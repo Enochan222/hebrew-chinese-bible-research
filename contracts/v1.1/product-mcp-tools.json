@@ -1,0 +1,78 @@
+{
+  "schemaVersion": "1.1-candidate",
+  "status": "READ_ONLY_PRODUCT_MCP_CONTRACT",
+  "principle": "MCP tools call shared domain/application services; they do not execute arbitrary SQL or access the authoring database.",
+  "tools": [
+    {
+      "name": "get_current_release",
+      "access": "READ_ONLY",
+      "domainOperation": "getCurrentRelease"
+    },
+    {
+      "name": "get_passage",
+      "access": "READ_ONLY",
+      "domainOperation": "getPassage",
+      "input": {
+        "releaseId": "uuid|null",
+        "reference": "string"
+      }
+    },
+    {
+      "name": "get_published_analysis",
+      "access": "READ_ONLY",
+      "domainOperation": "getPinnedPassageAnalysis",
+      "input": {
+        "releaseId": "uuid|null",
+        "reference": "string"
+      },
+      "outputSchemaRef": "./json-schema/published-passage-analysis.schema.json"
+    },
+    {
+      "name": "run_corpus_query",
+      "access": "READ_ONLY",
+      "domainOperation": "runCorpusQuery",
+      "inputSchemaRef": "./json-schema/corpus-query.schema.json"
+    },
+    {
+      "name": "get_construction_instances",
+      "access": "READ_ONLY",
+      "domainOperation": "getConstructionInstances",
+      "input": {
+        "releaseId": "uuid|null",
+        "constructionId": "uuid"
+      }
+    },
+    {
+      "name": "get_rule_applications",
+      "access": "READ_ONLY",
+      "domainOperation": "getRuleApplications",
+      "input": {
+        "releaseId": "uuid|null",
+        "reference": "string"
+      }
+    },
+    {
+      "name": "get_evidence",
+      "access": "READ_ONLY",
+      "domainOperation": "getPublishedEvidence",
+      "input": {
+        "releaseId": "uuid|null",
+        "evidenceId": "uuid"
+      }
+    },
+    {
+      "name": "list_semantic_sets",
+      "access": "READ_ONLY",
+      "domainOperation": "listSemanticSets",
+      "input": {
+        "releaseId": "uuid|null"
+      }
+    }
+  ],
+  "forbiddenTools": [
+    "execute_sql",
+    "publish_release",
+    "read_private_drive_source",
+    "read_authoring_database"
+  ]
+}
