@@ -2,7 +2,7 @@
   "schemaVersion": "1.1",
   "bindingMode": "SNAPSHOT_PINNED",
   "segmentStorageMode": "PERSISTED_CONTENT",
-  "providerDistributionId": "13131313-1313-4131-8131-131313131313",
+  "providerDistributionId": "41414141-4141-4414-8414-414141414141",
   "reference": "1Sam.16.7",
   "providerSegmentKey": "fixture-segment",
   "providerVersion": "fixture-v1",
