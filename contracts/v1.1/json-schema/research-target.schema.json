@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/research-target.schema.json",
+  "title": "ResearchTargetV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "researchTargetId",
+    "targetType"
+  ],
+  "properties": {
+    "researchTargetId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "targetType": {
+      "enum": [
+        "REFERENCE_SPAN",
+        "BIBLICAL_BOOK",
+        "LEXEME",
+        "MORPHEME_OR_FORM",
+        "CONSTRUCTION",
+        "CONCEPT",
+        "TEXTUAL_VARIANT",
+        "RESEARCH_ISSUE",
+        "TRANSLATION_ISSUE"
+      ]
+    },
+    "targetKey": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "nativeObjectId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    }
+  }
+}
