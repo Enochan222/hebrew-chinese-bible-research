@@ -1,0 +1,19 @@
+{
+  "semanticSetId": "25252525-2525-4252-8252-252525252525",
+  "semanticSetVersionId": "99999999-9999-4999-8999-999999999999",
+  "name": "BODY_PART",
+  "versionNumber": 1,
+  "definition": "Fixture semantic set for contract testing only.",
+  "members": [
+    {
+      "memberObjectType": "LEXEME",
+      "memberObjectId": null,
+      "memberKey": "עין",
+      "inclusionType": "INCLUDE",
+      "reason": "Fixture membership",
+      "confidence": 1,
+      "reviewStatus": "VERIFIED"
+    }
+  ],
+  "reviewStatus": "VERIFIED"
+}
