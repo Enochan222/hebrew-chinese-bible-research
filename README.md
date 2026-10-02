@@ -94,6 +94,8 @@ In practical terms:
 Start here:
 
 - `architecture/product-platform-and-publication-model.md`
+- `architecture/integration-boundaries-mcp-api-database.md`
+- `architecture/dry-runs/001-1sam16-7-mcp-api-db.md`
 - `architecture/database-api-cross-stage-contract-v1.1-candidate.md`
 - `architecture/site-build-staging-plan.md`
 - `architecture/research-pro-scholarly-intelligence.md`
@@ -110,6 +112,7 @@ Architecture decisions:
 
 - `architecture/adr/001-framework-scoped-text-analysis.md`
 - `architecture/adr/002-compiled-research-product.md`
+- `architecture/adr/003-mcp-agent-boundary.md`
 - `architecture/adr/003-research-pro-experience-layer.md`
 
 Superseded design history:
