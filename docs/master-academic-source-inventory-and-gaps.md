@@ -576,6 +576,29 @@ Treat this as a first-class acquisition programme, not an optional later appendi
 | Current specialist articles | Major gap |
 | Rights/edition metadata | Must be formalized |
 
+## 13A. Residual delta against the older specialist Drive
+
+The reorganized master library now contains most major categories, but a few useful holdings visible in the older specialist Drive are not currently visible in the consolidated folder.
+
+Examples include:
+
+- Gary Rendsburg, *Ancient Hebrew Morphology*;
+- Kelley / Crawford, *The Masorah of Biblia Hebraica Stuttgartensia*;
+- Jeremy Schipper, *Ruth*;
+- Robert Chisholm, Judges/Ruth commentary;
+- some additional DSS/DJD research material such as the DJD introduction and other secondary DSS studies;
+- NEAEHL volume 3 is not currently visible while volumes 1, 2, 4 and 5 are present.
+
+These are not all equal-priority acquisitions.
+
+Recommended treatment:
+
+- restore Rendsburg if morphology becomes a major research lane;
+- restore Kelley/Crawford if Masorah/BHS interpretation is exposed as a specialist feature;
+- restore Ruth commentaries if Ruth/BHQ becomes an early textual-criticism case study;
+- verify the NEAEHL set before registering it as complete;
+- do not bulk-copy every old Drive item solely for completeness.
+
 ## 14. Final source-library judgement
 
 The updated consolidated Drive can now be treated as the **primary private academic source library for the first Research Compiler implementation**.
