@@ -312,3 +312,97 @@ The following must still work:
 - approved rule applications.
 
 This is a release gate for the core scholarly product.
+
+
+## 19. Research Pro and UI-mode regression tests
+
+Required cross-mode fixtures:
+
+- same passage + same ResearchRelease in STUDY and RESEARCH;
+- same CommentaryEntry identity in both modes;
+- same published translation decision in both modes;
+- Study summary citations are a valid subset/projection of Research evidence;
+- Study remains academically verifiable without Research entitlement;
+- switching mode preserves passage/release/workspace state;
+- Research depth does not change canonical conclusion.
+
+## 20. Product entitlement tests
+
+Test separately from rights:
+
+- feature allowed + source rights allowed;
+- feature denied + source rights allowed;
+- feature allowed + source rights denied;
+- feature denied + source rights denied.
+
+Verify distinct failure reason codes.
+
+Target:
+
+- zero cases where entitlement overrides source rights;
+- zero cases where client-side flag manipulation enables a server-denied feature.
+
+## 21. Scholarly discovery evaluation
+
+For DiscoveryRecord / bibliographic resolution measure:
+
+- duplicate-work creation rate;
+- DOI exact-resolution precision;
+- title-author fingerprint precision/recall;
+- AI-assisted resolution review acceptance rate;
+- metadata/abstract/fulltext access-level accuracy;
+- passage/lexeme/construction target-link precision;
+- explicit-reference versus AI-inferred mapping confusion rate.
+
+A discovery record must not be scored as a canonical scholarly contribution until resolved/reviewed.
+
+## 22. ResearchIssue / ResearchPosition evaluation
+
+Benchmark cases should verify:
+
+- issue scope correctness;
+- position separation;
+- claim-to-position relation correctness;
+- preservation of minority/counter positions;
+- no conversion of work counts into consensus percentages;
+- debate-status dependence on reviewed LiteratureSnapshot;
+- historical versus current position distinction where documented.
+
+## 23. LiteratureSnapshot evaluation
+
+For a reviewed snapshot verify:
+
+- provider list persisted;
+- all query strings/languages persisted;
+- date range persisted;
+- deduplication method/version persisted;
+- included/excluded records accounted for;
+- coverage limitations visible;
+- as-of date visible;
+- multilingual queries retained where used.
+
+A "current scholarship" UI must fail QA if the snapshot/as-of context is missing.
+
+## 24. CommentaryEntry projection tests
+
+Verify:
+
+- commentary section evidence links resolve;
+- rendered prose does not introduce unsupported claims;
+- Study summary and Research expansion share one commentary identity;
+- Research evidence expansion respects rights;
+- translation note remains distinct from general commentary;
+- updated commentary requires a new release/version rather than mutating a published historical release.
+
+## 25. Live discovery non-contamination test
+
+Inject newly discovered works after a release is published.
+
+Verify:
+
+- Research mode can show them as DISCOVERED_SINCE_RELEASE;
+- Study commentary remains unchanged;
+- published ResearchIssue status remains unchanged;
+- translation decision remains unchanged;
+- no release hash changes;
+- next ResearchBuild may explicitly include/promote them after review.
