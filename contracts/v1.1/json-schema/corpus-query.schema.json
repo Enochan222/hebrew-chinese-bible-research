@@ -199,12 +199,13 @@
         },
         "field": {
           "enum": [
-            "LEXEME",
+            "LEXEME_ID",
+            "LEMMA_TEXT",
             "SURFACE",
             "POS",
             "FEATURE",
-            "SEMANTIC_SET_VERSION",
-            "REFERENCE_SPAN"
+            "SEMANTIC_SET_VERSION_ID",
+            "REFERENCE_SPAN_ID"
           ]
         },
         "featureKey": {
@@ -324,6 +325,7 @@
       "additionalProperties": false,
       "required": [
         "operator",
+        "bind",
         "child"
       ],
       "properties": {
@@ -351,6 +353,7 @@
       "required": [
         "operator",
         "count",
+        "bind",
         "child"
       ],
       "properties": {
