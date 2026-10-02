@@ -471,7 +471,7 @@ Signing out, refreshing, or explicitly choosing Forget key removes the in-memory
 See:
 
 - `architecture/byok-credential-handling.md`
-- `architecture/adr/004-public-ai-byok-only.md`
+- `architecture/adr/005-public-ai-byok-only.md`
 
 ## 21. BYOK threat model
 
