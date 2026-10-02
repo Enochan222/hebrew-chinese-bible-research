@@ -2,7 +2,11 @@
 
 ## Status
 
-This architecture follows the scholarly classification in `docs/academic-source-taxonomy.md`.
+This document defines storage and retrieval principles. Entity and enum names in this file are subordinate to the active candidate contract in `architecture/database-api-cross-stage-contract-v1.1-candidate.md` and the canonical machine-readable vocabulary in `contracts/v1.1/vocabulary.json`.
+
+Where older terminology in this document conflicts with those files, the v1.1 contract and canonical vocabulary take precedence.
+
+This architecture follows the scholarly classification in `docs/academic-source-taxonomy.md` and the current consolidated-library audit in `docs/master-academic-source-inventory-and-gaps.md`.
 
 The central design rule is:
 
@@ -168,35 +172,31 @@ For restricted books, the default architecture should support retaining the sour
 
 ## 3. Rights gate before ingestion
 
-Every source must have a `rights_profile` before entering persistent RAG.
+Every source must resolve through a versioned `rights_policy` before persistent ingestion or model use.
 
-Suggested values:
+The canonical operations are defined in `contracts/v1.1/vocabulary.json` and include distinct decisions for:
 
-- VERIFIED_OPEN
-- PUBLIC_DOMAIN
-- LICENSED_FULLTEXT_PUBLIC
-- LICENSED_INDEXING_PRIVATE
-- LICENSED_PRIVATE_ONLY
-- USER_SUPPLIED_RESEARCH_ONLY
-- METADATA_ONLY
-- RIGHTS_UNVERIFIED
-- DO_NOT_INDEX
+- storing the original;
+- extracting text;
+- storing extracted text;
+- embedding;
+- sending content to model context;
+- caching;
+- full-text display;
+- excerpt display / quotation;
+- export;
+- redistribution;
+- commercial use.
 
-Separate permissions:
+Rights decisions are `ALLOW`, `DENY`, `CONDITIONAL`, or `UNKNOWN`.
 
-- may_store_original
-- may_extract_text
-- may_store_extracted_text
-- may_embed
-- may_display_fulltext
-- may_display_excerpt
-- may_export
-- may_redistribute
-- may_use_commercially
+`UNKNOWN` defaults to restrictive behaviour.
 
-A source with `RIGHTS_UNVERIFIED` must default to restrictive behaviour.
+Rights may depend on purpose, audience, provider, commercial context, territory, terms version, attribution and excerpt limit.
 
 The system must not infer permission from the fact that a PDF exists in Drive.
+
+Permission for private human reading does not automatically permit persistent indexing, embeddings, external-model context, caching or public display.
 
 ## 4. Public mode and private research mode
 
@@ -350,34 +350,13 @@ Suggested fields:
 
 The synthesiser must not call an older Drive edition "the latest edition."
 
-## 8. Document hierarchy model
+## 8. Document hierarchy and asset-location model
 
-Use a generic tree for structural navigation:
+Use a generic edition-level tree for intellectual structure, but do not store physical PDF page indices as edition properties.
 
 ### `document_nodes`
 
-Fields:
-
-- node_id
-- edition_id
-- parent_node_id
-- node_type
-- ordinal
-- title
-- section_label
-- logical_page_start
-- logical_page_end
-- physical_page_start
-- physical_page_end
-- source_text
-- normalized_text
-- source_span_start
-- source_span_end
-- extraction_method
-- extraction_confidence
-- review_status
-
-Possible `node_type`:
+Edition-level structure may include:
 
 - PART
 - CHAPTER
@@ -389,11 +368,30 @@ Possible `node_type`:
 - VERSE_NOTE
 - PARAGRAPH
 - FOOTNOTE
-- APPARATUS_ENTRY
+- APPENDIX
 - TABLE
 - EXAMPLE_BLOCK
 
-Printed page and PDF page must remain separate.
+A document node stores logical / printed structure and section identity.
+
+### `source_asset_pages`
+
+Physical page identity belongs to a concrete source asset and records fields such as:
+
+- source asset;
+- PDF page index;
+- detected page label;
+- page/image hash.
+
+### `node_asset_locations`
+
+Maps an edition-level document node to its location in a specific PDF/scan asset.
+
+### `source_spans`
+
+Stores exact citable extracted source text with asset/location provenance, extraction method, confidence and review state.
+
+This separation allows multiple PDFs/scans of the same edition to have different physical pagination without corrupting the edition hierarchy.
 
 ## 9. Source text and interpretation must be separate
 
@@ -414,23 +412,26 @@ The source span is immutable evidence.
 
 ## 10. Claim-level model
 
-The academically useful unit is often a claim, not a chunk.
+The academically useful unit is often a claim representation, not a chunk.
+
+A source span is the author's actual text. A normalized proposition may be a human paraphrase or an AI extraction and must be labelled accordingly.
 
 ### `scholarly_claims`
 
-Fields:
+In addition to source linkage, record:
 
-- claim_id
-- node_id
-- claim_type
-- claim_text
-- source_span_id
-- author_id
-- confidence
-- extraction_method
-- review_status
+- claim type;
+- `claim_representation_type` = DIRECT_QUOTE / HUMAN_PARAPHRASE / AI_EXTRACTED_PROPOSITION;
+- assertion agent;
+- claim source text where legally permitted;
+- claim paraphrase;
+- scope;
+- modal force / certainty;
+- extraction method;
+- entailment review status;
+- reviewer.
 
-Possible claim types:
+Possible claim types include:
 
 - DEFINITION
 - GRAMMAR_RULE
@@ -445,18 +446,11 @@ Possible claim types:
 
 ### `claim_relations`
 
-Possible relations:
+Relations such as QUALIFIES, EXCEPTS, SUPPORTS, CONTRADICTS, REVISES or DEPENDS_ON must also record who asserted the relation and its review status.
 
-- QUALIFIES
-- EXCEPTS
-- SUPPORTS
-- DISAGREES_WITH
-- REVISES
-- DEPENDS_ON
-- EXAMPLE_OF
-- ALTERNATIVE_TO
+A system-inferred contradiction is not the same as one scholar explicitly criticising another.
 
-This allows the system to preserve disagreement instead of averaging it away.
+This allows the system to preserve disagreement without turning machine interpretation into scholarship.
 
 ## 11. Biblical example model
 
@@ -599,41 +593,59 @@ This matters because a vector search over a 600-page commentary is inferior to f
 
 ## 15. Textual-criticism-specific storage
 
-BHS/BHQ and critical apparatus require specialised structures.
+BHS/BHQ and other critical apparatus require specialised structures.
 
-Possible tables:
+Preserve both raw apparatus and parsed interpretation.
 
-### `textual_witnesses`
+Core structures should support:
 
-- witness_id
-- siglum
-- witness_type
-- language
-- date_range
+### `apparatus_raw_entries`
 
-### `textual_variants`
-
-- variant_id
-- canonical_passage_id
-- base_reading
-- variant_reading
-- witness_id
-- source_edition_id
+- source apparatus identity;
+- reference span / locus;
+- raw notation or source span;
+- content hash.
 
 ### `apparatus_entries`
 
-- apparatus_entry_id
-- passage_id
-- edition_id
-- sigla_raw
-- parsed_data
-- source_span
+- parsed locus;
+- lemma/base reference;
+- entry type;
+- responsible editor where known;
+- certainty;
+- parsing review status.
+
+### `apparatus_reading_groups`
+
+Supports grouped readings / subvariants.
+
+### `apparatus_readings`
+
+May record:
+
+- reading text;
+- reading type;
+- cause;
+- variation sequence;
+- conjectural/reconstructed status;
+- responsibility;
+- certainty.
+
+### `textual_witnesses`
+
+Witness identity, siglum, type, language and relevant metadata.
+
+### `witness_attestations`
+
+Must be able to represent uncertain or fragmentary support, lacuna, retroversion and other non-binary attestation states where required.
 
 ### `text_critical_discussions`
 
 For Tov, Brotzman-Tully, commentary discussions and other secondary analysis.
 
 Do not vector-search apparatus notation as if it were normal prose.
+
+The target is TEI-compatible conceptual richness, not mandatory one-to-one implementation of every TEI construct in the first MVP.
 
 ## 16. User and course material storage
 
@@ -823,29 +835,19 @@ Joüon-Muraoka may have extraction quality = poor while scholarly role = major r
 
 A low extraction score means "needs a better parser," not "low academic value."
 
-## 21. Recommended RAG namespaces
+## 21. Retrieval namespaces
 
-At minimum:
+The canonical retrieval namespaces are defined only in `contracts/v1.1/vocabulary.json`.
 
-- GRAMMAR_REFERENCE
-- GRAMMAR_CORPUS
-- GRAMMAR_PEDAGOGICAL
-- MORPHOLOGY_PHONOLOGY
-- LEXICON_GENERAL
-- LEXICON_CLASSICAL_HEBREW
-- LEXICON_THEOLOGICAL
-- LEXICON_DIACHRONIC
-- TEXTUAL_CRITICISM
-- CRITICAL_EDITION_GUIDE
-- DSS_QUMRAN
-- SEPTUAGINT_STUDIES
-- COMMENTARY
-- EXEGESIS_METHOD
-- RHETORICAL_LITERARY
-- HEBREW_LANGUAGE_HISTORY
-- HISTORICAL_BACKGROUND
-- USER_RESEARCH
-- COURSE_MATERIAL
+This file must not create a competing namespace vocabulary.
+
+Important distinction:
+
+- `sourceRole` classifies what a source is;
+- `retrievalNamespace` controls where retrieval is routed;
+- `evidenceClass` describes epistemic role in an analysis.
+
+These are separate dimensions and must not reuse near-synonymous enum names as if they were the same concept.
 
 Do not search all namespaces for every query.
 
@@ -1173,37 +1175,30 @@ An asynchronous queue is preferable to doing embedding generation synchronously 
 
 ## 35. Search-index lifecycle
 
-Maintain:
+Use only the canonical `indexStatus` values from `contracts/v1.1/vocabulary.json`.
 
-- ACTIVE
-- STALE
-- PENDING_REINDEX
-- FAILED
-- DISABLED_RIGHTS
-- DISABLED_QUALITY
+Index lifecycle is separate from ingestion-job lifecycle, source-publication lifecycle and scholarly review state.
 
-A parser failure must not silently leave stale searchable text in production.
+When content changes, the corresponding retrieval index / embedding is marked STALE and re-indexed through an explicit job.
 
-## 36. Ingestion job state machine
+A parser failure must not silently leave stale searchable text as current.
 
-Use:
+## 36. Ingestion and publication lifecycles
 
-- REGISTERED
-- RIGHTS_CHECK
-- EXTRACTING
-- STRUCTURING
-- LINKING
-- VALIDATING
-- READY_FOR_REVIEW
-- APPROVED
-- INDEXING
-- ACTIVE
-- FAILED
-- BLOCKED_RIGHTS
+Do not use one generic `status` field for every workflow.
 
-Ingestion should be idempotent.
+Use separate canonical vocabularies for:
 
-Re-running the same asset with the same parser version must not create duplicate document trees.
+- `ingestionJobStatus`;
+- `sourcePublicationStatus`;
+- `indexStatus`;
+- `reviewStatus`.
+
+The canonical values are defined in `contracts/v1.1/vocabulary.json`.
+
+Ingestion jobs are idempotent.
+
+Re-running the same asset with the same source checksum and pipeline version must not create duplicate document trees.
 
 ## 37. Parser versioning
 
@@ -1227,17 +1222,12 @@ Important academic sources should support review at:
 - section heading level;
 - claim extraction level;
 - Hebrew example level;
-- citation/page level.
+- citation/page level;
+- claim-source entailment level.
 
-Review status:
+Use the canonical `reviewStatus` vocabulary from `contracts/v1.1/vocabulary.json`.
 
-- UNREVIEWED
-- AUTO_VALIDATED
-- HUMAN_REVIEWED
-- NEEDS_CORRECTION
-- REJECTED
-
-The application should prioritise human-reviewed evidence when otherwise comparable.
+The application should prioritise human-reviewed evidence when otherwise comparable, without confusing human review with scholarly authority.
 
 ## 39. Hebrew-aware indexing for literature
 
@@ -1343,15 +1333,17 @@ When analysing a user's proposed translation:
 
 ### Lane 1: Hebrew form
 
-Retrieve:
+Retrieve from a pinned text expression and annotation framework:
 
-- token;
-- morpheme;
-- lemma;
+- text segment / reading;
+- provider/framework segmentation;
+- lexeme assignment;
 - morphology;
-- phrase;
-- clause;
-- syntax.
+- framework-scoped phrase/clause structure;
+- syntax / dependency;
+- provenance and release.
+
+Do not present phrase/clause membership as framework-neutral unless it has been explicitly mapped or curated.
 
 ### Lane 2: corpus
 
@@ -1417,7 +1409,9 @@ There is no adequate evidence for why the translator chose the wording.
 
 The phrase "the translator intended" is prohibited unless supported by documentation.
 
-## 46. Suggested core tables
+## 46. Suggested core structures
+
+The active entity contract is `architecture/database-api-cross-stage-contract-v1.1-candidate.md`. The following list is descriptive only and must not override the v1.1 schema.
 
 ### Source and bibliography
 
@@ -1485,24 +1479,25 @@ The phrase "the translator intended" is prohibited unless supported by documenta
 
 ## 47. Supabase security model
 
-Use Row Level Security on:
+The detailed trust-boundary and RAG security contract is in `architecture/security-trust-boundaries.md`.
 
-- private source metadata;
-- private retrieval units;
-- user research projects;
-- user annotations;
-- saved translations;
-- private source assets.
+RLS is necessary but not sufficient.
 
-Never expose a service-role key to the browser.
+Implementation must test:
 
-Vector search must respect the same permissions as ordinary document access.
+- SQL grants;
+- RLS policies;
+- security behaviour of views;
+- RPC/function EXECUTE grants;
+- any SECURITY DEFINER functions;
+- service-role isolation;
+- private/public retrieval;
+- vector-search tenant and rights filtering;
+- indirect prompt injection.
 
-Separate:
+Never expose service credentials to the browser.
 
-- public/open evidence;
-- licensed shared evidence;
-- private user evidence.
+Restricted evidence must be blocked before it reaches the model context.
 
 ## 48. Backup model
 
