@@ -1,5 +1,17 @@
 # Product Build Staging Plan
 
+## Global BYOK requirement
+
+Every public runtime AI feature is BYOK-only, with Gemini as the first supported provider.
+
+No build phase may add a shared model-provider credential to source code, environment variables, database, deployment secrets, fixtures, or fallback configuration.
+
+The user-supplied provider credential is volatile in-memory runtime input only and must never be persisted or logged.
+
+Core research functionality must pass acceptance tests with no BYOK credential present.
+
+See `architecture/byok-credential-handling.md` and ADR-004.
+
 Status: **ARCHITECTURE STAGING PLAN, IMPLEMENTATION HOLD UNTIL v1.1 CONTRACT FREEZE**
 
 This project is a database-backed scholarly product platform, not a single runtime AI application.
@@ -746,3 +758,15 @@ Suggested checkpoints:
 - `build-05-product-release`
 
 The research compiler continues operating after Phase 5. It is a permanent product subsystem, not a bootstrap stage.
+
+
+## Security acceptance tests added to every AI-capable phase
+
+- no shared Gemini/model credential exists in source/config/deployment;
+- no environment fallback is present;
+- BYOK credential is absent from localStorage/IndexedDB/cookies;
+- BYOK credential is absent from server logs and error telemetry;
+- refresh/sign-out/Forget key clears volatile credential state;
+- invalid BYOK cannot trigger a platform fallback key;
+- non-AI research functions remain available without BYOK;
+- CI secret scan blocks likely model-provider secret leakage.
