@@ -27,6 +27,8 @@ Deterministic Public Research Product
         +
 User Workspace
         +
+Study / Research experience modes
+        +
 Optional Natural-Language Query Adapter
 ```
 
@@ -94,6 +96,8 @@ Start here:
 - `architecture/product-platform-and-publication-model.md`
 - `architecture/database-api-cross-stage-contract-v1.1-candidate.md`
 - `architecture/site-build-staging-plan.md`
+- `architecture/research-pro-scholarly-intelligence.md`
+- `architecture/ui-mode-cross-stage-contract.md`
 - `contracts/v1.1/vocabulary.json`
 - `architecture/academic-evidence-policy.md`
 - `architecture/academic-storage-and-rag.md`
@@ -106,11 +110,49 @@ Architecture decisions:
 
 - `architecture/adr/001-framework-scoped-text-analysis.md`
 - `architecture/adr/002-compiled-research-product.md`
+- `architecture/adr/003-research-pro-experience-layer.md`
 
 Superseded design history:
 
 - `architecture/database-api-cross-stage-contract-v1.md`
 - `architecture/source-taxonomy-storage-rag.md`
+
+## Study and Research experiences
+
+The public product has two coordinated experience modes over the same active ResearchRelease:
+
+### Study
+
+Lower-density passage/translation research:
+
+- text and translations;
+- concise morphology/syntax;
+- published translation note;
+- reviewed commentary;
+- key scholarship;
+- key citations and major alternatives.
+
+Study is not academically opaque. It preserves minimum evidence transparency.
+
+### Research
+
+Professional research workspace:
+
+- full Corpus Lab;
+- construction browser;
+- ResearchIssue / ResearchPosition graph;
+- full bibliography;
+- literature snapshots/reviews;
+- scholarly dependency graph;
+- advanced textual criticism;
+- live recent literature discovery;
+- research export/citation workflows.
+
+Research Pro is controlled by ProductEntitlement.
+
+ProductEntitlement is separate from RightsPolicy and cannot override source/content restrictions.
+
+Live discovery is labelled as non-canonical until incorporated into a later ResearchRelease.
 
 ## Academic source library
 
@@ -148,8 +190,8 @@ See:
 1. Product foundation + release model + serving shell
 2. Passage translations + alignment + workspace
 3. Hebrew corpus + semantic sets + construction/query engine
-4. Private academic knowledge compiler + publication pipeline
-5. Rules + published analyses + optional NL-to-DSL + product operations
+4. Private academic knowledge compiler + Scholarly Intelligence + publication pipeline
+5. Rules + published commentary/literature review + Research serving + optional NL-to-DSL + product operations
 
 The Research Compiler remains a permanent subsystem after Phase 5.
 
