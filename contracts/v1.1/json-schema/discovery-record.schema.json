@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/discovery-record.schema.json",
+  "title": "DiscoveryRecordV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "externalDiscoveryRecordId",
+    "providerId",
+    "providerRecordId",
+    "retrievedAt",
+    "payloadHash",
+    "accessLevel",
+    "recordStatus",
+    "payloadStorageMode"
+  ],
+  "properties": {
+    "externalDiscoveryRecordId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "providerId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "providerRecordId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "titleRaw": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "doiRaw": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "abstractRaw": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "retrievedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "payloadHash": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{64}$"
+    },
+    "accessLevel": {
+      "enum": [
+        "METADATA_ONLY",
+        "ABSTRACT_ONLY",
+        "CITATION_CONTEXT_ONLY",
+        "FULLTEXT_OPEN",
+        "FULLTEXT_LICENSED",
+        "PRIVATE_FULLTEXT"
+      ]
+    },
+    "recordStatus": {
+      "enum": [
+        "DISCOVERED",
+        "RESOLVED",
+        "DUPLICATE",
+        "REJECTED",
+        "STALE"
+      ]
+    },
+    "payloadStorageMode": {
+      "enum": [
+        "PERSISTED_ALLOWED_FIELDS",
+        "METADATA_ONLY",
+        "TRANSIENT_ONLY"
+      ]
+    },
+    "rightsDecisionSnapshotId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    }
+  }
+}
