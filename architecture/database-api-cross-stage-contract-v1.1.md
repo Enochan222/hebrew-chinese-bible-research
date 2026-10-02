@@ -118,6 +118,49 @@ Fields:
 
 A URL alone is not sufficient academic provenance.
 
+## 2A.3A `provenance_agents`
+
+Process provenance distinguishes who/what performed a derivation from the source locator itself.
+
+Fields:
+
+- `provenance_agent_id uuid PK`
+- `agent_type text`
+- `display_name text`
+- `agent_version text nullable`
+- `metadata jsonb nullable`
+
+Agents may represent a human editor, deterministic software component, external provider, or AI model.
+
+## 2A.3B `provenance_activities`
+
+Fields:
+
+- `provenance_activity_id uuid PK`
+- `activity_type text`
+- `activity_version text nullable`
+- `started_at timestamptz nullable`
+- `completed_at timestamptz nullable`
+- `settings_hash text nullable`
+- `metadata jsonb nullable`
+
+Activity types come from canonical vocabulary and include ingestion, OCR, extraction, normalization, AI transformation, human review, mapping, query compilation, and publication.
+
+## 2A.3C `provenance_activity_agents`
+
+Fields:
+
+- `provenance_activity_id uuid FK`
+- `provenance_agent_id uuid FK`
+- `agent_role text`
+
+## 2A.3D `provenance_activity_inputs` / `provenance_activity_outputs`
+
+Each links one provenance activity to a registered research object, source asset/span, or other explicitly typed input/output identity.
+
+This process graph complements `provenance_records`; it does not replace source locators or evidence citations.
+
+
 ## 2A.4 `research_projects`
 
 User workspace project container.
@@ -152,7 +195,6 @@ Fields:
 - `title text`
 - `subtitle text nullable`
 - `publication_type text`
-- `source_role text nullable`
 - `language_code text nullable`
 - `original_publication_year integer nullable`
 - `doi text nullable`
@@ -166,6 +208,21 @@ Fields:
 - `metadata jsonb`
 
 Publication form and scholarly role are separate axes.
+
+## 2A.6A `work_source_roles`
+
+A work may serve more than one scholarly role.
+
+Fields:
+
+- `work_id uuid FK`
+- `source_role text`
+- `is_primary boolean default false`
+
+Unique:
+`(work_id, source_role)`
+
+`source_role` uses `contracts/v1.1/vocabulary.json -> sourceRole`.
 
 ## 2A.7 `authors` and `work_authors`
 
@@ -344,6 +401,8 @@ Fields:
 
 Its job is to support stable reference and span mapping across versification systems.
 
+**Published ReferenceAtom identity is immutable.** Once referenced by a published ResearchRelease, an atom must not be split, merged, renumbered or repurposed in place. Finer future granularity creates new anchors plus explicit mappings while historical releases continue to resolve their original atom IDs.
+
 ## 3.6 `reference_spans`
 
 Fields:
@@ -446,6 +505,23 @@ A provider's digital text must not automatically be identified with a print edit
 
 Example:
 An FHL digital expression may be historically related to the Chinese Union Version while still differing from a particular published revision.
+
+## 4.3A `expression_derivations`
+
+Structured lineage between immutable digital expressions.
+
+Fields:
+
+- `expression_derivation_id uuid PK`
+- `from_digital_expression_id uuid FK`
+- `to_digital_expression_id uuid FK`
+- `relation_type text`
+- `provenance_id uuid nullable FK`
+- `notes text nullable`
+
+Relation types include TRANSCRIBED_FROM, NORMALIZED_FROM, CORRECTED_AGAINST, MERGED_FROM, and REVISED_FROM.
+
+A digital expression whose content has been referenced by a ResearchRelease is immutable; correction creates a new expression identity.
 
 ## 4.4 `provider_distributions`
 
@@ -561,6 +637,9 @@ Fields:
 - `normalization_profile_id uuid PK`
 - `profile_key text`
 - `profile_version text`
+- `unicode_version text`
+- `normalization_engine text`
+- `normalization_engine_version text`
 - `rules_json jsonb`
 - `description text`
 
@@ -639,7 +718,7 @@ Fields:
 - `corpus_release_id uuid FK`
 - `annotation_framework_id uuid FK`
 - `layer_kind text`
-- `layer_version text nullable`
+- `layer_version text NOT NULL`
 - `source_registry_id uuid nullable FK`
 - `provenance_id uuid nullable FK`
 - `rights_policy_id uuid nullable FK`
@@ -841,6 +920,8 @@ Fields:
 - `alignment_group_id uuid PK`
 - `source_expression_id uuid FK`
 - `target_expression_id uuid FK`
+- `source_text_stream_id uuid FK`
+- `target_text_stream_id uuid FK`
 - `reference_span_id uuid FK`
 - `relation_type text`
 - `method text`
@@ -871,6 +952,8 @@ Fields:
 Same shape for target segments.
 
 Primary alignment should use stable segment IDs.
+
+Every source member segment must belong to `source_text_stream_id`; every target member segment must belong to `target_text_stream_id`. This prevents Ketiv WRITTEN and Qere READ alignment from being mixed implicitly inside one alignment group.
 
 Raw character offsets are secondary locators only.
 
@@ -991,11 +1074,14 @@ Fields:
 - `audience_scope text nullable`
 - `commercial_context text nullable`
 - `provider_constraint text nullable`
-- `max_excerpt_length integer nullable`
+- `max_excerpt_value numeric nullable`
+- `excerpt_unit text nullable`
 - `conditions_json jsonb nullable`
 - `attribution_requirement text nullable`
 
 Operations and decisions come from canonical vocabulary.
+
+Enforceable excerpt limits must always carry an explicit unit from `rightsExcerptUnit`. A bare integer excerpt limit is invalid.
 
 Free-text scopes are no longer authoritative. Canonical scope values must come from:
 
@@ -1051,27 +1137,40 @@ Permission to privately read or display a source does not automatically grant pe
 
 The Work -> Edition -> SourceAsset foundation remains.
 
-## 13.1 Expand `works.work_type`
+## 13.1 Publication form and scholarly role remain separate
 
-Must support at least:
+`works.publication_type` uses the canonical `publicationType` vocabulary.
 
-- monograph
-- reference_grammar
-- lexicon
-- commentary
-- journal_article
-- book_chapter
-- edited_volume
-- conference_paper
-- dissertation
-- thesis
-- critical_edition
-- dataset_publication
-- digital_resource
-- translation_documentation
-- critical_review
-- course_material
-- user_note
+Examples:
+
+- MONOGRAPH
+- REFERENCE_WORK
+- JOURNAL_ARTICLE
+- BOOK_CHAPTER
+- EDITED_VOLUME
+- CONFERENCE_PAPER
+- DISSERTATION
+- THESIS
+- CRITICAL_EDITION
+- DATASET_PUBLICATION
+- DIGITAL_RESOURCE
+- TRANSLATION_DOCUMENTATION
+- CRITICAL_REVIEW
+- COURSE_MATERIAL
+- USER_NOTE
+
+Scholarly function is many-to-many through `work_source_roles` and uses `sourceRole`.
+
+Examples:
+
+- REFERENCE_GRAMMAR
+- CORPUS_LINGUISTICS
+- GENERAL_LEXICON
+- TEXTUAL_CRITICISM_METHOD
+- COMMENTARY
+- CHINESE_TRANSLATION_STUDIES
+
+Do not recreate a mixed `work_type` enum.
 
 ## 13.2 Bibliographic identifiers
 
@@ -1093,7 +1192,6 @@ Add structured metadata for relevant types:
 The Google Drive shelf is a source library, not the epistemic boundary of the application.
 
 ---
-
 # 14. Edition structure versus asset location
 
 The old v1 placed PDF-page coordinates partly on document nodes. This is superseded.
@@ -1183,12 +1281,14 @@ A system-inferred CONTRADICTS edge is not the same as one author explicitly crit
 Fields:
 
 - `scholarly_dependency_id uuid PK`
-- `from_work_or_claim_id uuid`
-- `to_work_or_claim_id uuid`
+- `from_research_object_id uuid FK -> research_objects`
+- `to_research_object_id uuid FK -> research_objects`
 - `relation_type text`
 - `source_span_id uuid nullable`
 - `assertion_agent_type text`
 - `review_status text`
+
+Allowed endpoint subtypes are constrained to scholarly works, claims, datasets, and other explicitly approved scholarly objects. Generic UUIDs without registry-level identity are not permitted.
 
 Possible relations:
 
@@ -1255,6 +1355,48 @@ Fields may include:
 ## 17.6 `textual_witnesses`
 
 Witness identity and type.
+
+## 17.6A `textual_witness_identifiers`
+
+A siglum is source-contextual, not a universal witness identity.
+
+Fields:
+
+- `textual_witness_identifier_id uuid PK`
+- `textual_witness_id uuid FK`
+- `apparatus_source_id uuid FK`
+- `siglum text`
+- `identifier_note text nullable`
+
+Unique:
+`(apparatus_source_id, siglum)`
+
+## 17.6B `apparatus_loci`
+
+Exact apparatus anchoring may be narrower than a verse/reference span.
+
+Fields:
+
+- `apparatus_locus_id uuid PK`
+- `apparatus_entry_id uuid FK`
+- `base_text_stream_id uuid FK`
+- `start_text_segment_id uuid FK`
+- `end_text_segment_id uuid FK`
+- `start_offset integer nullable`
+- `end_offset integer nullable`
+- `offset_basis text nullable`
+- `anchoring_method text`
+- `review_status text`
+
+## 17.6C `textual_edition_publications`
+
+Bridges a textual-critical edition identity to its bibliographic publication/edition identity.
+
+Fields:
+
+- `textual_edition_id uuid FK`
+- `academic_edition_id uuid FK -> editions`
+- `relation_type text`
 
 ## 17.7 `witness_attestations`
 
