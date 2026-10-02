@@ -2,6 +2,8 @@
 
 Status: **CANDIDATE ARCHITECTURE CONTRACT. NOT YET FROZEN FOR IMPLEMENTATION.**
 
+Amended 2026-10-03: the product is now explicitly modeled as a compiled scholarly data product with private authoring, publication control, deterministic public serving, and user workspace planes. See `architecture/product-platform-and-publication-model.md` and ADR-002.
+
 This document supersedes the implementation guidance in `database-api-cross-stage-contract-v1.md`.
 
 The original v1 remains in the repository as design history. Do not implement its universal `canonical_tokens`, application-owned `phrases` / `clauses`, simplified translation identity, or simplified rights / apparatus models.
@@ -20,6 +22,10 @@ The v1.1 candidate preserves the project's strongest earlier decisions:
 The load-bearing correction is:
 
 > **Reference location may be application-canonical. Text expression must be edition-specific. Linguistic segmentation and structure must be framework-scoped. Translation witnesses must be expression-specific. Scholarly propositions must be agent-attributed.**
+
+A second product-level rule now also applies:
+
+> **Canonical public scholarship is compiled and published as a versioned ResearchRelease. Runtime AI/RAG is optional and non-authoritative; deterministic corpus search and published research data remain the core serving path.**
 
 ---
 
@@ -1044,8 +1050,31 @@ Require `analysisContext`:
 - governs
 - dependent_of
 - semantic_role
+- morpheme_of
+- has_morpheme
+- prefix_morpheme_of
+- suffix_morpheme_of
+
+Morpheme-host relations are framework/release-scoped analytical relations. A prefixed ל must not be modeled as an independent orthographic word merely to simplify search.
 
 Do not execute a framework-scoped relation over multiple frameworks unless an explicit mapping / comparative mode is requested.
+
+### Boolean and quantifier expression layer
+
+The query AST must support a constrained expression tree using the canonical vocabulary:
+
+- ALL_OF
+- ANY_OF
+- NOT
+- EXISTS
+- NOT_EXISTS
+- MIN_COUNT
+- MAX_COUNT
+- EXACT_COUNT
+
+General SQL-like arbitrary expressions are not allowed.
+
+A generic OPTIONAL binding is deliberately deferred until its result-set and counting semantics are specified and benchmarked. Use EXISTS/NOT_EXISTS/count constraints for v1.1 where possible.
 
 ## 19.3 Result epistemic class
 
@@ -1102,6 +1131,55 @@ Counts remain separated:
 - clause matches;
 - reference / verse matches;
 - passage spans.
+
+---
+
+# 20A. Semantic sets
+
+The v1.1 candidate previously referenced semantic-set versions without redefining their tables. This section closes that contract gap.
+
+## 20A.1 `semantic_sets`
+
+Fields:
+
+- `semantic_set_id uuid PK`
+- `name text`
+- `description text nullable`
+- `owner_user_id uuid nullable`
+- `set_scope text`
+- `official_status text`
+- `current_version_id uuid nullable`
+
+## 20A.2 `semantic_set_versions`
+
+Append-only.
+
+Fields:
+
+- `semantic_set_version_id uuid PK`
+- `semantic_set_id uuid FK`
+- `version_number integer`
+- `definition_json jsonb`
+- `review_status text`
+- `created_at timestamptz`
+
+## 20A.3 `semantic_set_members`
+
+Fields:
+
+- `semantic_set_version_id uuid FK`
+- `member_object_type text`
+- `member_object_id uuid nullable`
+- `member_key text nullable`
+- `inclusion_type text`
+- `reason text nullable`
+- `provenance_id uuid nullable`
+- `confidence numeric nullable`
+- `review_status text`
+
+Official public queries must pin a published semantic-set version.
+
+Semantic-set membership is compiled research data. Runtime LLM classification must not silently alter official set membership.
 
 ---
 
@@ -1261,66 +1339,88 @@ The academically important guarantee is that the evidence state and research pro
 
 # 26. Stage-boundary corrections
 
+The product planes are continuous operational boundaries; the five build stages are implementation sequencing only.
+
 ## Stage 1
 
 Must establish:
 - canon/reference atoms and spans;
 - general textual work / edition / digital-expression identity;
 - provider distribution abstraction;
+- **minimal text stream and text segment identity required by Stage 2 alignment**;
 - source registry / provenance;
 - rights-policy framework;
+- product-plane boundaries;
+- ResearchBuild / ResearchRelease foundation;
 - canonical vocabulary;
 - evidence labels;
 - trust-boundary scaffolding.
 
-Stage 1 must not create universal Hebrew linguistic tokens.
+Stage 1 must not create universal Hebrew linguistic tokens, phrases or clauses.
 
 ## Stage 2
 
 Passage / translation workspace:
 - versioned text expressions;
-- FHL provider distributions;
+- provider distributions;
+- stable text segments for source/target alignment;
 - translation profiles;
 - alignment groups and segment members;
-- user translation versioning;
-- documented translator-note identity.
+- user translation proposal/version contracts;
+- documented translator-note identity;
+- published passage/translation read contracts.
 
 ## Stage 3
 
-Hebrew corpus:
-- text streams / segments;
+Hebrew corpus and search:
 - normalization profiles;
 - reading correspondences;
 - annotation frameworks;
 - analysis nodes / edges;
+- explicit morpheme-host relations;
 - lexeme identity;
 - feature schemas;
-- framework-aware DSL;
+- semantic sets and versions;
+- framework-aware CorpusQuery AST;
+- Boolean/negation/quantifier expression layer;
 - bounded completeness classes;
-- corpus-analysis protocols.
+- corpus-analysis protocols;
+- ConstructionDefinition / ConstructionInstance;
+- compiled serving projections.
 
 ## Stage 4
 
-Academic knowledge / RAG:
+Private academic knowledge compilation and publication:
 - expanded bibliographic types;
 - source assets and asset pages;
 - structured claims with representation status;
 - lexica / commentary / textual-critical specialised models;
 - scholarly dependency;
-- rights-aware retrieval;
+- rights-aware private retrieval;
+- AI-assisted candidate extraction/mapping;
+- rule evidence;
+- editorial review;
+- publication validation;
 - security testing;
-- benchmark evaluation.
+- benchmark evaluation;
+- release candidate creation.
+
+Stage 4 RAG is primarily authoring/build-time infrastructure, not a required public runtime dependency.
 
 ## Stage 5
 
-Research orchestrator:
-- research plan;
-- evidence packet;
-- assertion ledger;
-- user-rule versioning;
-- counterevidence pass;
-- auditability snapshots;
-- translation synthesis.
+Rule compilation, published analysis and serving completion:
+- official rule/version model;
+- build-time rule applications where compilable;
+- translation decisions;
+- published passage analyses;
+- release manifest finalization;
+- deterministic public query APIs;
+- optional natural-language-to-DSL adapter;
+- user workspace integration;
+- full regression / product QA.
+
+The public core must remain functional when the optional LLM adapter is unavailable.
 
 ---
 
@@ -1355,3 +1455,303 @@ Before changing status from CANDIDATE to FROZEN:
 10. Stage 1 contract can be generated / validated from machine-readable schemas without vocabulary drift.
 
 Until these pass, Site Build prompts may be planned, but production schema implementation should not begin.
+
+---
+
+# 29. Product execution and release contract
+
+Detailed topology is defined in `architecture/product-platform-and-publication-model.md`.
+
+The active contract recognizes four logical product planes:
+
+- AUTHORING_RESEARCH
+- PUBLICATION_CONTROL
+- PUBLIC_SERVING
+- USER_WORKSPACE
+
+These are not evidence classes.
+
+## 29.1 `research_builds`
+
+Mutable compilation attempt.
+
+Fields:
+
+- `research_build_id uuid PK`
+- `build_version text`
+- `status text`
+- `started_at timestamptz`
+- `completed_at timestamptz nullable`
+- `compiler_version text`
+- `git_commit_sha text`
+- `source_inventory_snapshot_id uuid nullable`
+- `benchmark_version text nullable`
+
+## 29.2 `research_releases`
+
+Immutable after PUBLISHED.
+
+Fields:
+
+- `research_release_id uuid PK`
+- `release_label text unique`
+- `release_status text`
+- `source_build_id uuid FK`
+- `published_at timestamptz nullable`
+- `manifest_hash text`
+- `git_commit_sha text`
+- `compiler_version text`
+- `benchmark_version text`
+
+## 29.3 `research_release_components`
+
+Fields:
+
+- `research_release_id uuid FK`
+- `component_kind text`
+- `component_object_id uuid`
+- `component_version text`
+- `content_hash text`
+- `component_order integer nullable`
+
+A public response containing canonical published scholarship must be resolvable to a research release.
+
+---
+
+# 30. User translation workspace contract
+
+The v1.1 candidate previously referred to user translation versioning without redefining the old v1 tables.
+
+## 30.1 `user_translation_proposals`
+
+Fields:
+
+- `user_translation_id uuid PK`
+- `project_id uuid FK`
+- `reference_span_id uuid FK`
+- `owner_user_id uuid`
+- `current_version_id uuid nullable`
+- `status text`
+
+## 30.2 `user_translation_versions`
+
+Append-only.
+
+Fields:
+
+- `user_translation_version_id uuid PK`
+- `user_translation_id uuid FK`
+- `version_number integer`
+- `translation_text text`
+- `translation_notes text nullable`
+- `created_at timestamptz`
+- `supersedes_version_id uuid nullable`
+
+User drafts are workspace data. They are not official published translation data unless promoted through authoring/review/publication.
+
+---
+
+# 31. Construction contract
+
+## 31.1 `construction_definitions`
+
+Stable formal pattern identity.
+
+Fields:
+
+- `construction_definition_id uuid PK`
+- `name text`
+- `description text nullable`
+- `current_version_id uuid nullable`
+- `status text`
+
+## 31.2 `construction_definition_versions`
+
+Fields:
+
+- `construction_definition_version_id uuid PK`
+- `construction_definition_id uuid FK`
+- `version_number integer`
+- `dsl_version text`
+- `query_ast jsonb`
+- `framework_requirements jsonb`
+- `semantic_set_requirements jsonb`
+- `review_status text`
+- `created_at timestamptz`
+
+The query AST is validated by the same CorpusQuery schema used by ad-hoc search.
+
+## 31.3 `construction_instances`
+
+Fields:
+
+- `construction_instance_id uuid PK`
+- `construction_definition_version_id uuid FK`
+- `corpus_release_id uuid FK`
+- `reference_span_id uuid FK`
+- `node_bindings jsonb`
+- `match_explanation jsonb`
+- `review_status text`
+- `result_hash text`
+
+A construction instance is a corpus-analysis result, not a translation conclusion.
+
+---
+
+# 32. Official rule contract
+
+## 32.1 `rules`
+
+Fields:
+
+- `rule_id uuid PK`
+- `name text`
+- `rule_kind text`
+- `status text`
+- `current_version_id uuid nullable`
+
+Official rule kinds are defined in the canonical vocabulary.
+
+A SEARCH_PATTERN is not a rule kind; formal patterns belong to constructions.
+
+## 32.2 `rule_versions`
+
+Append-only.
+
+Fields:
+
+- `rule_version_id uuid PK`
+- `rule_id uuid FK`
+- `version_number integer`
+- `scope_json jsonb`
+- `trigger_construction_version_id uuid nullable`
+- `condition_ast jsonb nullable`
+- `implication_json jsonb`
+- `priority integer nullable`
+- `specificity integer nullable`
+- `review_status text`
+- `created_at timestamptz`
+
+## 32.3 `rule_evidence`
+
+Fields:
+
+- `rule_version_id uuid FK`
+- `research_object_id uuid FK`
+- `stance text`
+- `citation_locator jsonb nullable`
+- `notes text nullable`
+
+## 32.4 `rule_applications`
+
+Fields:
+
+- `rule_application_id uuid PK`
+- `rule_version_id uuid FK`
+- `construction_instance_id uuid nullable`
+- `reference_span_id uuid FK`
+- `matched_conditions jsonb`
+- `failed_conditions jsonb nullable`
+- `exception_status text`
+- `result_json jsonb`
+- `review_status text`
+- `result_hash text`
+
+Rule application must remain distinct from final translation decision.
+
+---
+
+# 33. Translation decision and published analysis contract
+
+## 33.1 `translation_decisions`
+
+Fields:
+
+- `translation_decision_id uuid PK`
+- `reference_span_id uuid FK`
+- `decision_type text`
+- `decision_payload jsonb`
+- `review_status text`
+- `supersedes_decision_id uuid nullable`
+
+Use typed junction tables to link rule applications, textual-critical evidence and scholarly evidence.
+
+## 33.2 `published_passage_analyses`
+
+Fields:
+
+- `published_analysis_id uuid PK`
+- `research_release_id uuid FK`
+- `reference_span_id uuid FK`
+- `analysis_type text`
+- `analysis_payload jsonb`
+- `analysis_hash text`
+- `review_status text`
+- `evidence_packet_id uuid nullable`
+
+Published public analysis is read from the active research release rather than regenerated from source books on every page request.
+
+---
+
+# 34. Compiled serving projections
+
+Canonical scholarly/corpus structures may be normalized and flexible.
+
+The public query hot path may use release-scoped generated projections such as:
+
+- `serving_words`
+- `serving_morphemes`
+- `serving_relations`
+- `serving_semantic_memberships`
+
+Every row must pin:
+
+- research release;
+- corpus release;
+- annotation framework where relevant.
+
+Serving projections are disposable compiler outputs and may be regenerated from canonical data.
+
+They must not silently introduce framework-neutral phrase or clause identity.
+
+---
+
+# 35. Public runtime API correction
+
+Core public runtime APIs should primarily serve published research and deterministic search.
+
+Examples:
+
+- `GET /api/v1/releases/current`
+- `GET /api/v1/passages/{reference}`
+- `GET /api/v1/passages/{reference}/translations`
+- `GET /api/v1/passages/{reference}/analysis`
+- `GET /api/v1/passages/{reference}/rule-applications`
+- `GET /api/v1/constructions/{id}/instances`
+- `POST /api/v1/corpus/query/validate`
+- `POST /api/v1/corpus/query/run`
+- `GET /api/v1/evidence/{id}`
+
+Optional:
+
+- `POST /api/v1/query/interpret`
+
+The optional interpreter returns a candidate constrained AST. It does not execute generated SQL.
+
+Private research compilation endpoints belong to privileged internal tooling and are not part of the public core API.
+
+---
+
+# 36. Updated freeze preconditions
+
+In addition to section 28, v1.1 must not freeze until:
+
+11. Stage 2 alignment can reference stable text segments created before Stage 3 linguistic analysis;
+12. semantic-set tables exist in the active contract and at least one official set can be version-pinned;
+13. a morpheme-host query fixture can represent prefixed ל without inventing an orthographic word;
+14. one named ConstructionDefinition can compile to reviewed ConstructionInstances;
+15. one RuleVersion can apply to a ConstructionInstance without collapsing corpus match into translation conclusion;
+16. a ResearchBuild can produce a candidate ResearchRelease manifest with component hashes;
+17. the publication gate can reject an object that references private/unpublishable source data;
+18. the public app can serve a pinned release with the optional LLM adapter disabled.
+
