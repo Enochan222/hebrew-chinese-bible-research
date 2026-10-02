@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/query-execution-policy.schema.json",
+  "title": "QueryExecutionPolicyV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "policyVersion",
+    "maxDeclaredNodes",
+    "maxAstDepth",
+    "maxRelations",
+    "maxQuantifierDepth",
+    "maxDistance",
+    "defaultPageSize",
+    "maxPageSize",
+    "hardResultCap",
+    "timeoutMs"
+  ],
+  "properties": {
+    "policyVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "maxDeclaredNodes": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "maxAstDepth": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "maxRelations": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "maxQuantifierDepth": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "maxDistance": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "defaultPageSize": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "maxPageSize": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "hardResultCap": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "timeoutMs": {
+      "type": "integer",
+      "minimum": 1
+    }
+  }
+}
