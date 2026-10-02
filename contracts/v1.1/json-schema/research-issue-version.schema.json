@@ -94,6 +94,9 @@
   "allOf": [
     {
       "if": {
+        "required": [
+          "debateStatus"
+        ],
         "properties": {
           "debateStatus": {
             "const": "MINORITY_WITHIN_REVIEWED_SNAPSHOT"
@@ -104,7 +107,17 @@
         "required": [
           "classificationBasis",
           "literatureSnapshotId"
-        ]
+        ],
+        "properties": {
+          "classificationBasis": {
+            "type": "string",
+            "minLength": 1
+          },
+          "literatureSnapshotId": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+          }
+        }
       }
     }
   ]
