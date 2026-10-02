@@ -182,7 +182,11 @@
       "ATTACHED_TO",
       "GOVERNS",
       "DEPENDENT_OF",
-      "SEMANTIC_ROLE"
+      "SEMANTIC_ROLE",
+      "MORPHEME_OF",
+      "HAS_MORPHEME",
+      "PREFIX_MORPHEME_OF",
+      "SUFFIX_MORPHEME_OF"
     ]
   },
   "analysisStance": [
@@ -200,5 +204,64 @@
     "USES_DATASET",
     "DERIVED_FROM",
     "SUMMARISES"
+  ],
+  "productPlane": [
+    "AUTHORING_RESEARCH",
+    "PUBLICATION_CONTROL",
+    "PUBLIC_SERVING",
+    "USER_WORKSPACE"
+  ],
+  "researchBuildStatus": [
+    "QUEUED",
+    "RUNNING",
+    "FAILED",
+    "READY_FOR_REVIEW",
+    "APPROVED",
+    "REJECTED",
+    "PUBLISHED"
+  ],
+  "researchReleaseStatus": [
+    "DRAFT",
+    "VALIDATING",
+    "CANDIDATE",
+    "PUBLISHED",
+    "SUPERSEDED",
+    "REVOKED"
+  ],
+  "releaseComponentKind": [
+    "CORPUS",
+    "ANNOTATION_FRAMEWORK",
+    "TRANSLATION",
+    "SEMANTIC_SET",
+    "CONSTRUCTION",
+    "RULE_SET",
+    "KNOWLEDGE_GRAPH",
+    "PUBLISHED_ANALYSIS",
+    "CITATION_BIBLIOGRAPHY",
+    "COMPILED_SEARCH"
+  ],
+  "ruleKind": [
+    "LINGUISTIC_HEURISTIC",
+    "TRANSLATION_POLICY",
+    "PASSAGE_OVERRIDE",
+    "EDITORIAL_CONVENTION"
+  ],
+  "constructionStatus": [
+    "DRAFT",
+    "HUMAN_REVIEWED",
+    "PUBLISHED",
+    "DEPRECATED"
+  ],
+  "queryBooleanOperator": [
+    "ALL_OF",
+    "ANY_OF",
+    "NOT"
+  ],
+  "queryQuantifier": [
+    "EXISTS",
+    "NOT_EXISTS",
+    "MIN_COUNT",
+    "MAX_COUNT",
+    "EXACT_COUNT"
   ]
 }
