@@ -11,5 +11,6 @@
     "fixture": true
   },
   "permittedExcerpt": null,
-  "rightsDecisionSnapshotId": null
+  "rightsDecisionSnapshotId": null,
+  "evidenceStabilityClass": "IMMUTABLE_SNAPSHOT"
 }
