@@ -2654,91 +2654,130 @@ An AI-extracted scholarly proposition must never imply full-text reading when it
 
 ---
 
-# 39. ResearchIssue and ResearchPosition contracts
+# 39. ResearchTarget, ResearchIssue, and ResearchPosition contracts
+
+## 39.0 `research_targets`
+
+A ResearchTarget is a stable scholarly target registry. It prevents passages, books, lexemes, and constructions from being forced into the `research_objects` supertype merely to become research targets.
+
+Fields:
+
+- `research_target_id uuid PK`
+- `target_type text`
+- `target_key text nullable`
+- `created_at timestamptz`
+
+Typed bridge tables bind exactly one target identity, for example:
+
+- `research_target_reference_spans(research_target_id PK/FK, reference_span_id unique FK)`
+- `research_target_books(research_target_id PK/FK, book_id unique FK)`
+- `research_target_lexemes(research_target_id PK/FK, lexeme_id unique FK)`
+- `research_target_constructions(research_target_id PK/FK, construction_definition_id unique FK)`
+- `research_target_research_issues(research_target_id PK/FK, research_issue_id unique FK)`
+
+Additional target types require a typed bridge before production use.
 
 ## 39.1 `research_issues`
+
+Stable identity only.
 
 Fields:
 
 - `research_issue_id uuid PK`
 - `issue_key text unique nullable`
+- `current_version_id uuid nullable`
+- `created_at timestamptz`
+
+## 39.2 `research_issue_versions`
+
+Append-only scholarly state.
+
+Fields:
+
+- `research_issue_version_id uuid PK/FK -> research_objects.research_object_id`
+- `research_issue_id uuid FK`
+- `version_number integer`
 - `title text`
 - `question_text text`
 - `issue_type text`
 - `debate_status text`
-- `current_snapshot_id uuid nullable`
+- `classification_basis text nullable`
+- `literature_snapshot_id uuid nullable FK`
 - `review_status text`
+- `content_hash text`
 - `created_at timestamptz`
-- `updated_at timestamptz`
+- `supersedes_version_id uuid nullable FK`
 
-A ResearchIssue is a bounded scholarly question, not a loose topic tag.
+A debate-status label such as MINORITY_WITHIN_REVIEWED_SNAPSHOT is valid only with snapshot-bounded classification basis and coverage limitations.
 
-## 39.2 `research_issue_scopes`
+## 39.3 `research_issue_scopes`
 
 Fields:
 
 - `research_issue_scope_id uuid PK`
-- `research_issue_id uuid FK`
-- `scope_object_id uuid FK research_objects`
-- `scope_type text`
+- `research_issue_version_id uuid FK`
+- `research_target_id uuid FK`
 - `scope_role text`
 - `review_status text`
 
-A single issue may scope to a passage, lexeme, construction, textual variant, concept or book.
+## 39.4 `research_positions`
 
-## 39.3 `research_positions`
+Stable identity within one ResearchIssue.
 
 Fields:
 
 - `research_position_id uuid PK`
 - `research_issue_id uuid FK`
 - `position_key text nullable`
+- `current_version_id uuid nullable`
+- `created_at timestamptz`
+
+## 39.5 `research_position_versions`
+
+Fields:
+
+- `research_position_version_id uuid PK/FK -> research_objects.research_object_id`
+- `research_position_id uuid FK`
+- `version_number integer`
 - `title text`
 - `position_summary text`
 - `position_status text`
+- `classification_basis text nullable`
 - `review_status text`
+- `content_hash text`
 - `created_at timestamptz`
-- `updated_at timestamptz`
+- `supersedes_version_id uuid nullable FK`
 
-A ResearchPosition is a reviewed representation of a position in scholarship.
-
-It is not automatically the wording of any source author.
-
-## 39.4 `position_claim_links`
+## 39.6 `position_claim_links`
 
 Fields:
 
 - `position_claim_link_id uuid PK`
-- `research_position_id uuid FK`
+- `research_position_version_id uuid FK`
 - `scholarly_claim_id uuid FK`
 - `relationship text`
 - `assertion_agent_type text`
 - `review_status text`
 - `notes text nullable`
 
-Relationships are controlled by the canonical vocabulary.
-
-Work/claim counts must not be converted into consensus percentages.
-
-## 39.5 `issue_relations`
+## 39.7 `issue_relations`
 
 Fields:
 
 - `issue_relation_id uuid PK`
-- `from_issue_id uuid FK`
-- `to_issue_id uuid FK`
+- `from_issue_version_id uuid FK`
+- `to_issue_version_id uuid FK`
 - `relation_type text`
 - `assertion_agent_type text`
 - `review_status text`
 
-## 39.6 `scholarly_target_links`
+## 39.8 `scholarly_target_links`
 
 Fields:
 
 - `scholarly_target_link_id uuid PK`
-- `source_object_id uuid FK research_objects`
-- `target_object_id uuid FK research_objects`
-- `target_type text`
+- `source_object_id uuid FK -> research_objects`
+- `research_target_id uuid FK`
 - `relevance_type text`
 - `directness text`
 - `mapping_method text`
@@ -2747,7 +2786,13 @@ Fields:
 - `review_status text`
 - `provenance_id uuid nullable`
 
-An explicit biblical reference and an AI-inferred construction relevance are different mappings and must remain visibly distinguishable.
+An explicit biblical reference and an AI-inferred construction relevance are distinct mappings.
+
+## 39.9 Immutable scholarly issue graph release
+
+Public ResearchRelease components must pin exact ResearchIssueVersion and ResearchPositionVersion identities, either individually or through an immutable SCHOLARLY_ISSUE_GRAPH component snapshot with a content hash.
+
+Pinned releases never dereference `current_version_id` from mutable authoring rows.
 
 ---
 
