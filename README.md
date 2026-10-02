@@ -247,4 +247,4 @@ Without BYOK, the deterministic scholarly product remains functional. Only optio
 See:
 
 - `architecture/byok-credential-handling.md`
-- `architecture/adr/004-public-ai-byok-only.md`
+- `architecture/adr/005-public-ai-byok-only.md`
