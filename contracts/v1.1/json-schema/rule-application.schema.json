@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/rule-application.schema.json",
+  "title": "RuleApplication v1.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ruleApplicationId",
+    "ruleVersionId",
+    "referenceSpanId",
+    "effect",
+    "matchedConditions",
+    "exceptionStatus",
+    "reviewStatus",
+    "resultHash"
+  ],
+  "properties": {
+    "ruleApplicationId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "ruleVersionId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "constructionInstanceId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "referenceSpanId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "effect": {
+      "enum": [
+        "SUPPORTS",
+        "DISFAVOURS",
+        "REQUIRES",
+        "PROHIBITS",
+        "QUALIFIES",
+        "NO_DECISION"
+      ]
+    },
+    "matchedConditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "failedConditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "exceptionStatus": {
+      "enum": [
+        "NONE",
+        "POSSIBLE_EXCEPTION",
+        "EXCEPTION_APPLIES",
+        "UNRESOLVED"
+      ]
+    },
+    "reviewStatus": {
+      "type": "string",
+      "minLength": 1
+    },
+    "resultHash": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{64}$"
+    }
+  }
+}
