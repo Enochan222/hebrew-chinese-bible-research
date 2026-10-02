@@ -21,6 +21,16 @@ Current files:
 - `json-schema/rights-decision-snapshot.schema.json`
 - `json-schema/published-passage-analysis.schema.json`
 - `json-schema/translation-decision.schema.json`
+- `json-schema/annotation-layer.schema.json`
+- `json-schema/provider-witness-binding.schema.json`
+- `json-schema/release-event.schema.json`
+- `json-schema/release-channel-pointer.schema.json`
+- `json-schema/semantic-set-version.schema.json`
+- `json-schema/construction-compilation-run.schema.json`
+- `json-schema/construction-instance.schema.json`
+- `json-schema/rule-application.schema.json`
+- `json-schema/published-evidence-item.schema.json`
+- `query-semantics.md`
 - `openapi.yaml`
 - `product-mcp-tools.json`
 - `fixtures/`
