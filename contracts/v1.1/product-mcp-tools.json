@@ -6,67 +6,57 @@
     {
       "name": "get_current_release",
       "access": "READ_ONLY",
-      "domainOperation": "getCurrentRelease"
+      "domainOperation": "getCurrentRelease",
+      "outputSchemaRef": "./json-schema/release-pointer.schema.json"
     },
     {
       "name": "get_passage",
       "access": "READ_ONLY",
       "domainOperation": "getPassage",
-      "input": {
-        "releaseId": "uuid|null",
-        "reference": "string"
-      }
+      "inputSchemaRef": "./json-schema/passage-request.schema.json",
+      "outputSchemaRef": "./json-schema/passage-core.schema.json"
     },
     {
       "name": "get_published_analysis",
       "access": "READ_ONLY",
       "domainOperation": "getPinnedPassageAnalysis",
-      "input": {
-        "releaseId": "uuid|null",
-        "reference": "string"
-      },
-      "outputSchemaRef": "./json-schema/published-passage-analysis.schema.json"
+      "outputSchemaRef": "./json-schema/published-passage-analysis.schema.json",
+      "inputSchemaRef": "./json-schema/passage-request.schema.json"
     },
     {
       "name": "run_corpus_query",
       "access": "READ_ONLY",
       "domainOperation": "runCorpusQuery",
-      "inputSchemaRef": "./json-schema/corpus-query.schema.json"
+      "inputSchemaRef": "./json-schema/corpus-query-normalized.schema.json",
+      "outputSchemaRef": "./json-schema/corpus-query-result.schema.json"
     },
     {
       "name": "get_construction_instances",
       "access": "READ_ONLY",
       "domainOperation": "getConstructionInstances",
-      "input": {
-        "releaseId": "uuid|null",
-        "constructionId": "uuid"
-      }
+      "inputSchemaRef": "./json-schema/construction-instances-request.schema.json",
+      "outputItemSchemaRef": "./json-schema/construction-instance.schema.json"
     },
     {
       "name": "get_rule_applications",
       "access": "READ_ONLY",
       "domainOperation": "getRuleApplications",
-      "input": {
-        "releaseId": "uuid|null",
-        "reference": "string"
-      }
+      "inputSchemaRef": "./json-schema/rule-applications-request.schema.json",
+      "outputItemSchemaRef": "./json-schema/rule-application.schema.json"
     },
     {
       "name": "get_evidence",
       "access": "READ_ONLY",
       "domainOperation": "getPublishedEvidence",
-      "input": {
-        "releaseId": "uuid|null",
-        "evidenceId": "uuid"
-      }
+      "inputSchemaRef": "./json-schema/evidence-request.schema.json",
+      "outputSchemaRef": "./json-schema/published-evidence-item.schema.json"
     },
     {
       "name": "list_semantic_sets",
       "access": "READ_ONLY",
       "domainOperation": "listSemanticSets",
-      "input": {
-        "releaseId": "uuid|null"
-      }
+      "inputSchemaRef": "./json-schema/semantic-sets-request.schema.json",
+      "outputItemSchemaRef": "./json-schema/semantic-set-version.schema.json"
     }
   ],
   "forbiddenTools": [
@@ -74,5 +64,17 @@
     "publish_release",
     "read_private_drive_source",
     "read_authoring_database"
+  ],
+  "protocolPolicy": {
+    "preferredRevision": "2026-07-28",
+    "transport": "STREAMABLE_HTTP_OR_SUPPORTED_STATELESS_HTTP",
+    "notes": "Runtime implementation must explicitly opt into and negotiate the intended MCP revision rather than assuming SDK defaults."
+  },
+  "releaseResolution": "For read tools, omitted/null researchReleaseId resolves current PRODUCTION exactly once and every scholarly output returns the resolved researchReleaseId. run_corpus_query requires a normalized release-pinned CorpusQuery.",
+  "securityRequirements": [
+    "rate limit per principal and tool",
+    "validate authorization audience/scopes if authenticated Research tools are later added",
+    "deterministic tool-list ordering/version metadata",
+    "return resolved researchReleaseId in scholarly results"
   ]
 }
