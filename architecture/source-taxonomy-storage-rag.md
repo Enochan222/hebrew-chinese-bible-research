@@ -2,7 +2,17 @@
 
 ## Status
 
-Research architecture document for the Hebrew–Chinese Bible Research project.
+**Historical synthesis / descriptive reference.** This document records an earlier integrated taxonomy-and-storage design. It is retained for research history and rationale, but it is not the active schema or enum source.
+
+For implementation use:
+
+- `architecture/database-api-cross-stage-contract-v1.1-candidate.md`
+- `contracts/v1.1/vocabulary.json`
+- `architecture/academic-storage-and-rag.md`
+- `docs/academic-source-taxonomy.md`
+- `docs/master-academic-source-inventory-and-gaps.md`
+
+Where this document uses older labels such as `CORE_REFERENCE_GRAMMAR`, those labels are descriptive legacy terminology and must not create new implementation enums.
 
 This document classifies the academic materials currently identified in the user's Google Drive and defines how they should and should not be used in a research-grade translation system. It also proposes the storage and retrieval architecture that should follow from that classification.
 
