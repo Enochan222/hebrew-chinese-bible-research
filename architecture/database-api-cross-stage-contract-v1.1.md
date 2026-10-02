@@ -2393,33 +2393,43 @@ Fields:
 - `citation_locator jsonb nullable`
 - `permitted_excerpt text nullable`
 - `rights_decision_snapshot_id uuid nullable FK`
+- `evidence_stability_class text`
 - `sort_order integer`
 
 No private Drive URL, private source locator, restricted full text, private embedding, or unreviewed AI note may appear here.
 
-## 33.5 `published_analysis_assertions`
+## 33.5 `published_assertions`
+
+Generic release-published scholarly assertion reused by passage analysis, commentary, and literature review.
 
 Fields:
 
-- `published_analysis_assertion_id uuid PK`
-- `published_analysis_id uuid FK`
+- `published_assertion_id uuid PK`
+- `research_release_id uuid FK`
 - `assertion_text text`
 - `assertion_type text`
 - `confidence_class text nullable`
-- `sort_order integer`
 - `assertion_hash text`
 
 ## 33.6 `published_assertion_evidence`
 
 Fields:
 
-- `published_analysis_assertion_id uuid FK`
+- `published_assertion_id uuid FK`
 - `published_evidence_item_id uuid FK`
 - `stance text`
 - `entailment_review_status text`
 - `weight_metadata jsonb nullable`
 
-Citation/public evidence follows the assertion, not merely the passage-analysis container.
+## 33.7 `published_analysis_assertion_members`
+
+Fields:
+
+- `published_analysis_id uuid FK`
+- `published_assertion_id uuid FK`
+- `sort_order integer`
+
+Passage analysis, commentary, and literature review must not maintain incompatible citation semantics.
 
 Published public analysis is read from a pinned ResearchRelease rather than regenerated from source books on every page request.
 
