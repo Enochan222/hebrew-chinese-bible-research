@@ -1,6 +1,12 @@
-# Storage and RAG Architecture for Academic Hebrew Translation Research
+# Academic Knowledge Compilation, Storage, and Retrieval Architecture
 
 ## Status
+
+This document defines **authoring-side academic knowledge compilation, storage and retrieval principles**.
+
+RAG, embeddings and large-model retrieval are primarily build-time/private research tools. They are not required public-runtime dependencies. Public runtime may optionally search published/open scholarly material, but canonical published analysis is served from an immutable ResearchRelease.
+
+The product topology is defined in `architecture/product-platform-and-publication-model.md`.
 
 This document defines storage and retrieval principles. Entity and enum names in this file are subordinate to the active candidate contract in `architecture/database-api-cross-stage-contract-v1.1-candidate.md` and the canonical machine-readable vocabulary in `contracts/v1.1/vocabulary.json`.
 
@@ -51,7 +57,9 @@ Retrieval model:
 
 Reference/verse lookup plus structured alignment and comparison.
 
-### 1.3 Academic literature system
+### 1.3 Academic literature / compilation system
+
+Default deployment: private Authoring / Research Plane.
 
 Purpose:
 
@@ -65,7 +73,7 @@ Purpose:
 
 Retrieval model:
 
-Rights-aware, source-type-aware hybrid retrieval.
+Rights-aware, source-type-aware hybrid retrieval for research compilation. Public runtime literature discovery, if offered, must operate only on publishable/open material and remains supplementary.
 
 ### 1.4 Research workspace system
 
@@ -1070,9 +1078,9 @@ For a disputed construction, a second retrieval pass should ask:
 
 This is mandatory for the future `Challenge my translation` function.
 
-## 30. Evidence packet before generation
+## 30. Evidence packet before compilation synthesis
 
-The model should receive an explicit structured packet such as:
+During authoring/build-time synthesis, the model should receive an explicit structured packet such as:
 
 ```
 Research question
@@ -1702,9 +1710,9 @@ PostgreSQL can provide:
 
 A dedicated graph database or search cluster should only be added after measured limitations appear.
 
-## 54. Final RAG principle
+## 54. Final academic compilation principle
 
-The application should not ask:
+The authoring/compiler system should not ask:
 
 > "Which chunk is most similar to this question?"
 
@@ -1713,3 +1721,36 @@ It should ask:
 > "What kind of scholarly question is this, which evidence classes are competent to answer it, which exact sources and sections address it, what does the primary corpus show, what contradicts the proposed answer, and what can responsibly be concluded from that evidence?"
 
 That distinction is the core of the research architecture.
+
+
+## 55. Publication output
+
+The private academic knowledge system does not publish its working index directly.
+
+Its publishable outputs are typed reviewed objects such as:
+
+- approved scholarly claim representations;
+- approved source/citation locators;
+- approved concept mappings;
+- approved textual-critical structures;
+- approved semantic-set memberships;
+- approved rule evidence;
+- approved public-safe excerpts;
+- approved published analyses.
+
+These flow through the publication firewall into a ResearchRelease.
+
+Restricted source text, private Drive locators, raw embeddings, rejected mappings and unreviewed AI outputs remain authoring-side objects.
+
+## 56. Runtime dependency rule
+
+The public product must not require this private academic retrieval system to:
+
+- open a passage;
+- display published analysis;
+- display published citations;
+- run deterministic corpus search;
+- show compiled construction instances;
+- show approved rule applications.
+
+This preserves scholarly stability, reduces rights risk and allows the public product to operate during model/retrieval-provider outages.
