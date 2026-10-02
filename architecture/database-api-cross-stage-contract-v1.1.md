@@ -1133,6 +1133,32 @@ Permission to privately read or display a source does not automatically grant pe
 
 ---
 
+# 12A. Review governance
+
+`review_status` is a materialized summary, not the audit trail itself.
+
+## 12A.1 `review_events`
+
+Fields:
+
+- `review_event_id uuid PK`
+- `research_object_id uuid FK -> research_objects`
+- `research_object_version text nullable`
+- `review_type text`
+- `reviewer_agent_id uuid nullable FK -> provenance_agents`
+- `reviewer_role text`
+- `criteria_version text`
+- `decision text`
+- `qualification text nullable`
+- `source_basis jsonb nullable`
+- `reviewed_at timestamptz`
+
+Canonical review types distinguish bibliographic identity, source entailment, Hebrew linguistic analysis, translation judgment, rights review, and publication approval.
+
+A generic `VERIFIED` flag must never be interpreted as proving all review dimensions.
+
+---
+
 # 13. Academic source model corrections
 
 The Work -> Edition -> SourceAsset foundation remains.
