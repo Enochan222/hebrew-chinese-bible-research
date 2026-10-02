@@ -119,7 +119,9 @@ Infrastructure credentials required for database/deployment operation are a sepa
 
 ## 11. Source-control scanning
 
-CI must scan for provider secret variable names, realistic secret patterns, accidental .env files, and secrets in fixtures/test snapshots.
+CI must scan for likely secret **values**, assignments, committed real `.env` files, realistic provider token patterns, and secrets in fixtures/test snapshots.
+
+Documentation is allowed to mention prohibited identifiers such as `GEMINI_API_KEY`; a naive grep for the identifier string alone must not fail CI.
 
 The scan blocks merge on likely model-provider secret leakage.
 
@@ -142,3 +144,85 @@ Provider validation determines acceptance.
 A developer, code generator, Site Builder, agent, or deployment script must not temporarily add a shared model API key for convenience.
 
 Doing so is an architecture violation, not a development shortcut.
+
+## 15. Browser and relay network-security contract
+
+Because the user's BYOK credential exists in browser JavaScript memory, browser compromise remains a threat even without persistence.
+
+Required controls for the BYOK surface:
+
+- strict Content Security Policy;
+- Trusted Types where supported by the chosen browser/framework stack;
+- no advertising or unnecessary third-party JavaScript on credential-entry / AI-request surfaces;
+- dependency lockfile and supply-chain scanning;
+- HTTPS only;
+- authenticated application session where the AI feature requires account state;
+- CSRF protection for cookie-authenticated application sessions;
+- strict Origin validation and narrow CORS policy;
+- request-body and model-response size limits;
+- per-user/IP abuse and rate controls;
+- provider timeout;
+- fixed provider egress allowlist;
+- `Cache-Control: no-store` on BYOK relay responses and request-processing paths where supported;
+- proxy/CDN/WAF/APM/error-report redaction, not only application logger redaction;
+- no automatic redirect to user-controlled provider hosts.
+
+A BYOK relay must never become a generic open proxy.
+
+## 16. BYOK data-egress policy
+
+Credential safety and research-data safety are separate controls.
+
+Every AI feature declares the minimum context it may send to the provider.
+
+### NL-to-CorpusQuery
+
+Allowed context:
+
+- user's natural-language query;
+- CorpusQuery schema/semantics;
+- allowed relation vocabulary;
+- public semantic-set names/metadata required for interpretation.
+
+Forbidden by default:
+
+- private academic source text;
+- Drive content;
+- private notes;
+- unpublished research;
+- unrelated passage evidence.
+
+### Explain a deterministic published result
+
+May send only the minimum published/right-cleared result data necessary for the requested explanation.
+
+### Compare the user's translation draft
+
+May send:
+
+- the user's explicitly submitted draft;
+- minimum necessary published/right-cleared evidence.
+
+Private workspace or private-source material requires explicit feature invocation and must not be attached automatically.
+
+### Private academic source assistance
+
+Before any private/restricted source text enters model context:
+
+1. the user explicitly invokes a feature that requires it;
+2. RightsPolicy resolves `MODEL_CONTEXT = ALLOW` or a satisfied CONDITIONAL decision;
+3. the UI discloses that selected material will be sent to the user's chosen provider;
+4. only the minimum necessary source span is sent;
+5. source identity/provenance is retained without sending unrelated private material.
+
+Possession/read access to a PDF is not model-context permission.
+
+## 17. Provider credential visibility statement
+
+The server-side relay necessarily sees the user credential transiently in process memory for proxy-mode requests.
+
+The correct security claim is:
+
+> the server does not persist, log, cache, or reuse the BYOK credential.
+
+Do not claim that the relay never sees the credential.
