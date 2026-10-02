@@ -358,3 +358,61 @@ Public canonical responses should pin:
 Switching the active release is a privileged operation.
 
 A rollback changes the active release pointer; it does not mutate historical published releases.
+
+
+## 17. Product entitlement security boundary
+
+ProductEntitlement and RightsPolicy are separate authorization dimensions.
+
+Server-side response authorization must resolve:
+
+1. source/content rights;
+2. tenant/user access;
+3. product feature entitlement;
+4. experience-mode projection.
+
+A ProductEntitlement ALLOW must never override a RightsPolicy DENY.
+
+A Research-mode client must not receive restricted/private source data merely because the account has a professional subscription.
+
+Entitlement enforcement must not exist only in client-side rendering logic.
+
+Negative tests must include:
+
+- Research entitlement cannot expose PRIVATE_LIBRARY_COPY;
+- Research entitlement cannot expose full text when only excerpt display is allowed;
+- Study and Research receive the same release-pinned scholarly conclusion;
+- entitlement denial is distinguishable from rights restriction;
+- direct API access cannot bypass a hidden/disabled Research feature.
+
+## 18. Live scholarly discovery isolation
+
+Live DiscoveryRecords are untrusted external data.
+
+They must be:
+
+- schema validated;
+- tagged with provider and retrieval time;
+- assigned source access level;
+- kept outside canonical ResearchRelease payload until reviewed;
+- unable to mutate ResearchIssue debate status;
+- unable to mutate published commentary;
+- unable to mutate translation decisions;
+- unable to promote themselves into canonical Works without bibliographic resolution.
+
+A hostile or malformed discovery-provider payload is treated as source data, not instruction.
+
+## 19. Cross-mode scholarly integrity
+
+Mode switching is not a privilege escalation path.
+
+STUDY and RESEARCH must share:
+
+- ResearchRelease;
+- canonical entity IDs;
+- commentary identity;
+- translation decisions.
+
+Research mode may fetch additional approved depth.
+
+It must not silently switch to private authoring state or unreleased scholarly objects.
