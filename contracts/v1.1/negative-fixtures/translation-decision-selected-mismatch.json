@@ -1,0 +1,22 @@
+{
+  "decisionSchemaVersion": "1.1",
+  "decisionKind": "FIXTURE_TRANSLATION_DECISION",
+  "targetLanguageCode": "zh-Hant",
+  "selectedRendering": "not-a-candidate",
+  "ambiguityStrategy": "PRESERVE_AMBIGUITY",
+  "candidateRenderings": [
+    {
+      "candidateId": "A",
+      "rendering": "測試譯文 A",
+      "status": "SELECTED",
+      "reasonSummary": "Fixture only"
+    },
+    {
+      "candidateId": "B",
+      "rendering": "測試譯文 B",
+      "status": "ALTERNATIVE",
+      "reasonSummary": "Fixture only"
+    }
+  ],
+  "notes": "This fixture validates shape only and is not a scholarly translation."
+}
