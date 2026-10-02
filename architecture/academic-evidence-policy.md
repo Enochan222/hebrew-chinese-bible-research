@@ -2,7 +2,7 @@
 
 ## Status
 
-This is the governing academic-integrity policy. Implementation vocabulary and entity names are defined in `contracts/v1.1/vocabulary.json` and `architecture/database-api-cross-stage-contract-v1.1-candidate.md`.
+This is the governing academic-integrity policy. Implementation vocabulary and entity names are defined in `contracts/v1.1/vocabulary.json` and `architecture/database-api-cross-stage-contract-v1.1.md`.
 
 A scholarly source span and a system-extracted representation of the scholar's proposition are distinct evidence objects. The latter must never be displayed as if it were the author's verbatim or directly verified statement.
 
