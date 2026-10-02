@@ -1755,3 +1755,601 @@ In addition to section 28, v1.1 must not freeze until:
 17. the publication gate can reject an object that references private/unpublishable source data;
 18. the public app can serve a pinned release with the optional LLM adapter disabled.
 
+
+
+---
+
+# 37. Research Pro / Scholarly Intelligence contract
+
+Detailed domain semantics are defined in:
+
+- `architecture/research-pro-scholarly-intelligence.md`
+- `architecture/ui-mode-cross-stage-contract.md`
+
+Research Pro is an expanded research experience over the same ResearchRelease and the same canonical scholarly objects.
+
+It is not:
+- a separate app;
+- a separate ontology;
+- a second scholarly database;
+- a more authoritative truth state.
+
+The active v1.1 contract now includes six first-class domain groups:
+
+1. DiscoveryRecord
+2. ResearchIssue
+3. ResearchPosition
+4. LiteratureSnapshot
+5. CommentaryEntry
+6. ProductEntitlement
+
+Supporting first-class contracts include:
+- ScholarlyDiscoveryProvider
+- ScholarlyTargetLink
+- LiteratureReviewSnapshot
+- SourceAccessRoute
+
+---
+
+# 38. DiscoveryRecord contract
+
+## 38.1 `scholarly_discovery_providers`
+
+Fields:
+
+- `scholarly_discovery_provider_id uuid PK`
+- `provider_key text unique`
+- `display_name text`
+- `capabilities jsonb`
+- `active boolean`
+- `metadata jsonb`
+
+Provider capability names are controlled by `contracts/v1.1/vocabulary.json`.
+
+## 38.2 `external_discovery_records`
+
+External records are staging/discovery objects and must not automatically become canonical works.
+
+Fields:
+
+- `external_discovery_record_id uuid PK`
+- `scholarly_discovery_provider_id uuid FK`
+- `provider_record_id text`
+- `title_raw text nullable`
+- `authors_raw jsonb nullable`
+- `publication_year_raw text nullable`
+- `publication_type_raw text nullable`
+- `doi_raw text nullable`
+- `isbn_raw text nullable`
+- `abstract_raw text nullable`
+- `source_url text nullable`
+- `language_raw text nullable`
+- `retrieved_at timestamptz`
+- `payload_hash text`
+- `raw_payload jsonb nullable`
+- `access_level text`
+- `record_status text`
+
+## 38.3 `external_record_resolutions`
+
+Fields:
+
+- `external_record_resolution_id uuid PK`
+- `external_discovery_record_id uuid FK`
+- `work_id uuid FK`
+- `resolution_method text`
+- `resolution_confidence numeric nullable`
+- `review_status text`
+- `resolved_at timestamptz`
+- `resolved_by uuid nullable`
+
+Canonical bibliographic identity must be resolved through DOI/ISBN/provider crosswalk/title-author/manual/AI-assisted methods.
+
+AI-assisted resolution never becomes VERIFIED without the configured review rule.
+
+## 38.4 Discovery access level invariant
+
+A discovery record must preserve whether the system had:
+
+- metadata only;
+- abstract only;
+- citation context only;
+- open full text;
+- licensed full text;
+- private full text.
+
+An AI-extracted scholarly proposition must never imply full-text reading when its evidence basis is only metadata or abstract.
+
+---
+
+# 39. ResearchIssue and ResearchPosition contracts
+
+## 39.1 `research_issues`
+
+Fields:
+
+- `research_issue_id uuid PK`
+- `issue_key text unique nullable`
+- `title text`
+- `question_text text`
+- `issue_type text`
+- `debate_status text`
+- `current_snapshot_id uuid nullable`
+- `review_status text`
+- `created_at timestamptz`
+- `updated_at timestamptz`
+
+A ResearchIssue is a bounded scholarly question, not a loose topic tag.
+
+## 39.2 `research_issue_scopes`
+
+Fields:
+
+- `research_issue_scope_id uuid PK`
+- `research_issue_id uuid FK`
+- `scope_object_id uuid FK research_objects`
+- `scope_type text`
+- `scope_role text`
+- `review_status text`
+
+A single issue may scope to a passage, lexeme, construction, textual variant, concept or book.
+
+## 39.3 `research_positions`
+
+Fields:
+
+- `research_position_id uuid PK`
+- `research_issue_id uuid FK`
+- `position_key text nullable`
+- `title text`
+- `position_summary text`
+- `position_status text`
+- `review_status text`
+- `created_at timestamptz`
+- `updated_at timestamptz`
+
+A ResearchPosition is a reviewed representation of a position in scholarship.
+
+It is not automatically the wording of any source author.
+
+## 39.4 `position_claim_links`
+
+Fields:
+
+- `position_claim_link_id uuid PK`
+- `research_position_id uuid FK`
+- `scholarly_claim_id uuid FK`
+- `relationship text`
+- `assertion_agent_type text`
+- `review_status text`
+- `notes text nullable`
+
+Relationships are controlled by the canonical vocabulary.
+
+Work/claim counts must not be converted into consensus percentages.
+
+## 39.5 `issue_relations`
+
+Fields:
+
+- `issue_relation_id uuid PK`
+- `from_issue_id uuid FK`
+- `to_issue_id uuid FK`
+- `relation_type text`
+- `assertion_agent_type text`
+- `review_status text`
+
+## 39.6 `scholarly_target_links`
+
+Fields:
+
+- `scholarly_target_link_id uuid PK`
+- `source_object_id uuid FK research_objects`
+- `target_object_id uuid FK research_objects`
+- `target_type text`
+- `relevance_type text`
+- `directness text`
+- `mapping_method text`
+- `mapping_confidence numeric nullable`
+- `source_span_id uuid nullable`
+- `review_status text`
+- `provenance_id uuid nullable`
+
+An explicit biblical reference and an AI-inferred construction relevance are different mappings and must remain visibly distinguishable.
+
+---
+
+# 40. LiteratureSnapshot contract
+
+"Current scholarship" is snapshot-bounded.
+
+## 40.1 `literature_snapshots`
+
+Fields:
+
+- `literature_snapshot_id uuid PK`
+- `snapshot_type text`
+- `target_object_id uuid FK research_objects`
+- `as_of_date date`
+- `coverage_start_date date nullable`
+- `coverage_end_date date nullable`
+- `review_scope text`
+- `coverage_note text nullable`
+- `reviewer_id uuid nullable`
+- `review_status text`
+- `research_release_id uuid nullable`
+- `created_at timestamptz`
+
+## 40.2 `literature_search_runs`
+
+Fields:
+
+- `literature_search_run_id uuid PK`
+- `literature_snapshot_id uuid FK`
+- `run_date timestamptz`
+- `date_range jsonb nullable`
+- `languages text[]`
+- `publication_types text[]`
+- `citation_expansion_depth integer nullable`
+- `dedup_method text`
+- `dedup_version text nullable`
+- `retrieved_count integer`
+- `included_count integer`
+- `excluded_count integer`
+- `coverage_limitations text nullable`
+- `status text`
+
+Use a junction table for provider membership rather than storing provider UUID arrays in final implementation.
+
+## 40.3 `literature_search_queries`
+
+Fields:
+
+- `literature_search_query_id uuid PK`
+- `literature_search_run_id uuid FK`
+- `language_code text`
+- `query_text text`
+- `query_type text`
+- `generated_by text`
+- `query_order integer`
+
+Multilingual search expansion must be preserved.
+
+## 40.4 `literature_inclusions`
+
+Fields:
+
+- `literature_snapshot_id uuid FK`
+- `work_id uuid FK`
+- `inclusion_role text`
+- `relevance_type text`
+- `reason text nullable`
+- `review_status text`
+
+## 40.5 `literature_exclusions`
+
+Fields:
+
+- `literature_snapshot_id uuid FK`
+- `external_discovery_record_id uuid nullable`
+- `work_id uuid nullable`
+- `exclusion_reason text`
+- `review_status text`
+
+## 40.6 `literature_review_snapshots`
+
+Fields:
+
+- `literature_review_snapshot_id uuid PK`
+- `target_object_id uuid FK research_objects`
+- `literature_snapshot_id uuid FK`
+- `research_release_id uuid nullable`
+- `review_structure jsonb`
+- `review_summary text nullable`
+- `coverage_limitations text nullable`
+- `review_status text`
+- `content_hash text`
+
+Literature-review prose is derivative from structured issues/positions/works/claims.
+
+---
+
+# 41. CommentaryEntry contract
+
+## 41.1 `commentary_entries`
+
+Fields:
+
+- `commentary_entry_id uuid PK`
+- `reference_span_id uuid FK`
+- `research_release_id uuid FK`
+- `commentary_kind text`
+- `title text nullable`
+- `summary text nullable`
+- `review_status text`
+- `content_hash text`
+- `supersedes_commentary_entry_id uuid nullable`
+
+## 41.2 `commentary_sections`
+
+Fields:
+
+- `commentary_section_id uuid PK`
+- `commentary_entry_id uuid FK`
+- `section_type text`
+- `section_order integer`
+- `rendered_text text`
+- `source_payload jsonb nullable`
+- `section_hash text`
+
+## 41.3 `commentary_section_evidence`
+
+Fields:
+
+- `commentary_section_id uuid FK`
+- `research_object_id uuid FK`
+- `stance text`
+- `citation_locator jsonb nullable`
+- `sort_order integer`
+
+Commentary prose is a release-pinned derivative rendering.
+
+Underlying evidence remains in structured research objects.
+
+Translation Note is a distinct commentary/artifact kind with a different editorial purpose from general exegetical Commentary.
+
+---
+
+# 42. ProductEntitlement contract
+
+Product entitlement is not source rights.
+
+## 42.1 `product_features`
+
+Fields:
+
+- `product_feature_id uuid PK`
+- `feature_key text unique`
+- `display_name text`
+- `description text`
+- `feature_group text`
+- `default_experience_mode text`
+- `active boolean`
+
+Feature keys are controlled by the canonical vocabulary.
+
+## 42.2 `product_entitlements`
+
+Fields:
+
+- `product_entitlement_id uuid PK`
+- `principal_type text`
+- `principal_id uuid`
+- `product_feature_id uuid FK`
+- `entitlement_decision text`
+- `source_type text`
+- `source_reference text nullable`
+- `valid_from timestamptz nullable`
+- `valid_until timestamptz nullable`
+- `metadata jsonb nullable`
+
+Billing/subscription provider implementation is outside this contract.
+
+## 42.3 Rights-before-entitlement invariant
+
+The resolution order is:
+
+1. RightsPolicy
+2. ProductEntitlement
+3. UI visibility
+
+ProductEntitlement can never override source/content rights.
+
+## 42.4 Minimum evidence transparency invariant
+
+A user must not require Research entitlement merely to verify a substantive published conclusion already shown in Study mode.
+
+Study must retain key citations, release identity and material uncertainty/alternatives.
+
+Research may expose the full graph, search history and source lineage.
+
+---
+
+# 43. SourceAccessRoute contract
+
+## 43.1 `source_access_routes`
+
+Fields:
+
+- `source_access_route_id uuid PK`
+- `work_id uuid FK`
+- `edition_id uuid nullable`
+- `route_type text`
+- `url text nullable`
+- `availability_scope text`
+- `rights_policy_id uuid nullable`
+- `active boolean`
+- `verified_at timestamptz nullable`
+
+Route type is controlled by canonical vocabulary.
+
+PRIVATE_LIBRARY_COPY must never be exposed to ordinary public/customer clients.
+
+Bibliographic relevance and full-text access are independent.
+
+---
+
+# 44. Study / Research UI cross-stage contract
+
+The authoritative UI-mode contract is:
+
+- `architecture/ui-mode-cross-stage-contract.md`
+
+The modes are:
+
+- STUDY
+- RESEARCH
+
+Both use:
+
+- the same active ResearchRelease;
+- the same canonical entity IDs;
+- the same passage/reference identity;
+- the same published commentary identity;
+- the same translation decisions;
+- the same rights resolver.
+
+Research mode exposes deeper projections.
+
+It does not use a different scholarly truth state.
+
+## 44.1 Stable domain interfaces
+
+Reserve equivalent runtime-validated contracts for:
+
+- `PassageExperienceCoreV1`
+- `StudyPassageProjectionV1`
+- `ResearchPassageProjectionV1`
+- `ExperienceCapabilitiesV1`
+- `ResearchIssueV1`
+- `ResearchPositionV1`
+- `LiteratureSnapshotV1`
+- `CommentaryEntryV1`
+- `DiscoveryRecordV1`
+- `ProductEntitlementV1`
+
+## 44.2 API additions
+
+### GET `/api/v1/experience/capabilities`
+
+Returns server-resolved experience/feature capability decisions.
+
+### GET `/api/v1/passages/{reference}/experience`
+
+Query:
+- `mode=STUDY|RESEARCH`
+- optional `researchReleaseId`
+
+Returns a release-pinned projection.
+
+An implementation may internally compose several domain endpoints rather than physically materializing one giant response.
+
+### GET `/api/v1/research-issues`
+
+Filters may include:
+- targetObjectId
+- referenceSpanId
+- issueType
+- debateStatus
+- researchReleaseId
+
+### GET `/api/v1/research-issues/{researchIssueId}`
+
+Returns issue identity, scopes, snapshot metadata and position summaries.
+
+### GET `/api/v1/research-issues/{researchIssueId}/positions`
+
+Returns position objects and reviewed claim-link summaries.
+
+### GET `/api/v1/literature/snapshots/{literatureSnapshotId}`
+
+Returns reviewed snapshot methodology and included bibliography according to entitlement/rights.
+
+### GET `/api/v1/passages/{reference}/commentary`
+
+Returns the release-pinned CommentaryEntry and Study-safe summary.
+
+Research mode may request section/evidence expansion.
+
+### GET `/api/v1/scholarly-discovery/recent`
+
+Research feature only.
+
+Returns live discovery records explicitly labelled DISCOVERED_SINCE_RELEASE.
+
+It must not merge them into release-pinned synthesis.
+
+## 44.3 Availability/error distinctions
+
+The API/UI must distinguish:
+
+- FEATURE_NOT_ENTITLED
+- SOURCE_RIGHTS_RESTRICTED
+- NOT_IN_RESEARCH_RELEASE
+- NOT_YET_REVIEWED
+- DISCOVERY_PROVIDER_UNAVAILABLE
+- COVERAGE_NOT_AVAILABLE
+- DATA_TEMPORARILY_UNAVAILABLE
+
+Do not collapse these into one "Pro required" state.
+
+---
+
+# 45. Research Pro phase ownership
+
+## Phase 1
+
+Reserve:
+- experience mode vocabulary;
+- ProductEntitlement schema/interface;
+- shared PassageExperienceCore;
+- capability resolver;
+- same-release mode switching.
+
+## Phase 2
+
+Study receives:
+- key scholarship;
+- published commentary summary;
+- translation note;
+- minimum evidence transparency.
+
+Research may use placeholders for deep scholarly modules.
+
+## Phase 3
+
+Research receives:
+- advanced corpus query;
+- construction browser;
+- semantic-set detail;
+- full linguistic/corpus evidence.
+
+## Phase 4
+
+Research Pro scholarly-intelligence compilation owns:
+- discovery providers;
+- DiscoveryRecords;
+- bibliographic resolution;
+- scholarly target links;
+- ResearchIssues;
+- ResearchPositions;
+- LiteratureSnapshots;
+- access routes.
+
+## Phase 5
+
+Publication/serving owns:
+- LiteratureReviewSnapshots;
+- CommentaryEntries;
+- full Research projections;
+- scholarly dependency/debate graphs;
+- live discovery surface;
+- ProductEntitlement enforcement;
+- full Study/Research QA.
+
+---
+
+# 46. Additional v1.1 freeze preconditions
+
+v1.1 must not freeze until:
+
+19. one external DiscoveryRecord can resolve to an existing canonical Work without creating a duplicate work;
+20. one ResearchIssue with at least two ResearchPositions can link to reviewed scholarly claims;
+21. one explicit passage reference and one AI-inferred construction relevance can coexist as different ScholarlyTargetLinks;
+22. one LiteratureSnapshot records providers, queries, inclusion/exclusion and coverage limitations;
+23. one CommentaryEntry can render in both Study and Research modes with the same commentary identity;
+24. one ProductEntitlement denial is distinguishable from a RightsPolicy restriction;
+25. Study and Research for the same passage demonstrably pin the same ResearchRelease;
+26. Study mode can verify a substantive published conclusion without Research entitlement;
+27. live discovery can be displayed as DISCOVERED_SINCE_RELEASE without changing the published commentary;
+28. capability resolution is enforced server-side and not inferred from client plan labels.
