@@ -1,0 +1,11 @@
+{
+  "annotationLayerId": "66666666-6666-4666-8666-666666666666",
+  "corpusReleaseId": "22222222-2222-4222-8222-222222222222",
+  "annotationFrameworkId": "36363636-3636-4363-8363-363636363636",
+  "layerKind": "MORPHEME_SEGMENTATION",
+  "layerVersion": "fixture-oshb-segmentation-1",
+  "sourceRegistryId": "37373737-3737-4373-8373-373737373737",
+  "provenanceId": "38383838-3838-4383-8383-383838383838",
+  "rightsPolicyId": null,
+  "contentHash": "abababababababababababababababababababababababababababababababab"
+}
