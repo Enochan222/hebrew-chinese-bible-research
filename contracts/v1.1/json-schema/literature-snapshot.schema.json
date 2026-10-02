@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/literature-snapshot.schema.json",
+  "title": "LiteratureSnapshotV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "literatureSnapshotId",
+    "researchTargetId",
+    "snapshotType",
+    "asOfDate",
+    "reviewScope",
+    "reviewStatus",
+    "contentHash",
+    "coverageLimitations"
+  ],
+  "properties": {
+    "literatureSnapshotId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "researchTargetId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "snapshotType": {
+      "enum": [
+        "BOOK_STATE_OF_RESEARCH",
+        "PASSAGE_LITERATURE",
+        "ISSUE_LITERATURE",
+        "CONSTRUCTION_LITERATURE",
+        "TRANSLATION_ISSUE_LITERATURE"
+      ]
+    },
+    "asOfDate": {
+      "type": "string",
+      "format": "date"
+    },
+    "reviewScope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reviewStatus": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contentHash": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{64}$"
+    },
+    "coverageLimitations": {
+      "type": "string",
+      "minLength": 1
+    },
+    "searchRunIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+      },
+      "uniqueItems": true
+    },
+    "includedWorkIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+      },
+      "uniqueItems": true
+    }
+  }
+}
