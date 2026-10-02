@@ -7,6 +7,8 @@ This project is a database-backed scholarly product platform, not a single runti
 Implementation phases are separate from the continuous product planes defined in:
 
 - `architecture/product-platform-and-publication-model.md`
+- `architecture/research-pro-scholarly-intelligence.md`
+- `architecture/ui-mode-cross-stage-contract.md`
 
 The product planes are:
 
@@ -53,11 +55,19 @@ Create the stable product shell and database contracts without introducing false
 ## Product surfaces reserved from the beginning
 
 ### Public Research App
+Two coordinated experience modes share one ResearchRelease:
+
+- Study
+- Research
+
+Shared product areas include:
 - Passage Study
 - Corpus Lab
 - Construction Browser
 - Published Analysis
 - Citations / Evidence
+
+Research mode may expose additional scholarly-intelligence modules according to ProductEntitlement.
 
 ### Researcher Workspace
 - saved queries
@@ -94,6 +104,9 @@ Phase 1 must establish:
 - ResearchRelease
 - ResearchReleaseComponent
 - ResearchProject / workspace ownership
+- ProductFeature / ProductEntitlement interface
+- ExperienceMode / ExperienceCapabilities contract
+- PassageExperienceCoreV1
 
 Important correction:
 
@@ -391,11 +404,27 @@ Pass only when:
 
 ## Goal
 
-Build the authoring-side scholarly compiler.
+Build the authoring-side scholarly compiler and Scholarly Intelligence layer.
 
 This phase processes the user's academic library and other legitimate research sources.
 
 It is **not** a public runtime chatbot/RAG endpoint.
+
+## Research Pro scholarly-intelligence scope
+
+Phase 4 owns:
+
+- ScholarlyDiscoveryProvider abstraction;
+- external DiscoveryRecords;
+- bibliographic resolution;
+- ScholarlyTargetLinks;
+- ResearchIssues;
+- ResearchPositions;
+- LiteratureSnapshots;
+- SourceAccessRoutes;
+- editorial review of issue/position/debate structures.
+
+External discovery results remain candidate/non-canonical until publication.
 
 ## Source inventory
 
@@ -537,7 +566,7 @@ Pass only when:
 
 ## Goal
 
-Complete the compiled scholarly product.
+Complete the compiled scholarly product, Research Pro serving experience, and release operations.
 
 ## Rule system
 
@@ -570,6 +599,24 @@ Rules marked as compilable and having clear corpus scope may be evaluated across
 Do **not** blindly run every editorial/passsage-specific rule across the entire Bible.
 
 Only rules whose trigger/conditions have defined deterministic scope are materialized globally.
+
+## Research Pro publication and serving
+
+Phase 5 owns:
+
+- LiteratureReviewSnapshots;
+- CommentaryEntries and CommentarySections;
+- StudyPassageProjectionV1;
+- ResearchPassageProjectionV1;
+- feature entitlement enforcement;
+- debate/evidence graph serving;
+- live `DISCOVERED_SINCE_RELEASE` literature surface;
+- Research export/citation workflows;
+- Study/Research cross-mode QA.
+
+Study and Research must use the same active ResearchRelease.
+
+Study must retain minimum evidence transparency even where Research features are not entitled.
 
 ## Published analysis
 
