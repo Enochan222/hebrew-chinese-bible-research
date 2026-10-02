@@ -60,6 +60,7 @@ Core OpenAPI does not override Research Pro extension endpoints merely because t
 - `json-schema/commentary-entry.schema.json`
 - `json-schema/discovery-record.schema.json`
 - `json-schema/experience-capabilities.schema.json`
+- `json-schema/product-entitlement.schema.json`
 - `research-pro-openapi.yaml`
 
 ## Validation
