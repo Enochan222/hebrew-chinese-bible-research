@@ -159,9 +159,6 @@
           "type": "number"
         },
         {
-          "type": "integer"
-        },
-        {
           "type": "boolean"
         }
       ]
@@ -340,7 +337,8 @@
           "items": {
             "type": "string"
           },
-          "uniqueItems": true
+          "uniqueItems": true,
+          "minItems": 1
         },
         "child": {
           "$ref": "#/$defs/expression"
@@ -373,7 +371,8 @@
           "items": {
             "type": "string"
           },
-          "uniqueItems": true
+          "uniqueItems": true,
+          "minItems": 1
         },
         "child": {
           "$ref": "#/$defs/expression"
