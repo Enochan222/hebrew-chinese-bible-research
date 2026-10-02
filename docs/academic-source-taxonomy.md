@@ -2,7 +2,11 @@
 
 ## Status
 
-This document defines how the academic materials currently present in the three Google Drive libraries should be classified and used inside the Hebrew-Chinese Bible Research project.
+This document defines the scholarly taxonomy and question-to-source routing principles for the Hebrew-Chinese Bible Research project.
+
+It is a **scholarly taxonomy**, not the machine-readable retrieval-enum source. Canonical implementation vocabularies live in `contracts/v1.1/vocabulary.json`. Current physical holdings and missing evidence lanes are tracked separately in `docs/master-academic-source-inventory-and-gaps.md`.
+
+This taxonomy began from the user's Google Drive holdings but the production academic knowledge base must not be limited to those holdings.
 
 It is intentionally written before the storage and RAG architecture. Retrieval architecture must follow scholarly function. It must not impose one undifferentiated search model on sources that answer fundamentally different questions.
 
@@ -74,17 +78,13 @@ It contains distinct collections for:
 
 This Drive should provide most of the scholarly evidence architecture for the application.
 
-### Drive Group C: concentrated grammar shelf
+### Drive Group C: consolidated grammar / lexicon shelf
 
-This Drive currently contains:
+This Drive now contains a concentrated grammar and lexicon collection, including multiple major reference grammars, pedagogical grammars, BDB, DCH, HALOT material, TLOT, TWOT, TDOT, Klein and related resources.
 
-- Waltke and O'Connor, *An Introduction to Biblical Hebrew Syntax*;
-- Joüon and Muraoka, *A Grammar of Biblical Hebrew*;
-- Gesenius / Davidson historical grammar and syntax material;
-- C. L. Seow, *A Grammar for Biblical Hebrew*;
-- Kutz and Josberger, *Learning Biblical Hebrew: Reading for Comprehension*.
+It remains incomplete as a master research library: textual criticism, BHS/BHQ, DSS, diachronic Hebrew, commentaries, exegesis method, rhetoric, Chinese Bible translation studies and current article-level specialist research remain outside or underrepresented. See `docs/master-academic-source-inventory-and-gaps.md`.
 
-This shelf is useful as a curated grammar subset, but several titles duplicate books in Drive Group B. It must not be treated as independent corroborating evidence simply because another file copy exists.
+Several titles duplicate books in Drive Group B. Duplicate files must never be treated as independent corroborating evidence.
 
 ## 3. Category A: major reference grammar and syntax sources
 
@@ -1357,3 +1357,104 @@ The application must classify every ingested scholarly object by at least:
 The goal is not to make all books searchable.
 
 The goal is to make the right books searchable for the right question, with their methodological identity, limitations and provenance preserved.
+
+
+## 28. Current scholarly publication layer
+
+The production knowledge base must not equate "academic sources" with books currently present in Google Drive.
+
+Supported source types must include:
+
+- journal article;
+- book chapter;
+- edited-volume contribution;
+- conference paper;
+- dissertation / thesis;
+- critical review;
+- dataset publication;
+- digital scholarly resource.
+
+Where applicable, preserve:
+
+- DOI;
+- ISSN;
+- journal title;
+- volume;
+- issue;
+- page range;
+- editors;
+- series;
+- peer-review status where known;
+- publication status;
+- correction / retraction metadata.
+
+Reason:
+
+Reference grammars are foundational, but specialist questions in discourse, prepositions, valency, tense/aspect/modality, corpus linguistics or Hebrew-Chinese translation may be treated more directly in recent articles or monographs.
+
+The system must distinguish:
+
+> "not present in the current library"
+
+from:
+
+> "scholarship does not exist."
+
+## 29. Chinese Bible translation scholarship and documentation
+
+Because the product is specifically a Hebrew–Chinese Bible translation research environment, Chinese translation evidence must extend beyond translation witnesses.
+
+Create a dedicated scholarly lane for:
+
+- histories of Chinese Bible translation;
+- translator / reviser prefaces;
+- Bible society and publisher translation principles;
+- revision documentation;
+- translator notes;
+- Chinese biblical style / syntax studies;
+- Hebrew-to-Chinese translation studies;
+- translation theory relevant to biblical translation;
+- historical Chinese Bible editions and editorial history.
+
+This lane answers questions such as:
+
+- what a translation project explicitly says its principles are;
+- how target-language Chinese constrains a rendering;
+- whether a translation choice is idiomatic, explanatory, literary or structurally conservative;
+- how historical revisions differ.
+
+It does **not** replace Hebrew grammar or corpus evidence.
+
+A Chinese translation witness proves what a digital expression currently reads. It does not, by itself, prove why the translators chose that rendering.
+
+## 30. Scholarly dependency and source independence
+
+Distinct works are not automatically independent corroboration.
+
+Where evidence matters materially, the system should be able to record or infer cautiously whether one work:
+
+- cites another;
+- adopts a classification from another;
+- revises another;
+- critiques another;
+- uses the same underlying corpus or dataset;
+- summarises another source.
+
+The application must never derive a quantitative "consensus score" from the number of distinct retrieved works alone.
+
+Statements such as "multiple scholars agree" require source diversity appropriate to the claim.
+
+## 31. Taxonomy versus implementation vocabulary
+
+This document may use descriptive scholarly category names in prose.
+
+Implementation must use the canonical machine-readable dimensions separately:
+
+- sourceRole: what kind of scholarly source this is;
+- retrievalNamespace: which retrieval lane is eligible;
+- evidenceClass: what epistemic role the retrieved item plays in an answer;
+- lifecycle vocabularies: operational workflow only.
+
+These dimensions must not be collapsed into one generic source-type enum.
+
+Where terminology in this document conflicts with `contracts/v1.1/vocabulary.json`, the machine-readable vocabulary controls implementation naming while this document controls the scholarly rationale.
