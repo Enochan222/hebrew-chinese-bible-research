@@ -1,0 +1,224 @@
+openapi: 3.1.0
+info:
+  title: Hebrew-Chinese Bible Research API
+  version: 1.1-candidate
+  description: >
+    Machine-readable public API contract for release-pinned scholarly serving
+    and deterministic corpus queries. Canonical public responses expose the
+    ResearchRelease used.
+servers:
+  - url: /
+paths:
+  /api/v1/releases/current:
+    get:
+      operationId: getCurrentRelease
+      summary: Resolve the current production ResearchRelease
+      responses:
+        "200":
+          description: Current release pointer
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [researchReleaseId, releaseLabel, channel]
+                properties:
+                  researchReleaseId:
+                    type: string
+                    format: uuid
+                  releaseLabel:
+                    type: string
+                  channel:
+                    const: PRODUCTION
+  /api/v1/passages/{reference}/analysis:
+    get:
+      operationId: getCurrentPassageAnalysis
+      summary: Get published analysis from the current production release
+      parameters:
+        - $ref: "#/components/parameters/reference"
+      responses:
+        "200":
+          description: Release-resolved published analysis
+          content:
+            application/json:
+              schema:
+                $ref: "./json-schema/published-passage-analysis.schema.json"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/v1/releases/{releaseId}/passages/{reference}/analysis:
+    get:
+      operationId: getPinnedPassageAnalysis
+      summary: Get citation-stable published analysis from a pinned ResearchRelease
+      parameters:
+        - $ref: "#/components/parameters/releaseId"
+        - $ref: "#/components/parameters/reference"
+      responses:
+        "200":
+          description: Pinned published analysis
+          content:
+            application/json:
+              schema:
+                $ref: "./json-schema/published-passage-analysis.schema.json"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/v1/corpus/query/validate:
+    post:
+      operationId: validateCorpusQuery
+      summary: Validate and normalize a CorpusQuery without executing it
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./json-schema/corpus-query.schema.json"
+      responses:
+        "200":
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [valid, errors]
+                properties:
+                  valid:
+                    type: boolean
+                  normalizedQuery:
+                    oneOf:
+                      - $ref: "./json-schema/corpus-query.schema.json"
+                      - type: "null"
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      required: [code, message]
+                      properties:
+                        code:
+                          type: string
+                        message:
+                          type: string
+                        path:
+                          type: string
+  /api/v1/corpus/query/run:
+    post:
+      operationId: runCorpusQuery
+      summary: Execute a validated deterministic CorpusQuery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./json-schema/corpus-query.schema.json"
+      responses:
+        "200":
+          description: Deterministic query result
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [researchReleaseId, epistemicClass, matches, matchCount]
+                properties:
+                  researchReleaseId:
+                    type: string
+                    format: uuid
+                  epistemicClass:
+                    enum:
+                      - CORPUS_COMPLETE
+                      - FRAMEWORK_COMPLETE
+                      - CURATED_SET_COMPLETE
+                      - HEURISTIC_CANDIDATE
+                      - INCOMPLETE_COVERAGE
+                  matchCount:
+                    type: integer
+                    minimum: 0
+                  matches:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      required: [referenceSpanId, bindings, whyMatched]
+                      properties:
+                        referenceSpanId:
+                          type: string
+                          format: uuid
+                        bindings:
+                          type: object
+                          additionalProperties:
+                            type: string
+                        whyMatched:
+                          type: array
+                          items:
+                            type: string
+                  dependencyManifest:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Invalid or over-complex query
+  /api/v1/evidence/{evidenceId}:
+    get:
+      operationId: getPublishedEvidence
+      summary: Get a public-safe published evidence item
+      parameters:
+        - name: evidenceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Published evidence
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [publishedEvidenceItemId, researchReleaseId, evidenceClass]
+                properties:
+                  publishedEvidenceItemId:
+                    type: string
+                    format: uuid
+                  researchReleaseId:
+                    type: string
+                    format: uuid
+                  evidenceClass:
+                    type: string
+                  citation:
+                    type: object
+                    additionalProperties: true
+                  permittedExcerpt:
+                    type: [string, "null"]
+        "404":
+          $ref: "#/components/responses/NotFound"
+components:
+  parameters:
+    releaseId:
+      name: releaseId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    reference:
+      name: reference
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+  responses:
+    NotFound:
+      description: Requested release/resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [code, message]
+            properties:
+              code:
+                const: NOT_FOUND
+              message:
+                type: string
