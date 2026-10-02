@@ -9,7 +9,8 @@
     "entitlementPrincipalId",
     "principalType",
     "productFeatureId",
-    "entitlementDecision"
+    "entitlementDecision",
+    "sourceType"
   ],
   "properties": {
     "productEntitlementId": {
@@ -38,7 +39,8 @@
       ]
     },
     "sourceType": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "sourceReference": {
       "type": [
