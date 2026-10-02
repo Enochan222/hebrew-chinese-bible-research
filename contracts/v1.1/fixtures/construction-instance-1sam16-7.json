@@ -1,0 +1,19 @@
+{
+  "constructionInstanceId": "30303030-3030-4303-8303-303030303030",
+  "compilationRunId": "26262626-2626-4262-8262-262626262626",
+  "referenceSpanId": "17171717-1717-4171-8171-171717171717",
+  "nodeBindings": {
+    "V": "31313131-3131-4313-8313-313131313131",
+    "P": "32323232-3232-4323-8323-323232323232",
+    "N": "33333333-aaaa-4333-8aaa-333333333333"
+  },
+  "whyMatched": [
+    "V satisfies LEMMA_TEXT=ראה in the pinned morphology layer",
+    "P satisfies LEMMA_TEXT=ל in the pinned morpheme-segmentation layer",
+    "P PREFIX_MORPHEME_OF N in the pinned morpheme-segmentation layer",
+    "N is a member of BODY_PART fixture version",
+    "V SAME_CLAUSE N in the pinned clause layer"
+  ],
+  "reviewStatus": "NEEDS_REVIEW",
+  "resultHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+}
