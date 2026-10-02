@@ -590,5 +590,21 @@
     "CRITICAL_REVIEW",
     "COURSE_MATERIAL",
     "USER_NOTE"
+  ],
+  "runtimeAIAuthMode": [
+    "BYOK_ONLY"
+  ],
+  "runtimeAIProvider": [
+    "GEMINI"
+  ],
+  "byokCredentialState": [
+    "BYOK_AVAILABLE",
+    "BYOK_MISSING",
+    "BYOK_INVALID",
+    "PROVIDER_UNAVAILABLE",
+    "FEATURE_DISABLED"
+  ],
+  "byokPersistenceMode": [
+    "VOLATILE_MEMORY_ONLY"
   ]
 }
