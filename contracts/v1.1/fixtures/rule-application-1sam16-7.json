@@ -1,0 +1,14 @@
+{
+  "ruleApplicationId": "34343434-3434-4343-8343-343434343434",
+  "ruleVersionId": "35353535-3535-4353-8353-353535353535",
+  "constructionInstanceId": "30303030-3030-4303-8303-303030303030",
+  "referenceSpanId": "17171717-1717-4171-8171-171717171717",
+  "effect": "QUALIFIES",
+  "matchedConditions": [
+    "fixture construction matched"
+  ],
+  "failedConditions": [],
+  "exceptionStatus": "UNRESOLVED",
+  "reviewStatus": "NEEDS_REVIEW",
+  "resultHash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+}
