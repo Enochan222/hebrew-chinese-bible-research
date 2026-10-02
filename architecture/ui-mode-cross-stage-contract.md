@@ -15,7 +15,7 @@ This contract must be read with:
 
 - `architecture/research-pro-scholarly-intelligence.md`
 - `architecture/product-platform-and-publication-model.md`
-- `architecture/database-api-cross-stage-contract-v1.1-candidate.md`
+- `architecture/database-api-cross-stage-contract-v1.1.md`
 - `contracts/v1.1/vocabulary.json`
 
 ---
