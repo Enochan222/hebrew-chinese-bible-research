@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/release-event.schema.json",
+  "title": "ResearchReleaseEvent v1.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "eventId",
+    "researchReleaseId",
+    "eventType",
+    "effectiveAt"
+  ],
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "researchReleaseId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "eventType": {
+      "enum": [
+        "PUBLISHED",
+        "SUPERSEDED",
+        "REVOKED",
+        "REACTIVATED"
+      ]
+    },
+    "effectiveAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "changedBy": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    }
+  }
+}
