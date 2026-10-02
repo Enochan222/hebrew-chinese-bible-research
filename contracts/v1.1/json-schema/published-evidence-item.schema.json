@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/published-evidence-item.schema.json",
+  "title": "PublishedEvidenceItem v1.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "publishedEvidenceItemId",
+    "researchReleaseId",
+    "publishedEvidencePacketId",
+    "researchObjectId",
+    "evidenceClass"
+  ],
+  "properties": {
+    "publishedEvidenceItemId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "researchReleaseId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "publishedEvidencePacketId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "researchObjectId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "researchObjectVersion": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "evidenceContentHash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-fA-F]{64}$"
+    },
+    "evidenceClass": {
+      "enum": [
+        "PRIMARY_TEXT",
+        "CORPUS_ANNOTATION",
+        "CORPUS_OBSERVATION",
+        "SCHOLARLY_SOURCE_TEXT",
+        "SCHOLARLY_CLAIM_REPRESENTATION",
+        "TRANSLATION_WITNESS",
+        "DOCUMENTED_TRANSLATOR_NOTE",
+        "USER_HYPOTHESIS",
+        "SYSTEM_INFERENCE",
+        "AI_SYNTHESIS",
+        "UNKNOWN"
+      ]
+    },
+    "citationLocator": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": true
+    },
+    "permittedExcerpt": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "rightsDecisionSnapshotId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    }
+  }
+}
