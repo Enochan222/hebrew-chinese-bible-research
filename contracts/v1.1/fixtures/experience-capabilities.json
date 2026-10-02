@@ -1,0 +1,16 @@
+{
+  "researchReleaseId": "11111111-1111-4111-8111-111111111111",
+  "experienceModesAllowed": [
+    "STUDY",
+    "RESEARCH"
+  ],
+  "featureDecisions": {
+    "PASSAGE_STUDY": "ALLOW",
+    "SCHOLARLY_DEBATE_GRAPH": "ALLOW",
+    "LIVE_LITERATURE_DISCOVERY": "DENY"
+  },
+  "reasonCodes": {
+    "LIVE_LITERATURE_DISCOVERY": "FEATURE_NOT_ENTITLED"
+  },
+  "validUntil": null
+}
