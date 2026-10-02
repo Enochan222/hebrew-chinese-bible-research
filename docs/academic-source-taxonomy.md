@@ -29,62 +29,72 @@ Accordingly, the system must route questions by scholarly function.
 
 ## 2. Library-level assessment
 
-### Drive Group A: broad biblical studies and commentary library
+### Consolidated master Drive library
 
-This Drive contains a mixed research library. It includes:
+The current primary private source library is the reorganized consolidated Drive folder.
 
-- major commentaries, including NICOT, Anchor Bible / Anchor Yale Bible, New Cambridge Bible Commentary, WBC and other series;
-- Old Testament theology;
-- introductions to the Hebrew Bible;
-- historical and literary studies;
-- ancient Israel background studies;
-- Chinese-language biblical studies;
-- substantial New Testament and Christian theology material that is outside the primary scope of Hebrew translation research.
+It now contains five major evidence areas:
 
-Default role in this project:
+1. Hebrew language
+2. Lexica and concordances
+3. Texts and textual criticism
+4. Commentaries and interpretation
+5. Background and reference
 
-- passage-specific exegesis;
-- historical, literary and theological context;
-- secondary scholarly interpretation.
+Substantive holdings now include:
 
-Default exclusion:
-
-- NT theology, general Christian theology and unrelated biblical studies should not enter Hebrew translation retrieval unless the research question explicitly requires them.
-
-This Drive should therefore not be indexed as one generic "commentary" pool.
-
-### Drive Group B: Hebrew language and Hebrew Bible research library
-
-This is the main specialist library for the project.
-
-It contains distinct collections for:
-
-- reference grammars;
+- major reference grammars;
 - pedagogical grammars;
-- morphology;
-- Hebrew language history;
-- textual criticism;
-- BHS;
-- BHQ;
-- Dead Sea Scrolls;
-- lexica;
-- concordances;
+- diachronic Hebrew;
+- BDB / DCH / HALOT holdings;
+- theological lexica;
+- Strong's and Hatch-Redpath concordances;
+- BHS / Masorah support;
+- BHQ Ruth materials;
+- Tov / Brotzman-Tully / Wegner / LXX methodology;
+- DSS/Judaean Desert sources;
+- Genesis 1-11 commentaries and studies;
 - exegesis methodology;
-- rhetorical analysis;
-- historical criticism;
-- archaeology;
-- book-specific work, especially Ruth and Psalms;
-- course and user notes.
+- rhetoric;
+- archaeology / ANE background;
+- Anchor Bible Dictionary.
 
-This Drive should provide most of the scholarly evidence architecture for the application.
+This consolidated folder should now be treated as the primary **private acquisition library** for the first Research Compiler.
 
-### Drive Group C: consolidated grammar / lexicon shelf
+It must not be treated as:
 
-This Drive now contains a concentrated grammar and lexicon collection, including multiple major reference grammars, pedagogical grammars, BDB, DCH, HALOT material, TLOT, TWOT, TDOT, Klein and related resources.
+- the production database;
+- the complete universe of scholarship;
+- evidence of redistribution/indexing/model-context rights;
+- one undifferentiated RAG namespace.
 
-It remains incomplete as a master research library: textual criticism, BHS/BHQ, DSS, diachronic Hebrew, commentaries, exegesis method, rhetoric, Chinese Bible translation studies and current article-level specialist research remain outside or underrepresented. See `docs/master-academic-source-inventory-and-gaps.md`.
+The current inventory is maintained in:
 
-Several titles duplicate books in Drive Group B. Duplicate files must never be treated as independent corroborating evidence.
+- `docs/master-academic-source-inventory-and-gaps.md`
+
+### Older Drive libraries
+
+The older broad biblical-studies and Hebrew-specialist Drives remain useful for provenance, duplicate/edition comparison, course/user notes and material not yet deliberately moved into the consolidated library.
+
+They should no longer define the primary folder taxonomy.
+
+If the same work exists in both an older Drive and the consolidated master library, that is one scholarly work/edition lineage unless bibliographic comparison proves otherwise.
+
+### Current major collection gaps
+
+The consolidated library is now strong in traditional/core Hebrew Bible research tools.
+
+The largest remaining collection gaps are:
+
+- Chinese Bible translation history and documentation;
+- target-language Chinese biblical style/linguistics;
+- Hebrew-to-Chinese translation studies;
+- recent specialist articles/chapters/dissertations;
+- whole-Bible commentary coverage;
+- whole-Bible BHQ coverage;
+- machine-readable LXX corpus/annotation data.
+
+These gaps must be represented as coverage metadata. The system must never equate "not in the current library" with "not present in scholarship."
 
 ## 3. Category A: major reference grammar and syntax sources
 
