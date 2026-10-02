@@ -6,7 +6,7 @@ This document adds a scholarly-intelligence layer to the v1.1 product architectu
 
 It must be read with:
 
-- `architecture/database-api-cross-stage-contract-v1.1-candidate.md`
+- `architecture/database-api-cross-stage-contract-v1.1.md`
 - `architecture/product-platform-and-publication-model.md`
 - `architecture/ui-mode-cross-stage-contract.md`
 - `contracts/v1.1/vocabulary.json`
