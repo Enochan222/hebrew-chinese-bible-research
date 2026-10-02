@@ -1,0 +1,406 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/corpus-query-normalized.schema.json",
+  "title": "Normalized CorpusQuery v1.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "researchReleaseId",
+    "textContext",
+    "analysisContext",
+    "nodes",
+    "expression"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.1"
+    },
+    "researchReleaseId": {
+      "$ref": "#/$defs/uuid"
+    },
+    "textContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "corpusReleaseId",
+        "digitalExpressionId"
+      ],
+      "properties": {
+        "corpusReleaseId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "digitalExpressionId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "textStreamId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "normalizationProfileId": {
+          "$ref": "#/$defs/uuid"
+        }
+      }
+    },
+    "analysisContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "layers"
+      ],
+      "properties": {
+        "layers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "layerKind",
+              "annotationLayerId"
+            ],
+            "properties": {
+              "layerKind": {
+                "enum": [
+                  "ORTHOGRAPHIC_SEGMENTATION",
+                  "MORPHEME_SEGMENTATION",
+                  "MORPHOLOGY",
+                  "PHRASE_STRUCTURE",
+                  "CLAUSE_STRUCTURE",
+                  "DEPENDENCY",
+                  "SEMANTIC_ROLE",
+                  "DISCOURSE",
+                  "WORD_SENSE"
+                ]
+              },
+              "annotationLayerId": {
+                "$ref": "#/$defs/uuid"
+              }
+            }
+          }
+        }
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "nodeType"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$"
+          },
+          "nodeType": {
+            "enum": [
+              "WORD",
+              "MORPHEME",
+              "PHRASE",
+              "CLAUSE",
+              "SENTENCE",
+              "DISCOURSE_UNIT",
+              "SEMANTIC_ROLE_UNIT"
+            ]
+          },
+          "bind": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      }
+    },
+    "expression": {
+      "$ref": "#/$defs/expression"
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "groupBy": {
+          "enum": [
+            "MATCH",
+            "CONSTRUCTION",
+            "CLAUSE",
+            "VERSE",
+            "REFERENCE_SPAN"
+          ]
+        },
+        "includeMatchExplanation": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    }
+  },
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "scalar": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        }
+      ]
+    },
+    "value": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/scalar"
+        },
+        {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/scalar"
+          }
+        }
+      ]
+    },
+    "nodeConstraint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "predicateType",
+        "nodeId",
+        "field",
+        "operator",
+        "value"
+      ],
+      "properties": {
+        "predicateType": {
+          "const": "NODE_CONSTRAINT"
+        },
+        "nodeId": {
+          "type": "string"
+        },
+        "field": {
+          "enum": [
+            "LEXEME_ID",
+            "LEMMA_TEXT",
+            "SURFACE",
+            "POS",
+            "FEATURE",
+            "SEMANTIC_SET_VERSION_ID",
+            "REFERENCE_SPAN_ID"
+          ]
+        },
+        "featureKey": {
+          "type": "string",
+          "minLength": 1
+        },
+        "operator": {
+          "enum": [
+            "EQ",
+            "NEQ",
+            "IN",
+            "NOT_IN",
+            "GT",
+            "GTE",
+            "LT",
+            "LTE"
+          ]
+        },
+        "value": {
+          "$ref": "#/$defs/value"
+        },
+        "annotationLayerId": {
+          "$ref": "#/$defs/uuid"
+        }
+      }
+    },
+    "relation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "predicateType",
+        "relationType",
+        "from",
+        "to"
+      ],
+      "properties": {
+        "predicateType": {
+          "const": "RELATION"
+        },
+        "relationType": {
+          "enum": [
+            "IMMEDIATELY_PRECEDES",
+            "PRECEDES",
+            "FOLLOWS",
+            "WITHIN_N_SEGMENTS",
+            "SAME_REFERENCE_SPAN",
+            "SAME_PHRASE",
+            "SAME_CLAUSE",
+            "SAME_SENTENCE",
+            "ATTACHED_TO",
+            "GOVERNS",
+            "DEPENDENT_OF",
+            "SEMANTIC_ROLE",
+            "MORPHEME_OF",
+            "HAS_MORPHEME",
+            "PREFIX_MORPHEME_OF",
+            "SUFFIX_MORPHEME_OF"
+          ]
+        },
+        "from": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        },
+        "annotationLayerId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "maxDistance": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "allAny": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operator",
+        "children"
+      ],
+      "properties": {
+        "operator": {
+          "enum": [
+            "ALL_OF",
+            "ANY_OF"
+          ]
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/expression"
+          }
+        }
+      }
+    },
+    "not": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operator",
+        "child"
+      ],
+      "properties": {
+        "operator": {
+          "const": "NOT"
+        },
+        "child": {
+          "$ref": "#/$defs/expression"
+        }
+      }
+    },
+    "exists": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operator",
+        "bind",
+        "child"
+      ],
+      "properties": {
+        "operator": {
+          "enum": [
+            "EXISTS",
+            "NOT_EXISTS"
+          ]
+        },
+        "bind": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "child": {
+          "$ref": "#/$defs/expression"
+        }
+      }
+    },
+    "count": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operator",
+        "count",
+        "bind",
+        "child"
+      ],
+      "properties": {
+        "operator": {
+          "enum": [
+            "MIN_COUNT",
+            "MAX_COUNT",
+            "EXACT_COUNT"
+          ]
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "bind": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "child": {
+          "$ref": "#/$defs/expression"
+        }
+      }
+    },
+    "expression": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/nodeConstraint"
+        },
+        {
+          "$ref": "#/$defs/relation"
+        },
+        {
+          "$ref": "#/$defs/allAny"
+        },
+        {
+          "$ref": "#/$defs/not"
+        },
+        {
+          "$ref": "#/$defs/exists"
+        },
+        {
+          "$ref": "#/$defs/count"
+        }
+      ]
+    }
+  }
+}
