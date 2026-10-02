@@ -21,7 +21,7 @@ These continue to exist after launch. They are not one-time stages.
 
 Before production schema implementation begins, the active candidate contract must pass its freeze preconditions:
 
-- `architecture/database-api-cross-stage-contract-v1.1-candidate.md`
+- `architecture/database-api-cross-stage-contract-v1.1.md`
 
 Canonical vocabularies:
 
