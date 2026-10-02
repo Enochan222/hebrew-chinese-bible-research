@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "1.0",
+  "profiles": {
+    "CORE_V1_1": {
+      "status": "ACTIVE_CANDIDATE",
+      "architecture": "architecture/database-api-cross-stage-contract-v1.1.md",
+      "openapi": "contracts/v1.1/openapi.yaml",
+      "freezeGateProfile": "CORE_FREEZE_V1_1",
+      "databaseSpikeGateProfile": "CORE_SPIKE_V1_1"
+    },
+    "RESEARCH_PRO_EXTENSION_V1_1": {
+      "status": "ACTIVE_CANDIDATE_EXTENSION",
+      "architecture": "architecture/research-pro-scholarly-intelligence.md",
+      "openapi": "contracts/v1.1/research-pro-openapi.yaml",
+      "freezeGateProfile": "RESEARCH_PRO_EXTENSION_V1_1",
+      "sharesResearchReleaseWith": "CORE_V1_1"
+    },
+    "PUBLIC_AI_BYOK_V1_1": {
+      "status": "OPTIONAL_SHIPPING_PROFILE",
+      "architecture": "architecture/byok-credential-handling.md",
+      "freezeGateProfile": "PUBLIC_AI_SHIP_V1_1",
+      "authMode": "BYOK_ONLY"
+    }
+  }
+}
