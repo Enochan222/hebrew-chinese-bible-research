@@ -84,7 +84,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: './json-schema/research-issue-version.schema.json'
+                type: object
+                additionalProperties: false
+                required: [researchReleaseId, item]
+                properties:
+                  researchReleaseId: {type: string, format: uuid}
+                  item:
+                    $ref: './json-schema/research-issue-version.schema.json'
   /api/v1/research-issues/{researchIssueId}/positions:
     get:
       operationId: listResearchPositions
@@ -117,7 +123,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: './json-schema/literature-snapshot.schema.json'
+                type: object
+                additionalProperties: false
+                required: [researchReleaseId, item]
+                properties:
+                  researchReleaseId: {type: string, format: uuid}
+                  item:
+                    $ref: './json-schema/literature-snapshot.schema.json'
   /api/v1/passages/{reference}/commentary:
     get:
       operationId: getPassageCommentary
