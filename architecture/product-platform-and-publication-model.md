@@ -253,9 +253,11 @@ Fields:
 - `component_research_object_id uuid FK -> research_objects`
 - `component_version text`
 - `content_hash text`
-- `component_order integer nullable`
+- `component_order integer NOT NULL`
 
 The publication compiler validates component-kind/subtype compatibility.
+
+Components are serialized in ascending unique `component_order`; duplicate or missing order values fail publication.
 
 ### 5.4 `research_release_events`
 
@@ -862,3 +864,12 @@ The product must not ship a shared provider secret or platform fallback credenti
 Gemini is the first supported provider.
 
 This requirement does not apply to private internal research-compilation credentials used by the product owner in the Authoring / Research Plane; those are separate private infrastructure and must never be embedded in the public application or exposed to public users.
+
+
+## 24. Research Pro extension profile
+
+Research Pro remains part of the same product and ResearchRelease.
+
+Its engineering freeze state is tracked separately in `contracts/v1.1/profiles.json` and `contracts/v1.1/freeze-checklist.md` so Core Database Spike work is not blocked by later scholarly-intelligence surfaces.
+
+This separation must never create a second ontology, database, commentary truth state, or ResearchRelease.
