@@ -46,7 +46,7 @@
       {
         "predicateType": "NODE_CONSTRAINT",
         "nodeId": "V",
-        "field": "LEXEME",
+        "field": "LEMMA_TEXT",
         "operator": "EQ",
         "value": "ראה",
         "annotationLayerId": "77777777-7777-4777-8777-777777777777"
@@ -54,7 +54,7 @@
       {
         "predicateType": "NODE_CONSTRAINT",
         "nodeId": "P",
-        "field": "LEXEME",
+        "field": "LEMMA_TEXT",
         "operator": "EQ",
         "value": "ל",
         "annotationLayerId": "66666666-6666-4666-8666-666666666666"
@@ -62,7 +62,7 @@
       {
         "predicateType": "NODE_CONSTRAINT",
         "nodeId": "N",
-        "field": "SEMANTIC_SET_VERSION",
+        "field": "SEMANTIC_SET_VERSION_ID",
         "operator": "EQ",
         "value": "99999999-9999-4999-8999-999999999999"
       },
