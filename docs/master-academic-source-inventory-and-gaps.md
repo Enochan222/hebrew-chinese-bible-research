@@ -1,418 +1,595 @@
 # Master Academic Source Inventory and Gap Audit
 
-Status: **ACTIVE SOURCE-INVENTORY DOCUMENT**
+Status: **ACTIVE SOURCE-INVENTORY SNAPSHOT**
 
-Purpose: define what the consolidated research library currently contains, what is duplicated, what remains outside the consolidated folder, and how the source library should be regrouped before production ingestion.
+Audit date: 2026-10-03
 
-This document intentionally records bibliographic titles and source roles, not private Google Drive URLs.
+Purpose: record the current structure and scholarly coverage of the consolidated Google Drive source library used for Hebrew-Chinese Bible Research.
 
-## 1. Main finding
+Important:
 
-The new consolidated folder is useful, but it is **not yet a complete master research library**.
+- Google Drive is the acquisition/source library.
+- Folder placement is not the production ontology.
+- Production source identity remains Work -> Edition -> SourceAsset.
+- Rights and edition verification are independent of whether a file is present.
+- This inventory records presence and research role, not permission to redistribute, embed, quote or send to an external model.
 
-At present it is heavily concentrated in:
+## 1. Current overall judgement
 
-- Biblical Hebrew grammar;
-- syntax;
-- introductory grammars;
-- general lexica;
-- theological lexica;
-- etymological reference.
+The consolidated Drive library has changed materially since the previous audit.
 
-It currently omits several evidence lanes that the application architecture already requires:
+It is now a genuine multi-domain Hebrew Bible research library rather than mainly a grammar/lexicon shelf.
 
-- textual criticism;
-- BHS / BHQ apparatus and Masorah;
-- Dead Sea Scrolls / Judean Desert evidence;
-- Hebrew language history / diachrony;
-- passage-specific commentaries;
-- exegesis methodology;
-- rhetoric / literary method;
-- concordances and LXX finding aids;
-- archaeology / background;
-- Chinese Bible translation studies and translator documentation;
-- current journal articles, book chapters, dissertations and dataset publications.
-
-Therefore the consolidated folder should become one **master library root with evidence-lane subfolders**, not one flat folder.
-
-## 2. Recommended master folder structure
+Current top-level structure:
 
 ```text
-Hebrew-Chinese-Bible-Research-Library/
-  00_INBOX_UNCLASSIFIED/
-  01_PRIMARY_TEXT_AND_EDITIONS/
-    MT_WLC_OSHB/
-    BHS/
-    BHQ/
-    ANCIENT_VERSIONS_LXX/
-  02_REFERENCE_GRAMMARS/
-  03_PEDAGOGICAL_GRAMMARS/
-  04_MORPHOLOGY_PHONOLOGY/
-  05_CORPUS_LINGUISTICS_SYNTAX_DISCOURSE/
-  06_GENERAL_LEXICA/
-  07_THEOLOGICAL_LEXICA/
-  08_ETYMOLOGY_DIACHRONY/
-  09_TEXTUAL_CRITICISM_METHOD/
-  10_DSS_JUDEAN_DESERT/
-  11_COMMENTARIES/
-    GENESIS/
-    RUTH/
-    OTHER_BOOKS/
-  12_EXEGESIS_METHOD/
-  13_RHETORIC_LITERARY_METHOD/
-  14_ARCHAEOLOGY_BACKGROUND/
-  15_CONCORDANCES_FINDING_AIDS/
-  16_CHINESE_BIBLE_TRANSLATION/
-    TRANSLATION_HISTORY/
-    TRANSLATOR_PREFACES/
-    PUBLISHER_PRINCIPLES/
-    TRANSLATION_STUDIES/
-    CHINESE_LINGUISTICS_STYLE/
-  17_JOURNAL_ARTICLES_CHAPTERS_DISSERTATIONS/
-  18_USER_COURSE_NOTES/
-  19_METADATA_RIGHTS_AND_BIBLIOGRAPHY/
-  99_DUPLICATES_SUPERSEDED_FILES/
+01_HEBREW_LANGUAGE
+02_LEXICA_AND_CONCORDANCES
+03_TEXTS_AND_TEXTUAL_CRITICISM
+04_COMMENTARIES_AND_INTERPRETATION
+05_BACKGROUND_AND_REFERENCE
 ```
 
-The folder layout is a human source-library convenience only. Production retrieval namespaces remain database metadata and must not be inferred only from folder path.
+The library is now strong enough to support development of the private Academic Knowledge Compiler.
 
-## 3. Sources currently present in the new consolidated folder
+The major remaining weaknesses are no longer basic Hebrew grammar/textual criticism.
 
-### 3.1 Major / reference grammar and syntax
+They are primarily:
 
-Present:
+1. Chinese Bible translation history, translator/publisher documentation and target-language studies;
+2. current specialist journal/article-level Biblical Hebrew research;
+3. whole-Bible passage-commentary coverage;
+4. whole-Bible BHQ / textual-apparatus coverage;
+5. a machine-readable LXX research corpus rather than only LXX reference literature/concordance;
+6. explicit rights and bibliographic metadata;
+7. systematic source edition verification.
 
-- Bruce K. Waltke and M. O'Connor, *An Introduction to Biblical Hebrew Syntax* — multiple copies;
-- Paul Joüon and Takamitsu Muraoka, *A Grammar of Biblical Hebrew* — multiple copies;
+## 2. Current Drive hierarchy
+
+### 2.1 01_HEBREW_LANGUAGE
+
+Subfolders:
+
+- REFERENCE_GRAMMARS
+- LEARNING_GRAMMARS
+- SYNTAX_MORPHOLOGY_AND_LANGUAGE_HISTORY
+
+### 2.2 02_LEXICA_AND_CONCORDANCES
+
+Subfolders:
+
+- GENERAL_LEXICA
+- THEOLOGICAL_LEXICA
+- CONCORDANCES
+
+### 2.3 03_TEXTS_AND_TEXTUAL_CRITICISM
+
+Subfolders:
+
+- BIBLE_EDITIONS_AND_MASORAH
+- DSS_AND_JUDAEAN_DESERT
+- TEXTUAL_CRITICISM_AND_LXX
+
+### 2.4 04_COMMENTARIES_AND_INTERPRETATION
+
+Subfolders:
+
+- GENESIS_COMMENTARIES
+- EXEGESIS_METHOD
+- RHETORIC_AND_LITERARY_ANALYSIS
+
+### 2.5 05_BACKGROUND_AND_REFERENCE
+
+Subfolders:
+
+- ARCHAEOLOGY_AND_ANCIENT_NEAR_EAST
+- BIBLE_DICTIONARIES_AND_ENCYCLOPEDIAS
+- JEWISH_WRITINGS_AND_HISTORICAL_BACKGROUND
+
+This structure is substantially better than a single flat academic folder.
+
+## 3. Hebrew grammar and language holdings
+
+### 3.1 Reference grammars and syntax
+
+Observed:
+
+- Waltke and O'Connor, *An Introduction to Biblical Hebrew Syntax*;
+- Joüon and Muraoka, *A Grammar of Biblical Hebrew*;
 - Gesenius / Kautzsch / Cowley, *Gesenius' Hebrew Grammar*;
-- Gesenius / Davidson syntax facsimile volume;
-- van der Merwe / Naudé / Kroeze, *A Biblical Hebrew Reference Grammar* (1999 first edition);
+- Gesenius / Davidson historical grammar/syntax material;
+- van der Merwe / Naudé / Kroeze, *A Biblical Hebrew Reference Grammar* (1999 holding);
 - Andersen and Forbes, *Biblical Hebrew Grammar Visualized*;
-- Arnold and Choi, *A Guide to Biblical Hebrew Syntax* (2003);
-- Seow, *A Grammar for Biblical Hebrew* — multiple copies;
-- Putnam, *A New Grammar of Biblical Hebrew*;
-- Barrick and Busenitz, *A Grammar for Biblical Hebrew*.
+- Arnold and Choi, *A Guide to Biblical Hebrew Syntax* (2003 holding);
+- John H. Sailhamer, *A Grammar of Biblical Hebrew*.
 
 Assessment:
 
-Strong base, but editions must remain explicit. The folder contains older editions for several works and must not label them simply as the current form of the work.
+Strong reference/syntax shelf.
 
-### 3.2 Introductory / pedagogical grammar
+Architecture consequence:
 
-Present:
+The compiler can test source-native grammatical classifications across several major frameworks rather than relying on one grammar.
 
-- Pratico / Van Pelt, basic Biblical Hebrew textbook;
-- Kutz / Josberger, *Learning Biblical Hebrew Reading for Comprehension*;
-- Ellis, *Learning to Read Biblical Hebrew*;
-- Cherryholmes, *The Seven Binyanim*;
-- Seow and other pedagogical grammars also overlap this category.
+Caution:
+
+Edition currency must be separately recorded. Presence of an older edition is not evidence that it is the latest form of the work.
+
+### 3.2 Learning / pedagogical grammars
+
+Observed:
+
+- Pratico / Van Pelt;
+- Kutz / Josberger;
+- Seow;
+- Putnam;
+- Ellis;
+- Barrick / Busenitz;
+- *Invitation to Biblical Hebrew*.
 
 Assessment:
 
-Useful for teaching and morphology explanation. These should not receive the same retrieval role as major reference grammars for disputed syntax.
+Strong pedagogical layer.
 
-### 3.3 General lexical resources
+Use:
 
-Present:
+- explanation;
+- morphology teaching;
+- introductory terminology;
+- cross-check of basic parsing conventions.
 
-- HALOT, currently represented by a volume/file rather than a clearly verified complete set;
+Do not give these sources the same function as advanced reference grammars for disputed syntax merely because they are easier to retrieve.
+
+### 3.3 Morphology and language history
+
+Observed:
+
+- Eric D. Reymond, *Intermediate Biblical Hebrew Grammar*;
+- E. Y. Kutscher, *A History of the Hebrew Language*;
+- Ángel Sáenz-Badillos, *A History of the Hebrew Language*;
+- Dong-Hyuk Kim, *Early Biblical Hebrew, Late Biblical Hebrew, and Linguistic Variability*;
+- Katz, *Recycled Morphemes and Grammaticalization*.
+
+Assessment:
+
+The previous major diachronic-language gap is substantially reduced.
+
+Remaining weakness:
+
+The collection still has relatively limited recent specialist work on:
+
+- discourse and information structure;
+- valency;
+- word order;
+- tense/aspect/modality;
+- pragmatics;
+- particles and individual prepositions;
+- contemporary corpus linguistics;
+- construction grammar.
+
+These are better addressed by specialist monographs and current articles than by adding more elementary grammars.
+
+## 4. Lexica and concordances
+
+### 4.1 General lexica
+
+Observed:
+
 - BDB;
-- Dictionary of Classical Hebrew volumes 1–8;
-- Klein, *Comprehensive Etymological Dictionary of the Hebrew Language*.
+- Dictionary of Classical Hebrew volumes 1-8;
+- HALOT I;
+- HALOT CD-ROM edition holding;
+- Hurvitz et al., *A Concise Lexicon of Late Biblical Hebrew*;
+- Klein, *Comprehensive Etymological Dictionary of the Hebrew Language*;
+- concise Hebrew-English / English-Hebrew lexicon.
 
 Assessment:
 
-DCH appears substantially complete in the consolidated folder. HALOT completeness requires verification before the folder can be called a complete general-lexicon collection.
+Strong lexical shelf.
 
-### 3.4 Theological / semantic word-study works
+DCH appears to have volumes 1-8 represented.
 
-Present:
+HALOT presence is materially improved compared with the previous audit, but the exact bibliographic identity and usable content of the CD-ROM edition file must be verified before calling the local HALOT holding complete or machine-usable.
 
+### 4.2 Theological lexica
+
+Observed:
+
+- TDOT volumes 1-15;
 - TLOT;
-- TWOT;
-- TDOT volumes 1–15 with at least some numbering gaps requiring verification.
+- TWOT.
 
 Assessment:
 
-Keep in a separate namespace from HALOT / DCH / BDB. Theological lexica must not be allowed to dominate basic clause-level sense decisions.
+Substantial theological/semantic word-study layer.
 
-### 3.5 Encyclopaedic reference
+Retrieval rule remains:
 
-Present:
+General lexical decisions should route first to corpus evidence and general lexica.
+
+TDOT/TLOT/TWOT are secondary for basic clause-level lexical sense unless the research question is explicitly semantic-theological.
+
+### 4.3 Concordances
+
+Observed:
+
+- Strong's Exhaustive Concordance;
+- Hatch and Redpath LXX Concordance volumes 1-2.
+
+Assessment:
+
+The previous concordance gap is closed.
+
+Strong's remains a legacy locator/finding aid, not a primary authority for difficult semantic decisions.
+
+## 5. Texts, Masorah and textual criticism
+
+### 5.1 Bible editions and Masorah
+
+Observed:
+
+- full BHS PDF holding;
+- BHS Ruth;
+- BHS Reader Edition Ruth and supporting reader material;
+- BHS Prolegomena;
+- Wonneberger, *Understanding BHS*;
+- Scott and Rüger guide;
+- Weil, *Massorah Gedolah*;
+- BHQ Manual;
+- BHQ General Introduction;
+- BHQ Ruth text;
+- BHQ Ruth critical apparatus/commentary;
+- BHQ Ruth introduction;
+- BHQ Masorah Parva notes;
+- BHQ Masorah Magna notes.
+
+Assessment:
+
+The previous BHS/BHQ architecture gap is no longer a source-library gap.
+
+Important limitation:
+
+BHQ passage-level coverage in this consolidated folder is still primarily Ruth-specific.
+
+The system must not describe the local BHQ library as whole-Bible BHQ coverage.
+
+### 5.2 Textual criticism and LXX studies
+
+Observed:
+
+- Emanuel Tov, *Textual Criticism of the Hebrew Bible* holdings;
+- Tov material covering Qumran / Septuagint;
+- Brotzman / Tully;
+- Wegner;
+- Fernández Marcos, *The Septuagint in Context*;
+- G. D. Martin, *Multiple Originals*.
+
+Assessment:
+
+Strong methodology shelf for textual criticism.
+
+Remaining distinction:
+
+Textual-criticism methodology and LXX studies are not themselves a machine-readable LXX textual corpus.
+
+For production corpus research, the project still needs an explicitly licensed/versioned LXX digital expression and, where required, morphology/alignment resources.
+
+### 5.3 DSS / Judaean Desert
+
+Observed:
+
+- García Martínez / Tigchelaar, *Dead Sea Scrolls Study Edition* volumes;
+- Tov, revised lists;
+- Ulrich;
+- Nebe / Qumranica material.
+
+Assessment:
+
+The previous DSS gap is substantially reduced.
+
+These sources remain a separate research domain from the Biblical Hebrew corpus and should enter retrieval only when manuscript/Second Temple context is relevant.
+
+## 6. Commentaries and interpretation
+
+### 6.1 Genesis commentaries and studies
+
+Observed:
+
+- Hendel 2024, *Genesis 1-11*, Anchor Yale Bible;
+- Westermann, Genesis 1-11;
+- Speiser, Genesis, Anchor Bible;
+- von Rad;
+- Gunkel;
+- van Seters;
+- Walton, *Genesis 1 as Ancient Cosmology*;
+- Smith, *The Priestly Vision of Genesis 1*.
+
+Assessment:
+
+The Genesis 1-11 / creation-material shelf is now strong and methodologically diverse.
+
+This is particularly useful if Genesis is an early product coverage target.
+
+### 6.2 Coverage limitation
+
+The current consolidated commentary folder is not yet a whole-Hebrew-Bible commentary library.
+
+It is concentrated in Genesis.
+
+Therefore:
+
+- passage-first commentary retrieval is ready to prototype for Genesis;
+- the product must expose commentary coverage metadata;
+- absence of a local commentary result must never be described as absence of scholarship.
+
+If the public product aims for whole-Bible passage analysis, commentary acquisition/indexing should expand book by book rather than by indiscriminate bulk import.
+
+### 6.3 Exegesis method
+
+Observed:
+
+- Steck;
+- Stuart;
+- Chisholm;
+- Habel;
+- Hendel, *Reading Genesis: Ten Methods*.
+
+Assessment:
+
+Strong enough for methodology routing.
+
+These works belong in METHOD / EXEGESIS namespaces, not grammar-rule evidence.
+
+### 6.4 Rhetorical/literary analysis
+
+Observed:
+
+- Roland Meynet, *Rhetorical Analysis*.
+
+Assessment:
+
+Useful specialist method source.
+
+The category remains comparatively thin if literary/rhetorical analysis becomes a major product feature.
+
+## 7. Background and reference
+
+### 7.1 Archaeology / ANE
+
+Observed:
+
+- NEAEHL volumes 1, 2, 4, 5 plus index/reference material;
+- Genesis/Egypt background material.
+
+Assessment:
+
+Useful contextual layer.
+
+Do not route ordinary morphology/syntax questions here.
+
+### 7.2 Bible dictionaries / encyclopedias
+
+Observed:
 
 - Anchor Bible Dictionary.
 
 Assessment:
 
-Useful contextual reference, not a primary Hebrew lexicon.
+High-value broad reference source.
 
-## 4. Duplicate / edition issues already visible in the consolidated folder
+Not a substitute for Hebrew lexica.
 
-Observed duplicate or near-duplicate holdings include:
+### 7.3 Jewish writings / historical background
 
-- Waltke–O'Connor: at least two files;
-- Joüon–Muraoka: at least two files;
-- Seow: at least two files;
-- potentially multiple historical Gesenius-related files.
+Observed:
 
-Required handling:
+- van Kooten;
+- Musaph-Andriesse.
+
+Assessment:
+
+Useful but currently selective.
+
+This should remain a context-specific evidence lane rather than an always-on retrieval pool.
+
+## 8. Largest remaining source gap: Chinese Bible translation research
+
+No dedicated top-level Chinese translation scholarship/documentation folder is currently visible in the consolidated library.
+
+For the stated product purpose, this is now the most important major gap.
+
+Recommended future folder:
 
 ```text
-Work
-  -> Edition
-      -> FileAsset
-          -> ContentHash
+06_CHINESE_BIBLE_TRANSLATION
+  TRANSLATION_HISTORY
+  TRANSLATOR_AND_REVISER_PREFACES
+  BIBLE_SOCIETY_AND_PUBLISHER_PRINCIPLES
+  REVISION_DOCUMENTATION
+  TRANSLATOR_NOTES
+  HEBREW_TO_CHINESE_TRANSLATION_STUDIES
+  CHINESE_BIBLICAL_STYLE_AND_LINGUISTICS
+  BIBLE_TRANSLATION_THEORY
 ```
 
-Do not delete older editions merely because a newer one exists.
+Why this matters:
 
-Move true duplicate file assets to a duplicate/superseded holding area only after cryptographic hashing and edition comparison.
+A Hebrew grammar/lexicon system can explain what the source text permits.
 
-## 5. High-priority evidence lanes missing from the consolidated folder
+It cannot by itself establish:
 
-The following materials are present in the older Drive libraries but are absent from the new consolidated folder and should be copied or represented in the master structure if they remain relevant and legally held.
+- target-language Chinese naturalness;
+- documented translation philosophy;
+- historical revision rationale;
+- Chinese biblical register;
+- why one Chinese version systematically chooses a particular rendering.
 
-### 5.1 Textual criticism methodology
+Translation witness behaviour and translator intent must remain separate evidence classes.
 
-Missing examples:
+## 9. Current-research gap
 
-- Emanuel Tov, *Textual Criticism of the Hebrew Bible* and related textual-criticism material;
-- Brotzman and Tully, *Old Testament Textual Criticism: A Practical Introduction*;
-- Paul D. Wegner, *A Student's Guide to Textual Criticism of the Bible*;
-- Natalio Fernández Marcos, *The Septuagint in Context*;
-- G. D. Martin, *Multiple Originals*.
+The library remains predominantly book/reference based.
 
-This is a major omission because translation analysis may depend on whether the Hebrew base reading is itself textually secure.
+Create a future acquisition lane for:
 
-### 5.2 BHS / Masorah resources
+```text
+07_CURRENT_RESEARCH
+  JOURNAL_ARTICLES
+  BOOK_CHAPTERS
+  DISSERTATIONS_THESES
+  CONFERENCE_PAPERS
+  DATASET_PUBLICATIONS
+  DIGITAL_SCHOLARLY_RESOURCES
+```
 
-Missing examples:
+Priority topics:
 
-- BHS Ruth;
-- sample BHS passage extracts;
-- BHS Prolegomena;
-- Wonneberger, *Understanding BHS*;
-- Scott / Rüger, simplified BHS guide;
-- Kelley / Crawford, *The Masorah of Biblia Hebraica Stuttgartensia*;
-- Weil, *Massorah Gedolah*.
-
-### 5.3 BHQ
-
-Missing Ruth materials include:
-
-- BHQ Ruth text;
-- critical apparatus;
-- Ruth introduction;
-- Masorah Parva notes;
-- Masorah Magna notes;
-- general introduction;
-- BHQ manual;
-- scholarship on BHQ / critical-edition methodology.
-
-The future database must treat apparatus as structured textual-critical data, not ordinary RAG prose.
-
-### 5.4 Dead Sea Scrolls / Judean Desert
-
-Missing examples:
-
-- García Martínez / Tigchelaar, *Dead Sea Scrolls Study Edition*;
-- DJD introduction / publication material;
-- Tov DSS research;
-- Ulrich;
-- Lim / Collins;
-- related Qumran material.
-
-### 5.5 Historical / diachronic Hebrew
-
-Missing:
-
-- E. Y. Kutscher, *A History of the Hebrew Language*;
-- Ángel Sáenz-Badillos, *A History of the Hebrew Language*;
-- Dong-Hyuk Kim, *Early Biblical Hebrew, Late Biblical Hebrew, and Linguistic Variability*.
-
-Also verify whether the Hurvitz Late Biblical Hebrew lexicon is present elsewhere and add it if legally available.
-
-### 5.6 Morphology-specialist material
-
-Missing:
-
-- Gary Rendsburg, *Ancient Hebrew Morphology*.
-
-Additional modern morphology / phonology work may be desirable later.
-
-### 5.7 Exegesis methodology
-
-Missing:
-
-- Odil Hannes Steck, *Old Testament Exegesis*;
-- Douglas Stuart, *Old Testament Exegesis*;
-- Robert Chisholm, *From Exegesis to Exposition*.
-
-These belong in methodology, not grammar evidence.
-
-### 5.8 Passage-specific commentary
-
-Missing from consolidated folder:
-
-Genesis:
-- Victor P. Hamilton, Genesis 1–17, NICOT;
-- Bill T. Arnold, *Genesis*, New Cambridge Bible Commentary;
-- E. A. Speiser, *Genesis*, Anchor Bible.
-
-Ruth:
-- Jeremy Schipper, *Ruth*, Anchor Yale / Anchor Bible;
-- Robert Chisholm, Judges and Ruth commentary.
-
-Other commentary collections exist in the older Drive library and should be admitted passage-first according to relevance and rights, not copied wholesale merely because they exist.
-
-### 5.9 Concordances / finding aids
-
-Missing:
-
-- Strong's concordance as a legacy finding aid;
-- Hatch and Redpath, Septuagint concordance.
-
-Strong's must remain low-authority for difficult translation decisions.
-
-### 5.10 Rhetorical / literary method
-
-Missing:
-
-- Roland Meynet, *Rhetorical Analysis*;
-- course materials should remain separated from published scholarship.
-
-### 5.11 Archaeology / historical background
-
-The older library contains archaeology/background material, including NEAEHL-related holdings.
-
-Only material relevant to a research question should be indexed into the academic system.
-
-### 5.12 Additional grammar / lexical holdings not yet consolidated
-
-A direct comparison with the older specialist folders shows additional omissions inside the same broad categories.
-
-Grammar / morphology resources present in the older library but not currently visible in the consolidated folder include:
-
-- John H. Sailhamer, *A Grammar of Biblical Hebrew*;
-- Eric D. Reymond, *Intermediate Biblical Hebrew Grammar: A Student's Guide to Phonology and Morphology*;
-- *Invitation to Biblical Hebrew: A Beginning Grammar*.
-
-Lexical / diachronic resources present in the older library but not currently visible in the consolidated folder include:
-
-- HALOT CD-ROM edition / digital resource;
-- Avi Hurvitz, Leeor Gottlieb and Aaron Hornkohl/Mastey-associated *A Concise Lexicon of Late Biblical Hebrew* holding;
-- a concise Hebrew-English / English-Hebrew lexicon.
-
-The consolidated folder currently shows only `HALOT I.pdf`; therefore HALOT completeness must be treated as **unverified**, not complete.
-
-The consolidated TDOT sequence also requires a volume-level completeness check before it is registered as a complete set. File presence must be verified by volume identity rather than inferred from the series name.
-
-## 6. Missing from all current Drive-focused collections or insufficiently represented
-
-These are not necessarily missing files in the user's possession; they are research-domain gaps.
-
-### 6.1 Chinese Bible translation scholarship
-
-This is the largest domain gap relative to the product's title and purpose.
-
-Needed source classes:
-
-- histories of Chinese Bible translation;
-- formal translation prefaces;
-- Bible society / publisher translation principles;
-- translator notes and revision documentation;
-- studies of Chinese biblical style and syntax;
-- Hebrew-to-Chinese translation studies;
-- modern translation theory relevant to biblical translation;
-- historical Chinese Bible versions and their editorial histories.
-
-Without this lane, the system can become very strong at Hebrew source analysis while remaining comparatively weak at evaluating target-language Chinese decisions.
-
-### 6.2 Specialist Biblical Hebrew research
-
-Comparatively underrepresented:
-
-- prepositions and particles;
+- Biblical Hebrew discourse;
 - valency;
-- discourse and information structure;
+- prepositions/particles;
+- tense/aspect/modality;
 - word order;
-- tense / aspect / modality;
-- construction grammar;
-- corpus linguistics;
 - pragmatics;
-- recent specialist syntax.
+- corpus linguistics;
+- computational Biblical Hebrew;
+- Hebrew-Chinese translation studies;
+- translation revision history.
 
-Reference grammars should not be treated as the end of the scholarly literature.
+The product must distinguish:
 
-### 6.3 Current scholarly publication types
+> not in current library
 
-The academic knowledge model must support:
+from:
 
-- journal article;
-- book chapter;
-- edited-volume contribution;
-- conference paper;
-- dissertation / thesis;
-- critical review;
-- dataset publication;
-- digital scholarly resource.
+> scholarship does not exist.
 
-Bibliographic metadata should support DOI, journal, ISSN, volume, issue, pages, editors, series, publication status, correction/retraction status where relevant.
+## 10. Machine-readable corpus resources are not a Drive-book problem
 
-## 7. Recommended immediate regrouping action
+The source library should not be forced to contain every production dataset as a PDF.
 
-Do **not** place all files into one flat folder.
+Open/structured corpora such as:
 
-Use one master folder with the evidence-lane subfolders listed in section 2.
+- OSHB;
+- MACULA Hebrew;
+- BHSA / Text-Fabric where licence permits;
+- future LXX structured data;
 
-Immediate priority for consolidation:
+belong in version-pinned corpus ingestion pipelines.
 
-1. keep the current grammar and lexicon files, but add the missing Sailhamer, Reymond, relevant pedagogical grammar, HALOT digital/remaining holdings and Hurvitz diachronic lexicon only after edition/rights verification;
-2. move verified duplicates into a duplicate holding folder rather than deleting them;
-3. add Textual Criticism, BHS and BHQ;
-4. add History of Hebrew Language;
-5. add key commentaries for the passages/books the app will initially support;
-6. add Hebrew Exegesis methodology;
-7. add DSS/Judean Desert material;
-8. add concordances/LXX finding aids;
-9. create an empty dedicated Chinese Bible Translation folder now, even before sources are acquired;
-10. create a Current Research folder for articles/chapters/dissertations rather than treating the Drive bookshelf as epistemically complete.
+Drive is primarily the academic-source acquisition layer.
 
-## 8. Database principle
+The production database should ingest official/releases directly from their authoritative distribution sources where appropriate.
 
-Physical folder grouping must not determine academic authority.
+## 11. Rights and metadata gap
 
-A file can sit under a convenient Drive folder while its database metadata independently records:
+A well-organized folder does not solve copyright/licensing.
 
-- source type;
-- scholarly domain;
-- intended audience;
-- level;
-- methodology;
-- work;
-- edition;
-- publication status;
-- rights;
-- extraction quality;
-- retrieval namespace;
-- citation eligibility;
-- current/superseded status.
+The library still needs systematic metadata for each work/edition/asset:
 
-## 9. Current completeness judgement
+- canonical bibliographic identity;
+- edition statement;
+- publication year;
+- publisher;
+- ISBN / DOI / ISSN where relevant;
+- rights status;
+- permitted extraction;
+- permitted embedding;
+- permitted model context;
+- permitted display;
+- permitted quotation;
+- permitted redistribution;
+- commercial-use condition;
+- source locator;
+- file checksum;
+- extraction quality.
 
-The consolidated folder is currently:
+Presence in Drive means "available to the researcher".
 
-- **strong** for general Biblical Hebrew grammar;
-- **strong** for lexica / theological lexica;
-- **moderate** for pedagogy;
-- **weak / absent** for textual criticism;
-- **absent** for BHS/BHQ as structured research evidence;
-- **weak / absent** for DSS;
-- **weak / absent** for diachronic Hebrew;
-- **absent** for passage commentaries;
-- **absent** for exegesis method;
-- **absent** for rhetoric/literary method;
-- **absent** for Chinese translation studies;
-- **absent** for current journal/article-level specialist scholarship.
+It does not mean "publishable in the product".
 
-Therefore it should not yet be treated as the complete source corpus for the application.
+## 12. Recommended source-ingestion priorities
+
+Do not ingest the whole library at once.
+
+### Priority A: architecture/pipeline fixtures
+
+Use a deliberately heterogeneous test set:
+
+1. Waltke-O'Connor or Joüon-Muraoka reference grammar;
+2. BDB or another lexicon;
+3. BHQ Ruth apparatus;
+4. Tov textual criticism;
+5. Hendel 2024 Genesis commentary;
+6. DSS study source;
+7. one EPUB;
+8. one CHM;
+9. one noisy/scanned PDF;
+10. one future Chinese translation documentation source.
+
+This tests source-specialised ingestion.
+
+### Priority B: core linguistic shelf
+
+Then process:
+
+- major reference grammars;
+- BDB / DCH / permitted HALOT material;
+- diachronic Hebrew sources;
+- selected morphology/syntax resources.
+
+### Priority C: textual criticism
+
+- BHS/BHQ structures;
+- Tov;
+- DSS/LXX studies.
+
+### Priority D: passage commentary
+
+Begin with the books/chapters actually covered by the first public research release.
+
+### Priority E: Chinese translation scholarship
+
+Treat this as a first-class acquisition programme, not an optional later appendix.
+
+## 13. Current completeness matrix
+
+| Evidence lane | Current status |
+|---|---|
+| Reference grammar | Strong |
+| Learning grammar | Strong |
+| Morphology / language history | Good |
+| General lexica | Strong, rights/edition verification still required |
+| Theological lexica | Strong |
+| Concordances | Strong |
+| BHS / Masorah | Strong |
+| BHQ | Strong for Ruth, not whole-Bible |
+| Textual criticism methodology | Strong |
+| DSS / Judaean Desert | Good |
+| LXX methodology / concordance | Good |
+| Machine-readable LXX corpus | Not established in this Drive |
+| Genesis 1-11 commentary | Strong |
+| Whole-Bible commentaries | Incomplete |
+| Exegesis method | Strong |
+| Rhetorical/literary method | Selective |
+| Archaeology / background | Good/selective |
+| Chinese Bible translation scholarship | Major gap |
+| Current specialist articles | Major gap |
+| Rights/edition metadata | Must be formalized |
+
+## 14. Final source-library judgement
+
+The updated consolidated Drive can now be treated as the **primary private academic source library for the first Research Compiler implementation**.
+
+It should **not** be treated as:
+
+- the complete universe of scholarship;
+- the public production database;
+- proof of redistribution rights;
+- a replacement for structured Hebrew/LXX corpora;
+- a reason to use one universal RAG index.
+
+The next architecture problem is no longer mainly "what books are missing?"
+
+It is:
+
+> how to compile this source library into reviewed, typed, versioned, publishable research data without making the public product dependent on the source files or runtime LLM retrieval.
