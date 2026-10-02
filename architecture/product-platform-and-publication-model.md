@@ -791,7 +791,7 @@ The detailed UI/cross-stage contract is:
 
 The accepted architecture decision is:
 
-- `architecture/adr/003-research-pro-experience-layer.md`
+- `architecture/adr/004-research-pro-experience-layer.md`
 
 Study and Research modes therefore share:
 
