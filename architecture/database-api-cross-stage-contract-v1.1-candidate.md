@@ -1,6 +1,8 @@
 # Database, API, and Cross-Stage Contract v1.1 Candidate
 
-Status: **CANDIDATE ARCHITECTURE CONTRACT. NOT YET FROZEN FOR IMPLEMENTATION.**
+Status: **SUPERSEDED CANDIDATE. DO NOT IMPLEMENT.**
+
+Active contract: `architecture/database-api-cross-stage-contract-v1.1.md`.
 
 Amended 2026-10-03: the product is now explicitly modeled as a compiled scholarly data product with private authoring, publication control, deterministic public serving, and user workspace planes. See `architecture/product-platform-and-publication-model.md` and ADR-002.
 
