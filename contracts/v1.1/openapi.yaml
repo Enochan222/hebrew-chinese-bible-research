@@ -1,79 +1,169 @@
 openapi: 3.1.0
 info:
-  title: Hebrew-Chinese Bible Research API
+  title: Hebrew-Chinese Bible Research Core API
   version: 1.1-candidate
   description: >
-    Machine-readable public API contract for release-pinned scholarly serving
-    and deterministic corpus queries. Canonical public responses expose the
-    ResearchRelease used.
+    Normative machine contract for the Core v1.1 serving profile. Research Pro
+    extension endpoints are governed separately until their extension profile is frozen.
+    Canonical scholarly responses expose the resolved ResearchRelease.
 servers:
   - url: /
 paths:
   /api/v1/releases/current:
     get:
       operationId: getCurrentRelease
-      summary: Resolve the current production ResearchRelease
       responses:
-        "200":
-          description: Current release pointer
+        '200':
+          description: Current production release
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: false
-                required: [researchReleaseId, releaseLabel, channel]
-                properties:
-                  researchReleaseId:
-                    type: string
-                    format: uuid
-                  releaseLabel:
-                    type: string
-                  channel:
-                    const: PRODUCTION
+                $ref: '#/components/schemas/ReleasePointer'
+  /api/v1/passages/{reference}:
+    get:
+      operationId: getCurrentPassage
+      parameters:
+        - $ref: '#/components/parameters/reference'
+      responses:
+        '200':
+          description: Current-release passage core
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PassageCore'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/v1/releases/{releaseId}/passages/{reference}:
+    get:
+      operationId: getPinnedPassage
+      parameters:
+        - $ref: '#/components/parameters/releaseId'
+        - $ref: '#/components/parameters/reference'
+      responses:
+        '200':
+          description: Pinned passage core
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PassageCore'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/v1/passages/{reference}/translations:
+    get:
+      operationId: getCurrentPassageTranslations
+      parameters:
+        - $ref: '#/components/parameters/reference'
+      responses:
+        '200':
+          description: Translation witnesses resolved from current release
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranslationWitnessList'
+  /api/v1/releases/{releaseId}/passages/{reference}/translations:
+    get:
+      operationId: getPinnedPassageTranslations
+      parameters:
+        - $ref: '#/components/parameters/releaseId'
+        - $ref: '#/components/parameters/reference'
+      responses:
+        '200':
+          description: Translation witnesses from pinned release
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranslationWitnessList'
   /api/v1/passages/{reference}/analysis:
     get:
       operationId: getCurrentPassageAnalysis
-      summary: Get published analysis from the current production release
       parameters:
-        - $ref: "#/components/parameters/reference"
+        - $ref: '#/components/parameters/reference'
       responses:
-        "200":
-          description: Release-resolved published analysis
+        '200':
+          description: Current release published analysis
           content:
             application/json:
               schema:
-                $ref: "./json-schema/published-passage-analysis.schema.json"
-        "404":
-          $ref: "#/components/responses/NotFound"
+                $ref: './json-schema/published-passage-analysis.schema.json'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /api/v1/releases/{releaseId}/passages/{reference}/analysis:
     get:
       operationId: getPinnedPassageAnalysis
-      summary: Get citation-stable published analysis from a pinned ResearchRelease
       parameters:
-        - $ref: "#/components/parameters/releaseId"
-        - $ref: "#/components/parameters/reference"
+        - $ref: '#/components/parameters/releaseId'
+        - $ref: '#/components/parameters/reference'
       responses:
-        "200":
-          description: Pinned published analysis
+        '200':
+          description: Citation-stable pinned published analysis
           content:
             application/json:
               schema:
-                $ref: "./json-schema/published-passage-analysis.schema.json"
-        "404":
-          $ref: "#/components/responses/NotFound"
+                $ref: './json-schema/published-passage-analysis.schema.json'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/v1/passages/{reference}/rule-applications:
+    get:
+      operationId: getCurrentRuleApplications
+      parameters:
+        - $ref: '#/components/parameters/reference'
+      responses:
+        '200':
+          description: Rule applications from current release
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleApplicationList'
+  /api/v1/releases/{releaseId}/passages/{reference}/rule-applications:
+    get:
+      operationId: getPinnedRuleApplications
+      parameters:
+        - $ref: '#/components/parameters/releaseId'
+        - $ref: '#/components/parameters/reference'
+      responses:
+        '200':
+          description: Rule applications from pinned release
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleApplicationList'
+  /api/v1/constructions/{constructionId}/instances:
+    get:
+      operationId: getConstructionInstances
+      parameters:
+        - $ref: '#/components/parameters/constructionId'
+        - $ref: '#/components/parameters/optionalReleaseId'
+      responses:
+        '200':
+          description: Release-pinned construction instances
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConstructionInstanceList'
+  /api/v1/semantic-sets:
+    get:
+      operationId: listSemanticSets
+      parameters:
+        - $ref: '#/components/parameters/optionalReleaseId'
+      responses:
+        '200':
+          description: Semantic sets available in resolved release
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SemanticSetList'
   /api/v1/corpus/query/validate:
     post:
       operationId: validateCorpusQuery
-      summary: Validate and normalize a CorpusQuery without executing it
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "./json-schema/corpus-query.schema.json"
+              $ref: './json-schema/corpus-query.schema.json'
       responses:
-        "200":
-          description: Validation result
+        '200':
+          description: Validation and release-pinning result
           content:
             application/json:
               schema:
@@ -85,129 +175,143 @@ paths:
                     type: boolean
                   normalizedQuery:
                     oneOf:
-                      - $ref: "./json-schema/corpus-query.schema.json"
-                      - type: "null"
+                      - $ref: './json-schema/corpus-query-normalized.schema.json'
+                      - type: 'null'
                   errors:
                     type: array
                     items:
-                      type: object
-                      additionalProperties: false
-                      required: [code, message]
-                      properties:
-                        code:
-                          type: string
-                        message:
-                          type: string
-                        path:
-                          type: string
+                      $ref: '#/components/schemas/ValidationError'
   /api/v1/corpus/query/run:
     post:
       operationId: runCorpusQuery
-      summary: Execute a validated deterministic CorpusQuery
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "./json-schema/corpus-query.schema.json"
+              $ref: './json-schema/corpus-query-normalized.schema.json'
       responses:
-        "200":
-          description: Deterministic query result
+        '200':
+          description: Deterministic release-pinned query page
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: false
-                required: [researchReleaseId, epistemicClass, matches, matchCount]
-                properties:
-                  researchReleaseId:
-                    type: string
-                    format: uuid
-                  epistemicClass:
-                    enum:
-                      - CORPUS_COMPLETE
-                      - FRAMEWORK_COMPLETE
-                      - CURATED_SET_COMPLETE
-                      - HEURISTIC_CANDIDATE
-                      - INCOMPLETE_COVERAGE
-                  matchCount:
-                    type: integer
-                    minimum: 0
-                  matches:
-                    type: array
-                    items:
-                      type: object
-                      additionalProperties: false
-                      required: [referenceSpanId, bindings, whyMatched]
-                      properties:
-                        referenceSpanId:
-                          type: string
-                          format: uuid
-                        bindings:
-                          type: object
-                          additionalProperties:
-                            type: string
-                        whyMatched:
-                          type: array
-                          items:
-                            type: string
-                  dependencyManifest:
-                    type: object
-                    additionalProperties: true
-        "400":
-          description: Invalid or over-complex query
+                $ref: './json-schema/corpus-query-result.schema.json'
+        '400':
+          description: Invalid, stale, or over-complex query
   /api/v1/evidence/{evidenceId}:
     get:
       operationId: getPublishedEvidence
-      summary: Get a public-safe published evidence item
       parameters:
-        - name: evidenceId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: '#/components/parameters/evidenceId'
       responses:
-        "200":
-          description: Published evidence
+        '200':
+          description: Public-safe published evidence item
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: false
-                required: [publishedEvidenceItemId, researchReleaseId, evidenceClass]
-                properties:
-                  publishedEvidenceItemId:
-                    type: string
-                    format: uuid
-                  researchReleaseId:
-                    type: string
-                    format: uuid
-                  evidenceClass:
-                    type: string
-                  citation:
-                    type: object
-                    additionalProperties: true
-                  permittedExcerpt:
-                    type: [string, "null"]
-        "404":
-          $ref: "#/components/responses/NotFound"
+                $ref: './json-schema/published-evidence-item.schema.json'
+        '404':
+          $ref: '#/components/responses/NotFound'
 components:
   parameters:
     releaseId:
       name: releaseId
       in: path
       required: true
-      schema:
-        type: string
-        format: uuid
+      schema: {type: string, format: uuid}
+    optionalReleaseId:
+      name: researchReleaseId
+      in: query
+      required: false
+      description: Omission resolves current PRODUCTION once for this request.
+      schema: {type: string, format: uuid}
     reference:
       name: reference
       in: path
       required: true
-      schema:
-        type: string
-        minLength: 1
+      schema: {type: string, minLength: 1}
+    evidenceId:
+      name: evidenceId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+    constructionId:
+      name: constructionId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+  schemas:
+    ReleasePointer:
+      type: object
+      additionalProperties: false
+      required: [researchReleaseId, releaseLabel, channel]
+      properties:
+        researchReleaseId: {type: string, format: uuid}
+        releaseLabel: {type: string}
+        channel: {const: PRODUCTION}
+    PassageCore:
+      type: object
+      additionalProperties: true
+      required: [researchReleaseId, referenceSpanId, reference]
+      properties:
+        researchReleaseId: {type: string, format: uuid}
+        referenceSpanId: {type: string, format: uuid}
+        reference: {type: string}
+    TranslationWitnessList:
+      type: object
+      additionalProperties: false
+      required: [researchReleaseId, witnesses]
+      properties:
+        researchReleaseId: {type: string, format: uuid}
+        witnesses:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+            required: [digitalExpressionId, displayName, bindingMode]
+            properties:
+              digitalExpressionId: {type: string, format: uuid}
+              displayName: {type: string}
+              bindingMode: {enum: [SNAPSHOT_PINNED, LIVE_EXTERNAL]}
+    RuleApplicationList:
+      type: object
+      additionalProperties: false
+      required: [researchReleaseId, items]
+      properties:
+        researchReleaseId: {type: string, format: uuid}
+        items:
+          type: array
+          items:
+            $ref: './json-schema/rule-application.schema.json'
+    ConstructionInstanceList:
+      type: object
+      additionalProperties: false
+      required: [researchReleaseId, items]
+      properties:
+        researchReleaseId: {type: string, format: uuid}
+        items:
+          type: array
+          items:
+            $ref: './json-schema/construction-instance.schema.json'
+    SemanticSetList:
+      type: object
+      additionalProperties: false
+      required: [researchReleaseId, items]
+      properties:
+        researchReleaseId: {type: string, format: uuid}
+        items:
+          type: array
+          items:
+            $ref: './json-schema/semantic-set-version.schema.json'
+    ValidationError:
+      type: object
+      additionalProperties: false
+      required: [code, message]
+      properties:
+        code: {type: string}
+        message: {type: string}
+        path: {type: string}
   responses:
     NotFound:
       description: Requested release/resource not found
@@ -218,7 +322,5 @@ components:
             additionalProperties: false
             required: [code, message]
             properties:
-              code:
-                const: NOT_FOUND
-              message:
-                type: string
+              code: {const: NOT_FOUND}
+              message: {type: string}
