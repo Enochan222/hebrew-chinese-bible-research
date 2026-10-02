@@ -1,258 +1,193 @@
-# Site Build Staging Plan
+# Product Build Staging Plan
 
 Status: **ARCHITECTURE STAGING PLAN, IMPLEMENTATION HOLD UNTIL v1.1 CONTRACT FREEZE**
 
-This document defines the five future Site Build stages. It is not itself a Site Build prompt.
+This project is a database-backed scholarly product platform, not a single runtime AI application.
 
-Before Stage 1 production schema implementation begins, the candidate contract in `architecture/database-api-cross-stage-contract-v1.1-candidate.md` must pass its freeze preconditions.
+Implementation phases are separate from the continuous product planes defined in:
 
-The superseded `database-api-cross-stage-contract-v1.md` must not be implemented.
+- `architecture/product-platform-and-publication-model.md`
 
-Canonical vocabularies are defined in:
+The product planes are:
+
+1. Authoring / Research
+2. Publication / Control
+3. Public Serving
+4. User Workspace
+
+These continue to exist after launch. They are not one-time stages.
+
+Before production schema implementation begins, the active candidate contract must pass its freeze preconditions:
+
+- `architecture/database-api-cross-stage-contract-v1.1-candidate.md`
+
+Canonical vocabularies:
 
 - `contracts/v1.1/vocabulary.json`
 
-Security and evaluation requirements are defined in:
+## Governing build principle
 
-- `architecture/security-trust-boundaries.md`
-- `architecture/research-evaluation-and-benchmarks.md`
+The public scholarly product must primarily serve:
 
-Academic evidence policy remains defined in:
+- compiled research releases;
+- deterministic corpus search;
+- published translation data;
+- published analysis;
+- approved rules and rule applications;
+- citations and provenance.
 
-- `architecture/academic-evidence-policy.md`
-- `architecture/academic-storage-and-rag.md`
-- `docs/academic-source-taxonomy.md`
-- `docs/master-academic-source-inventory-and-gaps.md`
+Runtime AI/RAG is supplementary.
 
-## Why the build must be staged
+The core product must still work when no LLM provider is available.
 
-This project is a research-grade Hebrew-Chinese Bible translation environment.
-
-The UI must not establish false ontological assumptions that the data layer later has to imitate.
-
-In particular:
-
-- a reference location may be application-canonical;
-- a text expression is edition / expression specific;
-- word / morpheme / phrase / clause analyses are framework-scoped unless explicitly curated;
-- an FHL version code is provider-distribution identity, not automatically a print-edition identity;
-- LXX is an ancient textual version / witness domain, not merely another modern translation column;
-- scholarly propositions extracted by AI are representations that require attribution and review.
-
-The current Vercel application remains a reference implementation, not a source-code dependency.
-
-Useful workflow ideas to reconstruct and improve include:
-
-- passage navigation and deep-linkable verse selection;
-- MT / LXX / Chinese parallel reading;
-- proposed translation area;
-- translation-analysis view;
-- syntax / BHSA-style view;
-- source-and-citation view.
-
-## Global UX direction
-
-The product should look like a serious academic research instrument.
-
-Avoid:
-
-- chatbot-first layout;
-- large "Ask AI" hero areas;
-- purple/blue AI gradients;
-- glassmorphism;
-- decorative dashboard tiles;
-- excessive animation;
-- generic AI marketing language.
-
-Prefer:
-
-- editorial / scholarly hierarchy;
-- restrained neutral palette;
-- strong Hebrew and Chinese typography;
-- research split views;
-- source and edition metadata close to evidence;
-- dense but readable comparison tables;
-- explicit evidence labels;
-- visible uncertainty / disagreement;
-- professional desktop-first workflow with responsive support.
-
-AI is a downstream research capability, not the visual identity of the product.
+The current Vercel application remains a reference implementation for useful interaction patterns, not an ontology or data-model authority.
 
 ---
 
-# Stage 1: Research Shell, Reference Identity, and Text-Expression Foundation
+# Phase 1: Product Foundation, Identity, Release Model, and Serving Shell
 
-## Primary goal
+## Goal
 
-Build the stable application shell and reconstruct the useful passage-study workflow without prematurely freezing a universal Hebrew tokenisation or syntax ontology.
+Create the stable product shell and database contracts without introducing false canonical Hebrew segmentation.
 
-## Permanent application areas
+## Product surfaces reserved from the beginning
 
-1. Passage Study
-2. Corpus Lab
-3. Academic Library
-4. Translation Rules
-5. Research Projects
+### Public Research App
+- Passage Study
+- Corpus Lab
+- Construction Browser
+- Published Analysis
+- Citations / Evidence
 
-## Core layout
+### Researcher Workspace
+- saved queries
+- draft translations
+- annotations
+- user semantic sets
+- user rule drafts
 
-Desktop research layout:
+### Editorial Console
+Initially minimal/placeholder, but route and authorization boundaries must exist.
 
-- top-level research navigation;
-- left Bible / project navigator;
-- central workspace;
-- right inspector / evidence panel;
-- optional provenance / source state area.
+### Publication Console
+Initially minimal/placeholder, but release state and current-release visibility must exist.
 
-## Legacy-reference reconstruction
+## Data contracts
 
-Using fixture data if necessary, reconstruct:
-
-- book / chapter / verse navigation;
-- deep links;
-- parallel reading;
-- MT display;
-- LXX display;
-- multiple Chinese translation slots;
-- proposed translation;
-- translation-analysis tab;
-- syntax-analysis tab;
-- source/citation tab.
-
-Fixture content must be labelled as fixture data and must not pretend to be live corpus analysis.
-
-## Stage 1 identity contracts
-
-Stage 1 must reserve / implement shared contracts for:
+Phase 1 must establish:
 
 - BiblicalBook
 - CanonSystem
 - ReferenceSystem
 - ReferenceAtom
 - ReferenceSpan
-- ReferenceLabel
 - TextualWork
 - TextualEdition
 - DigitalExpression
 - ProviderDistribution
+- TextStream
+- TextSegment
 - SourceRegistry
 - Provenance
 - RightsPolicy
-- EvidenceClass
-- ResearchProject
+- ResearchBuild
+- ResearchRelease
+- ResearchReleaseComponent
+- ResearchProject / workspace ownership
 
-Do **not** create a provider-independent CanonicalToken, CanonicalPhrase or CanonicalClause.
+Important correction:
 
-## Rights foundation
+TextStream/TextSegment must exist before Phase 2 because translation alignment requires stable segment identifiers.
 
-Stage 1 must support purpose-aware rights resolution.
+Phase 1 still must **not** create universal application-owned Hebrew word/phrase/clause identity.
 
-At minimum the contract must distinguish:
+## Publication boundary
 
-- storage;
-- extraction;
-- embedding;
-- AI model context;
-- caching;
-- full-text display;
-- excerpt display / quotation;
-- export;
-- redistribution;
-- commercial use.
+Implement the conceptual distinction:
 
-"Readable by the user" must not automatically mean "permitted in external model context."
+```text
+authoring candidate
+    -> publication validation
+    -> published release
+    -> serving
+```
 
-## Security foundation
+The first phase may use fixture releases, but every public fixture response should already be release-pinned.
 
-Implement the project-level trust-boundary assumptions early:
+## UI
 
-- no secret/service key in browser;
-- source text is data, not instruction;
-- public/private data classes are explicit;
-- provider payloads are untrusted;
-- future RLS/view/RPC tests have clear extension points.
+Reconstruct the useful passage workflow:
 
-## Explicitly excluded
+- book/chapter/verse navigation;
+- deep link;
+- MT witness;
+- LXX witness placeholder or selected data;
+- variable Chinese translation witnesses;
+- proposed translation workspace;
+- analysis tab;
+- syntax/corpus tab;
+- source/citation tab.
 
-Do not yet:
+Fixture data must be labelled.
 
-- build final Hebrew morphology / syntax corpus;
-- invent a universal token stream;
-- implement academic RAG;
-- implement AI translation judgments;
-- dump copyrighted translations/books into GitHub;
-- build final LXX linguistic research functionality.
+## Security
 
-## Stage 1 acceptance gate
+- no service-role key in browser;
+- public runtime has no authoring-DB credential;
+- product plane is explicit in server modules;
+- public/private/workspace schemas or logical boundaries are testable;
+- source text is untrusted data, never instruction.
+
+## Acceptance gate
 
 Pass only when:
 
-- navigation and deep links are stable;
-- Hebrew RTL / Chinese layout is stable;
-- reference identity is separate from text-expression identity;
-- UI does not require universal token/phrase/clause IDs;
-- LXX and Chinese witnesses can be represented without pretending they have the same epistemic role;
-- evidence labels are reusable;
-- rights resolver contracts exist;
-- later stages can attach real data without redesigning the shell.
+- release-pinned passage rendering works;
+- text-expression identity is independent of provider code;
+- stable text segments exist for later alignment;
+- user workspace data is not mixed with published research;
+- no UI component requires universal canonical phrase/clause IDs;
+- research-release identifier is visible/debuggable.
 
 ---
 
-# Stage 2: Passage Study, Translation Witness Identity, and Alignment
+# Phase 2: Published Passage Data, Translation Witnesses, Alignment, and Workspace
 
-## Primary goal
+## Goal
 
-Build a serious translation-comparison workbench with edition-aware / expression-aware provider integration.
+Turn Passage Study into a research-grade published translation workbench.
 
-## FHL integration
+## Provider identity
 
-Use `ytssamuel/FHL-MCP-Server` as a technical reference for FHL API interaction.
+Use dynamic version discovery where possible.
 
-Do not copy its AI comparison logic as the academic method.
-
-Use dynamic provider version discovery.
-
-For each FHL witness preserve:
+Preserve:
 
 ```text
-Translation / Textual Work
-    -> Edition / Revision when known
-        -> Digital Expression
-            -> Provider Distribution
-                FHL code
+Textual Work
+  -> Edition/Revision when established
+    -> Digital Expression
+      -> Provider Distribution
 ```
 
-If a provider text cannot be confidently mapped to a precise print edition, say so.
+A provider code is never sufficient proof of print-edition identity.
 
-Do not label a provider transcription simply as "the 1988 edition" or similar unless evidence supports that identity.
+## Translation witness contract
 
-## Translation witness view
+Each witness reports independently:
 
-Support a variable number of witnesses.
-
-Each witness independently reports:
-
-- availability;
-- provider;
-- work / edition / expression identity;
+- provider/distribution;
+- work/edition/expression;
 - rights/display state;
-- source metadata;
-- notes;
-- provider error state.
+- retrieval timestamp/version;
+- provenance;
+- loading/error state.
 
-One provider failure must not break the page.
-
-## User proposed translation
-
-Version the user's translation.
-
-Do not overwrite historical research versions.
+One provider failure must not fail the whole passage page.
 
 ## Alignment
 
-Use explicit alignment groups.
-
-Model:
+Use:
 
 - alignment group;
 - source segment members;
@@ -264,550 +199,503 @@ Model:
 - review status;
 - provenance.
 
-Primary alignment must use stable segment IDs.
+Raw offsets are secondary locators only and must include coordinate basis and text revision hash.
 
-Raw offsets are secondary and must state coordinate basis plus text revision hash.
+## User workspace
 
-## Translation analysis UI
+Implement:
 
-Comparison dimensions may include:
+- versioned user translation proposals;
+- annotations;
+- saved passage state;
+- saved comparison settings.
 
-- lexical choice;
-- syntax;
-- explicitness;
-- omission/addition;
-- semantic abstraction;
-- interpretive expansion;
-- idiom;
-- repetition;
-- parallelism;
-- word order;
-- ambiguity preserved/resolved.
+These are private workspace objects and must not become official published research automatically.
 
-Always distinguish:
+## Published analysis placeholder
 
-- Documented translator/publisher reason
-- Scholarly explanation
-- System inference
-- Unknown
+Phase 2 may serve reviewed fixture PublishedPassageAnalysis objects.
 
-## Stage 2 acceptance gate
+It must not synthesize new official analysis at page load.
+
+## Acceptance gate
 
 Pass only when:
 
-- provider code is not conflated with edition identity;
-- rights metadata participates in provider resolution;
-- translations fail independently;
-- user translation is versioned;
-- alignment represents many-to-many and discontinuous relations explicitly;
-- target-segment identity is stable;
-- translator intention is never inferred as documentary fact.
+- source/target segments support many-to-many alignment;
+- provider identity and translation identity remain separate;
+- user draft data is isolated from official translation data;
+- translator intention is never inferred as documentary fact;
+- passage page can be rendered entirely from a pinned research release plus workspace state.
 
 ---
 
-# Stage 3: Hebrew Corpus, Framework-Scoped Linguistic Analysis, and Pattern Search
+# Phase 3: Hebrew Corpus Engine, Semantic Sets, Constructions, and Deterministic Search
 
-## Primary goal
+## Goal
 
-Implement deterministic Hebrew corpus research while making the scope of each linguistic claim explicit.
+Build the research-grade corpus query engine.
 
-## Text and corpus model
+This is the main dynamic scholarly engine of the public product.
 
-Support:
+## Canonical source versus serving projection
 
-- digital expression;
-- text stream;
-- text segment;
-- alternate reading stream;
-- normalization profile;
+Canonical source layer:
+
 - corpus release;
 - annotation framework;
-- analysis node;
-- analysis edge;
-- feature schema;
-- lexeme mapping;
-- cross-annotation mapping.
+- analysis nodes;
+- analysis edges;
+- source-specific features;
+- cross-framework mappings.
 
-OSHB / MACULA / BHSA structures must be allowed to disagree.
+Serving/query layer:
 
-No universal app-owned phrase/clause structure is assumed.
+- serving_words;
+- serving_morphemes;
+- serving_relations;
+- serving_semantic_memberships.
 
-## Ketiv/Qere
+Serving projections are release-scoped compiler outputs.
 
-Represent alternate reading streams and correspondences.
-
-Do not reduce Ketiv/Qere to one status flag on a token.
-
-## Hebrew Unicode
-
-Queries must pin or declare a normalization profile.
-
-Preserve SOURCE_EXACT separately.
-
-Provide regression fixtures for:
-- traditional Biblical Hebrew combining mark ordering;
-- NFC/NFD;
-- cantillation removal;
-- niqqud removal;
-- consonantal matching.
-
-## Lexeme identity
-
-Introduce internal lexeme identity only through explicit mappings.
-
-Do not join all lexical resources by Hebrew string alone.
-
-Support identifiers such as:
-- corpus lemma IDs;
-- BHSA lexeme;
-- Strong's legacy IDs;
-- lexicon locators where legally / technically appropriate.
-
-Mappings require source/version/review metadata.
-
-## Query DSL
-
-Design DSL before visual builder.
+## Corpus relations
 
 ### Text-stream relations
 
+- IMMEDIATELY_PRECEDES
+- PRECEDES
+- FOLLOWS
+- WITHIN_N_SEGMENTS
+- SAME_REFERENCE_SPAN
+
+### Framework-scoped morphology/structure relations
+
+- MORPHEME_OF
+- HAS_MORPHEME
+- PREFIX_MORPHEME_OF
+- SUFFIX_MORPHEME_OF
+- SAME_PHRASE
+- SAME_CLAUSE
+- SAME_SENTENCE
+- ATTACHED_TO
+- GOVERNS
+- DEPENDENT_OF
+- SEMANTIC_ROLE
+
+A prefixed ל must be queryable as a morpheme without pretending it is an independent orthographic word.
+
+## CorpusQuery AST
+
+Required in the first serious query version:
+
+- typed nodes;
+- typed relations;
+- pinned corpus/framework context;
+- normalization profile;
+- semantic-set version;
+- ALL_OF;
+- ANY_OF;
+- NOT;
+- EXISTS;
+- NOT_EXISTS;
+- MIN_COUNT / MAX_COUNT / EXACT_COUNT.
+
+A generic OPTIONAL operator is deferred until match enumeration/count semantics are specified.
+
+## Complexity guard
+
+No arbitrary SQL from an LLM.
+
+The query planner enforces configurable limits such as:
+
+- max pattern nodes;
+- max relation depth;
+- max candidate/result count;
+- timeout;
+- permitted relation combinations.
+
+Exact values are benchmark-driven.
+
+## Semantic sets
+
+Official semantic sets are versioned compiled research data.
+
 Examples:
-- immediately precedes;
-- precedes;
-- within N segments.
 
-### Framework-scoped relations
+- BODY_PART
+- PERCEPTION_VERB
+- SPEECH_VERB
+- KINSHIP
+- LOCATION
 
-Examples:
-- same phrase;
-- same clause;
-- governs;
-- dependent of;
-- semantic role.
+Membership stores evidence/reason/review.
 
-Framework-sensitive relations require an annotation framework and corpus release.
+Runtime LLM classification does not modify official membership.
 
-The same relation name must not silently change meaning across MACULA/BHSA.
+## ConstructionDefinition
 
-## Result epistemic class
+A named formal pattern uses the same CorpusQuery AST.
 
-Every query reports whether its result is:
+Compile important constructions against pinned corpus releases.
 
-- corpus-complete within pinned scope;
-- framework-complete;
-- curated-set complete;
-- heuristic candidate;
-- incomplete coverage.
+Store ConstructionInstances with:
 
-Semantic analogues must not be displayed as exhaustive linguistic facts.
+- node bindings;
+- reference span;
+- match explanation;
+- review status;
+- result hash.
 
-## Corpus analysis protocol
+## Search modes
 
-For frequency/comparison research preserve:
+### Visual Pattern Builder
+No LLM required.
 
-- population;
-- inclusion/exclusion criteria;
-- denominator;
-- coverage;
-- genre / book grouping where relevant;
-- query sensitivity;
-- framework.
+### Advanced DSL
+No LLM required.
 
-Separate:
-- token count;
-- construction count;
-- clause count;
-- reference count;
-- span/passsage count.
+### Natural Language
+Optional language-to-AST adapter.
+
+The optional adapter cannot execute SQL directly and cannot decide result membership.
 
 ## Explainability
 
-Each match should expose why it matched.
+Each match exposes:
 
-Diagnostic tooling should support why an expected example did not match where feasible.
+- why matched;
+- bound nodes;
+- matched features;
+- relation evidence;
+- framework/release;
+- semantic-set version.
 
-## Stage 3 acceptance gate
+Where practical also support "why did expected verse not match?"
+
+## Acceptance gate
 
 Pass only when:
 
-- provider frameworks can coexist without forced canonical syntax;
-- GUI query and DSL are equivalent;
-- query scope/release/framework is pinned;
-- result completeness class is explicit;
+- same AST produces stable results;
+- GUI and API AST are equivalent;
+- morpheme-host search works;
+- exact versus framework-complete versus heuristic candidate results are explicit;
 - counts are not inflated by joins;
-- Hebrew normalization tests pass;
-- Ketiv/Qere fixtures pass;
-- semantic analogue provenance is visible.
+- semantic-set version is pinned;
+- known construction definitions can be compiled and checked;
+- core search works with LLM integration disabled.
 
 ---
 
-# Stage 4: Academic Knowledge Base, Structured Ingestion, Textual Criticism, Security, and RAG
+# Phase 4: Private Academic Knowledge Compiler and Publication Pipeline
 
-## Primary goal
+## Goal
 
-Build the scholarly evidence system from the user's source library and future current scholarship without turning the Drive shelf into one flat RAG corpus.
+Build the authoring-side scholarly compiler.
 
-## Source library role
+This phase processes the user's academic library and other legitimate research sources.
 
-Google Drive is a source/acquisition library, not the production search database.
+It is **not** a public runtime chatbot/RAG endpoint.
 
-Use `docs/master-academic-source-inventory-and-gaps.md` as the current inventory / gap map.
-
-The scholarly system must support books **and**:
-
-- journal articles;
-- book chapters;
-- dissertations/theses;
-- conference papers;
-- critical reviews;
-- dataset publications;
-- digital scholarly resources;
-- translation documentation.
-
-## Retrieval namespaces
-
-Use only vocabulary from `contracts/v1.1/vocabulary.json`.
-
-Do not invent near-synonymous names in individual implementation modules.
-
-## Work / Edition / Asset
-
-Maintain:
-
-```text
-Work
- -> Edition
-   -> SourceAsset
-     -> ContentHash
-```
-
-Deduplicate file assets without erasing historical editions.
-
-## Document structure and source locations
-
-Edition structure and PDF physical location are separate.
+## Source inventory
 
 Use:
 
-- document nodes for chapter/section/paragraph structure;
-- source-asset pages for physical PDF page;
-- node-asset locations for mapping;
-- source spans for exact citable text.
+- `docs/master-academic-source-inventory-and-gaps.md`
 
-## Claim extraction
+The Drive library is the acquisition/source library.
+
+It is not the production query database.
+
+## Ingestion model
 
 Preserve:
 
-- original source span;
-- direct quote where allowed;
-- human paraphrase;
-- AI-extracted proposition;
-- assertion agent;
-- modal force;
-- scope;
-- entailment review status.
+```text
+Work
+  -> Edition
+    -> SourceAsset
+      -> SourceAssetPage
+        -> SourceSpan
+```
 
-An AI paraphrase is not automatically "what the scholar said."
+Then derive:
 
-## Claim relationships
+- claims;
+- definitions;
+- rules;
+- qualifications;
+- exceptions;
+- examples;
+- concept mappings;
+- biblical-reference links;
+- lexeme links;
+- scholarly dependency;
+- textual-critical structures.
+
+## Claim integrity
 
 Distinguish:
-- author-explicit relationships;
-- human analytical relationships;
-- system/AI inferred relationships.
 
-Rule/qualification/exception relationships must be retrievable together.
+- DIRECT_QUOTE
+- HUMAN_PARAPHRASE
+- AI_EXTRACTED_PROPOSITION
 
-## Lexica
+AI-extracted propositions are candidate representations until reviewed.
 
-Model entry and sense structure.
+A real citation that does not entail the claim is an academic failure.
 
-Do not merge HALOT/DCH/BDB/TWOT/TLOT/TDOT senses into one source-neutral asserted meaning.
+## Source-type specialised processing
 
-## Commentary
+### Grammar
+Preserve author-native terminology, rules, qualifications and examples.
 
-Passage-first retrieval before semantic ranking where passage is known.
+### Lexica
+Preserve source-specific sense inventories.
 
-## Textual criticism
+### Commentary
+Passage-first structure.
 
-Preserve:
-- raw apparatus;
-- parsed apparatus entry;
-- reading groups;
-- readings;
-- witness attestations;
-- responsibility;
-- certainty;
-- reading type;
-- variant sequence / grouped subvariation where relevant.
+### Textual criticism
+Preserve raw apparatus before parsed interpretation.
 
-Do not pretend first-pass parsing is raw textual fact.
+### Chinese translation documentation
+Preserve translation project, revision, preface and translator/publisher documentation separately from observed translation behaviour.
 
-## Scholarly lineage
+## AI/RAG tools
 
-Support incremental relations such as:
-- cites;
-- adopts classification;
-- revises;
-- critiques;
-- uses dataset;
-- derived from.
+May include replaceable tools such as:
 
-Do not infer consensus from distinct work count alone.
+- internal hybrid retrieval;
+- Gemini File Search;
+- Notebook-style research workspaces;
+- OpenAI-assisted extraction;
+- batch model jobs;
+- embeddings.
 
-## Ingestion pipelines
+These are build tools, not canonical databases.
 
-Classify:
+Google Gemini File Search currently imports/chunks/indexes sources and supports custom metadata filtering; this makes it useful for candidate discovery, not a replacement for the project's typed scholarly store.
 
-- searchable PDF;
-- noisy PDF;
-- scanned PDF;
-- EPUB;
-- DOCX;
-- CHM;
-- image-based source.
+## Review
 
-Extraction failure must be explicit.
+Editorial console must support review of:
 
-## Rights
+- document structure;
+- citation location;
+- extracted claims;
+- claim-source entailment;
+- concept mappings;
+- examples;
+- rule evidence;
+- rights;
+- publication eligibility.
 
-Use purpose-aware rights policies and rules from v1.1 contract.
+## Publication compiler
 
-Rights check precedes:
-- persistent storage;
-- embedding;
-- cache;
-- display;
-- quotation;
-- model context.
+A build produces:
 
-## Security
+- approved claims;
+- approved mappings;
+- approved citations;
+- approved semantic-set updates;
+- approved rules;
+- approved textual-critical structures;
+- public-safe excerpts;
+- published analysis candidates;
+- serving projections;
+- release manifest.
 
-Stage 4 must implement / test the requirements in `architecture/security-trust-boundaries.md`.
+## Publication firewall
 
-Especially:
-- grants + RLS;
-- safe views;
-- RPC/function grants;
-- tenant isolation;
-- prompt injection;
-- source-as-data isolation;
-- vector filtered recall;
-- retrieval audit.
+Reject release candidate if:
 
-## RAG
+- restricted/private text would leak;
+- private Drive URL would leak;
+- rights operation denies publication/model use;
+- unreviewed mandatory item remains;
+- citation missing or broken;
+- benchmark gate fails;
+- release component hash mismatches;
+- serving projection is inconsistent with canonical source data.
 
-Hybrid retrieval:
-
-1. exact section/reference;
-2. Hebrew lemma/form;
-3. full-text;
-4. concept links;
-5. semantic candidates;
-6. reranking;
-7. deduplication;
-8. disagreement / counterevidence pass.
-
-Vector top-k is candidate retrieval, never "all relevant literature."
-
-## Evaluation
-
-Begin / run the benchmark in `architecture/research-evaluation-and-benchmarks.md`.
-
-Stage 4 is not research-ready based only on manual impression.
-
-## Stage 4 acceptance gate
+## Acceptance gate
 
 Pass only when:
 
-- duplicated files do not create false consensus;
-- every scholarly claim remains traceable to source/edition/location;
-- claim representation type is visible;
-- rights filter precedes model context;
-- textual criticism preserves raw + parsed layers;
-- passage-first commentary retrieval works;
-- rule + qualification / exception co-retrieval is tested;
-- RLS/view/RPC negative tests pass;
-- prompt injection tests pass;
-- filtered retrieval recall is measured;
-- extraction failure is surfaced.
+- at least one representative source of each supported class can be processed;
+- duplicate file does not create duplicate scholarly vote;
+- rights filtering precedes publication;
+- raw and derived scholarly layers remain separate;
+- benchmark/evaluation is repeatable;
+- ResearchBuild can become a CANDIDATE ResearchRelease;
+- failed candidate does not modify the serving database.
 
 ---
 
-# Stage 5: Research Orchestrator, Rules, Assertion-Level Provenance, and Full QA
+# Phase 5: Rules, Published Analyses, Optional AI Adapter, Product Operations, and Full QA
 
-## Primary goal
+## Goal
 
-Add AI-assisted research synthesis only after corpus and academic evidence systems exist.
+Complete the compiled scholarly product.
 
-## Research orchestration
+## Rule system
 
-For a translation question, the system may:
+Keep separate:
 
-1. inspect text expression / reading;
-2. retrieve morphology / syntax;
-3. run exact corpus query;
-4. run structural query;
-5. run contrastive query;
-6. retrieve major grammar;
-7. retrieve lexicon senses;
-8. retrieve textual-critical evidence;
-9. retrieve passage commentary;
-10. retrieve translation witnesses;
-11. retrieve documented translation principles;
-12. retrieve user translation/rules;
-13. retrieve counterevidence;
-14. synthesize with bounded uncertainty.
+```text
+ConstructionDefinition
+  -> ConstructionInstance
+  -> RuleVersion
+  -> RuleApplication
+  -> TranslationDecision
+  -> PublishedPassageAnalysis
+```
 
-## Evidence packet
+A corpus match is not a translation conclusion.
 
-Preserve separate lanes:
+Official rule kinds:
 
-- text / reading;
-- morphology;
-- syntax;
-- corpus;
-- grammar;
-- lexicon;
-- textual criticism;
-- commentary;
-- ancient version evidence;
-- translation witnesses;
-- translation documentation;
-- user research;
-- counterevidence.
+- LINGUISTIC_HEURISTIC
+- TRANSLATION_POLICY
+- PASSAGE_OVERRIDE
+- EDITORIAL_CONVENTION
 
-Do not flatten lanes into one ranked list before synthesis.
+Rule trigger reuses construction/query semantics.
 
-## Assertion ledger
+## Build-time rule execution
 
-Every substantive final analytical assertion should be representable separately.
+Rules marked as compilable and having clear corpus scope may be evaluated across the pinned corpus during ResearchBuild.
 
-Example assertion:
+Do **not** blindly run every editorial/passsage-specific rule across the entire Bible.
 
-> "In this construction, ל is better explained as X than Y."
+Only rules whose trigger/conditions have defined deterministic scope are materialized globally.
 
-That assertion must link to:
+## Published analysis
+
+Serve:
+
+- approved analysis;
 - supporting evidence;
 - opposing evidence;
-- qualifying evidence;
-- citation locators;
-- inference type;
-- confidence class;
-- entailment review status.
-
-Citation belongs to the assertion, not only to the analysis run.
-
-## User rule system
-
-Rules are versioned user research objects.
-
-They may link to:
-- supporting corpus runs;
-- opposing corpus cases;
-- scholarly claims;
-- qualifications/exceptions;
-- translation implications.
-
-User rules never become grammar facts merely because they are repeatedly used.
-
-## Challenge My Translation
-
-Must execute a genuinely adversarial retrieval plan:
-
+- qualifications;
 - counterexamples;
-- competing syntax;
-- conflicting grammar classifications;
-- lexical alternatives;
-- textual variants;
-- alternative translation witnesses;
-- target-language trade-offs;
-- unsupported assumptions.
+- uncertainty;
+- citations.
 
-It must not be the normal synthesis prompt with a different label.
+Do not regenerate canonical analysis from private academic books at page load.
 
-## Auditability, not bit-for-bit reproducibility
+## Optional runtime AI
 
-Persist:
+Primary initial use:
 
-- evidence state;
-- pinned corpus/retrieval inputs;
-- rule versions;
-- user translation version;
-- prompt version;
-- provider/model identifier;
-- sampling parameters when available;
-- request/output hashes;
-- tool calls;
-- evidence packet hash;
-- output snapshot.
+- natural-language-to-CorpusQuery AST.
 
-Do not promise deterministic regeneration of hosted model prose.
+Possible later non-canonical uses:
 
-## Final QA
+- explain a user's ad-hoc search;
+- help compare a private user translation;
+- explore published/open literature.
 
-Regression areas:
+Any such output is clearly labelled as non-canonical and does not modify published research.
 
-- RTL / bidi;
-- Unicode;
-- reading streams;
-- reference/versification;
-- provider identity;
-- translation alignment;
-- corpus framework scope;
-- query count integrity;
-- source citation;
+## Product operations
+
+Implement:
+
+- current research release pointer;
+- release history;
+- supersede;
+- revoke;
+- rollback;
+- release manifest verification;
+- user-workspace migration compatibility;
+- software-version/research-release compatibility matrix;
+- audit log.
+
+## Public API emphasis
+
+Core:
+
+- current release;
+- passage;
+- translations;
+- published analysis;
+- rule applications;
+- construction instances;
+- query validate/run;
+- evidence/citation.
+
+Optional:
+
+- query interpret.
+
+Private compiler endpoints remain admin/internal.
+
+## Full QA
+
+Include:
+
+- Hebrew RTL/bidi;
+- Unicode normalization;
+- Ketiv/Qere reading streams;
+- versification/reference mapping;
+- translation/provider identity;
+- many-to-many alignment;
+- corpus-framework scoping;
+- morpheme-host relations;
+- Boolean/negation query semantics;
+- count integrity;
+- semantic-set pinning;
+- construction compilation;
+- rule application;
 - citation entailment;
-- rights;
+- rights leakage;
+- publication firewall;
 - RLS/views/RPC;
 - prompt injection;
-- filtered vector recall;
-- duplicate evidence;
-- stale cache/embedding;
+- release rollback;
+- stale projections;
+- workspace isolation;
 - responsive layout;
 - no clipping/overlap.
 
-Stage 5 must not redesign the app unless a verified usability problem requires it.
+## Final acceptance gate
+
+The public product is ready only when:
+
+- a complete sample ResearchBuild can be validated and published;
+- public serving can be rebuilt from release components;
+- public runtime has no authoring credentials;
+- a release can be rolled back without losing user workspace data;
+- deterministic corpus search remains functional without LLM;
+- one optional natural-language query compiles to AST and yields exactly the same results as manually supplied AST;
+- published analysis is release-pinned and auditable.
 
 ---
 
-# Build sequencing rule
+# Implementation rule for all phases
 
-Every later Site Build prompt must explicitly say:
+Every implementation prompt must state:
 
-> Continue modifying the existing project. Do not rebuild or replace the application. Preserve prior working functionality and the active architecture contracts. Do not introduce a new canonical token/phrase/clause ontology, translation-edition identity, rights vocabulary, or retrieval namespace outside the v1.1 contract and canonical vocabulary without an explicit architecture revision.
+> Continue modifying the existing project. Do not rebuild or replace the product. Preserve prior working functionality and active architecture contracts. Do not introduce new canonical ontology, rights semantics, query relations, rule kinds, release states or evidence classes outside the canonical vocabulary without an explicit architecture revision.
 
-Each stage must:
+After each phase:
 
-1. read the active architecture contract;
-2. read the canonical vocabulary;
-3. modify the existing project;
-4. stay within stage scope;
-5. validate its acceptance gate;
-6. regression-test earlier stages;
-7. preserve source/edition/provenance;
-8. update architecture docs when implementation exposes a genuine mismatch.
+1. inspect repository diff;
+2. run schema/contracts tests;
+3. run phase acceptance tests;
+4. rerun earlier regressions;
+5. update architecture docs if implementation exposes a genuine mismatch;
+6. commit a distinct checkpoint;
+7. do not deploy to Vercel unless explicitly requested.
 
-## GitHub checkpoints
+Suggested checkpoints:
 
-Suggested:
-
-- `build-01-foundation`
+- `build-01-product-foundation`
 - `build-02-passage-translations`
-- `build-03-hebrew-corpus`
-- `build-04-academic-rag`
-- `build-05-research-orchestrator`
+- `build-03-corpus-search`
+- `build-04-research-compiler`
+- `build-05-product-release`
 
-Do not deploy to Vercel until explicitly requested.
-
-## Current decision
-
-Keep five stages.
-
-The reason remains structural:
-
-- corpus search is deterministic/framework-scoped data querying;
-- academic retrieval is source-sensitive information retrieval;
-- AI synthesis is downstream of both.
-
-Combining these systems into one build stage materially increases academic and implementation risk.
+The research compiler continues operating after Phase 5. It is a permanent product subsystem, not a bootstrap stage.
