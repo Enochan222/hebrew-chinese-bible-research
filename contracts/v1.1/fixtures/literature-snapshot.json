@@ -1,0 +1,12 @@
+{
+  "literatureSnapshotId": "53535353-5353-4535-8535-535353535353",
+  "researchTargetId": "48484848-4848-4484-8484-484848484848",
+  "snapshotType": "PASSAGE_LITERATURE",
+  "asOfDate": "2026-10-03",
+  "reviewScope": "Fixture contract scope only.",
+  "reviewStatus": "NEEDS_REVIEW",
+  "contentHash": "1616161616161616161616161616161616161616161616161616161616161616",
+  "coverageLimitations": "Synthetic fixture; no literature-coverage claim.",
+  "searchRunIds": [],
+  "includedWorkIds": []
+}
