@@ -2967,3 +2967,103 @@ v1.1 must not freeze until:
 26. Study mode can verify a substantive published conclusion without Research entitlement;
 27. live discovery can be displayed as DISCOVERED_SINCE_RELEASE without changing the published commentary;
 28. capability resolution is enforced server-side and not inferred from client plan labels.
+
+---
+
+# 47. Public runtime AI / BYOK contract
+
+Public runtime AI is BYOK-only.
+
+Gemini is the first supported provider.
+
+## 47.1 No shared model credential
+
+The public product must not contain or retrieve a platform-owned Gemini/OpenAI/Anthropic/other model credential from source code, environment variables, Vercel secrets, Supabase secrets, GitHub Actions secrets, database rows, fixtures, or fallback configuration.
+
+There is deliberately no database table for raw provider credentials.
+
+## 47.2 User BYOK credential
+
+A user-supplied credential is ephemeral runtime input.
+
+The implementation may contain generic code that accepts and forwards a user-supplied credential. It must never contain an actual credential value.
+
+The credential is opaque and provider validation determines validity.
+
+Default persistence mode:
+
+- VOLATILE_MEMORY_ONLY
+
+Forbidden persistence:
+
+- database;
+- object storage;
+- cookies;
+- localStorage;
+- IndexedDB;
+- analytics;
+- telemetry;
+- logs;
+- audit records;
+- evidence packets.
+
+## 47.3 Ephemeral relay
+
+The preferred public-web path is:
+
+~~~text
+browser volatile memory
+ -> AI-specific HTTPS relay
+ -> fixed provider adapter
+ -> Gemini
+~~~
+
+The relay must not persist, log, enqueue, cache, echo, or return the credential.
+
+The relay must have no shared model-provider fallback secret.
+
+## 47.4 No-BYOK behaviour
+
+Without BYOK, the following remain functional:
+
+- Passage Study;
+- CorpusQuery;
+- Corpus Lab;
+- semantic sets;
+- constructions;
+- rule applications;
+- published commentary;
+- evidence and citations;
+- ResearchRelease browsing.
+
+Only optional runtime AI features are unavailable.
+
+## 47.5 Canonical vocabulary
+
+Runtime AI auth mode:
+
+- BYOK_ONLY
+
+Credential states:
+
+- BYOK_AVAILABLE
+- BYOK_MISSING
+- BYOK_INVALID
+- PROVIDER_UNAVAILABLE
+- FEATURE_DISABLED
+
+Credential persistence mode:
+
+- VOLATILE_MEMORY_ONLY
+
+## 47.6 Freeze gate
+
+Before any public AI feature ships:
+
+1. secret scanning confirms no shared model-provider credential in source/config/build artifacts;
+2. browser storage inspection confirms no BYOK credential persistence;
+3. valid and invalid BYOK requests produce no raw credential in logs/telemetry;
+4. provider errors do not echo the credential;
+5. no platform fallback key is reachable;
+6. refresh/sign-out/Forget key clears volatile state;
+7. all non-AI scholarly features work without BYOK.
