@@ -1,0 +1,177 @@
+openapi: 3.1.0
+info:
+  title: Hebrew-Chinese Bible Research Pro Extension API
+  version: 1.1-extension-candidate
+  description: >
+    Machine contract for Research Pro / Scholarly Intelligence endpoints.
+    This is an extension over the same Core ResearchRelease, not a second product.
+servers:
+  - url: /
+paths:
+  /api/v1/experience/capabilities:
+    get:
+      operationId: getExperienceCapabilities
+      responses:
+        '200':
+          description: Server-resolved feature capability decisions
+          content:
+            application/json:
+              schema:
+                $ref: './json-schema/experience-capabilities.schema.json'
+  /api/v1/passages/{reference}/experience:
+    get:
+      operationId: getPassageExperience
+      parameters:
+        - $ref: '#/components/parameters/reference'
+        - name: mode
+          in: query
+          required: true
+          schema: {enum: [STUDY, RESEARCH]}
+        - $ref: '#/components/parameters/optionalReleaseId'
+      responses:
+        '200':
+          description: Release-pinned mode projection
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                required: [researchReleaseId, reference, mode, capabilities]
+                properties:
+                  researchReleaseId: {type: string, format: uuid}
+                  reference: {type: string}
+                  mode: {enum: [STUDY, RESEARCH]}
+                  capabilities:
+                    $ref: './json-schema/experience-capabilities.schema.json'
+  /api/v1/research-issues:
+    get:
+      operationId: listResearchIssues
+      parameters:
+        - $ref: '#/components/parameters/optionalReleaseId'
+        - name: researchTargetId
+          in: query
+          schema: {type: string, format: uuid}
+        - name: issueType
+          in: query
+          schema: {type: string}
+        - name: debateStatus
+          in: query
+          schema: {type: string}
+      responses:
+        '200':
+          description: Release-pinned issue versions
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [researchReleaseId, items]
+                properties:
+                  researchReleaseId: {type: string, format: uuid}
+                  items:
+                    type: array
+                    items:
+                      $ref: './json-schema/research-issue-version.schema.json'
+  /api/v1/research-issues/{researchIssueId}:
+    get:
+      operationId: getResearchIssue
+      parameters:
+        - $ref: '#/components/parameters/researchIssueId'
+        - $ref: '#/components/parameters/optionalReleaseId'
+      responses:
+        '200':
+          description: Exact issue version resolved from release
+          content:
+            application/json:
+              schema:
+                $ref: './json-schema/research-issue-version.schema.json'
+  /api/v1/research-issues/{researchIssueId}/positions:
+    get:
+      operationId: listResearchPositions
+      parameters:
+        - $ref: '#/components/parameters/researchIssueId'
+        - $ref: '#/components/parameters/optionalReleaseId'
+      responses:
+        '200':
+          description: Exact position versions resolved from release
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [researchReleaseId, items]
+                properties:
+                  researchReleaseId: {type: string, format: uuid}
+                  items:
+                    type: array
+                    items:
+                      $ref: './json-schema/research-position-version.schema.json'
+  /api/v1/literature/snapshots/{literatureSnapshotId}:
+    get:
+      operationId: getLiteratureSnapshot
+      parameters:
+        - $ref: '#/components/parameters/literatureSnapshotId'
+      responses:
+        '200':
+          description: Reviewed literature snapshot
+          content:
+            application/json:
+              schema:
+                $ref: './json-schema/literature-snapshot.schema.json'
+  /api/v1/passages/{reference}/commentary:
+    get:
+      operationId: getPassageCommentary
+      parameters:
+        - $ref: '#/components/parameters/reference'
+        - $ref: '#/components/parameters/optionalReleaseId'
+      responses:
+        '200':
+          description: Release-pinned commentary identity shared by Study and Research
+          content:
+            application/json:
+              schema:
+                $ref: './json-schema/commentary-entry.schema.json'
+  /api/v1/scholarly-discovery/recent:
+    get:
+      operationId: listRecentScholarlyDiscovery
+      parameters:
+        - name: researchTargetId
+          in: query
+          schema: {type: string, format: uuid}
+      responses:
+        '200':
+          description: Live non-canonical discovery records
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [publicationState, items]
+                properties:
+                  publicationState: {const: DISCOVERED_SINCE_RELEASE}
+                  items:
+                    type: array
+                    items:
+                      $ref: './json-schema/discovery-record.schema.json'
+components:
+  parameters:
+    reference:
+      name: reference
+      in: path
+      required: true
+      schema: {type: string, minLength: 1}
+    optionalReleaseId:
+      name: researchReleaseId
+      in: query
+      required: false
+      schema: {type: string, format: uuid}
+    researchIssueId:
+      name: researchIssueId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+    literatureSnapshotId:
+      name: literatureSnapshotId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
