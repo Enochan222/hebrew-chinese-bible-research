@@ -219,3 +219,73 @@ It may not:
 - silently relax an exact query into a semantic analogue.
 
 The deterministic query engine decides result membership.
+
+## 16. Release resolution and validate/run race prevention
+
+An incoming draft CorpusQuery may omit `researchReleaseId` only at the validation boundary.
+
+Validation must:
+
+1. resolve the current requested release channel exactly once;
+2. write the resolved `researchReleaseId` into the normalized query;
+3. validate all corpus/layer/semantic-set dependencies against that release;
+4. return a query conforming to `corpus-query-normalized.schema.json`.
+
+`POST /corpus/query/run` and Product MCP `run_corpus_query` execute only a normalized release-pinned query.
+
+They must not re-resolve the current release pointer.
+
+This prevents validation against Release A followed by execution against Release B after a channel-pointer change.
+
+## 17. Field/operator semantic validation
+
+JSON Schema shape validation is followed by a deterministic semantic validator.
+
+At minimum it enforces:
+
+- `FEATURE` requires `featureKey`;
+- `LEXEME_ID`, `SEMANTIC_SET_VERSION_ID`, and `REFERENCE_SPAN_ID` values are UUID identities;
+- `IN` and `NOT_IN` require a non-empty array;
+- scalar comparison operators do not accept boolean values;
+- every node reference is declared;
+- local quantifier bindings are declared and not leaked into outer result shape;
+- annotation-layer relation compatibility;
+- relation-specific required fields such as `maxDistance`;
+- server query-complexity policy.
+
+## 18. Query resource policy
+
+Semantic validity does not imply safe execution.
+
+The server owns a versioned `QueryExecutionPolicyV1` containing:
+
+- maximum declared nodes;
+- maximum AST depth;
+- maximum relation count;
+- maximum quantifier nesting;
+- maximum segment distance;
+- default page size;
+- maximum page size;
+- hard result cap;
+- execution timeout.
+
+Limits may be tuned by benchmark without changing query meaning, but every execution records the policy version used.
+
+A query rejected for cost/resource reasons is not described as linguistically invalid.
+
+## 19. Stable result ordering and pagination
+
+Large corpus results use deterministic pagination.
+
+Canonical order is based on release-pinned textual/reference order plus deterministic binding/result identifiers.
+
+A cursor must pin:
+
+- researchReleaseId;
+- normalized query hash;
+- query execution policy version;
+- last stable sort key.
+
+A cursor must not be reusable after the release/query hash changes.
+
+Counts must continue to distinguish match, construction, clause, verse/reference-label, and reference-span counts.
