@@ -238,7 +238,12 @@
     "KNOWLEDGE_GRAPH",
     "PUBLISHED_ANALYSIS",
     "CITATION_BIBLIOGRAPHY",
-    "COMPILED_SEARCH"
+    "COMPILED_SEARCH",
+    "SCHOLARLY_ISSUE_GRAPH",
+    "LITERATURE_SNAPSHOT",
+    "LITERATURE_REVIEW",
+    "COMMENTARY",
+    "DISCOVERY_BIBLIOGRAPHY"
   ],
   "ruleKind": [
     "LINGUISTIC_HEURISTIC",
@@ -263,5 +268,211 @@
     "MIN_COUNT",
     "MAX_COUNT",
     "EXACT_COUNT"
+  ],
+  "experienceMode": [
+    "STUDY",
+    "RESEARCH"
+  ],
+  "productFeatureKey": [
+    "PASSAGE_STUDY",
+    "KEY_SCHOLARSHIP",
+    "BASIC_CORPUS_SEARCH",
+    "ADVANCED_CORPUS_QUERY",
+    "CONSTRUCTION_BROWSER",
+    "SCHOLARLY_ISSUE_SUMMARY",
+    "SCHOLARLY_DEBATE_GRAPH",
+    "FULL_BIBLIOGRAPHY",
+    "LITERATURE_REVIEW",
+    "LIVE_LITERATURE_DISCOVERY",
+    "CITATION_DEPENDENCY_GRAPH",
+    "ADVANCED_TEXTUAL_CRITICISM",
+    "RESEARCH_EXPORT",
+    "SAVED_RESEARCH_PROJECTS",
+    "OPTIONAL_AI_QUERY_INTERPRETATION"
+  ],
+  "productEntitlementDecision": [
+    "ALLOW",
+    "DENY"
+  ],
+  "productEntitlementPrincipalType": [
+    "USER",
+    "ORGANIZATION",
+    "PLAN"
+  ],
+  "scholarlyDiscoveryCapability": [
+    "SEARCH_WORKS",
+    "GET_WORK",
+    "GET_AUTHORS",
+    "GET_REFERENCES",
+    "GET_CITATIONS",
+    "GET_CITATION_CONTEXTS",
+    "RESOLVE_DOI",
+    "GET_ABSTRACT",
+    "GET_FULLTEXT",
+    "GET_OPEN_ACCESS_LOCATION",
+    "GET_RETRACTION_OR_CORRECTION_STATUS",
+    "SEARCH_BY_DATE",
+    "SEARCH_BY_PUBLICATION_TYPE"
+  ],
+  "discoveryAccessLevel": [
+    "METADATA_ONLY",
+    "ABSTRACT_ONLY",
+    "CITATION_CONTEXT_ONLY",
+    "FULLTEXT_OPEN",
+    "FULLTEXT_LICENSED",
+    "PRIVATE_FULLTEXT"
+  ],
+  "discoveryRecordStatus": [
+    "DISCOVERED",
+    "RESOLVED",
+    "DUPLICATE",
+    "REJECTED",
+    "STALE"
+  ],
+  "discoveryResolutionMethod": [
+    "DOI_EXACT",
+    "ISBN_EXACT",
+    "PROVIDER_CROSSWALK",
+    "TITLE_AUTHOR_FINGERPRINT",
+    "MANUAL",
+    "AI_ASSISTED"
+  ],
+  "scholarlyTargetType": [
+    "REFERENCE_SPAN",
+    "BIBLICAL_BOOK",
+    "LEXEME",
+    "MORPHEME_OR_FORM",
+    "CONSTRUCTION",
+    "CONCEPT",
+    "TEXTUAL_VARIANT",
+    "RESEARCH_ISSUE",
+    "TRANSLATION_ISSUE"
+  ],
+  "scholarlyTargetMappingMethod": [
+    "EXPLICIT_REFERENCE",
+    "SECTION_SCOPE",
+    "AUTHOR_INDEX",
+    "CITATION_CONTEXT",
+    "LEXICAL_MAPPING",
+    "CONSTRUCTION_MAPPING",
+    "HUMAN_CURATED",
+    "AI_INFERRED"
+  ],
+  "scholarlyRelevanceType": [
+    "DIRECT_PASSAGE_EXEGESIS",
+    "BROADER_PASSAGE_SCOPE",
+    "LEXICAL_EVIDENCE",
+    "GRAMMATICAL_EVIDENCE",
+    "CONSTRUCTION_EVIDENCE",
+    "TEXTUAL_CRITICAL_EVIDENCE",
+    "LITERARY_EVIDENCE",
+    "HISTORICAL_CONTEXT",
+    "COMPOSITION_HISTORY",
+    "TRANSLATION_EVIDENCE",
+    "METHODOLOGICAL_CONTEXT"
+  ],
+  "researchIssueType": [
+    "TEXTUAL",
+    "MORPHOLOGICAL",
+    "SYNTACTIC",
+    "LEXICAL",
+    "SEMANTIC",
+    "DISCOURSE",
+    "LITERARY",
+    "COMPOSITIONAL",
+    "HISTORICAL",
+    "TRANSLATIONAL",
+    "RECEPTION",
+    "METHODOLOGICAL"
+  ],
+  "researchDebateStatus": [
+    "HISTORICAL",
+    "ONGOING",
+    "REFRAMED",
+    "SPECIALIST_MINORITY",
+    "INSUFFICIENT_COVERAGE",
+    "NOT_CLASSIFIED"
+  ],
+  "positionClaimRelationship": [
+    "SUPPORTS",
+    "OPPOSES",
+    "QUALIFIES",
+    "REFRAMES",
+    "CONTEXTUALISES",
+    "HISTORICALLY_PRECEDES"
+  ],
+  "issueRelationType": [
+    "SUBISSUE_OF",
+    "REFRAMES",
+    "HISTORICALLY_FOLLOWS",
+    "DEPENDS_ON",
+    "OVERLAPS_WITH"
+  ],
+  "literatureSnapshotType": [
+    "BOOK_STATE_OF_RESEARCH",
+    "PASSAGE_LITERATURE",
+    "ISSUE_LITERATURE",
+    "CONSTRUCTION_LITERATURE",
+    "TRANSLATION_ISSUE_LITERATURE"
+  ],
+  "literatureInclusionRole": [
+    "KEY_WORK",
+    "SEMINAL_WORK",
+    "REPRESENTATIVE_WORK",
+    "RECENT_DEVELOPMENT",
+    "MINORITY_POSITION",
+    "COUNTEREVIDENCE",
+    "BACKGROUND"
+  ],
+  "literatureQueryGeneratedBy": [
+    "HUMAN",
+    "SYSTEM",
+    "AI_ASSISTED"
+  ],
+  "scholarlyPublicationState": [
+    "CURATED_IN_RELEASE",
+    "DISCOVERED_SINCE_RELEASE"
+  ],
+  "commentaryKind": [
+    "PASSAGE_COMMENTARY",
+    "TEXTUAL_NOTE",
+    "GRAMMATICAL_NOTE",
+    "LEXICAL_NOTE",
+    "LITERARY_NOTE",
+    "HISTORICAL_NOTE",
+    "TRANSLATION_NOTE",
+    "STATE_OF_RESEARCH_NOTE"
+  ],
+  "commentarySectionType": [
+    "TEXTUAL_STATE",
+    "MORPHOLOGY",
+    "LEXICON",
+    "SYNTAX",
+    "CORPUS",
+    "TEXTUAL_CRITICISM",
+    "LITERARY_CONTEXT",
+    "HISTORICAL_CONTEXT",
+    "SCHOLARLY_ISSUES",
+    "TRANSLATION_IMPLICATIONS",
+    "CHINESE_TRANSLATION_DECISION",
+    "COUNTERARGUMENTS",
+    "UNCERTAINTY"
+  ],
+  "sourceAccessRouteType": [
+    "OPEN_ACCESS_FULLTEXT",
+    "DOI_PUBLISHER",
+    "LIBRARY_RESOLVER",
+    "LICENSED_PLATFORM",
+    "PRIVATE_LIBRARY_COPY",
+    "METADATA_ONLY"
+  ],
+  "experienceAvailabilityReason": [
+    "FEATURE_NOT_ENTITLED",
+    "SOURCE_RIGHTS_RESTRICTED",
+    "NOT_IN_RESEARCH_RELEASE",
+    "NOT_YET_REVIEWED",
+    "DISCOVERY_PROVIDER_UNAVAILABLE",
+    "COVERAGE_NOT_AVAILABLE",
+    "DATA_TEMPORARILY_UNAVAILABLE"
   ]
 }
