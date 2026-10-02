@@ -61,7 +61,8 @@
           "componentKind",
           "researchObjectId",
           "componentVersion",
-          "contentHash"
+          "contentHash",
+          "componentOrder"
         ],
         "properties": {
           "componentKind": {
