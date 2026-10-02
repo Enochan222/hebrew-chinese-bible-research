@@ -2798,15 +2798,15 @@ Pinned releases never dereference `current_version_id` from mutable authoring ro
 
 # 40. LiteratureSnapshot contract
 
-"Current scholarship" is snapshot-bounded.
+"Current scholarship" is snapshot-bounded and search-auditable.
 
 ## 40.1 `literature_snapshots`
 
 Fields:
 
-- `literature_snapshot_id uuid PK`
+- `literature_snapshot_id uuid PK/FK -> research_objects.research_object_id`
 - `snapshot_type text`
-- `target_object_id uuid FK research_objects`
+- `research_target_id uuid FK`
 - `as_of_date date`
 - `coverage_start_date date nullable`
 - `coverage_end_date date nullable`
@@ -2815,6 +2815,7 @@ Fields:
 - `reviewer_id uuid nullable`
 - `review_status text`
 - `research_release_id uuid nullable`
+- `content_hash text`
 - `created_at timestamptz`
 
 ## 40.2 `literature_search_runs`
@@ -2836,7 +2837,24 @@ Fields:
 - `coverage_limitations text nullable`
 - `status text`
 
-Use a junction table for provider membership rather than storing provider UUID arrays in final implementation.
+## 40.2A `literature_search_provider_requests`
+
+Per-provider execution audit.
+
+Fields:
+
+- `literature_search_provider_request_id uuid PK`
+- `literature_search_run_id uuid FK`
+- `scholarly_discovery_provider_id uuid FK`
+- `provider_dataset_version text nullable`
+- `provider_index_version text nullable`
+- `adapter_version text`
+- `provider_query_syntax_version text nullable`
+- `sort_ranking_mode text nullable`
+- `request_cursor text nullable`
+- `requested_limit integer nullable`
+- `raw_response_hash text nullable`
+- `executed_at timestamptz`
 
 ## 40.3 `literature_search_queries`
 
@@ -2849,8 +2867,8 @@ Fields:
 - `query_type text`
 - `generated_by text`
 - `query_order integer`
-
-Multilingual search expansion must be preserved.
+- `ai_expansion_model text nullable`
+- `ai_expansion_prompt_version text nullable`
 
 ## 40.4 `literature_inclusions`
 
@@ -2861,7 +2879,10 @@ Fields:
 - `inclusion_role text`
 - `relevance_type text`
 - `reason text nullable`
+- `classification_basis text nullable`
 - `review_status text`
+
+Editorial labels such as SEMINAL_WORK, REPRESENTATIVE_WORK, or MINORITY_WITHIN_REVIEWED_SNAPSHOT must retain their classification basis.
 
 ## 40.5 `literature_exclusions`
 
@@ -2877,8 +2898,8 @@ Fields:
 
 Fields:
 
-- `literature_review_snapshot_id uuid PK`
-- `target_object_id uuid FK research_objects`
+- `literature_review_snapshot_id uuid PK/FK -> research_objects.research_object_id`
+- `research_target_id uuid FK`
 - `literature_snapshot_id uuid FK`
 - `research_release_id uuid nullable`
 - `review_structure jsonb`
@@ -2887,7 +2908,18 @@ Fields:
 - `review_status text`
 - `content_hash text`
 
-Literature-review prose is derivative from structured issues/positions/works/claims.
+## 40.7 `literature_review_assertions`
+
+Fields:
+
+- `literature_review_snapshot_id uuid FK`
+- `published_assertion_id uuid FK`
+- `section_key text nullable`
+- `sort_order integer`
+
+Literature-review prose is derivative rendering. Substantive public claims reuse the same PublishedAssertion -> PublishedEvidenceItem graph as passage analysis and commentary.
+
+Search history is auditable. Exact external-provider result reproduction is claimed only where provider/version behavior makes that defensible.
 
 ---
 
@@ -2897,7 +2929,7 @@ Literature-review prose is derivative from structured issues/positions/works/cla
 
 Fields:
 
-- `commentary_entry_id uuid PK`
+- `commentary_entry_id uuid PK/FK -> research_objects.research_object_id`
 - `reference_span_id uuid FK`
 - `research_release_id uuid FK`
 - `commentary_kind text`
@@ -2919,21 +2951,29 @@ Fields:
 - `source_payload jsonb nullable`
 - `section_hash text`
 
-## 41.3 `commentary_section_evidence`
+## 41.3 `commentary_section_assertions`
 
 Fields:
 
 - `commentary_section_id uuid FK`
-- `research_object_id uuid FK`
-- `stance text`
-- `citation_locator jsonb nullable`
+- `published_assertion_id uuid FK`
 - `sort_order integer`
 
-Commentary prose is a release-pinned derivative rendering.
+Rendered prose is derivative from structured assertions.
 
-Underlying evidence remains in structured research objects.
+## 41.4 `commentary_section_evidence`
 
-Translation Note is a distinct commentary/artifact kind with a different editorial purpose from general exegetical Commentary.
+Optional direct section-level bibliography/navigation aid only.
+
+Fields:
+
+- `commentary_section_id uuid FK`
+- `published_evidence_item_id uuid FK`
+- `sort_order integer`
+
+Substantive claims must use `published_assertion_evidence`; section-level evidence must not replace assertion-level provenance.
+
+Translation Note remains a distinct artifact kind from general exegetical commentary.
 
 ---
 
@@ -2951,17 +2991,27 @@ Fields:
 - `description text`
 - `feature_group text`
 - `default_experience_mode text`
+- `default_decision text`
 - `active boolean`
 
-Feature keys are controlled by the canonical vocabulary.
+## 42.2 `entitlement_principals`
 
-## 42.2 `product_entitlements`
+Stable registry preventing one generic UUID from pretending to FK to USER, ORGANIZATION, or PLAN tables.
+
+Fields:
+
+- `entitlement_principal_id uuid PK`
+- `principal_type text`
+- `created_at timestamptz`
+
+Typed bridge tables bind USER, ORGANIZATION, and PLAN identities.
+
+## 42.3 `product_entitlements`
 
 Fields:
 
 - `product_entitlement_id uuid PK`
-- `principal_type text`
-- `principal_id uuid`
+- `entitlement_principal_id uuid FK`
 - `product_feature_id uuid FK`
 - `entitlement_decision text`
 - `source_type text`
@@ -2970,25 +3020,32 @@ Fields:
 - `valid_until timestamptz nullable`
 - `metadata jsonb nullable`
 
-Billing/subscription provider implementation is outside this contract.
+## 42.4 Deterministic entitlement resolution
 
-## 42.3 Rights-before-entitlement invariant
+After RightsPolicy and tenant authorization:
 
-The resolution order is:
+1. filter entitlements active at evaluation time;
+2. select the highest principal specificity: USER > ORGANIZATION > PLAN;
+3. at equal specificity, DENY overrides ALLOW;
+4. if no active entitlement exists, use `product_features.default_decision`;
+5. emit the resolved decision and reason/source references server-side.
+
+The browser never infers entitlement from plan names.
+
+## 42.5 Rights-before-entitlement invariant
+
+Resolution order:
 
 1. RightsPolicy
-2. ProductEntitlement
-3. UI visibility
+2. tenant/user authorization
+3. ProductEntitlement
+4. experience-mode projection
 
-ProductEntitlement can never override source/content rights.
+ProductEntitlement can never override content rights.
 
-## 42.4 Minimum evidence transparency invariant
+## 42.6 Minimum evidence transparency invariant
 
-A user must not require Research entitlement merely to verify a substantive published conclusion already shown in Study mode.
-
-Study must retain key citations, release identity and material uncertainty/alternatives.
-
-Research may expose the full graph, search history and source lineage.
+Research entitlement is never required merely to verify a substantive published conclusion already shown in Study mode.
 
 ---
 
@@ -3000,7 +3057,7 @@ Fields:
 
 - `source_access_route_id uuid PK`
 - `work_id uuid FK`
-- `edition_id uuid nullable`
+- `academic_edition_id uuid nullable FK -> editions`
 - `route_type text`
 - `url text nullable`
 - `availability_scope text`
