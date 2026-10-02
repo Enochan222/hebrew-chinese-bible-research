@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/rights-decision-snapshot.schema.json",
+  "title": "RightsDecisionSnapshot v1.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "snapshotId",
+    "subjectType",
+    "subjectIdentifier",
+    "operation",
+    "purposeScope",
+    "audienceScope",
+    "commercialContext",
+    "applicableRuleIds",
+    "winningRuleIds",
+    "decision",
+    "resolverVersion",
+    "evaluatedAt",
+    "decisionHash"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.1"
+    },
+    "snapshotId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "subjectType": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subjectIdentifier": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "operation": {
+      "enum": [
+        "STORE_ORIGINAL",
+        "EXTRACT_TEXT",
+        "STORE_EXTRACTED_TEXT",
+        "EMBED",
+        "MODEL_CONTEXT",
+        "CACHE",
+        "DISPLAY_FULLTEXT",
+        "DISPLAY_EXCERPT",
+        "QUOTE",
+        "EXPORT",
+        "REDISTRIBUTE",
+        "COMMERCIAL_USE"
+      ]
+    },
+    "purposeScope": {
+      "enum": [
+        "PRIVATE_RESEARCH",
+        "RESEARCH_COMPILATION",
+        "PUBLICATION",
+        "PUBLIC_DISPLAY",
+        "USER_WORKSPACE",
+        "MODEL_ASSISTANCE",
+        "EXPORT"
+      ]
+    },
+    "audienceScope": {
+      "enum": [
+        "INTERNAL_SERVICE",
+        "PRIVATE_RESEARCHER",
+        "AUTHENTICATED_USER",
+        "PUBLIC"
+      ]
+    },
+    "commercialContext": {
+      "enum": [
+        "NONCOMMERCIAL",
+        "COMMERCIAL",
+        "MIXED",
+        "UNKNOWN"
+      ]
+    },
+    "applicableRuleIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+      },
+      "uniqueItems": true
+    },
+    "winningRuleIds": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+      },
+      "uniqueItems": true
+    },
+    "decision": {
+      "enum": [
+        "ALLOW",
+        "DENY",
+        "CONDITIONAL",
+        "UNKNOWN"
+      ]
+    },
+    "conditions": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": true
+    },
+    "resolverVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evaluatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "decisionHash": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{64}$"
+    }
+  }
+}
