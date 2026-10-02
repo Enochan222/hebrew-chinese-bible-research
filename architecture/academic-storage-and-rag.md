@@ -8,7 +8,7 @@ RAG, embeddings and large-model retrieval are primarily build-time/private resea
 
 The product topology is defined in `architecture/product-platform-and-publication-model.md`.
 
-This document defines storage and retrieval principles. Entity and enum names in this file are subordinate to the active candidate contract in `architecture/database-api-cross-stage-contract-v1.1-candidate.md` and the canonical machine-readable vocabulary in `contracts/v1.1/vocabulary.json`.
+This document defines storage and retrieval principles. Entity and enum names in this file are subordinate to the active candidate contract in `architecture/database-api-cross-stage-contract-v1.1.md` and the canonical machine-readable vocabulary in `contracts/v1.1/vocabulary.json`.
 
 Where older terminology in this document conflicts with those files, the v1.1 contract and canonical vocabulary take precedence.
 
@@ -1419,7 +1419,7 @@ The phrase "the translator intended" is prohibited unless supported by documenta
 
 ## 46. Suggested core structures
 
-The active entity contract is `architecture/database-api-cross-stage-contract-v1.1-candidate.md`. The following list is descriptive only and must not override the v1.1 schema.
+The active entity contract is `architecture/database-api-cross-stage-contract-v1.1.md`. The following list is descriptive only and must not override the v1.1 schema.
 
 ### Source and bibliography
 
