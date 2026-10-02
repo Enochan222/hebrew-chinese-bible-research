@@ -96,7 +96,7 @@ Start here:
 - `architecture/product-platform-and-publication-model.md`
 - `architecture/integration-boundaries-mcp-api-database.md`
 - `architecture/dry-runs/001-1sam16-7-mcp-api-db.md`
-- `architecture/database-api-cross-stage-contract-v1.1-candidate.md`
+- `architecture/database-api-cross-stage-contract-v1.1.md`
 - `architecture/site-build-staging-plan.md`
 - `architecture/research-pro-scholarly-intelligence.md`
 - `architecture/ui-mode-cross-stage-contract.md`
