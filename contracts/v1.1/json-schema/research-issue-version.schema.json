@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/research-issue-version.schema.json",
+  "title": "ResearchIssueVersionV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "researchIssueId",
+    "researchIssueVersionId",
+    "versionNumber",
+    "title",
+    "questionText",
+    "issueType",
+    "debateStatus",
+    "reviewStatus",
+    "contentHash"
+  ],
+  "properties": {
+    "researchIssueId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "researchIssueVersionId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "versionNumber": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "questionText": {
+      "type": "string",
+      "minLength": 1
+    },
+    "issueType": {
+      "enum": [
+        "TEXTUAL",
+        "MORPHOLOGICAL",
+        "SYNTACTIC",
+        "LEXICAL",
+        "SEMANTIC",
+        "DISCOURSE",
+        "LITERARY",
+        "COMPOSITIONAL",
+        "HISTORICAL",
+        "TRANSLATIONAL",
+        "RECEPTION",
+        "METHODOLOGICAL"
+      ]
+    },
+    "debateStatus": {
+      "enum": [
+        "HISTORICAL",
+        "ONGOING",
+        "REFRAMED",
+        "MINORITY_WITHIN_REVIEWED_SNAPSHOT",
+        "INSUFFICIENT_COVERAGE",
+        "NOT_CLASSIFIED"
+      ]
+    },
+    "classificationBasis": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "literatureSnapshotId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "reviewStatus": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contentHash": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{64}$"
+    },
+    "supersedesVersionId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "debateStatus": {
+            "const": "MINORITY_WITHIN_REVIEWED_SNAPSHOT"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "classificationBasis",
+          "literatureSnapshotId"
+        ]
+      }
+    }
+  ]
+}
