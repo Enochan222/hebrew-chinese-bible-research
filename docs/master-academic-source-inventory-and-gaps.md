@@ -287,6 +287,26 @@ The older library contains archaeology/background material, including NEAEHL-rel
 
 Only material relevant to a research question should be indexed into the academic system.
 
+### 5.12 Additional grammar / lexical holdings not yet consolidated
+
+A direct comparison with the older specialist folders shows additional omissions inside the same broad categories.
+
+Grammar / morphology resources present in the older library but not currently visible in the consolidated folder include:
+
+- John H. Sailhamer, *A Grammar of Biblical Hebrew*;
+- Eric D. Reymond, *Intermediate Biblical Hebrew Grammar: A Student's Guide to Phonology and Morphology*;
+- *Invitation to Biblical Hebrew: A Beginning Grammar*.
+
+Lexical / diachronic resources present in the older library but not currently visible in the consolidated folder include:
+
+- HALOT CD-ROM edition / digital resource;
+- Avi Hurvitz, Leeor Gottlieb and Aaron Hornkohl/Mastey-associated *A Concise Lexicon of Late Biblical Hebrew* holding;
+- a concise Hebrew-English / English-Hebrew lexicon.
+
+The consolidated folder currently shows only `HALOT I.pdf`; therefore HALOT completeness must be treated as **unverified**, not complete.
+
+The consolidated TDOT sequence also requires a volume-level completeness check before it is registered as a complete set. File presence must be verified by volume identity rather than inferred from the series name.
+
 ## 6. Missing from all current Drive-focused collections or insufficiently represented
 
 These are not necessarily missing files in the user's possession; they are research-domain gaps.
@@ -347,7 +367,7 @@ Use one master folder with the evidence-lane subfolders listed in section 2.
 
 Immediate priority for consolidation:
 
-1. keep the current grammar and lexicon files;
+1. keep the current grammar and lexicon files, but add the missing Sailhamer, Reymond, relevant pedagogical grammar, HALOT digital/remaining holdings and Hurvitz diachronic lexicon only after edition/rights verification;
 2. move verified duplicates into a duplicate holding folder rather than deleting them;
 3. add Textual Criticism, BHS and BHQ;
 4. add History of Hebrew Language;
