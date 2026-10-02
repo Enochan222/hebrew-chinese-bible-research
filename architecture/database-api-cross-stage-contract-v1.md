@@ -1,8 +1,8 @@
 # Database, API, and Cross-Stage Contract v1
 
-Status: **LOCKED ARCHITECTURE CONTRACT**
+Status: **SUPERSEDED CANDIDATE — DO NOT IMPLEMENT AS DATABASE SCHEMA**
 
-This document freezes the v1 data boundaries shared by the five Site Build stages. Future implementation prompts may add indexes, implementation-only columns, derived views, or new feature tables, but must not silently change the meaning of the identifiers, entities, relationships, API contracts, evidence types, or stage ownership defined here.
+This document records the first architecture draft. A subsequent adversarial review identified load-bearing ontology and trust-boundary problems. It is retained for design history only and must not be implemented as the database schema. The active candidate is `architecture/database-api-cross-stage-contract-v1.1-candidate.md`. Future implementation prompts may add indexes, implementation-only columns, derived views, or new feature tables, but must not silently change the meaning of the identifiers, entities, relationships, API contracts, evidence types, or stage ownership defined here.
 
 Any breaking change requires:
 1. an explicit architecture decision record;
