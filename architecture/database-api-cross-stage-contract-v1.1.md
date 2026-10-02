@@ -2354,9 +2354,21 @@ Machine-readable contracts required before freeze:
 
 - `contracts/v1.1/vocabulary.json`
 - `contracts/v1.1/json-schema/corpus-query.schema.json`
-- `contracts/v1.1/json-schema/release-manifest.schema.json`
+- `contracts/v1.1/query-semantics.md`
+- `contracts/v1.1/json-schema/annotation-layer.schema.json`
+- `contracts/v1.1/json-schema/semantic-set-version.schema.json`
+- `contracts/v1.1/json-schema/construction-compilation-run.schema.json`
+- `contracts/v1.1/json-schema/construction-instance.schema.json`
+- `contracts/v1.1/json-schema/rule-application.schema.json`
 - `contracts/v1.1/json-schema/rights-decision-snapshot.schema.json`
+- `contracts/v1.1/json-schema/provider-witness-binding.schema.json`
+- `contracts/v1.1/json-schema/release-manifest.schema.json`
+- `contracts/v1.1/json-schema/release-event.schema.json`
+- `contracts/v1.1/json-schema/release-channel-pointer.schema.json`
+- `contracts/v1.1/json-schema/published-evidence-item.schema.json`
 - `contracts/v1.1/json-schema/published-passage-analysis.schema.json`
+- `contracts/v1.1/json-schema/translation-decision.schema.json`
+- `contracts/v1.1/product-mcp-tools.json`
 - `contracts/v1.1/openapi.yaml`
 
 ---
