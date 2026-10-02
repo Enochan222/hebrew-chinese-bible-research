@@ -18,5 +18,6 @@
   "conditions": null,
   "resolverVersion": "rights-resolver-fixture-1",
   "evaluatedAt": "2026-10-03T00:00:00Z",
-  "decisionHash": "5555555555555555555555555555555555555555555555555555555555555555"
+  "decisionHash": "5555555555555555555555555555555555555555555555555555555555555555",
+  "decisionBasis": "RULE"
 }
