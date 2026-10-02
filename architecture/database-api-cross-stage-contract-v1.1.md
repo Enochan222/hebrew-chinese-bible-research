@@ -1077,12 +1077,15 @@ Fields:
 - `provider_constraint text nullable`
 - `max_excerpt_value numeric nullable`
 - `excerpt_unit text nullable`
+- `conditions_schema_version text nullable`
 - `conditions_json jsonb nullable`
 - `attribution_requirement text nullable`
 
 Operations and decisions come from canonical vocabulary.
 
 Enforceable excerpt limits must always carry an explicit unit from `rightsExcerptUnit`. A bare integer excerpt limit is invalid.
+
+`conditions_json` is not an untyped enforcement escape hatch. Any condition that can change an ALLOW/DENY/CONDITIONAL outcome must belong to a registered versioned condition schema or a typed RightsDecision obligation. Unknown/unregistered condition keys resolve restrictively and cannot silently grant access.
 
 Free-text scopes are no longer authoritative. Canonical scope values must come from:
 
@@ -1121,12 +1124,17 @@ Fields:
 - `applicable_rule_ids jsonb`
 - `winning_rule_ids jsonb`
 - `decision text`
+- `decision_basis text`
+- `conditions_schema_version text nullable`
 - `conditions_json jsonb nullable`
+- `obligations_json jsonb`
 - `resolver_version text`
 - `evaluated_at timestamptz`
 - `decision_hash text`
 
 Publication must pin the rights decision snapshots used for publishability.
+
+A `DEFAULT_DENY` snapshot has zero winning rule IDs and records `decision_basis = DEFAULT_DENY`. An explicit rule outcome records `decision_basis = RULE`. Enforceable residual obligations are serialized from typed/versioned obligation semantics.
 
 Critical rule:
 
@@ -2933,8 +2941,10 @@ Fields:
 - `section_type text`
 - `section_order integer`
 - `rendered_text text`
-- `source_payload jsonb nullable`
+- `render_metadata jsonb nullable`
 - `section_hash text`
+
+`render_metadata` is public-safe rendering metadata only. It must not contain private source text, private locators, unpublished evidence, or an alternative evidence graph.
 
 ## 41.3 `commentary_section_assertions`
 
@@ -3090,8 +3100,8 @@ Reserve equivalent runtime-validated contracts for:
 - `StudyPassageProjectionV1`
 - `ResearchPassageProjectionV1`
 - `ExperienceCapabilitiesV1`
-- `ResearchIssueV1`
-- `ResearchPositionV1`
+- `ResearchIssueVersionV1`
+- `ResearchPositionVersionV1`
 - `LiteratureSnapshotV1`
 - `CommentaryEntryV1`
 - `DiscoveryRecordV1`
@@ -3116,7 +3126,7 @@ An implementation may internally compose several domain endpoints rather than ph
 ### GET `/api/v1/research-issues`
 
 Filters may include:
-- targetObjectId
+- researchTargetId
 - referenceSpanId
 - issueType
 - debateStatus
