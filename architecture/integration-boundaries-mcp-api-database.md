@@ -485,3 +485,45 @@ Use PostgreSQL/Data API/RPC at **data boundaries**.
 Use a publication worker at the **private-to-public trust boundary**.
 
 Do not use MCP as the internal application bus.
+
+
+## 16. Public runtime AI BYOK boundary
+
+Runtime AI is optional and BYOK-only.
+
+Approved flow:
+
+```text
+Browser
+ -> user enters Gemini/provider credential
+ -> volatile browser memory
+ -> AI-specific HTTPS request
+ -> ephemeral BYOK relay / provider adapter
+ -> selected provider
+```
+
+The BYOK relay is not a credential vault.
+
+It must not:
+
+- store provider credentials;
+- create database rows for provider credentials;
+- read a platform model credential;
+- use a Vercel/Supabase/shared model secret;
+- enqueue provider credentials;
+- log provider credentials;
+- silently fall back to a product-funded provider key.
+
+The first-party non-AI APIs do not accept provider credentials.
+
+The Product MCP also does not carry the user's Gemini credential by default. If a future MCP host supplies its own provider credential, that is the host/provider relationship and requires a separate tool-auth design.
+
+Runtime AI states are explicit:
+
+- BYOK_AVAILABLE
+- BYOK_MISSING
+- BYOK_INVALID
+- PROVIDER_UNAVAILABLE
+- FEATURE_DISABLED
+
+Gemini is the first provider implementation, but provider credentials remain opaque and provider-neutral at the domain layer.
