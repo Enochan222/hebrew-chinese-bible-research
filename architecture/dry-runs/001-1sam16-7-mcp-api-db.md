@@ -1,6 +1,8 @@
 # Dry Run 001: 1 Samuel 16:7 across Source, Compiler, Database, API, and MCP
 
-Status: **CONTRACT DRY RUN — NOT SCHOLARLY CONCLUSION**
+Status: **HISTORICAL BASELINE CONTRACT DRY RUN — NOT SCHOLARLY CONCLUSION**
+
+P0 follow-up: `architecture/dry-runs/002-p0-contract-regression.md`.
 
 Date: 2026-10-03
 
