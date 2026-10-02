@@ -558,5 +558,26 @@
     "GTE",
     "LT",
     "LTE"
+  ],
+  "rightsSubjectType": [
+    "SOURCE_ASSET",
+    "WORK",
+    "EDITION",
+    "TEXTUAL_WORK",
+    "TEXTUAL_EDITION",
+    "DIGITAL_EXPRESSION",
+    "PROVIDER_DISTRIBUTION",
+    "CORPUS_RELEASE",
+    "ANNOTATION_LAYER",
+    "RESEARCH_OBJECT"
+  ],
+  "queryConstraintField": [
+    "LEXEME_ID",
+    "LEMMA_TEXT",
+    "SURFACE",
+    "POS",
+    "FEATURE",
+    "SEMANTIC_SET_VERSION_ID",
+    "REFERENCE_SPAN_ID"
   ]
 }
