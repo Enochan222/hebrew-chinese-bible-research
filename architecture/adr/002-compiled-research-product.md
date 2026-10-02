@@ -124,6 +124,6 @@ The following assumptions are no longer valid as core product architecture:
 ## Related documents
 
 - `architecture/product-platform-and-publication-model.md`
-- `architecture/database-api-cross-stage-contract-v1.1-candidate.md`
+- `architecture/database-api-cross-stage-contract-v1.1.md`
 - `architecture/site-build-staging-plan.md`
 - `architecture/security-trust-boundaries.md`
