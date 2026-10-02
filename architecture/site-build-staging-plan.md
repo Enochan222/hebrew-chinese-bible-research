@@ -4,6 +4,8 @@ Status: **architecture-stage only**. This document defines the boundaries and de
 
 ## Why the build must be staged
 
+Before any Site Build stage is implemented, the builder must also read and preserve the locked cross-stage contract in `architecture/database-api-cross-stage-contract-v1.md`. Any breaking change to canonical IDs, entity semantics, Corpus Query DSL relation meanings, rights behavior, versioning, or /api/v1 response contracts requires an explicit architecture revision and migration plan.
+
 This project is a research-grade Hebrew–Chinese Bible translation environment. The build order must follow the evidence architecture already defined in:
 
 - `architecture/academic-evidence-policy.md`
