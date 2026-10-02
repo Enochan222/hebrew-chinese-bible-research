@@ -1276,7 +1276,7 @@ The goal is TEI-compatible conceptual richness, not mandatory one-to-one impleme
 
 The old v1 relied too heavily on `object_type + uuid` without database-enforced existence.
 
-v1.1 introduces a controlled supertype registry for first-class evidence objects.
+v1.1 uses a controlled supertype registry for first-class publishable/evidence objects.
 
 ## 18.1 `research_objects`
 
@@ -1286,9 +1286,35 @@ Fields:
 - `object_type text`
 - `created_at timestamptz`
 
-Research-critical subtype tables should share / reference this ID.
+For first-class publishable version objects, prefer **shared primary-key identity**:
 
-Generic edges may point to `research_objects`, guaranteeing at least registry-level referential integrity.
+```text
+subtype_version_id
+  PK
+  FK -> research_objects.research_object_id
+```
+
+This allows `research_release_components.component_research_object_id` to have a real FK while preserving subtype tables.
+
+Objects expected to participate as release components or public evidence should use this pattern, including where applicable:
+
+- corpus release;
+- annotation layer;
+- translation release/expression snapshot;
+- semantic-set version;
+- construction-definition version;
+- rule-set/rule version aggregate;
+- knowledge-graph release;
+- published analysis set;
+- citation/bibliography release;
+- compiled-search release;
+- scholarly issue graph;
+- literature snapshot/review;
+- commentary release.
+
+Generic edges may point to `research_objects`, guaranteeing registry-level existence.
+
+The publication compiler additionally validates that `object_type` is compatible with the requested release `component_kind`.
 
 Use dedicated typed bridge tables where the relation is structurally central.
 
