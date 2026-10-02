@@ -1289,15 +1289,18 @@ The HALOT PDF sampled from the Drive is especially explicit in restricting repro
 
 Therefore every source must receive a rights status before production ingestion.
 
-Recommended statuses:
+Canonical implementation status uses `contracts/v1.1/vocabulary.json -> sourcePublicationStatus`:
 
-- VERIFIED_OPEN;
-- LICENSED_FOR_INDEXING;
-- LICENSED_PRIVATE_ONLY;
-- USER_SUPPLIED_RESEARCH_ONLY;
-- METADATA_ONLY;
+- REGISTERED;
 - RIGHTS_UNVERIFIED;
-- DO_NOT_INDEX.
+- PRIVATE_RESEARCH_ONLY;
+- APPROVED_PRIVATE_INDEX;
+- APPROVED_PUBLIC_INDEX;
+- METADATA_ONLY;
+- DO_NOT_INDEX;
+- ARCHIVED.
+
+Concepts such as "open", "licensed", or "user supplied" belong in RightsPolicy/source provenance, not a second competing publication-status vocabulary.
 
 Until rights are verified, default to restrictive treatment.
 
