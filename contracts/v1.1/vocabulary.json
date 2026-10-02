@@ -669,5 +669,18 @@
     "PLAN",
     "ORGANIZATION",
     "USER"
+  ],
+  "discoveryPayloadStorageMode": [
+    "PERSISTED_ALLOWED_FIELDS",
+    "METADATA_ONLY",
+    "TRANSIENT_ONLY"
+  ],
+  "scholarlyIntegrityStatus": [
+    "UNCHANGED",
+    "CORRECTED",
+    "RETRACTED",
+    "EXPRESSION_OF_CONCERN",
+    "UPDATED",
+    "UNKNOWN"
   ]
 }
