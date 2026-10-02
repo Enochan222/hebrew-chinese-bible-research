@@ -1,5 +1,11 @@
 # Academic Evidence and Translation Analysis Policy
 
+## Status
+
+This is the governing academic-integrity policy. Implementation vocabulary and entity names are defined in `contracts/v1.1/vocabulary.json` and `architecture/database-api-cross-stage-contract-v1.1-candidate.md`.
+
+A scholarly source span and a system-extracted representation of the scholar's proposition are distinct evidence objects. The latter must never be displayed as if it were the author's verbatim or directly verified statement.
+
 ## 1. Purpose
 
 This project is a research-grade Hebrew Bible translation environment, not a devotional Bible chatbot and not a generic AI translation assistant.
@@ -302,6 +308,7 @@ Suggested evidence groups:
 - strongest supporting evidence
 - strongest opposing evidence
 - unresolved questions
+- assertion-level evidence links for each substantive analytical conclusion
 
 ## 7. Retrieval architecture
 
@@ -385,7 +392,8 @@ Every visible analytical statement should be capable of carrying one of the foll
 - PRIMARY TEXT
 - CORPUS ANNOTATION
 - CORPUS OBSERVATION
-- SCHOLARLY CLAIM
+- SCHOLARLY SOURCE TEXT
+- SCHOLARLY CLAIM REPRESENTATION
 - TRANSLATION WITNESS
 - DOCUMENTED TRANSLATOR NOTE
 - USER HYPOTHESIS
@@ -394,6 +402,27 @@ Every visible analytical statement should be capable of carrying one of the foll
 - UNKNOWN
 
 This distinction is mandatory in both data modelling and UI design.
+
+## 10A. Scholarly claim representation integrity
+
+A source author's wording and the application's representation of that wording must remain distinct.
+
+Allowed representation classes include:
+
+- direct quote, subject to quotation rights;
+- human paraphrase;
+- AI-extracted proposition.
+
+An AI-extracted proposition is a system representation until its entailment by the cited source span has been reviewed.
+
+Therefore:
+
+- a real citation is not enough if the citation does not support the attached claim;
+- source-span identity must be preserved;
+- paraphrase / proposition extraction must record its assertion agent and review status;
+- claim-to-claim relations such as CONTRADICTS or SUPPORTS must also record whether the relation is author-explicit, human-analysed or system-inferred.
+
+The application must treat citation-source mismatch as a major academic error.
 
 ## 11. Counterevidence requirement
 
