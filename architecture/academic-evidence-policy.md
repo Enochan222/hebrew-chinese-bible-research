@@ -473,3 +473,36 @@ When a translation is possible but not demonstrable, the system should call it p
 When translator intention is unknown, the system should say it is unknown.
 
 The product goal is not to make AI sound confident. The goal is to make the research process inspectable, reproducible, and defensible.
+
+
+## 16. Published versus runtime analysis
+
+Canonical public scholarly analysis is a reviewed published artifact.
+
+It must be tied to a ResearchRelease.
+
+Runtime generative output, if offered, is non-canonical unless it later passes the private authoring/review/publication workflow.
+
+Therefore the UI must distinguish:
+
+- PUBLISHED ANALYSIS
+- USER WORKSPACE ANALYSIS
+- OPTIONAL AI EXPLORATION
+
+An optional runtime model may explain or explore published evidence, but it must not silently rewrite the release-pinned conclusion.
+
+## 17. Corpus construction versus interpretive rule
+
+A deterministic pattern match and an interpretive rule are separate epistemic objects.
+
+Example chain:
+
+ConstructionInstance -> RuleApplication -> TranslationDecision.
+
+The first states that a formal pattern matched.
+The second states what a reviewed heuristic/policy does with that match.
+The third states the editorial conclusion in a specific passage.
+
+The application must not collapse the first statement into the third.
+
+This distinction is mandatory for auditable translation research.
