@@ -747,3 +747,81 @@ sources
 Optional AI sits around this pipeline.
 
 It must not replace it.
+
+
+## 23. Research Pro experience layer
+
+Research Pro is not a fifth product plane.
+
+It is a feature-entitled Research experience rendered primarily from:
+
+- PUBLIC_SERVING;
+- USER_WORKSPACE;
+- optional live Scholarly Discovery providers.
+
+The canonical scholarly state remains the active ResearchRelease.
+
+The detailed domain contract is:
+
+- `architecture/research-pro-scholarly-intelligence.md`
+
+The detailed UI/cross-stage contract is:
+
+- `architecture/ui-mode-cross-stage-contract.md`
+
+The accepted architecture decision is:
+
+- `architecture/adr/003-research-pro-experience-layer.md`
+
+Study and Research modes therefore share:
+
+- reference identity;
+- textual witnesses;
+- published translation decisions;
+- commentary identity;
+- ResearchIssues;
+- ResearchPositions;
+- citations;
+- ResearchRelease.
+
+Research mode exposes additional depth rather than a different scholarly truth.
+
+## 24. Scholarly discovery state
+
+External live discovery is outside the immutable curated ResearchRelease until reviewed and published.
+
+The product distinguishes:
+
+- `CURATED_IN_RELEASE`
+- `DISCOVERED_SINCE_RELEASE`
+
+The latter may be displayed in Research mode as recent discovery.
+
+It must not change:
+
+- published commentary;
+- translation decisions;
+- issue/debate status;
+- canonical literature review;
+
+until a later authoring/review/publication cycle.
+
+## 25. Entitlement versus rights
+
+Product feature entitlement is resolved after source/content rights.
+
+Conceptually:
+
+```text
+RightsPolicy
+    ↓
+ProductEntitlement
+    ↓
+Experience visibility
+```
+
+Research entitlement cannot reveal a source whose RightsPolicy prohibits that operation.
+
+Conversely, a source may be legally displayable while a high-depth workflow remains a paid/limited product feature.
+
+This distinction is mandatory across API, UI and server authorization.
