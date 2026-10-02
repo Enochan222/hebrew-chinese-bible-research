@@ -845,3 +845,20 @@ Research entitlement cannot reveal a source whose RightsPolicy prohibits that op
 Conversely, a source may be legally displayable while a high-depth workflow remains a paid/limited product feature.
 
 This distinction is mandatory across API, UI and server authorization.
+
+
+## 23. Public runtime AI billing/auth model
+
+Public runtime AI is strictly BYOK.
+
+The product does not fund or centrally authenticate public Gemini/model usage.
+
+Core product capability is independent of BYOK.
+
+Optional runtime model features may require the user to supply a valid provider credential for the current session.
+
+The product must not ship a shared provider secret or platform fallback credential.
+
+Gemini is the first supported provider.
+
+This requirement does not apply to private internal research-compilation credentials used by the product owner in the Authoring / Research Plane; those are separate private infrastructure and must never be embedded in the public application or exposed to public users.
