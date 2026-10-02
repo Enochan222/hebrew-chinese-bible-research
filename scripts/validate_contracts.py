@@ -47,6 +47,7 @@ POSITIVE = [
  ("contracts/v1.1/json-schema/commentary-entry.schema.json","contracts/v1.1/fixtures/commentary-entry.json"),
  ("contracts/v1.1/json-schema/discovery-record.schema.json","contracts/v1.1/fixtures/discovery-record.json"),
  ("contracts/v1.1/json-schema/experience-capabilities.schema.json","contracts/v1.1/fixtures/experience-capabilities.json"),
+ ("contracts/v1.1/json-schema/product-entitlement.schema.json","contracts/v1.1/fixtures/product-entitlement.json"),
 ]
 
 NEG_SCHEMA = [
