@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "1.1",
+  "snapshotId": "42424242-4242-4424-8424-424242424242",
+  "subjectType": "PROVIDER_DISTRIBUTION",
+  "subjectIdentifier": "41414141-4141-4414-8414-414141414141",
+  "operation": "STORE_EXTRACTED_TEXT",
+  "purposeScope": "PUBLICATION",
+  "audienceScope": "PUBLIC",
+  "commercialContext": "COMMERCIAL",
+  "applicableRuleIds": [
+    "43434343-4343-4434-8434-434343434343"
+  ],
+  "winningRuleIds": [
+    "43434343-4343-4434-8434-434343434343"
+  ],
+  "decision": "ALLOW",
+  "conditions": null,
+  "resolverVersion": "rights-resolver-fixture-1",
+  "evaluatedAt": "2026-10-03T00:00:00Z",
+  "decisionHash": "1212121212121212121212121212121212121212121212121212121212121212"
+}
