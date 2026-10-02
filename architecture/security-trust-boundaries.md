@@ -416,3 +416,105 @@ STUDY and RESEARCH must share:
 Research mode may fetch additional approved depth.
 
 It must not silently switch to private authoring state or unreleased scholarly objects.
+
+
+## 20. Public runtime model credentials are BYOK-only
+
+Non-negotiable invariant:
+
+> The public product owns no shared model-provider credential.
+
+Gemini is the first supported runtime AI provider, but every public-user model call uses a credential supplied by that user.
+
+The product must not contain or retrieve a shared model credential from:
+
+- source code;
+- Vercel environment variables;
+- Supabase secrets;
+- GitHub Actions secrets;
+- database rows;
+- config files;
+- client bundles;
+- test fixtures.
+
+The public runtime must not define a hidden fallback path using a platform-owned model credential.
+
+User BYOK credentials are transient secrets.
+
+They must not be persisted in:
+
+- PostgreSQL/Supabase;
+- object storage;
+- cookies;
+- localStorage;
+- IndexedDB;
+- analytics;
+- telemetry;
+- logs;
+- audit records;
+- evidence packets.
+
+Default client storage is volatile in-memory state only.
+
+The optional AI relay may hold a user credential only during the live HTTPS request and must forward it only to the selected allowlisted provider.
+
+The relay must redact the credential from:
+
+- access logs;
+- application logs;
+- error reporting;
+- telemetry spans;
+- provider-error serialization.
+
+Signing out, refreshing, or explicitly choosing Forget key removes the in-memory credential.
+
+See:
+
+- `architecture/byok-credential-handling.md`
+- `architecture/adr/004-public-ai-byok-only.md`
+
+## 21. BYOK threat model
+
+Threats include:
+
+- accidental source-control commit;
+- accidental build-time injection;
+- client persistence;
+- XSS credential theft;
+- malicious browser extension;
+- server request logging;
+- telemetry capture;
+- error-object echo;
+- provider redirect/SSRF;
+- model credential accidentally entering prompts.
+
+Mitigations:
+
+- masked credential input;
+- strict CSP and XSS controls;
+- volatile memory only;
+- fixed provider adapter destinations;
+- no user-controlled provider URL;
+- explicit log/telemetry redaction;
+- no background job/queue containing credentials;
+- no credential in prompt/evidence/research objects;
+- CI secret scanning;
+- negative tests for browser storage and logs.
+
+## 22. BYOK availability is not scholarly availability
+
+A missing or invalid BYOK credential affects only optional runtime AI.
+
+It must not affect:
+
+- passage rendering;
+- published translation witnesses;
+- CorpusQuery;
+- semantic-set search;
+- constructions;
+- rule applications;
+- published commentary;
+- evidence/citations;
+- ResearchRelease access.
+
+The UI must not imply that AI access is required to use the research product.
