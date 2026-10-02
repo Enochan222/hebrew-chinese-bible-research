@@ -110,6 +110,10 @@ Start here:
 - `docs/academic-source-taxonomy.md`
 - `docs/master-academic-source-inventory-and-gaps.md`
 
+Architecture authority manifest:
+
+- `architecture/manifest.json`
+
 Architecture decisions:
 
 - `architecture/adr/001-framework-scoped-text-analysis.md`
