@@ -189,13 +189,13 @@ Publication validation must check at least:
 
 ## 5. ResearchBuild and ResearchRelease
 
-Build attempts and published releases are not the same object.
+Build attempts, immutable published payloads, and release lifecycle events are separate objects.
 
 ### 5.1 `research_builds`
 
 Mutable build/compilation attempt.
 
-Suggested fields:
+Fields:
 
 - `research_build_id uuid PK`
 - `build_version text`
@@ -204,73 +204,93 @@ Suggested fields:
 - `completed_at timestamptz nullable`
 - `compiler_version text`
 - `git_commit_sha text`
-- `source_inventory_snapshot_id uuid`
+- `source_inventory_snapshot_id uuid nullable`
 - `benchmark_version text nullable`
 - `notes text nullable`
 
-A build may fail, be rejected or be superseded without ever being published.
+Canonical build lifecycle:
+
+- QUEUED
+- RUNNING
+- FAILED
+- READY_FOR_REVIEW
+- APPROVED
+- REJECTED
+- COMPLETED
+
+A ResearchBuild is never PUBLISHED. Publication creates a ResearchRelease.
 
 ### 5.2 `research_releases`
 
-Immutable after publication.
+Immutable release payload.
 
-Suggested fields:
+Fields include:
 
 - `research_release_id uuid PK`
 - `release_label text unique`
-- `release_status text`
-- `published_at timestamptz nullable`
+- `published_at timestamptz`
 - `source_build_id uuid FK`
+- `manifest_schema_version text`
 - `manifest_hash text`
+- `manifest_hash_algorithm text`
+- `manifest_canonical_serialization text`
 - `git_commit_sha text`
 - `compiler_version text`
-- `benchmark_version text`
-- `publication_notes text nullable`
+- `benchmark_version text nullable`
 
-After `PUBLISHED`, scholarly payload is immutable.
+After publication, the scholarly payload and manifest are immutable.
 
 Corrections create a new release.
 
 ### 5.3 `research_release_components`
 
-Pins component releases such as:
-
-- Hebrew corpus release;
-- annotation-framework release;
-- translation release;
-- semantic-set release;
-- construction release;
-- rule-set release;
-- knowledge-graph release;
-- published-analysis release;
-- citation/bibliography release;
-- compiled-search release.
+Release-manifest components point to registered `research_objects`, not unchecked naked UUIDs.
 
 Fields:
 
 - `research_release_id uuid FK`
 - `component_kind text`
-- `component_object_id uuid`
+- `component_research_object_id uuid FK -> research_objects`
 - `component_version text`
 - `content_hash text`
 - `component_order integer nullable`
 
-The public site should expose the active `research_release_id` and allow a scholarly citation to identify the release used.
+The publication compiler validates component-kind/subtype compatibility.
 
-## 6. Release lifecycle
+### 5.4 `research_release_events`
 
-Recommended state model:
+Append-only lifecycle history:
 
-- DRAFT
-- VALIDATING
-- CANDIDATE
 - PUBLISHED
 - SUPERSEDED
 - REVOKED
+- REACTIVATED
 
-`SUPERSEDED` does not destroy the old release.
+Superseding or revoking a release does not mutate its scholarly payload.
 
-`REVOKED` is reserved for releases that must no longer be offered as current because of serious error, rights issue or integrity failure.
+### 5.5 Release channels
+
+`release_channels` and `release_channel_pointers` separate deployment selection from release identity.
+
+Canonical channels:
+
+- PREVIEW
+- STAGING
+- PRODUCTION
+
+Rollback updates a channel pointer to an earlier valid ResearchRelease.
+
+## 6. Manifest integrity
+
+The release manifest payload excludes its own `manifest_hash`.
+
+Canonical hashing contract:
+
+- RFC 8785 JSON Canonicalization Scheme;
+- UTF-8;
+- SHA-256.
+
+The public site exposes the resolved `research_release_id`, and citation-stable APIs allow a caller to pin a historical release explicitly.
 
 ## 7. Runtime model: deterministic by default
 
