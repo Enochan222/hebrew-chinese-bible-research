@@ -376,7 +376,7 @@
     "HISTORICAL",
     "ONGOING",
     "REFRAMED",
-    "SPECIALIST_MINORITY",
+    "MINORITY_WITHIN_REVIEWED_SNAPSHOT",
     "INSUFFICIENT_COVERAGE",
     "NOT_CLASSIFIED"
   ],
@@ -407,7 +407,7 @@
     "SEMINAL_WORK",
     "REPRESENTATIVE_WORK",
     "RECENT_DEVELOPMENT",
-    "MINORITY_POSITION",
+    "MINORITY_WITHIN_REVIEWED_SNAPSHOT",
     "COUNTEREVIDENCE",
     "BACKGROUND"
   ],
@@ -606,5 +606,68 @@
   ],
   "byokPersistenceMode": [
     "VOLATILE_MEMORY_ONLY"
+  ],
+  "reviewType": [
+    "BIBLIOGRAPHIC_IDENTITY",
+    "SOURCE_ENTAILMENT",
+    "HEBREW_LINGUISTIC_ANALYSIS",
+    "TRANSLATION_JUDGMENT",
+    "RIGHTS",
+    "PUBLICATION_APPROVAL"
+  ],
+  "reviewerRole": [
+    "EDITOR",
+    "HEBREW_SPECIALIST",
+    "TEXTUAL_CRITIC",
+    "TRANSLATION_REVIEWER",
+    "RIGHTS_REVIEWER",
+    "SYSTEM_VALIDATOR",
+    "AI_ASSISTANT"
+  ],
+  "reviewDecision": [
+    "APPROVE",
+    "REJECT",
+    "QUALIFY",
+    "NEEDS_CHANGES"
+  ],
+  "provenanceActivityType": [
+    "INGESTION",
+    "OCR",
+    "TEXT_EXTRACTION",
+    "NORMALIZATION",
+    "AI_TRANSFORMATION",
+    "HUMAN_REVIEW",
+    "MAPPING",
+    "QUERY_COMPILATION",
+    "PUBLICATION"
+  ],
+  "rightsDecisionBasis": [
+    "RULE",
+    "DEFAULT_DENY",
+    "UNKNOWN_RESTRICTIVE"
+  ],
+  "rightsExcerptUnit": [
+    "WORD",
+    "UNICODE_CODEPOINT",
+    "GRAPHEME_CLUSTER",
+    "BYTE",
+    "PERCENT_OF_WORK"
+  ],
+  "evidenceStabilityClass": [
+    "IMMUTABLE_SNAPSHOT",
+    "LIVE_EXTERNAL_OBSERVATION",
+    "METADATA_ONLY"
+  ],
+  "expressionDerivationType": [
+    "TRANSCRIBED_FROM",
+    "NORMALIZED_FROM",
+    "CORRECTED_AGAINST",
+    "MERGED_FROM",
+    "REVISED_FROM"
+  ],
+  "entitlementResolutionSpecificity": [
+    "PLAN",
+    "ORGANIZATION",
+    "USER"
   ]
 }
