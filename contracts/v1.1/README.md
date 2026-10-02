@@ -2,24 +2,42 @@
 
 Status: **ACTIVE CANDIDATE CONTRACTS**
 
-These files are normative companions to:
+These files are normative companions to the active architecture.
 
-- `architecture/database-api-cross-stage-contract-v1.1.md`
+## Contract profiles
 
-Precedence for machine names and wire formats:
+- Core: `contracts/v1.1/openapi.yaml` + Core schemas
+- Research Pro extension: `contracts/v1.1/research-pro-openapi.yaml` + Research Pro schemas
+- Optional public AI: strict BYOK policy, independent of deterministic scholarly serving
 
-1. JSON Schema / OpenAPI / Product MCP contract in this directory;
+Profile metadata:
+
+- `contracts/v1.1/profiles.json`
+- `contracts/v1.1/freeze-checklist.md`
+
+Research Pro is not a second product or truth state. The separate profile records engineering maturity only.
+
+## Precedence
+
+Within the applicable profile:
+
+1. JSON Schema / that profile's OpenAPI / Product MCP contract;
 2. `vocabulary.json`;
 3. active architecture prose;
 4. superseded architecture files are design history only.
 
-Current files:
+Core OpenAPI does not override Research Pro extension endpoints merely because they live in a separate profile.
 
-- `vocabulary.json`
+## Core machine contracts
+
 - `json-schema/corpus-query.schema.json`
+- `json-schema/corpus-query-normalized.schema.json`
+- `json-schema/corpus-query-result.schema.json`
+- `json-schema/query-execution-policy.schema.json`
 - `json-schema/release-manifest.schema.json`
 - `json-schema/rights-decision-snapshot.schema.json`
 - `json-schema/published-passage-analysis.schema.json`
+- `json-schema/published-evidence-item.schema.json`
 - `json-schema/translation-decision.schema.json`
 - `json-schema/annotation-layer.schema.json`
 - `json-schema/provider-witness-binding.schema.json`
@@ -29,17 +47,34 @@ Current files:
 - `json-schema/construction-compilation-run.schema.json`
 - `json-schema/construction-instance.schema.json`
 - `json-schema/rule-application.schema.json`
-- `json-schema/published-evidence-item.schema.json`
 - `query-semantics.md`
 - `openapi.yaml`
 - `product-mcp-tools.json`
-- `fixtures/`
+
+## Research Pro extension machine contracts
+
+- `json-schema/research-target.schema.json`
+- `json-schema/research-issue-version.schema.json`
+- `json-schema/research-position-version.schema.json`
+- `json-schema/literature-snapshot.schema.json`
+- `json-schema/commentary-entry.schema.json`
+- `json-schema/discovery-record.schema.json`
+- `json-schema/experience-capabilities.schema.json`
+- `research-pro-openapi.yaml`
+
+## Validation
+
+- `scripts/validate_contracts.py`
+- `.github/workflows/contract-validation.yml`
+- positive fixtures: `contracts/v1.1/fixtures/`
+- negative fixtures: `contracts/v1.1/negative-fixtures/`
 
 Important invariants:
 
-- HTTP, MCP, Pattern Builder, and NL-to-DSL use the same CorpusQuery schema.
+- Pattern Builder, HTTP, MCP, and NL-to-DSL share CorpusQuery semantics.
+- Query execution uses a release-pinned normalized query.
 - Product MCP is read-only over published data in the initial contract.
-- Release manifest hashes are computed over the manifest payload, not a payload containing its own hash.
-- RightsDecisionSnapshot is an immutable evaluation output.
-- Published analysis uses assertion-level public evidence.
-- JSON Schema validation is necessary but not sufficient: semantic validation must also check node references, layer compatibility, release availability, rights, and query complexity.
+- Release manifest hashing excludes its own hash and uses deterministic component ordering.
+- RightsDecisionSnapshot represents explicit-rule and default-deny outcomes.
+- Published scholarship uses assertion-level public evidence.
+- JSON Schema validation is necessary but not sufficient; deterministic semantic validation is mandatory.
