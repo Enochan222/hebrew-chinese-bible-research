@@ -115,7 +115,7 @@ Architecture decisions:
 - `architecture/adr/001-framework-scoped-text-analysis.md`
 - `architecture/adr/002-compiled-research-product.md`
 - `architecture/adr/003-mcp-agent-boundary.md`
-- `architecture/adr/003-research-pro-experience-layer.md`
+- `architecture/adr/004-research-pro-experience-layer.md`
 
 Superseded design history:
 
