@@ -2,7 +2,9 @@
 
 Status: **ACTIVE ARCHITECTURE REQUIREMENT**
 
-The application cannot be judged research-grade by visual quality, citation count, or whether model answers sound plausible.
+The product cannot be judged research-grade by visual quality, citation count, whether model answers sound plausible, or whether the private authoring database is correct in isolation.
+
+Evaluation must also verify that compiled public releases faithfully reproduce the approved research state.
 
 Every major corpus, retrieval and synthesis change must eventually be evaluated against a controlled benchmark.
 
@@ -18,6 +20,10 @@ Evaluate separately:
 6. Rights / access-control leakage
 7. AI synthesis faithfulness
 8. UI evidence presentation
+9. Research compiler correctness
+10. Publication firewall correctness
+11. Compiled serving-projection parity
+12. Research-release integrity and rollback
 
 Do not collapse these into one generic "answer quality" score.
 
@@ -238,3 +244,71 @@ Store evaluation runs with:
 - known failures.
 
 Evaluation history is part of research infrastructure, not a one-time launch checklist.
+
+
+## 15. Compiler and publication metrics
+
+For each representative ResearchBuild measure:
+
+- canonical-to-serving row parity for required objects;
+- construction-instance parity between canonical query execution and compiled instances;
+- rule-application parity;
+- semantic-set membership parity;
+- published-analysis evidence-link integrity;
+- release component hash verification;
+- private/unpublishable object leakage;
+- private locator leakage;
+- quotation/excerpt policy violations;
+- stale serving projection rate.
+
+A successful authoring-side analysis is insufficient if publication changes or loses its meaning.
+
+## 16. Query compiler equivalence
+
+For optional natural-language search, maintain fixtures where a manual AST and a natural-language-generated AST must normalize to the same canonical query or an explicitly equivalent query.
+
+Then verify both execute to the same deterministic result set.
+
+Score separately:
+
+- intent-to-AST accuracy;
+- schema-valid AST rate;
+- semantic equivalence to gold AST;
+- execution-result equivalence;
+- unsafe/over-complex query rejection.
+
+Do not score the LLM's prose explanation as a substitute for query correctness.
+
+## 17. Research-release tests
+
+Every published release should pass:
+
+- manifest schema validation;
+- component hash validation;
+- no mutable payload after PUBLISHED;
+- current-release pointer test;
+- supersede without deletion;
+- revoke behaviour;
+- rollback to prior release;
+- user workspace preservation across release change;
+- API compatibility with supported software version.
+
+## 18. Public-serving independence test
+
+Run a production-like test with:
+
+- authoring database unavailable;
+- external LLM provider unavailable;
+- private RAG index unavailable.
+
+The following must still work:
+
+- passage display;
+- published translations;
+- published analysis;
+- citations;
+- construction browsing;
+- deterministic CorpusQuery;
+- approved rule applications.
+
+This is a release gate for the core scholarly product.
