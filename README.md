@@ -1,6 +1,6 @@
 # Hebrew-Chinese Bible Research
 
-Research-grade Hebrew Bible and Chinese translation analysis platform.
+Research-grade Hebrew Bible and Chinese translation **data product and research platform**.
 
 ## Current project status
 
@@ -8,53 +8,71 @@ Research-grade Hebrew Bible and Chinese translation analysis platform.
 
 Do not implement the superseded v1 database contract.
 
-The active architecture is the **v1.1 candidate**, which is not yet frozen. The project is intentionally delaying Site Build implementation until the load-bearing identity, rights, security and evaluation contracts pass the v1.1 freeze checks.
+The active architecture is the amended **v1.1 candidate**, which is not yet frozen.
 
-## Core research principle
+## Product definition
 
-The application separates:
+This project is not primarily a runtime AI/RAG app.
 
-1. Biblical / textual corpus evidence
-2. Translation witnesses and alignments
-3. Academic literature
-4. User research and AI analysis
+It is designed as:
 
-AI synthesis is downstream of retrieved evidence. It must not fabricate corpus membership, scholarly claims, translator intention or consensus.
+```text
+Private Scholarly Authoring / Research Compiler
+        ↓
+Publication Validation / Firewall
+        ↓
+Immutable ResearchRelease
+        ↓
+Deterministic Public Research Product
+        +
+User Workspace
+        +
+Optional Natural-Language Query Adapter
+```
 
-## Active architecture documents
+Core public research must remain usable without an LLM provider.
 
-Start here:
+## Four logical product planes
 
-- `architecture/database-api-cross-stage-contract-v1.1-candidate.md`
-- `contracts/v1.1/vocabulary.json`
-- `architecture/site-build-staging-plan.md`
-- `architecture/academic-evidence-policy.md`
-- `architecture/academic-storage-and-rag.md`
-- `architecture/security-trust-boundaries.md`
-- `architecture/research-evaluation-and-benchmarks.md`
-- `docs/academic-source-taxonomy.md`
-- `docs/master-academic-source-inventory-and-gaps.md`
+1. **Authoring / Research**
+   - source books
+   - extraction/OCR
+   - RAG/embeddings
+   - AI candidate extraction/mapping
+   - editorial review
 
-Architecture decision history:
+2. **Publication / Control**
+   - rights/citation/benchmark validation
+   - serving projection compilation
+   - release manifest
+   - publish/supersede/revoke/rollback
 
-- `architecture/adr/001-framework-scoped-text-analysis.md`
+3. **Public Serving**
+   - versioned Hebrew corpus
+   - published translations
+   - published analyses
+   - semantic sets
+   - constructions
+   - rule applications
+   - deterministic search
 
-Superseded design history:
+4. **User Workspace**
+   - saved queries
+   - annotations
+   - translation drafts
+   - user semantic sets/rule drafts
 
-- `architecture/database-api-cross-stage-contract-v1.md`
-- `architecture/source-taxonomy-storage-rag.md`
-
-## v1.1 load-bearing distinction
-
-The current architecture distinguishes:
+## Core research distinction
 
 ```text
 Reference location
   != textual expression
   != linguistic segmentation
   != syntactic analysis
-  != translation witness
-  != scholarly interpretation
+  != corpus construction
+  != interpretive rule
+  != translation decision
+  != published analysis
   != AI synthesis
 ```
 
@@ -64,43 +82,104 @@ In practical terms:
 - textual expressions are edition/expression-specific;
 - tokenisation, phrase/clause structure and dependency are framework-scoped;
 - cross-corpus mappings are explicit research data;
-- provider codes such as an FHL Bible version code are not assumed to equal a precise print edition;
+- provider codes do not automatically equal print editions;
 - source text and AI-extracted scholarly propositions are distinct;
-- final AI assertions should link to supporting, opposing and qualifying evidence.
+- corpus pattern matching is not itself a translation conclusion;
+- canonical public analysis is release-pinned.
+
+## Active architecture documents
+
+Start here:
+
+- `architecture/product-platform-and-publication-model.md`
+- `architecture/database-api-cross-stage-contract-v1.1-candidate.md`
+- `architecture/site-build-staging-plan.md`
+- `contracts/v1.1/vocabulary.json`
+- `architecture/academic-evidence-policy.md`
+- `architecture/academic-storage-and-rag.md`
+- `architecture/security-trust-boundaries.md`
+- `architecture/research-evaluation-and-benchmarks.md`
+- `docs/academic-source-taxonomy.md`
+- `docs/master-academic-source-inventory-and-gaps.md`
+
+Architecture decisions:
+
+- `architecture/adr/001-framework-scoped-text-analysis.md`
+- `architecture/adr/002-compiled-research-product.md`
+
+Superseded design history:
+
+- `architecture/database-api-cross-stage-contract-v1.md`
+- `architecture/source-taxonomy-storage-rag.md`
 
 ## Academic source library
 
-Google Drive remains the source/acquisition library, not the production RAG database.
+The reorganized Google Drive library now contains substantial coverage in:
 
-The newly consolidated Drive folder is currently strongest in:
-- Biblical Hebrew grammar;
-- lexica;
-- theological lexica.
+- major Hebrew reference grammars;
+- learning grammars;
+- morphology and language history;
+- BDB / DCH / HALOT holdings;
+- theological lexica;
+- concordances;
+- BHS / Masorah;
+- BHQ Ruth materials;
+- textual criticism;
+- DSS/Judaean Desert;
+- Genesis 1-11 commentary;
+- exegesis method;
+- archaeology/background.
 
-It is not yet a complete master research library. See:
+The current largest source gaps are:
+
+- Chinese Bible translation scholarship/documentation;
+- current specialist article-level research;
+- whole-Bible commentary coverage;
+- whole-Bible BHQ coverage;
+- machine-readable LXX corpus resources;
+- formal rights/edition metadata.
+
+See:
+
 - `docs/master-academic-source-inventory-and-gaps.md`
 
-Major remaining / separate evidence lanes include:
-- BHS/BHQ and textual criticism;
-- DSS/Judean Desert;
-- historical/diachronic Hebrew;
-- commentaries;
-- exegesis and rhetoric methodology;
-- Chinese Bible translation studies/documentation;
-- current journal articles, chapters and dissertations.
+## Product build phases
 
-## Future build stages
+1. Product foundation + release model + serving shell
+2. Passage translations + alignment + workspace
+3. Hebrew corpus + semantic sets + construction/query engine
+4. Private academic knowledge compiler + publication pipeline
+5. Rules + published analyses + optional NL-to-DSL + product operations
 
-The project remains divided into five stages:
+The Research Compiler remains a permanent subsystem after Phase 5.
 
-1. Research shell + reference/text-expression foundation
-2. Passage Study + Chinese translation witnesses + alignment
-3. Hebrew corpus + framework-aware query engine
-4. Academic knowledge base + textual criticism + RAG + security/evaluation
-5. Research orchestrator + rule engine + assertion-level synthesis
+## Runtime AI policy
 
-No Vercel deployment should be performed until explicitly requested.
+Optional runtime AI may interpret natural language into a constrained CorpusQuery AST.
+
+It must not:
+
+- generate arbitrary SQL for execution;
+- determine corpus membership;
+- access private authoring source books through public runtime;
+- silently create canonical claims/rules;
+- modify the active research release.
+
+Visual Pattern Builder and DSL search must work without AI.
 
 ## Development rule
 
-A later build stage must extend the existing project. It must not silently replace canonical vocabularies, ontology, rights semantics, corpus-query semantics or earlier working functionality.
+A later build phase must extend the existing product.
+
+It must not silently replace:
+
+- canonical vocabulary;
+- ontology;
+- rights semantics;
+- product-plane boundaries;
+- release semantics;
+- corpus-query relations;
+- rule kinds;
+- earlier working functionality.
+
+Do not deploy to Vercel until explicitly requested.
