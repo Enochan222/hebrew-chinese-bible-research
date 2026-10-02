@@ -1,0 +1,29 @@
+name: Contract validation
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install validators
+        run: pip install -r requirements-contracts.txt
+      - name: Validate contracts and governance
+        run: python scripts/validate_contracts.py
+      - name: Validate Core OpenAPI
+        run: openapi-spec-validator contracts/v1.1/openapi.yaml
+      - name: Validate Research Pro OpenAPI when present
+        run: |
+          if [ -f contracts/v1.1/research-pro-openapi.yaml ]; then
+            openapi-spec-validator contracts/v1.1/research-pro-openapi.yaml
+          fi
