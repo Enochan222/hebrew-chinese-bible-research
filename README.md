@@ -4,7 +4,7 @@ Research-grade Hebrew Bible and Chinese translation **data product and research 
 
 ## Current project status
 
-**Architecture correction / pre-implementation stage.**
+**Architecture contract closure / pre-database-spike stage.**
 
 Do not implement the superseded v1 database contract.
 
@@ -96,10 +96,12 @@ Start here:
 - `architecture/product-platform-and-publication-model.md`
 - `architecture/integration-boundaries-mcp-api-database.md`
 - `architecture/dry-runs/001-1sam16-7-mcp-api-db.md`
+- `architecture/dry-runs/002-p0-contract-regression.md`
 - `architecture/database-api-cross-stage-contract-v1.1.md`
 - `architecture/site-build-staging-plan.md`
 - `architecture/research-pro-scholarly-intelligence.md`
 - `architecture/ui-mode-cross-stage-contract.md`
+- `contracts/v1.1/README.md`
 - `contracts/v1.1/vocabulary.json`
 - `architecture/academic-evidence-policy.md`
 - `architecture/academic-storage-and-rag.md`
