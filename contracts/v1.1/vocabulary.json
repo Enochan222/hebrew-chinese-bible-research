@@ -1,0 +1,204 @@
+{
+  "schemaVersion": "1.1-candidate",
+  "status": "CANONICAL_VOCABULARY_SOURCE",
+  "evidenceClass": [
+    "PRIMARY_TEXT",
+    "CORPUS_ANNOTATION",
+    "CORPUS_OBSERVATION",
+    "SCHOLARLY_SOURCE_TEXT",
+    "SCHOLARLY_CLAIM_REPRESENTATION",
+    "TRANSLATION_WITNESS",
+    "DOCUMENTED_TRANSLATOR_NOTE",
+    "USER_HYPOTHESIS",
+    "SYSTEM_INFERENCE",
+    "AI_SYNTHESIS",
+    "UNKNOWN"
+  ],
+  "sourceRole": [
+    "PRIMARY_TEXT_EDITION",
+    "REFERENCE_GRAMMAR",
+    "PEDAGOGICAL_GRAMMAR",
+    "MORPHOLOGY_PHONOLOGY",
+    "CORPUS_LINGUISTICS",
+    "GENERAL_LEXICON",
+    "THEOLOGICAL_LEXICON",
+    "ETYMOLOGICAL_REFERENCE",
+    "TEXTUAL_CRITICISM_METHOD",
+    "CRITICAL_EDITION_APPARATUS",
+    "DSS_JUDEAN_DESERT",
+    "COMMENTARY",
+    "EXEGESIS_METHOD",
+    "RHETORIC_LITERARY_METHOD",
+    "ARCHAEOLOGY_BACKGROUND",
+    "CONCORDANCE_FINDING_AID",
+    "CHINESE_TRANSLATION_STUDIES",
+    "TRANSLATION_DOCUMENTATION",
+    "JOURNAL_ARTICLE",
+    "BOOK_CHAPTER",
+    "DISSERTATION_THESIS",
+    "DATASET_PUBLICATION",
+    "COURSE_MATERIAL",
+    "USER_NOTE"
+  ],
+  "retrievalNamespace": [
+    "PRIMARY_TEXT",
+    "REFERENCE_GRAMMAR",
+    "PEDAGOGICAL_GRAMMAR",
+    "MORPHOLOGY_PHONOLOGY",
+    "CORPUS_LINGUISTICS",
+    "GENERAL_LEXICON",
+    "THEOLOGICAL_LEXICON",
+    "COMMENTARY",
+    "TEXTUAL_CRITICISM",
+    "DIACHRONIC_HEBREW",
+    "EXEGESIS_METHOD",
+    "RHETORIC_LITERARY_METHOD",
+    "ARCHAEOLOGY_BACKGROUND",
+    "TRANSLATION_DOCUMENTATION",
+    "CHINESE_TRANSLATION_STUDIES",
+    "CURRENT_RESEARCH"
+  ],
+  "rightsOperation": [
+    "STORE_ORIGINAL",
+    "EXTRACT_TEXT",
+    "STORE_EXTRACTED_TEXT",
+    "EMBED",
+    "MODEL_CONTEXT",
+    "CACHE",
+    "DISPLAY_FULLTEXT",
+    "DISPLAY_EXCERPT",
+    "QUOTE",
+    "EXPORT",
+    "REDISTRIBUTE",
+    "COMMERCIAL_USE"
+  ],
+  "rightsDecision": [
+    "ALLOW",
+    "DENY",
+    "CONDITIONAL",
+    "UNKNOWN"
+  ],
+  "ingestionJobStatus": [
+    "PENDING",
+    "CLASSIFYING",
+    "EXTRACTING",
+    "STRUCTURING",
+    "ENRICHING",
+    "VALIDATING",
+    "READY_TO_COMMIT",
+    "COMPLETED",
+    "FAILED",
+    "CANCELLED",
+    "PARTIAL_RETRYABLE"
+  ],
+  "sourcePublicationStatus": [
+    "REGISTERED",
+    "RIGHTS_UNVERIFIED",
+    "PRIVATE_RESEARCH_ONLY",
+    "APPROVED_PRIVATE_INDEX",
+    "APPROVED_PUBLIC_INDEX",
+    "METADATA_ONLY",
+    "DO_NOT_INDEX",
+    "ARCHIVED"
+  ],
+  "indexStatus": [
+    "NOT_INDEXED",
+    "QUEUED",
+    "INDEXING",
+    "ACTIVE",
+    "STALE",
+    "FAILED",
+    "DISABLED"
+  ],
+  "reviewStatus": [
+    "UNREVIEWED",
+    "AUTO_REVIEWED",
+    "HUMAN_REVIEWED",
+    "VERIFIED",
+    "REJECTED",
+    "NEEDS_REVIEW"
+  ],
+  "claimRepresentationType": [
+    "DIRECT_QUOTE",
+    "HUMAN_PARAPHRASE",
+    "AI_EXTRACTED_PROPOSITION"
+  ],
+  "assertionAgentType": [
+    "SOURCE_AUTHOR",
+    "HUMAN_RESEARCHER",
+    "SYSTEM",
+    "AI_MODEL",
+    "UNKNOWN"
+  ],
+  "corpusResultEpistemicClass": [
+    "CORPUS_COMPLETE",
+    "FRAMEWORK_COMPLETE",
+    "CURATED_SET_COMPLETE",
+    "HEURISTIC_CANDIDATE",
+    "INCOMPLETE_COVERAGE"
+  ],
+  "alignmentRelationType": [
+    "ONE_TO_ONE",
+    "ONE_TO_MANY",
+    "MANY_TO_ONE",
+    "MANY_TO_MANY",
+    "SOURCE_ONLY",
+    "TARGET_ONLY"
+  ],
+  "offsetBasis": [
+    "UTF8_BYTE",
+    "UNICODE_CODEPOINT",
+    "UTF16_CODEUNIT",
+    "GRAPHEME_CLUSTER"
+  ],
+  "textStreamType": [
+    "BASE",
+    "WRITTEN",
+    "READ",
+    "EDITORIAL"
+  ],
+  "normalizationProfileKey": [
+    "SOURCE_EXACT",
+    "UNICODE_NFC",
+    "UNICODE_NFD",
+    "REMOVE_CANTILLATION",
+    "REMOVE_CANTILLATION_KEEP_METEG",
+    "REMOVE_NIQQUD",
+    "CONSONANTAL",
+    "SEARCH_CANONICAL"
+  ],
+  "corpusRelationClass": {
+    "textStream": [
+      "IMMEDIATELY_PRECEDES",
+      "PRECEDES",
+      "FOLLOWS",
+      "WITHIN_N_SEGMENTS",
+      "SAME_REFERENCE_SPAN"
+    ],
+    "frameworkScoped": [
+      "SAME_PHRASE",
+      "SAME_CLAUSE",
+      "SAME_SENTENCE",
+      "ATTACHED_TO",
+      "GOVERNS",
+      "DEPENDENT_OF",
+      "SEMANTIC_ROLE"
+    ]
+  },
+  "analysisStance": [
+    "SUPPORTS",
+    "OPPOSES",
+    "QUALIFIES",
+    "CONTEXT",
+    "NEUTRAL"
+  ],
+  "scholarlyDependencyType": [
+    "CITES",
+    "ADOPTS_CLASSIFICATION_FROM",
+    "REVISES",
+    "CRITIQUES",
+    "USES_DATASET",
+    "DERIVED_FROM",
+    "SUMMARISES"
+  ]
+}
