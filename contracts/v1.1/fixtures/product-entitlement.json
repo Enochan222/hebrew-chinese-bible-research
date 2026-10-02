@@ -1,0 +1,11 @@
+{
+  "productEntitlementId": "58585858-5858-4585-8585-585858585858",
+  "entitlementPrincipalId": "59595959-5959-4595-8595-595959595959",
+  "principalType": "USER",
+  "productFeatureId": "60606060-6060-4606-8606-606060606060",
+  "entitlementDecision": "DENY",
+  "sourceType": "MANUAL",
+  "sourceReference": "fixture",
+  "validFrom": "2026-10-03T00:00:00Z",
+  "validUntil": null
+}
