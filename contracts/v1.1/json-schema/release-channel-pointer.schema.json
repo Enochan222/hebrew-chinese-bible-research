@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/release-channel-pointer.schema.json",
+  "title": "ReleaseChannelPointer v1.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "channel",
+    "researchReleaseId",
+    "updatedAt",
+    "rowVersion"
+  ],
+  "properties": {
+    "channel": {
+      "enum": [
+        "PREVIEW",
+        "STAGING",
+        "PRODUCTION"
+      ]
+    },
+    "researchReleaseId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedBy": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "rowVersion": {
+      "type": "integer",
+      "minimum": 1
+    }
+  }
+}
