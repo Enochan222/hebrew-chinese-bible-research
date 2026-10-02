@@ -230,3 +230,21 @@ It must not silently replace:
 - earlier working functionality.
 
 Do not deploy to Vercel until explicitly requested.
+
+
+## Public AI / BYOK policy
+
+All public runtime AI is **BYOK-only**.
+
+Gemini is the first supported provider.
+
+The repository and deployed public app must contain no shared model-provider credential in source code, environment variables, Vercel secrets, Supabase secrets, GitHub Actions secrets, database rows, fixtures, or fallback configuration.
+
+User-supplied provider credentials are session-only volatile secrets and are not stored in the database, cookies, localStorage, IndexedDB, logs, analytics, telemetry, evidence packets, or audit records.
+
+Without BYOK, the deterministic scholarly product remains functional. Only optional AI-assisted features are unavailable.
+
+See:
+
+- `architecture/byok-credential-handling.md`
+- `architecture/adr/004-public-ai-byok-only.md`
