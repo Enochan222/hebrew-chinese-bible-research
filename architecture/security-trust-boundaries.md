@@ -1,4 +1,4 @@
-# Security and Trust Boundaries
+# Security, Publication Firewall, and Trust Boundaries
 
 Status: **ACTIVE ARCHITECTURE REQUIREMENT**
 
@@ -298,3 +298,63 @@ Required:
 A result is not safe merely because the model does not display restricted text.
 
 Restricted content must not reach an unauthorized retrieval result or model context in the first place.
+
+
+## 14. Publication firewall
+
+The strongest control is data minimization.
+
+The public serving database should not contain restricted academic source full text merely because the private authoring system can access it.
+
+Required one-way path:
+
+```text
+AUTHORING_RESEARCH
+  -> publication validator
+  -> PUBLIC_SERVING
+```
+
+The publication validator must reject:
+
+- private Drive URLs;
+- private source locators not intended for display;
+- source text exceeding permitted excerpt/quotation rules;
+- objects whose rights policy denies public use;
+- unresolved private object references;
+- unreviewed mandatory claims;
+- failed citation entailment requirements;
+- release components with invalid hashes.
+
+Public runtime credentials must not provide a route back into the authoring database.
+
+## 15. User workspace isolation
+
+User workspace is separate from official published research.
+
+A user's:
+
+- translation draft;
+- saved query;
+- annotation;
+- semantic-set draft;
+- rule draft;
+
+must not alter the current ResearchRelease.
+
+Promotion into official research requires an explicit authoring/review/publication workflow.
+
+For MVP deployment, workspace and serving data may share a Supabase project only if schema, RLS, grants, RPCs and caches preserve the separation.
+
+## 16. Research-release integrity
+
+Security includes scholarly integrity.
+
+Public canonical responses should pin:
+
+- research_release_id;
+- component versions;
+- relevant hashes where needed.
+
+Switching the active release is a privileged operation.
+
+A rollback changes the active release pointer; it does not mutate historical published releases.
