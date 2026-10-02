@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/provider-witness-binding.schema.json",
+  "title": "Provider Witness Binding v1.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "bindingMode",
+    "segmentStorageMode",
+    "providerDistributionId",
+    "reference"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.1"
+    },
+    "bindingMode": {
+      "enum": [
+        "SNAPSHOT_PINNED",
+        "LIVE_EXTERNAL"
+      ]
+    },
+    "segmentStorageMode": {
+      "enum": [
+        "PERSISTED_CONTENT",
+        "PROVIDER_LOCATOR",
+        "EPHEMERAL"
+      ]
+    },
+    "providerDistributionId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 1
+    },
+    "providerSegmentKey": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "providerVersion": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "observedHash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-fA-F]{64}$"
+    },
+    "observedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "snapshotContentHash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-fA-F]{64}$"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "bindingMode": {
+            "const": "SNAPSHOT_PINNED"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "snapshotContentHash"
+        ],
+        "properties": {
+          "segmentStorageMode": {
+            "const": "PERSISTED_CONTENT"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "bindingMode": {
+            "const": "LIVE_EXTERNAL"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "segmentStorageMode": {
+            "enum": [
+              "PROVIDER_LOCATOR",
+              "EPHEMERAL"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
