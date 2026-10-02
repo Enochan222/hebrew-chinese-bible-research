@@ -6,7 +6,7 @@ This document reframes the project as a database-backed scholarly product platfo
 
 It complements:
 
-- `architecture/database-api-cross-stage-contract-v1.1-candidate.md`
+- `architecture/database-api-cross-stage-contract-v1.1.md`
 - `architecture/academic-evidence-policy.md`
 - `architecture/security-trust-boundaries.md`
 - `architecture/research-evaluation-and-benchmarks.md`
