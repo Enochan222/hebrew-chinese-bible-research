@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/research-position-version.schema.json",
+  "title": "ResearchPositionVersionV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "researchPositionId",
+    "researchPositionVersionId",
+    "researchIssueId",
+    "versionNumber",
+    "title",
+    "positionSummary",
+    "positionStatus",
+    "reviewStatus",
+    "contentHash"
+  ],
+  "properties": {
+    "researchPositionId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "researchPositionVersionId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "researchIssueId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "versionNumber": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "positionSummary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "positionStatus": {
+      "type": "string",
+      "minLength": 1
+    },
+    "classificationBasis": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reviewStatus": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contentHash": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{64}$"
+    },
+    "supersedesVersionId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    }
+  }
+}
