@@ -35,17 +35,18 @@ A second product-level rule now also applies:
 
 # 1. Architecture freeze policy
 
-v1.1 is a candidate until the following are complete:
+The canonical gate registry is:
 
-1. machine-readable canonical vocabulary exists;
-2. corpus identity / annotation model is exercised against at least OSHB plus one structurally different framework such as MACULA or BHSA;
-3. a translation identity fixture distinguishes a translation work, edition/revision, digital expression and provider distribution;
-4. textual-critical model can represent grouped readings, witness uncertainty and editorial responsibility without losing raw apparatus;
-5. security trust boundaries and RAG injection policy are documented;
-6. evaluation / benchmark architecture is documented;
-7. no unresolved enum / lifecycle vocabulary drift remains.
+- `contracts/v1.1/freeze-checklist.md`
 
-Only then may the contract status become FROZEN.
+Important distinction:
+
+- passing `CORE_SPIKE_V1_1` permits Database Spike 001;
+- it does **not** declare v1.1 FROZEN;
+- Core v1.1 and Research Pro extension gates mature on separate engineering timelines but remain one product over one ResearchRelease;
+- optional public AI has its own shipping gate and cannot block deterministic non-AI scholarship.
+
+Only the canonical stable gate IDs in the checklist may be used by CI/fixtures.
 
 ---
 
@@ -1966,22 +1967,17 @@ The architecture must leave clean extension points without pretending those data
 
 ---
 
-# 28. Preconditions for freezing v1.1
+# 28. Freeze-gate governance
 
-Before changing status from CANDIDATE to FROZEN:
+Do not maintain a second numbered freeze list here.
 
-1. no architecture document contradicts `contracts/v1.1/vocabulary.json`;
-2. an OSHB word / morpheme example and a BHSA or MACULA example can coexist without forced canonical phrase / clause identity;
-3. at least one Ketiv/Qere fixture can be represented as linked reading streams;
-4. one FHL translation witness can be represented as provider distribution -> digital expression -> textual work without falsely asserting a print edition;
-5. one grouped textual-critical reading can be represented while retaining raw apparatus;
-6. one Hebrew-Chinese many-to-many alignment can be represented with stable segment IDs;
-7. rights resolver can represent "display allowed, cache denied, embedding denied, model context denied";
-8. security architecture covers RLS, views, RPC/functions and prompt injection;
-9. research assertion can cite supporting and opposing evidence at assertion level;
-10. Stage 1 contract can be generated / validated from machine-readable schemas without vocabulary drift.
+All preconditions are identified by stable IDs in:
 
-Until these pass, Site Build prompts may be planned, but production schema implementation should not begin.
+- `contracts/v1.1/freeze-checklist.md`
+
+Core implementation may proceed to Database Spike only after `CORE_SPIKE_V1_1` passes.
+
+Full Core freeze, Research Pro extension freeze, and BYOK shipping remain separate gates.
 
 ---
 
@@ -2049,7 +2045,7 @@ Fields:
 - `component_research_object_id uuid FK -> research_objects`
 - `component_version text`
 - `content_hash text`
-- `component_order integer nullable`
+- `component_order integer NOT NULL`
 
 The publication compiler must validate compatibility between `component_kind` and the registered research-object subtype.
 
@@ -2123,7 +2119,7 @@ The manifest includes at minimum:
 - component version;
 - component content hash.
 
-Array ordering must be semantically defined before hashing.
+Release components are serialized in ascending unique `component_order`. The publication validator rejects duplicate/missing order values. RFC 8785 canonicalizes object representation but does not reorder semantic arrays.
 
 A public response containing canonical published scholarship must be resolvable to a research release.
 
@@ -2507,32 +2503,18 @@ Machine-readable HTTP contract:
 
 ---
 
-# 36. Updated freeze preconditions
+# 36. Machine-contract freeze requirements
 
-In addition to section 28, v1.1 must not freeze until:
+Machine-contract requirements are registered under stable IDs in `contracts/v1.1/freeze-checklist.md`.
 
-11. Stage 2 alignment can reference stable text segments created before linguistic analysis;
-12. semantic-set tables exist and at least one official set can be version-pinned;
-13. a morpheme-host query fixture can represent prefixed ל without inventing an orthographic word;
-14. one named ConstructionDefinition can compile through a ConstructionCompilationRun to reviewed ConstructionInstances;
-15. one RuleVersion can apply to a ConstructionInstance without collapsing corpus match into translation conclusion;
-16. a ResearchBuild can produce a candidate ResearchRelease manifest with registered component FKs and deterministic hashes;
-17. publication can reject an object that references private/unpublishable source data;
-18. the public app can serve a pinned release with the optional LLM adapter disabled;
-19. one corpus query pins independent annotation layers and reproduces the same result set;
-20. RightsDecisionSnapshot is deterministic under conflicting policy fixtures;
-21. both PERSISTED_CONTENT and PROVIDER_LOCATOR text-segment fixtures pass;
-22. release rollback changes a release-channel pointer without mutating historical release payload;
-23. a published passage analysis resolves assertion-level public evidence without referencing an authoring evidence packet;
-24. CorpusQuery, ReleaseManifest, RightsDecisionSnapshot, and PublishedPassageAnalysis schemas validate representative fixtures;
-25. OpenAPI exposes both current and pinned-release scholarly read routes;
-26. Product MCP `run_corpus_query` is defined as a facade over the same validated CorpusQuery service, not direct SQL.
-
-Machine-readable contracts required before freeze:
+Normative machine files for the Core profile include:
 
 - `contracts/v1.1/vocabulary.json`
 - `contracts/v1.1/json-schema/corpus-query.schema.json`
+- `contracts/v1.1/json-schema/corpus-query-normalized.schema.json`
 - `contracts/v1.1/query-semantics.md`
+- `contracts/v1.1/json-schema/query-execution-policy.schema.json`
+- `contracts/v1.1/json-schema/corpus-query-result.schema.json`
 - `contracts/v1.1/json-schema/annotation-layer.schema.json`
 - `contracts/v1.1/json-schema/semantic-set-version.schema.json`
 - `contracts/v1.1/json-schema/construction-compilation-run.schema.json`
@@ -2548,6 +2530,8 @@ Machine-readable contracts required before freeze:
 - `contracts/v1.1/json-schema/translation-decision.schema.json`
 - `contracts/v1.1/product-mcp-tools.json`
 - `contracts/v1.1/openapi.yaml`
+
+Research Pro extension machine contracts are tracked by `PRO-FZ-*` gates and do not block Core Database Spike 001.
 
 ---
 
@@ -3233,20 +3217,17 @@ Publication/serving owns:
 
 ---
 
-# 46. Additional v1.1 freeze preconditions
+# 46. Research Pro extension freeze governance
 
-v1.1 must not freeze until:
+Research Pro remains an active product domain over the same ResearchRelease, not a second product.
 
-19. one external DiscoveryRecord can resolve to an existing canonical Work without creating a duplicate work;
-20. one ResearchIssue with at least two ResearchPositions can link to reviewed scholarly claims;
-21. one explicit passage reference and one AI-inferred construction relevance can coexist as different ScholarlyTargetLinks;
-22. one LiteratureSnapshot records providers, queries, inclusion/exclusion and coverage limitations;
-23. one CommentaryEntry can render in both Study and Research modes with the same commentary identity;
-24. one ProductEntitlement denial is distinguishable from a RightsPolicy restriction;
-25. Study and Research for the same passage demonstrably pin the same ResearchRelease;
-26. Study mode can verify a substantive published conclusion without Research entitlement;
-27. live discovery can be displayed as DISCOVERED_SINCE_RELEASE without changing the published commentary;
-28. capability resolution is enforced server-side and not inferred from client plan labels.
+Its machine-contract maturity is tracked independently from the Core Database Spike gate.
+
+Canonical Research Pro requirements use `PRO-FZ-*` IDs in:
+
+- `contracts/v1.1/freeze-checklist.md`
+
+Do not reintroduce duplicate numeric freeze conditions in this document.
 
 ---
 
