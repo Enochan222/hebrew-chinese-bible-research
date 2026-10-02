@@ -2577,10 +2577,12 @@ Fields:
 - `provider_key text unique`
 - `display_name text`
 - `capabilities jsonb`
+- `provider_terms_version text nullable`
+- `rights_policy_id uuid nullable FK`
 - `active boolean`
 - `metadata jsonb`
 
-Provider capability names are controlled by `contracts/v1.1/vocabulary.json`.
+Provider capability names are controlled by canonical vocabulary.
 
 ## 38.2 `external_discovery_records`
 
@@ -2605,6 +2607,12 @@ Fields:
 - `raw_payload jsonb nullable`
 - `access_level text`
 - `record_status text`
+- `rights_decision_snapshot_id uuid nullable FK`
+- `payload_storage_mode text`
+
+`access_level` describes what the provider exposed. It does not by itself authorize persistent storage.
+
+`raw_payload` may be persisted only when the rights decision snapshot permits that operation. Otherwise the record stores rights-safe normalized metadata plus hashes/locators allowed by provider terms.
 
 ## 38.3 `external_record_resolutions`
 
@@ -2619,22 +2627,15 @@ Fields:
 - `resolved_at timestamptz`
 - `resolved_by uuid nullable`
 
-Canonical bibliographic identity must be resolved through DOI/ISBN/provider crosswalk/title-author/manual/AI-assisted methods.
+AI-assisted bibliographic resolution never becomes VERIFIED without configured review.
 
-AI-assisted resolution never becomes VERIFIED without the configured review rule.
+## 38.4 Discovery access invariant
 
-## 38.4 Discovery access level invariant
+A record must preserve whether the system had metadata, abstract, citation context, open full text, licensed full text, or private full text.
 
-A discovery record must preserve whether the system had:
+An AI-extracted scholarly proposition must never imply full-text reading when its evidence basis was metadata/abstract only.
 
-- metadata only;
-- abstract only;
-- citation context only;
-- open full text;
-- licensed full text;
-- private full text.
-
-An AI-extracted scholarly proposition must never imply full-text reading when its evidence basis is only metadata or abstract.
+Provider terms and rights decisions are version-pinned research inputs.
 
 ---
 
