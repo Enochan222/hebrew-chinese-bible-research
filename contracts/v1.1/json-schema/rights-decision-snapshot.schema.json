@@ -16,6 +16,7 @@
     "applicableRuleIds",
     "winningRuleIds",
     "decision",
+    "decisionBasis",
     "resolverVersion",
     "evaluatedAt",
     "decisionHash"
@@ -89,7 +90,6 @@
     },
     "winningRuleIds": {
       "type": "array",
-      "minItems": 1,
       "items": {
         "type": "string",
         "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
@@ -122,6 +122,95 @@
     "decisionHash": {
       "type": "string",
       "pattern": "^[0-9a-fA-F]{64}$"
+    },
+    "decisionBasis": {
+      "enum": [
+        "RULE",
+        "DEFAULT_DENY",
+        "UNKNOWN_RESTRICTIVE"
+      ]
+    },
+    "obligations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "obligationType"
+        ],
+        "properties": {
+          "obligationType": {
+            "enum": [
+              "ATTRIBUTION",
+              "MAX_EXCERPT",
+              "RETENTION_LIMIT",
+              "AUTHENTICATED_ONLY",
+              "TERRITORY_LIMIT",
+              "TEMPORARY_PROCESSING_ONLY"
+            ]
+          },
+          "value": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "unit": {
+            "enum": [
+              "WORD",
+              "UNICODE_CODEPOINT",
+              "GRAPHEME_CLUSTER",
+              "BYTE",
+              "PERCENT_OF_WORK",
+              "DAY"
+            ]
+          }
+        }
+      }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "decisionBasis": {
+            "const": "RULE"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "winningRuleIds": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decisionBasis": {
+            "const": "DEFAULT_DENY"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "winningRuleIds": {
+            "maxItems": 0
+          },
+          "decision": {
+            "const": "DENY"
+          }
+        }
+      }
+    }
+  ]
 }
