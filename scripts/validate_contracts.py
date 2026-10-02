@@ -3,7 +3,7 @@ from __future__ import annotations
 import json, re, sys
 from pathlib import Path
 from typing import Any
-from jsonschema import Draft202012Validator
+from jsonschema import Draft202012Validator, FormatChecker
 
 ROOT = Path(__file__).resolve().parents[1]
 ERRORS: list[str] = []
@@ -16,7 +16,7 @@ def load(path: str) -> Any:
 
 def schema_errors(schema_path: str, fixture_path: str) -> list[str]:
     schema, fixture = load(schema_path), load(fixture_path)
-    return [f"{fixture_path}: {e.message}" for e in Draft202012Validator(schema).iter_errors(fixture)]
+    return [f"{fixture_path}: {e.message}" for e in Draft202012Validator(schema, format_checker=FormatChecker()).iter_errors(fixture)]
 
 POSITIVE = [
  ("contracts/v1.1/json-schema/corpus-query.schema.json","contracts/v1.1/fixtures/corpus-query-1sam16-7.json"),
