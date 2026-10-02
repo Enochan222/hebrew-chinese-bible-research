@@ -22,7 +22,7 @@ The review also identified related problems in translation-edition identity, rig
 ## Decision
 
 1. The original database-api-cross-stage-contract-v1.md is superseded and retained only as design history.
-2. The active candidate contract is database-api-cross-stage-contract-v1.1-candidate.md.
+2. The active candidate contract is `architecture/database-api-cross-stage-contract-v1.1.md`.
 3. The architecture now distinguishes:
 
 Reference Atom / Span
@@ -83,4 +83,4 @@ The model must support them cleanly, but staged implementation remains the proje
 
 ## Freeze rule
 
-v1.1 may be declared frozen only after the preconditions listed in database-api-cross-stage-contract-v1.1-candidate.md have been tested.
+v1.1 may be declared frozen only after the preconditions listed in database-api-cross-stage-contract-v1.1.md have been tested.
