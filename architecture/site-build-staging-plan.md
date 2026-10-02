@@ -10,7 +10,7 @@ The user-supplied provider credential is volatile in-memory runtime input only a
 
 Core research functionality must pass acceptance tests with no BYOK credential present.
 
-See `architecture/byok-credential-handling.md` and ADR-004.
+See `architecture/byok-credential-handling.md` and ADR-005.
 
 Status: **ARCHITECTURE STAGING PLAN, IMPLEMENTATION HOLD UNTIL v1.1 CONTRACT FREEZE**
 
