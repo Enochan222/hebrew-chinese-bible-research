@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/product-entitlement.schema.json",
+  "title": "ProductEntitlementV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "productEntitlementId",
+    "entitlementPrincipalId",
+    "principalType",
+    "productFeatureId",
+    "entitlementDecision"
+  ],
+  "properties": {
+    "productEntitlementId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "entitlementPrincipalId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "principalType": {
+      "enum": [
+        "USER",
+        "ORGANIZATION",
+        "PLAN"
+      ]
+    },
+    "productFeatureId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "entitlementDecision": {
+      "enum": [
+        "ALLOW",
+        "DENY"
+      ]
+    },
+    "sourceType": {
+      "type": "string"
+    },
+    "sourceReference": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "validFrom": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "validUntil": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    }
+  }
+}
