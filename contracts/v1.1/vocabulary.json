@@ -218,19 +218,12 @@
     "READY_FOR_REVIEW",
     "APPROVED",
     "REJECTED",
-    "PUBLISHED"
-  ],
-  "researchReleaseStatus": [
-    "DRAFT",
-    "VALIDATING",
-    "CANDIDATE",
-    "PUBLISHED",
-    "SUPERSEDED",
-    "REVOKED"
+    "COMPLETED"
   ],
   "releaseComponentKind": [
     "CORPUS",
     "ANNOTATION_FRAMEWORK",
+    "ANNOTATION_LAYER",
     "TRANSLATION",
     "SEMANTIC_SET",
     "CONSTRUCTION",
@@ -474,5 +467,96 @@
     "DISCOVERY_PROVIDER_UNAVAILABLE",
     "COVERAGE_NOT_AVAILABLE",
     "DATA_TEMPORARILY_UNAVAILABLE"
+  ],
+  "researchReleasePreparationStatus": [
+    "DRAFT",
+    "VALIDATING",
+    "CANDIDATE",
+    "READY_TO_PUBLISH"
+  ],
+  "researchReleaseEventType": [
+    "PUBLISHED",
+    "SUPERSEDED",
+    "REVOKED",
+    "REACTIVATED"
+  ],
+  "releaseChannel": [
+    "PREVIEW",
+    "STAGING",
+    "PRODUCTION"
+  ],
+  "annotationLayerKind": [
+    "ORTHOGRAPHIC_SEGMENTATION",
+    "MORPHEME_SEGMENTATION",
+    "MORPHOLOGY",
+    "PHRASE_STRUCTURE",
+    "CLAUSE_STRUCTURE",
+    "DEPENDENCY",
+    "SEMANTIC_ROLE",
+    "DISCOURSE",
+    "WORD_SENSE"
+  ],
+  "segmentStorageMode": [
+    "PERSISTED_CONTENT",
+    "PROVIDER_LOCATOR",
+    "EPHEMERAL"
+  ],
+  "witnessReleaseBindingMode": [
+    "SNAPSHOT_PINNED",
+    "LIVE_EXTERNAL"
+  ],
+  "rightsPurposeScope": [
+    "PRIVATE_RESEARCH",
+    "RESEARCH_COMPILATION",
+    "PUBLICATION",
+    "PUBLIC_DISPLAY",
+    "USER_WORKSPACE",
+    "MODEL_ASSISTANCE",
+    "EXPORT"
+  ],
+  "rightsAudienceScope": [
+    "INTERNAL_SERVICE",
+    "PRIVATE_RESEARCHER",
+    "AUTHENTICATED_USER",
+    "PUBLIC"
+  ],
+  "rightsCommercialContext": [
+    "NONCOMMERCIAL",
+    "COMMERCIAL",
+    "MIXED",
+    "UNKNOWN"
+  ],
+  "ruleApplicationEffect": [
+    "SUPPORTS",
+    "DISFAVOURS",
+    "REQUIRES",
+    "PROHIBITS",
+    "QUALIFIES",
+    "NO_DECISION"
+  ],
+  "manifestHashAlgorithm": [
+    "SHA256"
+  ],
+  "manifestCanonicalSerialization": [
+    "RFC8785_JSON_CANONICALIZATION_SCHEME"
+  ],
+  "queryNodeType": [
+    "WORD",
+    "MORPHEME",
+    "PHRASE",
+    "CLAUSE",
+    "SENTENCE",
+    "DISCOURSE_UNIT",
+    "SEMANTIC_ROLE_UNIT"
+  ],
+  "queryConstraintOperator": [
+    "EQ",
+    "NEQ",
+    "IN",
+    "NOT_IN",
+    "GT",
+    "GTE",
+    "LT",
+    "LTE"
   ]
 }
