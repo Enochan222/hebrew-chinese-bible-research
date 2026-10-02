@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/published-passage-analysis.schema.json",
+  "title": "PublishedPassageAnalysis API Payload v1.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "analysisSchemaVersion",
+    "researchReleaseId",
+    "publishedAnalysisId",
+    "referenceSpanId",
+    "analysisType",
+    "assertions",
+    "analysisHash"
+  ],
+  "properties": {
+    "analysisSchemaVersion": {
+      "const": "1.1"
+    },
+    "researchReleaseId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "publishedAnalysisId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "referenceSpanId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "analysisType": {
+      "type": "string",
+      "minLength": 1
+    },
+    "renderedSummary": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "assertions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "assertionId",
+          "assertionText",
+          "assertionType",
+          "evidence"
+        ],
+        "properties": {
+          "assertionId": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+          },
+          "assertionText": {
+            "type": "string",
+            "minLength": 1
+          },
+          "assertionType": {
+            "type": "string",
+            "minLength": 1
+          },
+          "confidenceClass": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "publishedEvidenceItemId",
+                "stance",
+                "entailmentReviewStatus"
+              ],
+              "properties": {
+                "publishedEvidenceItemId": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                },
+                "stance": {
+                  "enum": [
+                    "SUPPORTS",
+                    "OPPOSES",
+                    "QUALIFIES",
+                    "CONTEXT",
+                    "NEUTRAL"
+                  ]
+                },
+                "entailmentReviewStatus": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "analysisHash": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{64}$"
+    }
+  }
+}
