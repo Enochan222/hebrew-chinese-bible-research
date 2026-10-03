@@ -60,6 +60,34 @@ The current Sacred Studies repository contains useful search prompts, Librarian/
 
 This project therefore preserves the **full intended research method** and completes the provider aggregation path, while rejecting dead-code, credential, stale-date, and auto-pass defects.
 
+## Current contract-closure state
+
+The 2026-10-03 independent contract-closure panel has accepted a deliberately bounded set of changes before Database Spike 001:
+
+- human passage labels resolve through an explicit ReferenceSystem to canonical ReferenceSpan identity;
+- corpus query meaning is separated from pagination state through CorpusQueryExecutionRequest;
+- result pages distinguish page count from defensible exact total count;
+- official project TranslationDecision pins an immutable TranslationSourceBasis and exact TranslationPolicyVersion;
+- TranslationPolicy reuses existing RuleVersion infrastructure instead of creating a second rule engine;
+- passage-level TranslationSourceBasis is sealed through published translation/analysis aggregates rather than emitted as one top-level release component per passage;
+- rights snapshots fail closed, use typed conditions/obligations, and cannot resolve to UNKNOWN;
+- CitationLocator has locator-specific required identity;
+- public excerpts require rights snapshots and immutable evidence requires content hashes;
+- ResearchPositionVersion pins exact ResearchIssueVersion framing;
+- publication across Authoring/Serving guarantees atomic visibility by inactive materialization plus an atomic Serving pointer move, not a fictional distributed ACID transaction;
+- Database Spike 001 now attacks cross-layer, cross-stream, cross-issue-version, translation-policy, rights, RLS, query and publication invariants.
+
+Deliberately deferred rather than added to the Core closure patch:
+
+- large bibliographic ontology redesign;
+- full API-wide pagination/error ontology;
+- OCR ontology expansion;
+- full TEI modelling;
+- another BYOK architecture layer;
+- Research Pro provider-scale production normalization.
+
+Repository-admin branch protection remains operationally unresolved and is tracked separately; source files cannot truthfully substitute for the live GitHub ruleset.
+
 ## Current architecture state
 
 - `PROJECT_CHARTER.md` is canonical product intent.
