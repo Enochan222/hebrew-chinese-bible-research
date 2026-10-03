@@ -15,6 +15,8 @@ The active architecture is the amended **v1.1 candidate**, which is not yet froz
 Read first:
 
 - `PROJECT_CHARTER.md`
+- `PROJECT_STATE.md`
+- `CHANGELOG.md`
 
 This is the canonical product-intent and requirements document. Architecture and machine contracts implement it; they do not redefine the product goal.
 
@@ -115,6 +117,7 @@ Other active specialised architecture:
 - `architecture/academic-storage-and-rag.md`
 - `architecture/research-pro-scholarly-intelligence.md`
 - `architecture/scholarly-discovery-aggregation.md`
+- `architecture/sacred-studies-research-method.md`
 - `architecture/ui-mode-cross-stage-contract.md`
 - `architecture/security-trust-boundaries.md`
 - `architecture/byok-credential-handling.md`
@@ -263,3 +266,10 @@ See:
 
 - `architecture/byok-credential-handling.md`
 - `architecture/adr/005-public-ai-byok-only.md`
+
+
+## Mandatory repository governance
+
+Every push/PR must update both `PROJECT_STATE.md` and `CHANGELOG.md`.
+
+See `AGENTS.md` and `.github/workflows/project-governance.yml`.
