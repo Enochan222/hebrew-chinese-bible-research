@@ -45,9 +45,9 @@ Additional gate only when optional public BYOK AI is shipped.
 | CORE-SPIKE-009 | Public assertion evidence is assertion-level and public-safe | PASS | PublishedAssertion/Evidence contract |
 | CORE-SPIKE-010 | BYOK introduces no shared model credential dependency into core | PASS | ADR-005 / BYOK policy |
 | CORE-SPIKE-011 | Contract validation is executable from a fresh clone | PASS | GitHub Actions run 37071301356 checked out `7bc46c...`; validator + Core OpenAPI + Research Pro OpenAPI all succeeded |
-| CORE-SPIKE-012 | Passage labels resolve through explicit ReferenceSystem and corpus pagination has an executable request contract | PENDING | panel contract-closure PR CI |
-| CORE-SPIKE-013 | Official TranslationDecision pins immutable adopted source basis and exact TranslationPolicyVersion | PENDING | panel contract-closure PR CI |
-| CORE-SPIKE-014 | Rights machine contract fails closed and typed condition/obligation negative fixtures pass | PENDING | panel contract-closure PR CI |
+| CORE-SPIKE-012 | Passage labels resolve through explicit ReferenceSystem and corpus pagination has an executable request contract | PASS | Contract validation run 37100959518 + panel review |
+| CORE-SPIKE-013 | Official TranslationDecision pins immutable adopted source basis and exact TranslationPolicyVersion | PASS | Contract validation run 37100959518 + panel review |
+| CORE-SPIKE-014 | Rights machine contract fails closed and typed condition/obligation negative fixtures pass | PASS | Contract validation run 37100959518 + adversarial negative fixtures |
 
 Database Spike 001 may begin when all CORE-SPIKE gates are PASS. This does not declare v1.1 FROZEN.
 
