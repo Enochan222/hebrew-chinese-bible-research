@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.5**
+State Revision: **2026-10-04.6**
 
 ## Mandatory governance rule
 
@@ -192,4 +192,4 @@ Repository visibility remains public as observed state; this audit does not chan
 
 ## Latest push intent
 
-Database Spike 001 second clean run now proves bootstrap, full migration, and controlled seed loading. The adversarial suite then reached the deterministic corpus-query assertions and exposed a PostgreSQL test-expression defect: aggregate `min(uuid)` is not defined. The schema and corpus query are unchanged; the test now selects the first ordered UUID directly. A third blank-database run is required to continue into RLS, publication failure/rollback, immutability, and query-plan evidence.
+Database Spike 001 third clean run again proved bootstrap, migration, and seed. The adversarial suite advanced into the authenticated RLS phase, where the test role could not call the temporary `spike_test.assert_true()` helper. The correction grants only the temporary test schema/function to `authenticated` and `anon`; production schemas/grants are unchanged, and the test schema is dropped at the end. Independent review has also identified a separate Serving-plane concern: the first corpus-query implementation still reads Authoring tables. Even if the SQL suite becomes green, that coupling must be removed or explicitly failed before claiming public-serving isolation.

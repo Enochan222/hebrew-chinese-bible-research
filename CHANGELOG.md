@@ -63,6 +63,18 @@ Second Database Spike run `37142329963`:
 
 The failure is a test-expression defect, not a schema relaxation. The assertion now orders UUID rows and selects the first result directly.
 
+Third Database Spike run `37142397559`:
+- bootstrap: PASS;
+- full migration: PASS;
+- seed: PASS;
+- adversarial suite progressed through deterministic corpus-query assertions and reached Workspace RLS;
+- failure: the switched `authenticated` test role lacked USAGE/EXECUTE on the temporary `spike_test.assert_true()` helper;
+- query plan: not reached.
+
+The fix grants only the disposable test helper to test roles. Production Authoring/Serving/Workspace grants are unchanged.
+
+Independent review also identified a non-test concern not yet closed: `serving.spike_corpus_query` currently depends on Authoring tables. A later green test run is not sufficient to claim Serving-plane independence until that coupling is removed or the gate is explicitly left unproven.
+
 A fresh run is required after this correction.
 
 This is the first implementation round. The new `Database Spike 001 / postgres-spike` workflow must apply the migration from a blank PostgreSQL 17 database, load fixtures, pass all expected-failure assertions, and emit a representative query plan. Existing required `contracts` and `state-and-changelog` checks remain mandatory. Any SQL/contract defect found by the first clean run must be corrected before merge.
