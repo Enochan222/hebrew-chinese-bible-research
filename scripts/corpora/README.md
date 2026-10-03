@@ -35,11 +35,22 @@ BHSA example:
 
 ```bash
 python scripts/corpora/export_bhsa_features.py \
-  --reference 1_Samuel.16.7 \
+  --reference Samuel_I.16.7 \
   --output .local/exports/bhsa-1sam16-7.ndjson
 ```
 
-The BHSA exporter loads ETCBC bridging features when the pinned bridging cache exists. Those fields are attached to BHSA word nodes as comparison evidence and are not represented as OSHB provider word IDs.
+The BHSA exporter loads ETCBC bridging features when the pinned bridging cache exists. Those fields are attached to BHSA word nodes as 2021 comparison evidence and are not represented as current OSHB provider word IDs.
+
+Build a conservative current-OSHB to BHSA candidate crosswalk:
+
+```bash
+python scripts/corpora/build_candidate_crosswalk.py \
+  --oshb .local/exports/oshb-1sam16-7.ndjson \
+  --bhsa .local/exports/bhsa-1sam16-7.ndjson \
+  --output .local/exports/crosswalk-1sam16-7.ndjson
+```
+
+The crosswalk fails closed at verse level: count/signature mismatch becomes `NEEDS_REVIEW`; generated mappings are `CANDIDATE_AUTOMATED` and never canonical by themselves.
 
 ## Updating upstream data
 

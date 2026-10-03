@@ -17,7 +17,7 @@ REQUESTED_FEATURES = [
 def parse_reference(value: str) -> tuple[str, int, int]:
     parts = value.rsplit(".", 2)
     if len(parts) != 3:
-        raise ValueError("reference must look like 1_Samuel.16.7")
+        raise ValueError("reference must look like Samuel_I.16.7")
     return parts[0], int(parts[1]), int(parts[2])
 
 def main() -> int:
@@ -25,7 +25,7 @@ def main() -> int:
     parser.add_argument("--bhsa-dir", type=Path, default=DEFAULT_BHSA)
     parser.add_argument("--bridging-dir", type=Path, default=DEFAULT_BRIDGE)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--reference", help="BHSA section label such as 1_Samuel.16.7")
+    parser.add_argument("--reference", help="BHSA section label such as Samuel_I.16.7")
     parser.add_argument("--limit", type=int, default=0)
     args = parser.parse_args()
     try:
@@ -53,9 +53,15 @@ def main() -> int:
         return obj.v(node) if obj is not None else None
 
     count = 0
+    last_section = None
+    word_order = 0
     with args.output.open("w", encoding="utf-8") as out:
         for word in F.otype.s("word"):
             section = T.sectionFromNode(word)
+            if tuple(section) != last_section:
+                last_section = tuple(section)
+                word_order = 0
+            word_order += 1
             if target and tuple(section) != target:
                 continue
             phrase_nodes = L.u(word, otype="phrase")
@@ -68,6 +74,7 @@ def main() -> int:
                 "providerScopedNodeId": word,
                 "referenceSystemCode": "BHSA_2021_SECTION",
                 "referenceLabel": f"{section[0]}.{section[1]}.{section[2]}",
+                "wordOrderInVerse": word_order,
                 "surfaceSourceExact": feature("g_word_utf8", word),
                 "consonantalSourceExact": feature("g_cons_utf8", word),
                 "lexemeRaw": feature("lex_utf8", word),

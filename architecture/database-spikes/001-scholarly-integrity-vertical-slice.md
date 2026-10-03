@@ -52,7 +52,8 @@ Bootstrap and provider-scoped export tooling:
 
 - `scripts/corpora/fetch_sources.py`;
 - `scripts/corpora/export_oshb_words.py`;
-- `scripts/corpora/export_bhsa_features.py`.
+- `scripts/corpora/export_bhsa_features.py`;
+- `scripts/corpora/build_candidate_crosswalk.py`.
 
 The spike must preserve the source roles defined in `architecture/corpus-source-integration.md`: OSHB is the initial morphology/morpheme baseline; BHSA phrase/clause/syntax stays framework-scoped; ETCBC bridging is derived comparison/mapping evidence; project SemanticSetVersion remains the authority for project-curated semantic classes.
 
@@ -166,7 +167,8 @@ Prove:
 - join expansion does not inflate construction/clause/reference counts;
 - query execution policy enforces `defaultPageSize <= maxPageSize <= hardResultCap`;
 - pinned OSHB morphology/morpheme layers and pinned BHSA 2021 phrase/clause layers can coexist without universal phrase/clause identity;
-- a mixed OSHB + project SemanticSetVersion + BHSA clause query cannot execute without an explicit compatible cross-layer mapping.
+- a mixed OSHB + project SemanticSetVersion + BHSA clause query cannot execute without an explicit compatible cross-layer mapping;
+- candidate crosswalk output remains non-canonical until reviewed/imported through the typed cross-annotation mapping boundary; any unresolved verse must not be guessed into a match.
 
 ## 6. RLS / authorization attacks
 

@@ -241,7 +241,8 @@ Export the 1 Samuel 16:7 spike inputs:
 ```bash
 python scripts/corpora/export_oshb_words.py --reference 1Sam.16.7 --output .local/exports/oshb-1sam16-7.ndjson
 python -m pip install -r requirements-corpus.txt
-python scripts/corpora/export_bhsa_features.py --reference 1_Samuel.16.7 --output .local/exports/bhsa-1sam16-7.ndjson
+python scripts/corpora/export_bhsa_features.py --reference Samuel_I.16.7 --output .local/exports/bhsa-1sam16-7.ndjson
+python scripts/corpora/build_candidate_crosswalk.py --oshb .local/exports/oshb-1sam16-7.ndjson --bhsa .local/exports/bhsa-1sam16-7.ndjson --output .local/exports/crosswalk-1sam16-7.ndjson
 ```
 
 Source pins and rights defaults are machine-readable in `contracts/v1.1/corpus-source-registry.json`.

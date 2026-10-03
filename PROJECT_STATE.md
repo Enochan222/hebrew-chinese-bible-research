@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.3**
+State Revision: **2026-10-04.4**
 
 ## Mandatory governance rule
 
@@ -152,10 +152,11 @@ The first real-corpus integration for Database Spike 001 is now machine-pinned a
 
 - OSHB/morphhb commit `3d15126fb1ef74867fc1434be1942e837932691f` is the initial text/word/lemma/morpheme/morphology baseline;
 - BHSA frozen dataset `2021`, fetched from repository commit `4db00e2157915495e1a4d3d57e41223df24775da`, is an independent framework-scoped phrase/clause/syntactic annotation source;
-- ETCBC bridging `2021`, commit `324598bb3f9cb3a36543e77ac61e4b0f77addf82`, is derived mapping/morphology-comparison evidence on BHSA word nodes and is not universal word identity;
+- ETCBC bridging `2021`, commit `324598bb3f9cb3a36543e77ac61e4b0f77addf82`, is 2021-derived morphology-comparison evidence on BHSA word nodes and is not assumed to map the current OSHB pin's provider word IDs;
 - project SemanticSetVersion remains the authority for project-curated semantic categories such as BODY_PART;
 - upstream corpus data is downloaded on demand into gitignored `.local/corpora/`, never vendored as the repository's canonical data;
 - source exact Unicode is preserved; OSHB source identity is not NFC-normalized;
+- a conservative candidate crosswalk compiler may propose current-OSHB to BHSA word mappings only when reference/order/consonantal signatures agree; mismatch is `NEEDS_REVIEW`, and automatic canonical promotion is forbidden;
 - source pins never auto-advance and every upstream change requires reviewed PR, corpus diff, spike rerun and a new ResearchBuild/ResearchRelease;
 - OSHB public serving defaults to attribution-compatible use under its upstream terms;
 - BHSA public/commercial serving requires an explicit RightsDecision;
@@ -209,4 +210,4 @@ See `architecture/corpus-source-integration.md` and `contracts/v1.1/corpus-sourc
 
 ## Latest push intent
 
-This revision connects the project to real, version-pinned OSHB/morphhb, BHSA 2021 and ETCBC bridging inputs for Database Spike 001. It adds a machine-readable source registry, gitignored fetch/cache workflow, provider-scoped OSHB and BHSA export adapters, explicit rights/default-use boundaries, and exact rules for when morphology, morpheme, phrase/clause, bridge and project-semantic-set evidence may be used. It does not vendor upstream corpora, does not flatten annotation frameworks, and does not yet authorize BHSA-derived commercial public serving.
+This revision connects the project to real, version-pinned OSHB/morphhb, BHSA 2021 and ETCBC bridging inputs for Database Spike 001, then incorporates an independent adapter review. The review corrected the BHSA section label to the real `Samuel_I` convention, explicitly prevents 2021 bridging features from being mistaken for current-OSHB word-ID mappings, adds a fail-closed current-OSHB/BHSA candidate crosswalk compiler, and adds a dedicated corpus-source smoke workflow that downloads the exact pins and runs the real 1 Samuel 16:7 adapters on GitHub Actions. It does not vendor upstream corpora or authorize automatic/canonical cross-layer mappings.

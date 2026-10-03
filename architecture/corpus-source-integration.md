@@ -83,6 +83,8 @@ The bridge compares BHSA and Open Scriptures and exposes Open Scriptures morphol
 
 It is not treated as a complete provider-word-ID mapping and must not silently establish universal word identity.
 
+The 2021 bridge artifact does not embed an immutable current Open Scriptures commit pin that can be assumed equivalent to this project's current OSHB pin. Therefore its `osm` / `osm_sf` features are valid as 2021 comparison evidence on BHSA nodes, but they do not authorize direct use of current OSHB provider word IDs as BHSA node mappings.
+
 ## 3. What is downloaded
 
 Upstream corpora are not vendored into this GitHub repository.
@@ -167,11 +169,22 @@ Export BHSA 2021 plus available bridging features:
 
 ```bash
 python scripts/corpora/export_bhsa_features.py \
-  --reference 1_Samuel.16.7 \
+  --reference Samuel_I.16.7 \
   --output .local/exports/bhsa-1sam16-7.ndjson
 ```
 
 These exporters deliberately emit provider-scoped/raw fields first. Database import/adjudication may derive normalized project fields only after the raw identities and provenance have been stored.
+
+Build a conservative current-OSHB to BHSA candidate crosswalk for the spike:
+
+```bash
+python scripts/corpora/build_candidate_crosswalk.py \
+  --oshb .local/exports/oshb-1sam16-7.ndjson \
+  --bhsa .local/exports/bhsa-1sam16-7.ndjson \
+  --output .local/exports/crosswalk-1sam16-7.ndjson
+```
+
+The crosswalk emits mappings only when reference, word count, word order, and a derived Hebrew-letter consonantal signature agree. Any disagreement becomes `NEEDS_REVIEW`. Its mappings remain `CANDIDATE_AUTOMATED` and `canonical = false` until Database Spike review promotes them through the project's typed mapping workflow.
 
 ## 5. Decision table: when to use which source
 
@@ -201,7 +214,7 @@ the first implementation should resolve it as a multi-layer query:
 2. OSHB morphology/morpheme data identifies the relevant prefixed form.
 3. the project SemanticSetVersion determines BODY_PART membership.
 4. BHSA 2021 supplies the declared clause-structure relation.
-5. an explicit version-pinned mapping establishes which objects may participate in the cross-layer query.
+5. an explicit reviewed mapping establishes which objects may participate in the cross-layer query; the candidate crosswalk may propose mappings but cannot promote itself to canonical/reviewed state.
 6. CorpusQuery executes against one ResearchRelease that pins all dependencies.
 
 The query result must disclose the annotation layers used.

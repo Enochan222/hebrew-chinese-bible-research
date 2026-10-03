@@ -28,6 +28,7 @@ OSHB and BHSA are complementary rather than interchangeable. OSHB is well suited
 - added `scripts/corpora/fetch_sources.py` to download only configured pinned source material into `.local/corpora/`, generate SHA-256 source manifests, verify existing caches, and report upstream movement without ever auto-advancing pins;
 - added `scripts/corpora/export_oshb_words.py` for provider-scoped OSHB OSIS NDJSON export with source Unicode preserved exactly;
 - added `scripts/corpora/export_bhsa_features.py` for provider-scoped BHSA word/phrase/clause NDJSON export and optional pinned bridging features;
+- added `scripts/corpora/build_candidate_crosswalk.py` to propose only fail-closed, non-canonical current-OSHB to BHSA word mappings when reference/order/consonantal signatures agree;
 - pinned Text-Fabric `13.1.0` in `requirements-corpus.txt` for the BHSA adapter;
 - added `.gitignore` rules so downloaded corpora and generated local exports do not enter Git;
 - documented the usage policy:
@@ -56,9 +57,12 @@ Before creating the repository commit:
 - the registry draft passed Draft 2020-12 JSON Schema validation;
 - all three corpus Python adapters passed Python syntax compilation;
 - the OSHB exporter was exercised against a synthetic namespaced OSIS verse and preserved source Hebrew, lemma, morphology, provider ID and verse order;
-- Text-Fabric `13.1.0` was verified as the current PyPI release and supports pinned/local Text-Fabric data workflows.
+- Text-Fabric `13.1.0` was verified as the current PyPI release and supports pinned/local Text-Fabric data workflows;
+- independent review found that BHSA uses `Samuel_I`, not `1_Samuel`, as the section book label and corrected the adapter/docs;
+- independent review also found that ETCBC bridging 2021 must not be treated as a direct mapping from this project's current OSHB commit to BHSA nodes because the bridge artifact does not embed that current immutable OSHB input pin;
+- a dedicated `Corpus source smoke` workflow was therefore added to fetch all three pinned sources and execute the OSHB exporter, BHSA exporter, and conservative crosswalk on 1 Samuel 16:7.
 
-This PR must still pass the repository-required `contracts` and `state-and-changelog` checks against latest `main` before squash merge. Database Spike 001 remains responsible for the real PostgreSQL and real-corpus semantic/relational validation.
+The reviewed PR head must pass the repository-required `contracts` and `state-and-changelog` checks plus the non-required `Corpus source smoke` integration workflow against latest `main` before squash merge. Database Spike 001 remains responsible for the real PostgreSQL and real-corpus semantic/relational validation.
 
 ## 2026-10-04 — Re-verify live repository protection and PR enforcement
 
