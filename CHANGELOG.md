@@ -129,5 +129,9 @@ Database Spike 001 can now test a narrower, more explicit set of scholarly invar
 - six-role panel review used separate academic/method, relational-data, API/contract, rights/security, Research Pro/bibliography, and engineering/governance lenses;
 - first clean PR Contract validation run 37099589859 passed before the second adversarial review;
 - subsequent review corrected over-constraint in PassageCore, incomplete CitationLocator semantics, a dangling target-language-profile dependency, ambiguous source-basis evidence identity, UNKNOWN final rights decisions, and ambiguous non-exact totals;
-- final Contract validation and Project governance runs are required after this changelog/state update before merge;
+- substantive closeout Contract validation run 37101013187 passed;
+- substantive closeout Project governance run 37101013160 passed;
+- CORE-SPIKE-012/013/014 are therefore marked PASS with explicit CI evidence;
+- the panel adjudication record is stored at `architecture/reviews/2026-10-03-panel-contract-closure.md`;
+- one final CI run is required after these governance-only status/manifest updates before merge;
 - live GitHub branch protection remains unresolved and is tracked in issue #1 rather than falsely marked complete.
