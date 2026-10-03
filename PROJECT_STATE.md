@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-03.4**
+State Revision: **2026-10-03.5**
 
 ## Mandatory governance rule
 
@@ -156,4 +156,4 @@ Repository-admin branch protection remains the only unresolved repository-govern
 
 ## Latest push intent
 
-This revision repairs the post-merge governance registry drift discovered by the final independent review. The canonical freeze checklist now explicitly tracks live branch-protection/ruleset enforcement as `REPO-GOV-001/002 = PENDING` and CODEOWNERS as `REPO-GOV-003 = PASS`. Core Database Spike 001 remains permitted; full repository production governance does not.
+This revision repairs the post-merge governance registry drift and the first follow-up patch's heading-placement defect discovered by independent self-review. The canonical freeze checklist now preserves the profile taxonomy and separately tracks `REPO-GOV-001/002 = PENDING` plus `REPO-GOV-003 = PASS`. Core Database Spike 001 remains permitted; full repository production governance does not.
