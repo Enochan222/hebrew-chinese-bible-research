@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.9**
+State Revision: **2026-10-04.10**
 
 ## Mandatory governance rule
 
@@ -192,4 +192,4 @@ Repository visibility remains public as observed state; this audit does not chan
 
 ## Latest push intent
 
-Database Spike 001 run `37143183450`, the first clean run after the Serving-isolation architecture correction, stopped while applying the migration because the two newly added Serving-side rights-validator functions were serialized with invalid single-dollar delimiters. They now use named PostgreSQL dollar quotes. This is a migration-syntax correction only; the Serving-owned projection design, no-cross-plane FK/function catalog assertions, and public-anon corpus-query test remain unchanged and still require a complete blank-database rerun.
+Database Spike 001 run `37143277018` applied the Serving-isolation migration until the Publication Control translation aggregate hash, then failed because `pgcrypto.digest()` was hidden by the deliberately restricted SECURITY DEFINER search path. The correction removes the pgcrypto dependency and uses PostgreSQL 17's core `pg_catalog.sha256(bytea)` primitive via `sha256(convert_to(...))`. The secure search path remains restricted; no mutable `public` schema is added to SECURITY DEFINER resolution. All Serving-isolation catalog/RLS/public-query assertions still require a fresh blank-database run.

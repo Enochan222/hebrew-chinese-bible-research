@@ -2,8 +2,6 @@
 
 BEGIN;
 
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
-
 CREATE SCHEMA IF NOT EXISTS authoring;
 CREATE SCHEMA IF NOT EXISTS serving;
 CREATE SCHEMA IF NOT EXISTS workspace;
@@ -1263,7 +1261,7 @@ STABLE
 SECURITY DEFINER
 SET search_path = pg_catalog, authoring
 AS $$
-  SELECT encode(digest(concat_ws('|',
+  SELECT encode(sha256(convert_to(concat_ws('|',
     td.translation_decision_id::text,
     td.translation_source_basis_id::text,
     td.translation_policy_version_id::text,
@@ -1271,7 +1269,7 @@ AS $$
     COALESCE(td.selected_rendering,''),
     tsb.content_hash,
     tpv.content_hash
-  ),'sha256'),'hex')
+  ),'UTF8')),'hex')
   FROM authoring.translation_decisions td
   JOIN authoring.translation_source_bases tsb
     ON tsb.translation_source_basis_id=td.translation_source_basis_id

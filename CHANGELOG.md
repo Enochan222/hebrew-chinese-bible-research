@@ -129,6 +129,15 @@ The active database/API contract and publication model are clarified accordingly
 
 Both functions now use named PostgreSQL dollar quotes. No relational/security invariant was relaxed.
 
+### Secure hash portability finding
+
+Database Spike run `37143277018`:
+- bootstrap: PASS;
+- Serving-isolation migration: progressed to the Publication Control hash function, then failed because `pgcrypto.digest()` was not visible under the intentionally restricted SECURITY DEFINER search path;
+- seed/tests/query plan: not reached.
+
+The correction does not widen the SECURITY DEFINER search path. It removes the pgcrypto dependency and uses PostgreSQL 17 core `sha256(bytea)` with `convert_to(..., 'UTF8')`, preserving SHA-256 while avoiding extension-schema ambiguity between plain PostgreSQL and Supabase.
+
 ### Intended effect
 
 Database Spike 001 now has executable evidence rather than prose-only expectations. CI should expose relational assumptions that JSON Schema cannot prove and provide a repeatable base for correcting the active v1.1 contract before Core Freeze.
