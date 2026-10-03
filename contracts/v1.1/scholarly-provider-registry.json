@@ -1,0 +1,129 @@
+{
+  "schemaVersion": "1.0",
+  "status": "ACTIVE_INITIAL_PROVIDER_ENSEMBLE",
+  "providers": [
+    {
+      "providerKey": "OPENALEX",
+      "requiredInFirstImplementation": true,
+      "primaryRoles": [
+        "BROAD_DISCOVERY",
+        "SCHOLARLY_GRAPH",
+        "OPEN_ACCESS_LOCATION"
+      ],
+      "transportModes": [
+        "DIRECT_API",
+        "MCP"
+      ],
+      "expectedCapabilities": [
+        "SEARCH_WORKS",
+        "GET_WORK",
+        "GET_AUTHORS",
+        "GET_REFERENCES",
+        "GET_CITATIONS",
+        "GET_ABSTRACT",
+        "GET_OPEN_ACCESS_LOCATION",
+        "SEARCH_BY_DATE",
+        "SEARCH_BY_PUBLICATION_TYPE"
+      ]
+    },
+    {
+      "providerKey": "SEMANTIC_SCHOLAR",
+      "requiredInFirstImplementation": true,
+      "primaryRoles": [
+        "BROAD_DISCOVERY",
+        "CITATION_GRAPH",
+        "ABSTRACT_METADATA"
+      ],
+      "transportModes": [
+        "DIRECT_API",
+        "MCP"
+      ],
+      "expectedCapabilities": [
+        "SEARCH_WORKS",
+        "GET_WORK",
+        "GET_AUTHORS",
+        "GET_REFERENCES",
+        "GET_CITATIONS",
+        "GET_ABSTRACT",
+        "SEARCH_BY_DATE",
+        "SEARCH_BY_PUBLICATION_TYPE"
+      ]
+    },
+    {
+      "providerKey": "CORE",
+      "requiredInFirstImplementation": true,
+      "primaryRoles": [
+        "OPEN_ACCESS_DISCOVERY",
+        "OPEN_FULLTEXT",
+        "REPOSITORY_COVERAGE"
+      ],
+      "transportModes": [
+        "DIRECT_API",
+        "MCP"
+      ],
+      "expectedCapabilities": [
+        "SEARCH_WORKS",
+        "GET_WORK",
+        "GET_ABSTRACT",
+        "GET_FULLTEXT",
+        "GET_OPEN_ACCESS_LOCATION",
+        "SEARCH_BY_DATE",
+        "SEARCH_BY_PUBLICATION_TYPE"
+      ]
+    },
+    {
+      "providerKey": "CROSSREF",
+      "requiredInFirstImplementation": true,
+      "primaryRoles": [
+        "DOI_RESOLUTION",
+        "BIBLIOGRAPHIC_IDENTITY",
+        "PUBLICATION_METADATA"
+      ],
+      "transportModes": [
+        "DIRECT_API"
+      ],
+      "expectedCapabilities": [
+        "SEARCH_WORKS",
+        "GET_WORK",
+        "RESOLVE_DOI",
+        "GET_ABSTRACT",
+        "GET_RETRACTION_OR_CORRECTION_STATUS",
+        "SEARCH_BY_DATE",
+        "SEARCH_BY_PUBLICATION_TYPE"
+      ]
+    },
+    {
+      "providerKey": "SCITE",
+      "requiredInFirstImplementation": true,
+      "primaryRoles": [
+        "FULLTEXT_SEARCH",
+        "CITATION_CONTEXT",
+        "SUPPORT_CONTRAST_SIGNAL",
+        "INTEGRITY_SIGNAL"
+      ],
+      "transportModes": [
+        "DIRECT_API",
+        "MCP"
+      ],
+      "expectedCapabilities": [
+        "SEARCH_WORKS",
+        "GET_WORK",
+        "GET_REFERENCES",
+        "GET_CITATIONS",
+        "GET_CITATION_CONTEXTS",
+        "GET_ABSTRACT",
+        "GET_FULLTEXT",
+        "GET_OPEN_ACCESS_LOCATION",
+        "GET_RETRACTION_OR_CORRECTION_STATUS",
+        "SEARCH_BY_DATE",
+        "SEARCH_BY_PUBLICATION_TYPE"
+      ]
+    }
+  ],
+  "rules": [
+    "Provider capability declarations are adapter/runtime truth and may be narrower than expectedCapabilities.",
+    "Unsupported capabilities must be reported explicitly rather than simulated by a model.",
+    "Provider credentials are external secrets and never appear in this registry.",
+    "Adding a provider does not create a new canonical scholarly identity system."
+  ]
+}
