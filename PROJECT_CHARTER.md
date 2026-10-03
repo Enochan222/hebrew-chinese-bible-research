@@ -219,6 +219,8 @@ For a materially disputed translation question, the analysis should consider the
 
 Not every question requires every lane, but the system must make the omitted/relevant lanes intelligible.
 
+An official project translation decision must also identify the exact **adopted source text state** being translated and the exact **versioned project translation policy** governing target-language/editorial choices.
+
 A corpus construction is not itself a translation rule.
 
 A grammar's classification is not automatically corpus fact.
@@ -505,6 +507,7 @@ The project has reached its intended product direction only when a user can do t
 - research-grade Hebrew-to-Chinese focus;
 - long-term whole-Hebrew-Bible coverage target;
 - reviewed/versioned project Chinese rendering layer alongside external witnesses and user drafts;
+- reproducible TranslationDecision chain pinning adopted source-text basis and exact project translation-policy version;
 - database-backed product, not throwaway app;
 - evidence-led translation analysis;
 - Google Drive scholarly library is a mandatory curated authoring source base;
