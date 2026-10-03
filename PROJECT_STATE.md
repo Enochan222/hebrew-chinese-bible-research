@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.4**
+State Revision: **2026-10-04.5**
 
 ## Mandatory governance rule
 
@@ -192,4 +192,4 @@ Repository visibility remains public as observed state; this audit does not chan
 
 ## Latest push intent
 
-Database Spike 001 first clean PostgreSQL run proved that the migration itself applies, then exposed a real fixture-ordering constraint: stable entities with a foreign-keyed `current_version_id` cannot be seeded with a not-yet-created append-only version. The spike keeps the FK and corrects all affected seeds to create the stable row with a null current pointer, insert the version, then set the pointer. This correction applies consistently to SemanticSet, ConstructionDefinition, Rule, TranslationPolicy, ResearchIssue, and ResearchPosition. The database workflow must rerun from a blank PostgreSQL 17 database before any further gate can be claimed.
+Database Spike 001 second clean run now proves bootstrap, full migration, and controlled seed loading. The adversarial suite then reached the deterministic corpus-query assertions and exposed a PostgreSQL test-expression defect: aggregate `min(uuid)` is not defined. The schema and corpus query are unchanged; the test now selects the first ordered UUID directly. A third blank-database run is required to continue into RLS, publication failure/rollback, immutability, and query-plan evidence.

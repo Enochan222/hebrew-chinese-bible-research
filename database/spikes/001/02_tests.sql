@@ -223,10 +223,10 @@ SELECT spike_test.assert_true(
   'release-pinned query must return exactly one distinct fixture span'
 );
 SELECT spike_test.assert_true(
-  (SELECT min(reference_span_id)::text FROM serving.spike_corpus_query(
+  (SELECT reference_span_id::text FROM serving.spike_corpus_query(
     '47000000-0000-4000-8000-000000000001',
     '34000000-0000-4000-8000-000000000001',NULL,50
-  )) = '13000000-0000-4000-8000-000000000001',
+  ) ORDER BY reference_span_id LIMIT 1) = '13000000-0000-4000-8000-000000000001',
   'query membership must resolve to 1 Samuel 16:7 fixture span'
 );
 SELECT spike_test.assert_true(

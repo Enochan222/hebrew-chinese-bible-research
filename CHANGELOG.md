@@ -54,7 +54,16 @@ First Database Spike run `37142212945`:
 - seed: FAIL at the pre-version SemanticSet current pointer;
 - adversarial tests/query plan: not reached.
 
-A fresh run is required after the corrected seed ordering.
+Second Database Spike run `37142329963`:
+- bootstrap: PASS;
+- full migration: PASS;
+- seed: PASS;
+- adversarial suite progressed through relational/translation/rights checks and failed at the deterministic-query assertion because PostgreSQL has no `min(uuid)` aggregate;
+- query plan: not reached.
+
+The failure is a test-expression defect, not a schema relaxation. The assertion now orders UUID rows and selects the first result directly.
+
+A fresh run is required after this correction.
 
 This is the first implementation round. The new `Database Spike 001 / postgres-spike` workflow must apply the migration from a blank PostgreSQL 17 database, load fixtures, pass all expected-failure assertions, and emit a representative query plan. Existing required `contracts` and `state-and-changelog` checks remain mandatory. Any SQL/contract defect found by the first clean run must be corrected before merge.
 
