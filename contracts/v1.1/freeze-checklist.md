@@ -16,15 +16,7 @@ Minimum contract closure required before Database Spike 001 begins.
 
 Operational source-of-truth protection. This profile does not block Database Spike 001, but it must be enforced before the repository is treated as production-governed.
 
-### REPOSITORY_GOVERNANCE
-
-| Gate ID | Requirement | Current status | Evidence |
-|---|---|---|---|
-| REPO-GOV-001 | `main` requires PR-based changes and Contract validation before merge | PENDING | live GitHub branch reports `protected:false` |
-| REPO-GOV-002 | force-push and deletion of `main` are blocked | PENDING | repository rulesets currently empty |
-| REPO-GOV-003 | product/architecture/contract/validator ownership is declared in CODEOWNERS | PENDING | panel contract-closure PR |
-
-## CORE_FREEZE_V1_1
+### CORE_FREEZE_V1_1
 
 Core Hebrew-Chinese scholarly data platform freeze.
 
@@ -92,6 +84,10 @@ Database Spike 001 may begin when all CORE-SPIKE gates are PASS. This does not d
 | PRO-FZ-008 | Live discovery remains non-canonical and cannot mutate release-pinned synthesis |
 | PRO-FZ-009 | Research Pro machine schemas/OpenAPI extension validate representative fixtures |
 | PRO-FZ-010 | Snapshot-bounded field-state labels preserve classification basis and coverage limitations |
+| PRO-FZ-011 | Database build supports OpenAlex + Semantic Scholar + CORE + Crossref + Scite through typed provider adapters and records unavailable/skipped providers |
+| PRO-FZ-012 | Query expansion/synthesis uses a model-neutral ResearchModelAdapter and records model/prompt/input/output provenance |
+| PRO-FZ-013 | DiscoveryRecords are traceable to provider requests and multi-provider duplicates resolve to one canonical Work without losing provider provenance |
+| PRO-FZ-014 | Academic-provider credentials are absent from source, fixtures, logs and public runtime paths |
 
 ## PUBLIC_AI_SHIP_V1_1
 
