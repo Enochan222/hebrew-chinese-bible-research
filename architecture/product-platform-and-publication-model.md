@@ -25,7 +25,8 @@ The public product must not depend on runtime RAG or runtime generative synthesi
 The core runtime should be able to serve:
 
 - Hebrew text and linguistic annotations;
-- published Chinese translations;
+- published Chinese translation witnesses;
+- reviewed project Chinese rendering / translation decision where available;
 - published translation analyses;
 - approved scholarly claims and citations;
 - construction instances;
