@@ -8,17 +8,7 @@ Gate IDs are stable and must be referenced by fixtures/CI.
 
 ## Profiles
 
-### REPOSITORY_GOVERNANCE
-
-| Gate ID | Requirement | Current status | Evidence |
-|---|---|---|---|
-| REPO-GOV-001 | `main` requires PR-based changes and successful Contract validation before merge | PENDING | live GitHub reports `main protected = false` |
-| REPO-GOV-002 | force pushes and deletion of `main` are blocked by repository rules | PENDING | live repository rulesets are empty |
-| REPO-GOV-003 | canonical product/architecture/contract/validator/workflow ownership is declared in CODEOWNERS | PASS | `.github/CODEOWNERS` |
-
-These gates do not block Database Spike 001. They block treating the repository itself as production-governed.
-
-## CORE_SPIKE_V1_1
+### CORE_SPIKE_V1_1
 
 Minimum contract closure required before Database Spike 001 begins.
 
@@ -39,6 +29,16 @@ Research Pro remains part of the same product and truth model. This profile sepa
 ### PUBLIC_AI_SHIP_V1_1
 
 Additional gate only when optional public BYOK AI is shipped.
+
+## REPOSITORY_GOVERNANCE
+
+| Gate ID | Requirement | Current status | Evidence |
+|---|---|---|---|
+| REPO-GOV-001 | `main` requires PR-based changes and successful Contract validation before merge | PENDING | live GitHub reports `main protected = false` |
+| REPO-GOV-002 | force pushes and deletion of `main` are blocked by repository rules | PENDING | live repository rulesets are empty |
+| REPO-GOV-003 | canonical product/architecture/contract/validator/workflow ownership is declared in CODEOWNERS | PASS | `.github/CODEOWNERS` |
+
+These gates do not block Database Spike 001. They block treating the repository itself as production-governed.
 
 ## CORE_SPIKE_V1_1
 
