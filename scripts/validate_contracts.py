@@ -4,6 +4,7 @@ import json, re, sys
 from pathlib import Path
 from typing import Any
 from jsonschema import Draft202012Validator, FormatChecker
+from referencing import Registry, Resource
 
 ROOT = Path(__file__).resolve().parents[1]
 ERRORS: list[str] = []
@@ -14,9 +15,21 @@ def fail(msg: str) -> None:
 def load(path: str) -> Any:
     return json.loads((ROOT / path).read_text(encoding="utf-8"))
 
+def build_schema_registry() -> Registry:
+    registry = Registry()
+    for path in (ROOT / "contracts/v1.1/json-schema").glob("*.json"):
+        schema = json.loads(path.read_text(encoding="utf-8"))
+        Draft202012Validator.check_schema(schema)
+        schema_id = schema.get("$id")
+        if schema_id:
+            registry = registry.with_resource(schema_id, Resource.from_contents(schema))
+    return registry
+
+SCHEMA_REGISTRY = build_schema_registry()
+
 def schema_errors(schema_path: str, fixture_path: str) -> list[str]:
     schema, fixture = load(schema_path), load(fixture_path)
-    return [f"{fixture_path}: {e.message}" for e in Draft202012Validator(schema, format_checker=FormatChecker()).iter_errors(fixture)]
+    return [f"{fixture_path}: {e.message}" for e in Draft202012Validator(schema, registry=SCHEMA_REGISTRY, format_checker=FormatChecker()).iter_errors(fixture)]
 
 POSITIVE = [
  ("contracts/v1.1/json-schema/corpus-query.schema.json","contracts/v1.1/fixtures/corpus-query-1sam16-7.json"),
@@ -48,11 +61,26 @@ POSITIVE = [
  ("contracts/v1.1/json-schema/discovery-record.schema.json","contracts/v1.1/fixtures/discovery-record.json"),
  ("contracts/v1.1/json-schema/experience-capabilities.schema.json","contracts/v1.1/fixtures/experience-capabilities.json"),
  ("contracts/v1.1/json-schema/product-entitlement.schema.json","contracts/v1.1/fixtures/product-entitlement.json"),
+ ("contracts/v1.1/json-schema/passage-locator.schema.json","contracts/v1.1/fixtures/passage-locator-label.json"),
+ ("contracts/v1.1/json-schema/passage-request.schema.json","contracts/v1.1/fixtures/passage-request.json"),
+ ("contracts/v1.1/json-schema/passage-core.schema.json","contracts/v1.1/fixtures/passage-core.json"),
+ ("contracts/v1.1/json-schema/corpus-query-execution-request.schema.json","contracts/v1.1/fixtures/corpus-query-execution-request.json"),
+ ("contracts/v1.1/json-schema/corpus-query-result.schema.json","contracts/v1.1/fixtures/corpus-query-result.json"),
+ ("contracts/v1.1/json-schema/translation-source-basis.schema.json","contracts/v1.1/fixtures/translation-source-basis.json"),
+ ("contracts/v1.1/json-schema/translation-policy-version.schema.json","contracts/v1.1/fixtures/translation-policy-version.json"),
+ ("contracts/v1.1/json-schema/rights-decision-snapshot.schema.json","contracts/v1.1/fixtures/rights-decision-conditional.json"),
 ]
 
 NEG_SCHEMA = [
  ("contracts/v1.1/json-schema/corpus-query.schema.json","contracts/v1.1/negative-fixtures/corpus-query-empty-bind.json"),
  ("contracts/v1.1/json-schema/rights-decision-snapshot.schema.json","contracts/v1.1/negative-fixtures/rights-default-deny-with-winner.json"),
+ ("contracts/v1.1/json-schema/rights-decision-snapshot.schema.json","contracts/v1.1/negative-fixtures/rights-unknown-restrictive-allow.json"),
+ ("contracts/v1.1/json-schema/rights-decision-snapshot.schema.json","contracts/v1.1/negative-fixtures/rights-conditional-empty.json"),
+ ("contracts/v1.1/json-schema/rights-decision-snapshot.schema.json","contracts/v1.1/negative-fixtures/rights-max-excerpt-missing-unit.json"),
+ ("contracts/v1.1/json-schema/rights-decision-snapshot.schema.json","contracts/v1.1/negative-fixtures/rights-unregistered-condition.json"),
+ ("contracts/v1.1/json-schema/published-evidence-item.schema.json","contracts/v1.1/negative-fixtures/published-evidence-excerpt-without-rights.json"),
+ ("contracts/v1.1/json-schema/published-evidence-item.schema.json","contracts/v1.1/negative-fixtures/published-evidence-immutable-without-hash.json"),
+ ("contracts/v1.1/json-schema/discovery-record.schema.json","contracts/v1.1/negative-fixtures/discovery-persisted-without-rights.json"),
 ]
 
 UUID = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$")
@@ -105,12 +133,55 @@ def manifest_semantic(d: dict) -> list[str]:
     if any(x is None for x in orders): return ["missing componentOrder"]
     if len(orders)!=len(set(orders)): return ["duplicate componentOrder"]
     if sorted(orders)!=list(range(len(orders))): return ["componentOrder not contiguous"]
+    logical=[(x.get("componentKind"),x.get("researchObjectId"),x.get("componentVersion")) for x in d.get("components",[])]
+    if len(logical)!=len(set(logical)): return ["duplicate logical release component"]
     return []
+
+def query_policy_semantic(d: dict) -> list[str]:
+    out=[]
+    if d.get("defaultPageSize",0)>d.get("maxPageSize",0): out.append("defaultPageSize exceeds maxPageSize")
+    if d.get("maxPageSize",0)>d.get("hardResultCap",0): out.append("maxPageSize exceeds hardResultCap")
+    return out
+
+def query_result_semantic(d: dict) -> list[str]:
+    out=[]
+    if d.get("pageMatchCount")!=len(d.get("matches",[])): out.append("pageMatchCount does not equal matches length")
+    total=d.get("totalMatchCount")
+    if d.get("totalCountExact") and total is None: out.append("exact total requires totalMatchCount")
+    if total is not None and total<d.get("pageMatchCount",0): out.append("totalMatchCount smaller than pageMatchCount")
+    return out
+
+def experience_semantic(d: dict) -> list[str]:
+    out=[]
+    decisions=d.get("featureDecisions",{})
+    reasons=d.get("reasonCodes",{})
+    if not set(reasons).issubset(set(decisions)): out.append("reasonCodes contains unknown feature decision")
+    for key in reasons:
+        if decisions.get(key)!="DENY": out.append("reasonCode may only accompany DENY")
+    return out
 
 def rights_semantic(d: dict) -> list[str]:
     if d.get("decisionBasis")=="RULE" and not d.get("winningRuleIds"): return ["RULE without winner"]
     if d.get("decisionBasis")=="DEFAULT_DENY" and (d.get("winningRuleIds") or d.get("decision")!="DENY"): return ["bad DEFAULT_DENY"]
     return []
+
+def validate_schema_documents():
+    for path in (ROOT/"contracts/v1.1/json-schema").glob("*.json"):
+        schema=json.loads(path.read_text(encoding="utf-8"))
+        try:
+            Draft202012Validator.check_schema(schema)
+        except Exception as exc:
+            fail(f"{path.relative_to(ROOT)} invalid JSON Schema: {exc}")
+        def scan(node):
+            if isinstance(node,dict):
+                ref=node.get("$ref")
+                if isinstance(ref,str) and ref.startswith("./"):
+                    target=(path.parent/ref).resolve()
+                    if not target.exists(): fail(f"{path.relative_to(ROOT)} missing local ref {ref}")
+                for value in node.values(): scan(value)
+            elif isinstance(node,list):
+                for value in node: scan(value)
+        scan(schema)
 
 def validate_fixtures():
     for s,f in POSITIVE:
@@ -122,6 +193,9 @@ def validate_fixtures():
         if f.endswith("translation-decision.json"): ERRORS.extend(f"{f}: {e}" for e in translation_semantic(d))
         if f.endswith("release-manifest.json"): ERRORS.extend(f"{f}: {e}" for e in manifest_semantic(d))
         if "rights-decision-" in f: ERRORS.extend(f"{f}: {e}" for e in rights_semantic(d))
+        if f.endswith("query-execution-policy.json"): ERRORS.extend(f"{f}: {e}" for e in query_policy_semantic(d))
+        if f.endswith("corpus-query-result.json"): ERRORS.extend(f"{f}: {e}" for e in query_result_semantic(d))
+        if f.endswith("experience-capabilities.json"): ERRORS.extend(f"{f}: {e}" for e in experience_semantic(d))
     for s,f in NEG_SCHEMA:
         if not schema_errors(s,f): fail(f"{f}: expected schema rejection")
     semantic_neg=[
@@ -129,6 +203,8 @@ def validate_fixtures():
       ("contracts/v1.1/negative-fixtures/translation-decision-two-selected.json",translation_semantic),
       ("contracts/v1.1/negative-fixtures/translation-decision-selected-mismatch.json",translation_semantic),
       ("contracts/v1.1/negative-fixtures/release-manifest-duplicate-order.json",manifest_semantic),
+      ("contracts/v1.1/negative-fixtures/release-manifest-duplicate-logical-component.json",manifest_semantic),
+      ("contracts/v1.1/negative-fixtures/query-execution-policy-invalid-bounds.json",query_policy_semantic),
     ]
     for f,fn in semantic_neg:
         if not fn(load(f)): fail(f"{f}: expected semantic rejection")
@@ -188,7 +264,7 @@ def secret_scan():
             if pat.search(t): fail(f"possible model-secret literal {rel}")
 
 def main() -> int:
-    validate_fixtures(); governance(); vocab_drift(); secret_scan()
+    validate_schema_documents(); validate_fixtures(); governance(); vocab_drift(); secret_scan()
     if ERRORS:
         print("CONTRACT VALIDATION FAILED")
         for e in ERRORS: print(" -",e)
