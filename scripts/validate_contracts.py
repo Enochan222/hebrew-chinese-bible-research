@@ -82,6 +82,9 @@ NEG_SCHEMA = [
  ("contracts/v1.1/json-schema/published-evidence-item.schema.json","contracts/v1.1/negative-fixtures/published-evidence-excerpt-without-rights.json"),
  ("contracts/v1.1/json-schema/published-evidence-item.schema.json","contracts/v1.1/negative-fixtures/published-evidence-immutable-without-hash.json"),
  ("contracts/v1.1/json-schema/discovery-record.schema.json","contracts/v1.1/negative-fixtures/discovery-persisted-without-rights.json"),
+ ("contracts/v1.1/json-schema/citation-locator.schema.json","contracts/v1.1/negative-fixtures/citation-locator-source-span-missing-id.json"),
+ ("contracts/v1.1/json-schema/rights-decision-snapshot.schema.json","contracts/v1.1/negative-fixtures/rights-snapshot-unknown-final-decision.json"),
+ ("contracts/v1.1/json-schema/corpus-query-result.schema.json","contracts/v1.1/negative-fixtures/corpus-query-result-nonexact-with-total.json"),
 
 ]
 
@@ -150,6 +153,7 @@ def query_result_semantic(d: dict) -> list[str]:
     if d.get("pageMatchCount")!=len(d.get("matches",[])): out.append("pageMatchCount does not equal matches length")
     total=d.get("totalMatchCount")
     if d.get("totalCountExact") and total is None: out.append("exact total requires totalMatchCount")
+    if not d.get("totalCountExact") and total is not None: out.append("non-exact total must be null")
     if total is not None and total<d.get("pageMatchCount",0): out.append("totalMatchCount smaller than pageMatchCount")
     return out
 
@@ -252,6 +256,8 @@ def vocab_drift():
     r=load("contracts/v1.1/json-schema/rights-decision-snapshot.schema.json")
     for key,prop in [("rightsOperation","operation"),("rightsPurposeScope","purposeScope"),("rightsAudienceScope","audienceScope"),("rightsCommercialContext","commercialContext"),("rightsDecisionBasis","decisionBasis")]:
         if set(v[key])!=set(r["properties"][prop]["enum"]): fail(f"{key} drift")
+    if set(v["rightsResolvedDecision"])!=set(r["properties"]["decision"]["enum"]): fail("rightsResolvedDecision drift")
+    if set(v["rightsSubjectType"])!=set(r["properties"]["subjectType"]["enum"]): fail("rightsSubjectType drift")
     rm=load("contracts/v1.1/json-schema/release-manifest.schema.json")
     if set(v["releaseComponentKind"])!=set(rm["properties"]["components"]["items"]["properties"]["componentKind"]["enum"]): fail("releaseComponentKind drift")
     ri=load("contracts/v1.1/json-schema/research-issue-version.schema.json")
