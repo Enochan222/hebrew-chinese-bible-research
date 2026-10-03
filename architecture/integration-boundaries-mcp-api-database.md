@@ -326,26 +326,49 @@ Publication is deliberately **not** an ordinary MCP tool in the first implementa
 
 If publication is ever exposed to an agent, it requires explicit human approval plus the same publication validation pipeline.
 
-## 8. External academic-paper MCP/API
+## 8. External scholarly discovery aggregation
 
-A future millions-of-papers provider should be connected only to the Authoring / Research Plane.
+Multi-provider scholarly discovery is a required private Authoring / Research Compiler capability.
 
-Adapter shape:
+Initial ensemble:
+
+- OpenAlex;
+- Semantic Scholar;
+- CORE;
+- Crossref;
+- Scite.
+
+Each provider may be reached by direct API or MCP, but both routes must pass through a project-owned adapter and normalize into the same internal contracts.
 
 ```text
-Academic MCP/API
-   -> Research Source Adapter
-       -> bibliographic normalization
-       -> rights/availability metadata
-       -> SourceRegistry / Work / Edition / Asset or remote locator
-       -> candidate retrieval
-       -> reviewed claim/evidence objects
+ResearchIssue / ResearchTarget
+   -> ResearchModelAdapter query expansion
+   -> provider plan
+      -> OpenAlex
+      -> Semantic Scholar
+      -> CORE
+      -> Crossref
+      -> Scite
+   -> ScholarlyProviderRequest
+   -> DiscoveryRecord
+   -> Work identity resolution/dedup
+   -> access + RightsPolicy
+   -> evidence enrichment
+   -> ResearchModelAdapter triage / claim candidates / synthesis
+   -> review
+   -> LiteratureSnapshot
+   -> ResearchRelease
 ```
+
+The build model is provider-neutral. GPT in ChatGPT/Codex, Gemini, Claude, local models, or future approved models may perform the model-assisted steps through the same ResearchModelAdapter.
+
+Provider/API credentials remain private authoring secrets or MCP-managed credentials and never enter Git, DiscoveryRecords, LiteratureSnapshots, public responses, or the public BYOK path.
 
 Do not make external paper search a hidden dependency of opening a public passage.
 
 Canonical public research remains release-pinned.
 
+See `architecture/scholarly-discovery-aggregation.md`.
 ## 9. FHL integration
 
 Recommended production path:
