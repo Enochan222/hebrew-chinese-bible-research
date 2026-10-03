@@ -429,6 +429,23 @@ Pass only when:
 
 # Phase 4: Private Academic Knowledge Compiler and Publication Pipeline
 
+
+**Mandatory scholarly-discovery compiler for Phase 4:**
+
+Database/research compilation must execute the multi-provider workflow defined in `architecture/scholarly-discovery-aggregation.md`.
+
+Initial provider ensemble:
+
+- OpenAlex;
+- Semantic Scholar;
+- CORE;
+- Crossref;
+- Scite.
+
+Query expansion, result triage, candidate claim extraction and synthesis use the provider-neutral ResearchModelAdapter. The build may be executed by GPT in ChatGPT/Codex, Gemini, Claude, local models or another approved model. Do not hard-code Gemini as the database-build intelligence layer.
+
+Provider results must become DiscoveryRecords, deduplicate to canonical Works, pass RightsPolicy, feed reviewed ResearchIssue/ResearchPosition/LiteratureSnapshot objects, and only then become eligible for ResearchRelease publication.
+
 ## Goal
 
 Build the authoring-side scholarly compiler and Scholarly Intelligence layer.
