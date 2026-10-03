@@ -1,0 +1,16 @@
+{
+  "researchModelRunId": "64646464-6464-4646-8646-646464646464",
+  "taskType": "QUERY_EXPANSION",
+  "modelProvider": "OPENAI",
+  "modelId": "gpt-build-agent",
+  "hostEnvironment": "CHATGPT_OR_CODEX_AUTHORING",
+  "promptVersion": "scholarly-query-expansion-v1",
+  "inputHash": "2020202020202020202020202020202020202020202020202020202020202020",
+  "outputHash": "2121212121212121212121212121212121212121212121212121212121212121",
+  "provenanceActivityId": null,
+  "inputObjectIds": [],
+  "status": "SUCCEEDED",
+  "startedAt": "2026-10-03T00:00:00Z",
+  "completedAt": "2026-10-03T00:00:01Z",
+  "reviewStatus": "UNREVIEWED"
+}
