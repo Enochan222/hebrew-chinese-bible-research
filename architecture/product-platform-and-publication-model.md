@@ -190,6 +190,25 @@ Publication validation must check at least:
 - compiled-search projection consistency;
 - release manifest integrity.
 
+## 4A. Publication visibility atomicity
+
+When Authoring and Public Serving are physically separate databases, the product does **not** claim one distributed PostgreSQL ACID transaction across both systems.
+
+Required publication sequence:
+
+1. compile an immutable candidate package in Authoring;
+2. complete rights, citation, review, benchmark and hash validation;
+3. materialize the complete candidate ResearchRelease in the Serving database while inactive;
+4. verify Serving parity, foreign keys, projections and hashes;
+5. in one Serving-database transaction, finalize the release's publishable state and move the selected release-channel pointer;
+6. only then expose the new release.
+
+The atomic guarantee is **publication visibility**: clients observe the complete old release or the complete new release, never a partially materialized release.
+
+A failed candidate load or validation leaves the existing PRODUCTION pointer unchanged.
+
+---
+
 ## 5. ResearchBuild and ResearchRelease
 
 Build attempts, immutable published payloads, and release lifecycle events are separate objects.
@@ -504,6 +523,15 @@ A rule application is not automatically the final translation decision.
 
 ## 12. Translation decisions and published analysis
 
+### 12.0 Adopted source text and project policy
+
+An official project rendering must pin:
+
+- an immutable TranslationSourceBasis identifying the exact source text stream/segments and adopted textual-critical reading;
+- an exact TranslationPolicyVersion describing the project target-language/editorial policy.
+
+TranslationPolicyVersion aggregates existing TRANSLATION_POLICY / EDITORIAL_CONVENTION RuleVersions; it does not create a parallel rule engine.
+
 ### 12.1 `translation_decisions`
 
 Records an editorial/research decision.
@@ -512,6 +540,9 @@ Suggested fields:
 
 - `translation_decision_id uuid PK`
 - `reference_span_id uuid FK`
+- `translation_source_basis_id uuid FK`
+- `translation_policy_version_id uuid FK`
+- `target_language_tag text`
 - `decision_type text`
 - `decision_payload jsonb`
 - `rule_application_ids uuid[]` only as a conceptual shape; implementation should use a junction table;
