@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-03.3**
+State Revision: **2026-10-03.4**
 
 ## Mandatory governance rule
 
@@ -155,4 +155,4 @@ Repository-admin branch protection remains operationally unresolved and is track
 
 ## Latest push intent
 
-This revision records the completed panel contract-closure loop, marks the new pre-spike closure gates PASS on substantive CI evidence, registers the governance/review/spike documents in the authority graph, and leaves only explicitly tracked implementation or repository-admin work open.
+This revision records the completed panel contract-closure loop, marks the new pre-spike closure gates PASS on substantive CI evidence, registers the governance/review/spike documents in the authority graph, and defines the latest successful PR Contract validation plus Project governance checks as the final merge gate. Only explicitly tracked implementation or repository-admin work remains open.
