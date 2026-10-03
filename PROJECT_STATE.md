@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-03.2**
+State Revision: **2026-10-03.3**
 
 ## Mandatory governance rule
 
@@ -108,6 +108,7 @@ Repository-admin branch protection remains operationally unresolved and is track
 - ResearchPositionVersion pins the exact ResearchIssueVersion framing used for that scholarly position.
 - Database Spike 001 is specified as an adversarial scholarly-integrity vertical slice, not a table-creation demo.
 - Repository-admin branch protection remains operationally pending; issue #1 tracks required PR/status-check/force-push/deletion rules.
+- Panel contract-closure adjudication is recorded in `architecture/reviews/2026-10-03-panel-contract-closure.md` and registered as current validation authority.
 
 ## Current data/research boundaries
 
@@ -154,4 +155,4 @@ Repository-admin branch protection remains operationally unresolved and is track
 
 ## Latest push intent
 
-This revision closes the remaining pre-Database-Spike reference, translation-source-basis, translation-policy, rights, evidence, pagination, Research Pro versioning, CI, and repository-governance contract gaps after independent panel review and adversarial re-review.
+This revision records the completed panel contract-closure loop, marks the new pre-spike closure gates PASS on substantive CI evidence, registers the governance/review/spike documents in the authority graph, and leaves only explicitly tracked implementation or repository-admin work open.
