@@ -34,8 +34,8 @@ Additional gate only when optional public BYOK AI is shipped.
 
 | Gate ID | Requirement | Current status | Evidence |
 |---|---|---|---|
-| REPO-GOV-001 | `main` requires PR-based changes and successful Contract validation before merge | PASS | active ruleset `Protect main` (ID 24409248): PR required; strict required checks `contracts` + `state-and-changelog`; no bypass actors |
-| REPO-GOV-002 | force pushes and deletion of `main` are blocked by repository rules | PASS | active ruleset `Protect main` (ID 24409248): `non_fast_forward` + `deletion`; `main protected = true` |
+| REPO-GOV-001 | `main` requires PR-based changes and successful Contract validation before merge | PASS | re-verified 2026-10-04: active ruleset `Protect main` (ID 24409248); PR required; strict required checks `contracts` + `state-and-changelog`; no bypass actors; audited PRs #4/#5/#6 merged through protected flow |
+| REPO-GOV-002 | force pushes and deletion of `main` are blocked by repository rules | PASS | re-verified 2026-10-04: ruleset `Protect main` has `non_fast_forward` + `deletion`; branch metadata reports `main protected = true` |
 | REPO-GOV-003 | canonical product/architecture/contract/validator/workflow ownership is declared in CODEOWNERS | PASS | `.github/CODEOWNERS` |
 
 All REPOSITORY_GOVERNANCE gates are now PASS. Live GitHub enforcement is documented in `architecture/reviews/2026-10-03-live-repository-governance-verification.md`.

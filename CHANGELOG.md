@@ -4,6 +4,50 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+## 2026-10-04 — Re-verify live repository protection and PR enforcement
+
+### Push intent
+
+Perform a fresh live audit of repository governance after branch protection was enabled and subsequent protected-main work was merged.
+
+### Why
+
+The repository already recorded `REPO-GOV-001/002/003` as PASS, but the canonical verification evidence still centred on earlier main commits. Because repository rulesets are external live state, their correctness should be periodically re-read rather than inferred from repository prose.
+
+### What changed
+
+- re-read the live `Protect main` ruleset and confirmed:
+  - enforcement active on the default branch;
+  - no bypass actors;
+  - deletion blocked;
+  - non-fast-forward/force-push blocked;
+  - linear history required;
+  - PR required;
+  - required approvals = 0;
+  - review conversation resolution required;
+  - squash-only merge;
+  - strict required checks `contracts` and `state-and-changelog`;
+- re-read repository merge settings and confirmed squash enabled, merge-commit/rebase disabled, update-branch enabled, and merged branches auto-deleted;
+- confirmed latest audited main `3d2dc4d8f07b67f3be44f9fedc69a60acb775405` is associated with PR #6;
+- confirmed PR #6 head passed both required checks before merge and the post-merge main commit also passed both checks;
+- audited recent protected-main history and confirmed PR provenance for PR #4, PR #5, and PR #6;
+- refreshed the live-governance verification record, repository-governance contract, canonical freeze-gate evidence, README validation index, and living project state;
+- retained repository visibility as public observed state without changing it.
+
+### Intended effect
+
+Keep the repository's canonical governance evidence synchronized with actual GitHub enforcement and prove that the ruleset is not merely configured but is being used by recent main-branch changes.
+
+### Validation
+
+This PR must itself pass:
+
+- `contracts`;
+- `state-and-changelog`;
+
+against latest `main` before squash merge. Post-merge main checks will be re-read as the final verification.
+
+
 
 ## 2026-10-04 — Adopt production-verified Pastoral Studio scholarly retrieval/RAG method
 

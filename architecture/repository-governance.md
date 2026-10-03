@@ -114,3 +114,19 @@ Canonical gate status:
 Live repository metadata currently reports the repository as **public**.
 
 This document records that fact but does not change repository visibility. Visibility changes require a separate deliberate repository-administration decision.
+
+## Current re-verification
+
+Re-verified on 2026-10-04 against live GitHub metadata after further protected-main work.
+
+The ruleset remains active with the same load-bearing rules, required checks, strict latest-main policy, no bypass actors, and squash-only merge path.
+
+Current audited `main` commit `3d2dc4d8f07b67f3be44f9fedc69a60acb775405` is a squash merge from PR #6 rather than a direct push. Its PR head passed both required checks before merge, and the post-merge main commit also passed both workflows.
+
+Recent protected-main commits inspected after ruleset activation were traceable to PR #4, PR #5, and PR #6. No bypass evidence was found.
+
+The legacy branch-protection API's own `enabled: false` field is not the controlling signal for this repository because the active repository ruleset provides protection; branch metadata correctly reports `protected: true`.
+
+See the canonical live record:
+
+- `architecture/reviews/2026-10-03-live-repository-governance-verification.md`.
