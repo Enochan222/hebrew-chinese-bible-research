@@ -61,6 +61,9 @@ Core OpenAPI does not override Research Pro extension endpoints merely because t
 - `json-schema/discovery-record.schema.json`
 - `json-schema/experience-capabilities.schema.json`
 - `json-schema/product-entitlement.schema.json`
+- `json-schema/research-model-run.schema.json`
+- `json-schema/scholarly-provider-request.schema.json`
+- `scholarly-provider-registry.json`
 - `research-pro-openapi.yaml`
 
 ## Validation
@@ -79,3 +82,11 @@ Important invariants:
 - RightsDecisionSnapshot represents explicit-rule and default-deny outcomes.
 - Published scholarship uses assertion-level public evidence.
 - JSON Schema validation is necessary but not sufficient; deterministic semantic validation is mandatory.
+
+## Scholarly discovery build contracts
+
+- The initial provider ensemble is OpenAlex, Semantic Scholar, CORE, Crossref, and Scite.
+- Direct API and MCP are transport alternatives behind the same provider adapter boundary.
+- Build-time query expansion and synthesis use a provider-neutral ResearchModelAdapter; Gemini is not required.
+- Every DiscoveryRecord is traceable to a ScholarlyProviderRequest.
+- Provider/model credentials are never contract payloads.
