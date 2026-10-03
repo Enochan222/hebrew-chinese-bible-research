@@ -271,6 +271,28 @@ OSHB, MACULA/Clear, BHSA/ETCBC and other resources may have different roles, lic
 
 Cross-framework equivalence is explicit mapped research data, never silently assumed.
 
+## 5.4 Multi-provider scholarly discovery
+
+The private database/research build must implement a multi-provider scholarly discovery aggregation layer rather than rely on one academic index or on model memory.
+
+The initial required provider ensemble is:
+
+- OpenAlex;
+- Semantic Scholar;
+- CORE;
+- Crossref;
+- Scite.
+
+These providers have complementary roles in broad discovery, bibliographic identity, open-access/full-text access, citation graphs, citation contexts and scholarly-integrity signals.
+
+The database build may access a provider through direct API or MCP, but all results must normalize into the same DiscoveryRecord / Work / LiteratureSnapshot pipeline.
+
+A replaceable ResearchModelAdapter performs model-assisted tasks such as query expansion, query normalization, result triage, relevance classification, candidate claim extraction, counterevidence-query generation and synthesis drafting.
+
+The build model is not fixed to Gemini. A build executed by GPT in ChatGPT/Codex, Gemini, Claude, a local model or another approved model uses the same contracts and records its model/provenance identity.
+
+External provider results and model synthesis remain non-canonical until reviewed and compiled into a ResearchRelease.
+
 ---
 
 # 6. Academic integrity requirements
@@ -348,7 +370,7 @@ AI may assist with:
 
 - extraction candidates;
 - concept mapping candidates;
-- literature discovery/query expansion;
+- multi-provider literature discovery/query expansion;
 - natural-language-to-CorpusQuery interpretation;
 - explanation of deterministic results;
 - comparing a user's translation draft against already retrieved evidence;
@@ -507,6 +529,7 @@ The project has reached its intended product direction only when a user can do t
 - reviewed/versioned project Chinese rendering layer alongside external witnesses and user drafts;
 - database-backed product, not throwaway app;
 - evidence-led translation analysis;
+- multi-provider scholarly discovery during database/research compilation;
 - Google Drive scholarly library is a mandatory curated authoring source base;
 - deterministic corpus evidence;
 - Chinese translation comparison;
