@@ -442,6 +442,25 @@ Fields:
 
 This supports split / merged verse numbering and subverse addressing.
 
+## 3.9 Reference-resolution boundary
+
+Human-readable labels are addresses, not canonical passage identity.
+
+Canonical input contract:
+
+- direct `reference_span_id`; or
+- `reference_system_code + reference_label`.
+
+A deterministic resolver maps the second form through ReferenceSystem / ReferenceLabel / ReferenceLabelMember to one ReferenceSpan.
+
+A naked human label must not be stored or passed internally as if it were universally unambiguous.
+
+Public-friendly URLs may continue to use readable labels, but the request must declare its reference system and every scholarly response returns the resolved ReferenceSpan identity.
+
+Machine contract:
+
+- `contracts/v1.1/json-schema/passage-locator.schema.json`.
+
 ---
 
 # 4. General text identity model
@@ -1085,7 +1104,9 @@ Operations and decisions come from canonical vocabulary.
 
 Enforceable excerpt limits must always carry an explicit unit from `rightsExcerptUnit`. A bare integer excerpt limit is invalid.
 
-`conditions_json` is not an untyped enforcement escape hatch. Any condition that can change an ALLOW/DENY/CONDITIONAL outcome must belong to a registered versioned condition schema or a typed RightsDecision obligation. Unknown/unregistered condition keys resolve restrictively and cannot silently grant access.
+`conditions_json` is not an untyped enforcement escape hatch. It is an array of registered/versioned RightsCondition objects. Each condition declares a condition schema ID, condition schema version, evaluator version, and typed payload. Unknown/unregistered condition schemas cannot grant access and resolve restrictively.
+
+Typed residual obligations use discriminated machine contracts. For example, MAX_EXCERPT requires a numeric value plus excerpt unit, while RETENTION_LIMIT requires an integer duration plus DAY.
 
 Free-text scopes are no longer authoritative. Canonical scope values must come from:
 
@@ -1134,7 +1155,7 @@ Fields:
 
 Publication must pin the rights decision snapshots used for publishability.
 
-A `DEFAULT_DENY` snapshot has zero winning rule IDs and records `decision_basis = DEFAULT_DENY`. An explicit rule outcome records `decision_basis = RULE`. Enforceable residual obligations are serialized from typed/versioned obligation semantics.
+A `DEFAULT_DENY` snapshot has zero winning rule IDs and records `decision_basis = DEFAULT_DENY`. `UNKNOWN_RESTRICTIVE` also resolves to DENY and cannot carry a permissive result. An explicit rule outcome records `decision_basis = RULE`. A CONDITIONAL decision must contain at least one typed condition or obligation. Enforceable residual obligations are serialized from typed/versioned obligation semantics.
 
 Critical rule:
 
@@ -1297,6 +1318,8 @@ Representation types:
 Only a source span is the author's actual text.
 
 An AI-extracted proposition must not silently become equivalent to author wording.
+
+Once a ScholarlyClaim is referenced by a published ResearchRelease, its scholarly proposition is immutable. A correction creates a new claim identity and an explicit supersession/revision relation; historical releases retain the original claim. Do not mutate published claim wording in place.
 
 ## 15.2 `claim_relations`
 
@@ -1816,7 +1839,7 @@ Fields:
 - `research_object_version text nullable`
 - `evidence_content_hash text nullable`
 - `stance text`
-- `citation_locator jsonb nullable`
+- `citation_locator jsonb nullable` validated as `CitationLocatorV1`
 - `entailment_review_status text`
 - `weight_metadata jsonb nullable`
 
@@ -2323,7 +2346,83 @@ Rule application remains distinct from final translation decision.
 
 ---
 
-# 33. Translation decision and published analysis contract
+# 33. Translation source basis, policy, decision, and published analysis contract
+
+## 33.0A `translation_source_bases`
+
+Immutable adopted textual state used by an official project translation decision.
+
+This closes the distinction:
+
+```text
+DigitalExpression
+  != TextStream
+  != adopted source text for translation
+```
+
+Fields:
+
+- `translation_source_basis_id uuid PK/FK -> research_objects.research_object_id`
+- `reference_span_id uuid FK`
+- `source_digital_expression_id uuid FK`
+- `source_text_stream_id uuid FK`
+- `basis_kind text`
+- `review_status text`
+- `content_hash text`
+- `created_at timestamptz`
+
+Typed members:
+
+- `translation_source_basis_segments(translation_source_basis_id, text_segment_id, member_order)`
+- `translation_source_basis_apparatus_readings(translation_source_basis_id, apparatus_reading_id)`
+- `translation_source_basis_assertions(translation_source_basis_id, published/assertion object as appropriate)`
+
+If an editorial emendation is used, the adopted reading and editorial rationale are explicit research data.
+
+This object is immutable. A changed adopted reading creates a new basis object; v1.1 does not add a second mutable "current basis" hierarchy.
+
+Machine contract:
+
+- `contracts/v1.1/json-schema/translation-source-basis.schema.json`.
+
+## 33.0B `translation_policies` and `translation_policy_versions`
+
+The project Chinese rendering requires a versioned editorial policy. Hebrew evidence does not by itself determine one unique Chinese rendering.
+
+`translation_policies`:
+
+- `translation_policy_id uuid PK`
+- `policy_key text unique`
+- `current_version_id uuid nullable`
+- `created_at timestamptz`
+
+`translation_policy_versions`:
+
+- `translation_policy_version_id uuid PK/FK -> research_objects.research_object_id`
+- `translation_policy_id uuid FK`
+- `version_number integer`
+- `target_language_tag text`
+- `target_language_profile_version_id uuid nullable`
+- `audience_profile text`
+- `register text`
+- `ambiguity_policy text`
+- `policy_summary text nullable`
+- `review_status text`
+- `content_hash text`
+- `supersedes_version_id uuid nullable FK`
+
+`target_language_tag` follows BCP 47 semantics. It identifies language/script/region where justified; it does not encode the full translation style.
+
+Policy versions aggregate existing RuleVersion objects rather than creating a second rule engine:
+
+- TRANSLATION_POLICY rule versions;
+- EDITORIAL_CONVENTION rule versions.
+
+Use a junction table such as `translation_policy_rule_members`.
+
+Machine contract:
+
+- `contracts/v1.1/json-schema/translation-policy-version.schema.json`.
 
 ## 33.1 `translation_decisions`
 
@@ -2333,8 +2432,9 @@ Fields:
 
 - `translation_decision_id uuid PK`
 - `reference_span_id uuid FK`
-- `source_digital_expression_id uuid FK`
-- `target_language_code text`
+- `translation_source_basis_id uuid FK`
+- `translation_policy_version_id uuid FK`
+- `target_language_tag text`
 - `decision_kind text`
 - `selected_rendering text nullable`
 - `ambiguity_strategy text nullable`
@@ -2342,6 +2442,8 @@ Fields:
 - `decision_payload jsonb`
 - `review_status text`
 - `supersedes_decision_id uuid nullable FK`
+
+Every official project TranslationDecision must pin exactly which textual state was translated and which project translation policy version governed the target-language decision.
 
 `decision_payload` must validate against a versioned schema. It is not an untyped escape hatch.
 
@@ -2401,6 +2503,8 @@ Fields:
 - `sort_order integer`
 
 No private Drive URL, private source locator, restricted full text, private embedding, or unreviewed AI note may appear here.
+
+If `permitted_excerpt` is non-null, a publication-compatible RightsDecisionSnapshot is mandatory. If `evidence_stability_class = IMMUTABLE_SNAPSHOT`, `evidence_content_hash` is mandatory.
 
 ## 33.5 `published_assertions`
 
@@ -2494,6 +2598,10 @@ Optional:
 
 The optional interpreter returns a candidate constrained CorpusQuery AST. It never executes generated SQL.
 
+Human-readable passage routes require an explicit `referenceSystemCode` and resolve to a canonical ReferenceSpan before domain execution. Product MCP PassageRequestV1 may alternatively supply `referenceSpanId` directly.
+
+Corpus query execution uses `CorpusQueryExecutionRequestV1`, which separates the normalized scholarly query from retrieval state (`cursor`, `pageSize`). Query results distinguish page match count from total match count and whether the total is exact.
+
 Every canonical response must include `research_release_id`.
 
 The same CorpusQuery JSON Schema is used by:
@@ -2523,6 +2631,10 @@ Normative machine files for the Core profile include:
 - `contracts/v1.1/query-semantics.md`
 - `contracts/v1.1/json-schema/query-execution-policy.schema.json`
 - `contracts/v1.1/json-schema/corpus-query-result.schema.json`
+- `contracts/v1.1/json-schema/corpus-query-execution-request.schema.json`
+- `contracts/v1.1/json-schema/passage-locator.schema.json`
+- `contracts/v1.1/json-schema/passage-request.schema.json`
+- `contracts/v1.1/json-schema/passage-core.schema.json`
 - `contracts/v1.1/json-schema/annotation-layer.schema.json`
 - `contracts/v1.1/json-schema/semantic-set-version.schema.json`
 - `contracts/v1.1/json-schema/construction-compilation-run.schema.json`
@@ -2535,7 +2647,11 @@ Normative machine files for the Core profile include:
 - `contracts/v1.1/json-schema/release-channel-pointer.schema.json`
 - `contracts/v1.1/json-schema/published-evidence-item.schema.json`
 - `contracts/v1.1/json-schema/published-passage-analysis.schema.json`
+- `contracts/v1.1/json-schema/translation-source-basis.schema.json`
+- `contracts/v1.1/json-schema/translation-policy-version.schema.json`
 - `contracts/v1.1/json-schema/translation-decision.schema.json`
+- `contracts/v1.1/json-schema/citation-locator.schema.json`
+- `contracts/v1.1/json-schema/rights-condition.schema.json`
 - `contracts/v1.1/product-mcp-tools.json`
 - `contracts/v1.1/openapi.yaml`
 
@@ -2620,7 +2736,7 @@ Fields:
 
 `access_level` describes what the provider exposed. It does not by itself authorize persistent storage.
 
-`raw_payload` may be persisted only when the rights decision snapshot permits that operation. Otherwise the record stores rights-safe normalized metadata plus hashes/locators allowed by provider terms.
+`raw_payload` or other provider-returned payload fields may be persisted only when the rights decision snapshot permits that operation. `PERSISTED_ALLOWED_FIELDS` requires a RightsDecisionSnapshot; `METADATA_ONLY` cannot persist abstract/full-text payload. Otherwise the record stores rights-safe normalized metadata plus hashes/locators allowed by provider terms.
 
 ## 38.3 `external_record_resolutions`
 
@@ -2731,6 +2847,7 @@ Fields:
 
 - `research_position_version_id uuid PK/FK -> research_objects.research_object_id`
 - `research_position_id uuid FK`
+- `research_issue_version_id uuid FK`
 - `version_number integer`
 - `title text`
 - `position_summary text`
@@ -2740,6 +2857,8 @@ Fields:
 - `content_hash text`
 - `created_at timestamptz`
 - `supersedes_version_id uuid nullable FK`
+
+A ResearchPositionVersion belongs to the exact ResearchIssueVersion framing under which it was formulated. Release assembly must reject an issue/position graph that mixes incompatible historical versions.
 
 ## 39.6 `position_claim_links`
 
@@ -2954,7 +3073,7 @@ Fields:
 - `published_assertion_id uuid FK`
 - `sort_order integer`
 
-Rendered prose is derivative from structured assertions.
+Rendered substantive prose is derivative from structured assertions. A commentary section containing scholarly argument must contain at least one PublishedAssertion membership; empty-assertion prose is not publishable.
 
 ## 41.4 `commentary_section_evidence`
 
@@ -3009,7 +3128,7 @@ Fields:
 - `entitlement_principal_id uuid FK`
 - `product_feature_id uuid FK`
 - `entitlement_decision text`
-- `source_type text`
+- `source_type text` from canonical `productEntitlementSourceType`
 - `source_reference text nullable`
 - `valid_from timestamptz nullable`
 - `valid_until timestamptz nullable`
