@@ -41,8 +41,12 @@ Database Spike 001 can now test a smaller, more coherent contract surface in whi
 
 - earlier clean PR Contract validation run 37099589859 passed after the first closure pass;
 - later Project governance run 37099830333 correctly failed because the new mandatory PROJECT_STATE/CHANGELOG rule landed concurrently on main and the panel branch had not yet adopted it;
-- the branch has now synchronized that governance baseline and updated both living governance documents;
-- final Contract validation + Project governance runs remain required before merge, followed by one more independent read-only adversarial review.
+- the branch synchronized that governance baseline and updated both living governance documents;
+- Contract validation runs 37100959518, 37101013187, and 37101156060 passed during successive review rounds;
+- Project governance runs 37100959521, 37101013160, and 37101156012 passed during successive review rounds;
+- the final independent adversarial review found no further load-bearing domain-model defect;
+- `architecture/reviews/2026-10-03-panel-contract-closure.md` is the canonical panel adjudication record;
+- live branch protection remains the only unresolved repository-governance item and is tracked in issue #1.
 
 ## 2026-10-03 — Sacred Studies method parity + mandatory push governance
 
