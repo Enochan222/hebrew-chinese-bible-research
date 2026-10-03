@@ -4,6 +4,8 @@ Status: **ACTIVE CANDIDATE PRODUCT ARCHITECTURE**
 
 This document reframes the project as a database-backed scholarly product platform rather than a single runtime AI application.
 
+It implements the product intent defined in `PROJECT_CHARTER.md`.
+
 It complements:
 
 - `architecture/database-api-cross-stage-contract-v1.1.md`
