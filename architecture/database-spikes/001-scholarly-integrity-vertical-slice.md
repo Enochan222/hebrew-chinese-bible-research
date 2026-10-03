@@ -96,12 +96,21 @@ At minimum prove:
 - ReferenceLabel members have deterministic order;
 - superscription / split / merged labels resolve through explicit ReferenceSystem.
 
-### 3.5 Translation reproducibility
+### 3.5 Research-issue version compatibility
+
+Attack:
+
+- ResearchPositionVersion references ResearchIssue stable identity A;
+- its `research_issue_version_id` belongs to stable ResearchIssue B;
+- database insertion or publication validation must fail.
+
+### 3.6 Translation reproducibility
 
 Attack:
 
 - official TranslationDecision without TranslationSourceBasis;
 - official TranslationDecision without TranslationPolicyVersion;
+- TranslationDecision target language differs from pinned TranslationPolicyVersion target language;
 - source basis stream and source basis segments do not agree;
 - apparatus-based basis names a reading outside the passage/locus.
 
