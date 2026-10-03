@@ -167,7 +167,8 @@ Test the required guarantee:
 4. confirm current PRODUCTION remains unchanged;
 5. retry successful publication;
 6. move PRODUCTION pointer in one Serving-database transaction;
-7. confirm clients observe complete old or complete new release, never partial new release.
+7. confirm clients observe complete old or complete new release, never partial new release;
+8. prove that changing a TranslationDecision's source-basis identity changes the canonical published translation/analysis aggregate hash and therefore cannot remain hidden under the same release component hash.
 
 Rollback moves a pointer and does not mutate historical release payload.
 
