@@ -32,6 +32,7 @@ def schema_errors(schema_path: str, fixture_path: str) -> list[str]:
     return [f"{fixture_path}: {e.message}" for e in Draft202012Validator(schema, registry=SCHEMA_REGISTRY, format_checker=FormatChecker()).iter_errors(fixture)]
 
 POSITIVE = [
+ ("contracts/v1.1/json-schema/corpus-source-registry.schema.json","contracts/v1.1/corpus-source-registry.json"),
  ("contracts/v1.1/json-schema/corpus-query.schema.json","contracts/v1.1/fixtures/corpus-query-1sam16-7.json"),
  ("contracts/v1.1/json-schema/corpus-query-normalized.schema.json","contracts/v1.1/fixtures/corpus-query-1sam16-7.json"),
  ("contracts/v1.1/json-schema/release-manifest.schema.json","contracts/v1.1/fixtures/release-manifest.json"),
@@ -124,6 +125,21 @@ def query_semantic(q: dict) -> list[str]:
             if any(b not in nodes for b in x.get("bind",[])): out.append("unknown quantifier bind")
     return out
 
+def corpus_source_registry_semantic(d: dict) -> list[str]:
+    out=[]
+    sources=d.get("sources",[])
+    keys=[s.get("sourceKey") for s in sources]
+    if len(keys)!=len(set(keys)): out.append("duplicate corpus sourceKey")
+    by_key={s.get("sourceKey"):s for s in sources}
+    if set(by_key)!={"OSHB_MORPHHB","BHSA_2021","ETCBC_BRIDGING_2021"}: out.append("required corpus source ensemble drift")
+    if by_key.get("OSHB_MORPHHB",{}).get("licensing",{}).get("publicServingDefault")!="ALLOW_WITH_ATTRIBUTION": out.append("OSHB serving-right default drift")
+    if by_key.get("BHSA_2021",{}).get("pin",{}).get("datasetVersion")!="2021": out.append("BHSA dataset pin drift")
+    if by_key.get("BHSA_2021",{}).get("licensing",{}).get("publicServingDefault")!="CONDITIONAL_RIGHTS_REVIEW": out.append("BHSA rights boundary drift")
+    if by_key.get("ETCBC_BRIDGING_2021",{}).get("integration",{}).get("canonicality")!="DERIVED_MAPPING_EVIDENCE": out.append("bridging canonicality drift")
+    if by_key.get("ETCBC_BRIDGING_2021",{}).get("licensing",{}).get("publicServingDefault")!="DENY_UNTIL_RIGHTS_REVIEW": out.append("bridging rights boundary drift")
+    if d.get("usagePolicy",{}).get("upstreamUpdatePolicy")!="NEVER_AUTO_ADVANCE": out.append("corpus pins may not auto-advance")
+    return out
+
 def translation_semantic(d: dict) -> list[str]:
     out=[]
     ids=[x["candidateId"] for x in d.get("candidateRenderings",[])]
@@ -210,6 +226,7 @@ def validate_fixtures():
         ERRORS.extend(errs)
         if errs: continue
         d=load(f)
+        if f.endswith("corpus-source-registry.json"): ERRORS.extend(f"{f}: {e}" for e in corpus_source_registry_semantic(d))
         if "corpus-query-1sam16-7" in f: ERRORS.extend(f"{f}: {e}" for e in query_semantic(d))
         if f.endswith("translation-decision.json"): ERRORS.extend(f"{f}: {e}" for e in translation_semantic(d))
         if f.endswith("translation-policy-version.json"): ERRORS.extend(f"{f}: {e}" for e in translation_policy_semantic(d))
@@ -260,6 +277,9 @@ def governance():
     if "PROJECT_CHARTER.md" not in readme: fail("README must point to project charter")
     active=(ROOT/"architecture/database-api-cross-stage-contract-v1.1.md").read_text(encoding="utf-8")
     if "Expand " + chr(96) + "works.work_type" + chr(96) in active: fail("stale mixed work_type section")
+    for adapter in (ROOT/"scripts/corpora").glob("*.py"):
+        try: compile(adapter.read_text(encoding="utf-8"),str(adapter),"exec")
+        except SyntaxError as exc: fail(f"corpus adapter syntax error {adapter.relative_to(ROOT)}: {exc}")
     tax=(ROOT/"docs/academic-source-taxonomy.md").read_text(encoding="utf-8")
     for stale in ("VERIFIED_OPEN","LICENSED_FOR_INDEXING","LICENSED_PRIVATE_ONLY","USER_SUPPLIED_RESEARCH_ONLY"):
         if stale in tax: fail(f"stale source status {stale}")

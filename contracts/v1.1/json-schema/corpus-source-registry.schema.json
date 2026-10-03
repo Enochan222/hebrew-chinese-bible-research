@@ -1,0 +1,255 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/corpus-source-registry.schema.json",
+  "title": "Pinned Corpus Source Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "cacheRoot",
+    "sources",
+    "usagePolicy"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "cacheRoot": {
+      "const": ".local/corpora"
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 3,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sourceKey",
+          "providerKey",
+          "repository",
+          "pin",
+          "acquisition",
+          "roles",
+          "licensing",
+          "integration",
+          "updatePolicy"
+        ],
+        "properties": {
+          "sourceKey": {
+            "type": "string",
+            "pattern": "^[A-Z0-9_]+$"
+          },
+          "providerKey": {
+            "type": "string",
+            "pattern": "^[A-Z0-9_]+$"
+          },
+          "repository": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+          },
+          "pin": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "commitSha",
+              "datasetVersion"
+            ],
+            "properties": {
+              "commitSha": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{40}$"
+              },
+              "datasetVersion": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "minLength": 1
+              }
+            }
+          },
+          "acquisition": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "method",
+              "paths",
+              "localSubdir"
+            ],
+            "properties": {
+              "method": {
+                "enum": [
+                  "GITHUB_ARCHIVE_SUBSET",
+                  "RAW_FILES"
+                ]
+              },
+              "paths": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "localSubdir": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9._-]*$"
+              }
+            }
+          },
+          "roles": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "enum": [
+                "TEXT_EXPRESSION",
+                "WORD_IDENTITY",
+                "MORPHEME_SEGMENTATION",
+                "MORPHOLOGY",
+                "LEMMA",
+                "LEXEME",
+                "PHRASE_STRUCTURE",
+                "CLAUSE_STRUCTURE",
+                "SYNTACTIC_FUNCTION",
+                "LINGUISTIC_RELATION",
+                "KETIV_QERE",
+                "CROSS_ANNOTATION_MAPPING",
+                "MORPHOLOGY_COMPARISON"
+              ]
+            }
+          },
+          "licensing": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "dataLicense",
+              "softwareLicense",
+              "commercialUse",
+              "attributionRequired",
+              "publicServingDefault"
+            ],
+            "properties": {
+              "dataLicense": {
+                "type": "string",
+                "minLength": 1
+              },
+              "softwareLicense": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "commercialUse": {
+                "enum": [
+                  "ALLOWED_SUBJECT_TO_TERMS",
+                  "NONCOMMERCIAL_UNLESS_PERMISSION",
+                  "RIGHTS_REVIEW_REQUIRED"
+                ]
+              },
+              "attributionRequired": {
+                "type": "boolean"
+              },
+              "publicServingDefault": {
+                "enum": [
+                  "ALLOW_WITH_ATTRIBUTION",
+                  "CONDITIONAL_RIGHTS_REVIEW",
+                  "DENY_UNTIL_RIGHTS_REVIEW"
+                ]
+              }
+            }
+          },
+          "integration": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "canonicality",
+              "annotationLayers",
+              "preserveSourceUnicode",
+              "normalizationRule",
+              "automaticPromotionToCanonical"
+            ],
+            "properties": {
+              "canonicality": {
+                "enum": [
+                  "PROVIDER_SCOPED",
+                  "DERIVED_MAPPING_EVIDENCE"
+                ]
+              },
+              "annotationLayers": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "enum": [
+                    "ORTHOGRAPHIC_SEGMENTATION",
+                    "MORPHEME_SEGMENTATION",
+                    "MORPHOLOGY",
+                    "PHRASE_STRUCTURE",
+                    "CLAUSE_STRUCTURE",
+                    "DEPENDENCY"
+                  ]
+                }
+              },
+              "preserveSourceUnicode": {
+                "const": true
+              },
+              "normalizationRule": {
+                "type": "string",
+                "minLength": 1
+              },
+              "automaticPromotionToCanonical": {
+                "const": false
+              }
+            }
+          },
+          "updatePolicy": {
+            "const": "PINNED_REVIEWED_PR_ONLY"
+          }
+        }
+      }
+    },
+    "usagePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "morphologyDefaultSource",
+        "morphemeDefaultSource",
+        "phraseClauseDefaultSource",
+        "crossLayerMappingEvidenceSource",
+        "semanticSetAuthority",
+        "disagreementPolicy",
+        "bhsaPublicServing",
+        "upstreamUpdatePolicy"
+      ],
+      "properties": {
+        "morphologyDefaultSource": {
+          "const": "OSHB_MORPHHB"
+        },
+        "morphemeDefaultSource": {
+          "const": "OSHB_MORPHHB"
+        },
+        "phraseClauseDefaultSource": {
+          "const": "BHSA_2021"
+        },
+        "crossLayerMappingEvidenceSource": {
+          "const": "ETCBC_BRIDGING_2021"
+        },
+        "semanticSetAuthority": {
+          "const": "PROJECT_SEMANTIC_SET_VERSION"
+        },
+        "disagreementPolicy": {
+          "const": "PRESERVE_SEPARATE_ANNOTATION_LAYERS"
+        },
+        "bhsaPublicServing": {
+          "const": "RIGHTS_DECISION_REQUIRED"
+        },
+        "upstreamUpdatePolicy": {
+          "const": "NEVER_AUTO_ADVANCE"
+        }
+      }
+    }
+  }
+}

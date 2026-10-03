@@ -4,6 +4,62 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+
+## 2026-10-04 — Connect pinned OSHB, BHSA 2021, and ETCBC bridging corpus sources
+
+### Push intent
+
+Turn the previously open OSHB/BHSA corpus-source decision into a reproducible first implementation for Database Spike 001 without vendoring large upstream corpora or collapsing incompatible annotation frameworks.
+
+### Why
+
+The project already had the correct framework-scoped ontology, CorpusQuery layer pinning, rights model, and an explicit Spike requirement to test OSHB against structurally different BHSA/MACULA-style data. What was missing was an executable acquisition/import boundary: exact upstream pins, local download rules, provider-scoped exporters, rights defaults, and a decision table telling future agents which source should answer which class of corpus question.
+
+OSHB and BHSA are complementary rather than interchangeable. OSHB is well suited to the initial word/lemma/morpheme/morphology baseline. BHSA provides a rich independent phrase/clause/syntactic framework. ETCBC bridging provides Open Scriptures morphology comparison on BHSA word nodes, but does not prove a universal provider-word-ID identity.
+
+### What changed
+
+- added `contracts/v1.1/corpus-source-registry.json` with exact reviewed pins for:
+  - OSHB/morphhb commit `3d15126fb1ef74867fc1434be1942e837932691f`;
+  - BHSA frozen dataset `2021` from repo commit `4db00e2157915495e1a4d3d57e41223df24775da`;
+  - ETCBC bridging `2021` commit `324598bb3f9cb3a36543e77ac61e4b0f77addf82`;
+- added JSON Schema validation for the corpus source registry;
+- added `architecture/corpus-source-integration.md` as active authority;
+- added `scripts/corpora/fetch_sources.py` to download only configured pinned source material into `.local/corpora/`, generate SHA-256 source manifests, verify existing caches, and report upstream movement without ever auto-advancing pins;
+- added `scripts/corpora/export_oshb_words.py` for provider-scoped OSHB OSIS NDJSON export with source Unicode preserved exactly;
+- added `scripts/corpora/export_bhsa_features.py` for provider-scoped BHSA word/phrase/clause NDJSON export and optional pinned bridging features;
+- pinned Text-Fabric `13.1.0` in `requirements-corpus.txt` for the BHSA adapter;
+- added `.gitignore` rules so downloaded corpora and generated local exports do not enter Git;
+- documented the usage policy:
+  - OSHB for the first morphology/morpheme baseline;
+  - BHSA for declared phrase/clause/syntax layers;
+  - ETCBC bridging for derived comparison/mapping evidence;
+  - project SemanticSetVersion for project semantic classes;
+  - preserve disagreement rather than silently flattening it;
+- documented the rights boundary:
+  - OSHB licensed morphology/lemma data requires attribution;
+  - BHSA data is treated as CC BY-NC with explicit RightsDecision required for public/commercial serving;
+  - bridging-derived public serving defaults to deny until mixed upstream rights are reviewed;
+- strengthened Database Spike 001 so its 1 Samuel 16:7 path uses these real pinned sources and requires an explicit compatible cross-layer mapping;
+- extended contract validation to validate the registry, its semantic source ensemble/rights invariants, and corpus-adapter Python syntax;
+- updated README, contracts README, architecture manifest, PROJECT_STATE and this CHANGELOG.
+
+### Intended effect
+
+A developer can now reproducibly fetch and inspect the exact upstream Hebrew data used by the first database spike, export provider-scoped records, and know which annotation layer owns each claim. Upstream branch movement cannot silently change an existing ResearchRelease, and BHSA licensing cannot be bypassed by treating repository availability as public/commercial permission.
+
+### Validation
+
+Before creating the repository commit:
+
+- current upstream repository heads and frozen BHSA/bridging 2021 directories were inspected;
+- the registry draft passed Draft 2020-12 JSON Schema validation;
+- all three corpus Python adapters passed Python syntax compilation;
+- the OSHB exporter was exercised against a synthetic namespaced OSIS verse and preserved source Hebrew, lemma, morphology, provider ID and verse order;
+- Text-Fabric `13.1.0` was verified as the current PyPI release and supports pinned/local Text-Fabric data workflows.
+
+This PR must still pass the repository-required `contracts` and `state-and-changelog` checks against latest `main` before squash merge. Database Spike 001 remains responsible for the real PostgreSQL and real-corpus semantic/relational validation.
+
 ## 2026-10-04 — Re-verify live repository protection and PR enforcement
 
 ### Push intent

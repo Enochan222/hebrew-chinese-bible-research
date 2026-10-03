@@ -30,6 +30,8 @@ Core OpenAPI does not override Research Pro extension endpoints merely because t
 
 ## Core machine contracts
 
+- `json-schema/corpus-source-registry.schema.json`
+- `corpus-source-registry.json`
 - `json-schema/corpus-query.schema.json`
 - `json-schema/corpus-query-normalized.schema.json`
 - `json-schema/corpus-query-result.schema.json`
@@ -82,6 +84,10 @@ Core OpenAPI does not override Research Pro extension endpoints merely because t
 - negative fixtures: `contracts/v1.1/negative-fixtures/`
 
 Important invariants:
+
+- Pinned corpus sources never auto-advance; provider/framework identities remain explicit.
+- OSHB morphology/morpheme data and BHSA structural annotations remain separate AnnotationLayers.
+- ETCBC bridging is mapping/comparison evidence, not universal canonical word identity.
 
 - Pattern Builder, HTTP, MCP, and NL-to-DSL share CorpusQuery semantics.
 - Query execution uses a release-pinned normalized query.

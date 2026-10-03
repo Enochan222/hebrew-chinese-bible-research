@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.2**
+State Revision: **2026-10-04.3**
 
 ## Mandatory governance rule
 
@@ -146,6 +146,23 @@ Repository visibility remains public as observed state; this audit does not chan
 - Normal changes require PR + latest-main synchronization + `contracts` PASS + `state-and-changelog` PASS + resolved conversations + squash merge.
 - Panel contract-closure adjudication is recorded in `architecture/reviews/2026-10-03-panel-contract-closure.md` and registered as current validation authority.
 
+## Current pinned Hebrew corpus integration
+
+The first real-corpus integration for Database Spike 001 is now machine-pinned and reproducible:
+
+- OSHB/morphhb commit `3d15126fb1ef74867fc1434be1942e837932691f` is the initial text/word/lemma/morpheme/morphology baseline;
+- BHSA frozen dataset `2021`, fetched from repository commit `4db00e2157915495e1a4d3d57e41223df24775da`, is an independent framework-scoped phrase/clause/syntactic annotation source;
+- ETCBC bridging `2021`, commit `324598bb3f9cb3a36543e77ac61e4b0f77addf82`, is derived mapping/morphology-comparison evidence on BHSA word nodes and is not universal word identity;
+- project SemanticSetVersion remains the authority for project-curated semantic categories such as BODY_PART;
+- upstream corpus data is downloaded on demand into gitignored `.local/corpora/`, never vendored as the repository's canonical data;
+- source exact Unicode is preserved; OSHB source identity is not NFC-normalized;
+- source pins never auto-advance and every upstream change requires reviewed PR, corpus diff, spike rerun and a new ResearchBuild/ResearchRelease;
+- OSHB public serving defaults to attribution-compatible use under its upstream terms;
+- BHSA public/commercial serving requires an explicit RightsDecision;
+- bridging-derived public serving is denied until its mixed upstream rights are reviewed.
+
+See `architecture/corpus-source-integration.md` and `contracts/v1.1/corpus-source-registry.json`.
+
 ## Current data/research boundaries
 
 - Google Drive: curated private scholarly source base, subject to operation-specific rights.
@@ -176,7 +193,7 @@ Repository visibility remains public as observed state; this audit does not chan
 
 - exact Chinese translation witness launch list;
 - final provider for each translation witness;
-- final production mix/releases of OSHB/MACULA/BHSA layers;
+- final production/public-serving mix of OSHB/MACULA/BHSA layers after Database Spike evidence and BHSA/MACULA rights review; the initial Spike pins and OSHB/BHSA/bridging roles are now fixed in the corpus source registry;
 - commercial provider licences/quotas for Scite/CORE/Semantic Scholar where applicable;
 - final Research Pro rollout sequence;
 - final entitlement/pricing model;
@@ -185,11 +202,11 @@ Repository visibility remains public as observed state; this audit does not chan
 ## Current implementation priority
 
 1. Preserve contract/governance consistency.
-2. Database Spike 001 for real PostgreSQL/Supabase schema and constraints.
+2. Database Spike 001 using the pinned OSHB/BHSA/ETCBC-bridging real-corpus inputs for PostgreSQL/Supabase constraints and cross-layer query validation.
 3. Implement provider adapters and ResearchModelAdapter interfaces.
 4. Validate one end-to-end literature-discovery build against a real Hebrew-Bible ResearchIssue.
 5. Continue later application stages without weakening publication/rights/reproducibility boundaries.
 
 ## Latest push intent
 
-This revision refreshes repository-governance evidence after live re-verification of the active `Protect main` ruleset, latest required checks, repository merge settings, and recent protected-main PR history. It changes governance evidence only and does not change product architecture, scholarly method, repository visibility, approval-count policy, or merge semantics.
+This revision connects the project to real, version-pinned OSHB/morphhb, BHSA 2021 and ETCBC bridging inputs for Database Spike 001. It adds a machine-readable source registry, gitignored fetch/cache workflow, provider-scoped OSHB and BHSA export adapters, explicit rights/default-use boundaries, and exact rules for when morphology, morpheme, phrase/clause, bridge and project-semantic-set evidence may be used. It does not vendor upstream corpora, does not flatten annotation frameworks, and does not yet authorize BHSA-derived commercial public serving.
