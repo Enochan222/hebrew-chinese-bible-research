@@ -52,6 +52,14 @@ The long-term product is therefore both:
 - a Hebrew-Chinese translation research environment;
 - a scholarly data product with a persistent database, publication pipeline, versioning and provenance.
 
+## 1.1 Canonical coverage target
+
+The long-term canonical scope is the **whole Hebrew Bible**, not a permanently selected set of demonstration passages.
+
+Development may use pilot books/passages, fixtures and staged corpus coverage, but staged implementation must not be mistaken for the final scholarly scope.
+
+Where the project publishes its own Chinese rendering, that rendering is a reviewed, versioned scholarly product object linked to its translation decision and evidence. It is distinct from both existing Chinese translation witnesses and a user's private draft.
+
 It is **not** a disposable single-page AI app.
 
 ---
@@ -86,7 +94,9 @@ Required capabilities include:
 - LXX evidence where available and properly modelled;
 - multiple Chinese translation witnesses;
 - optional English/reference witnesses where useful;
-- user/proposed Chinese translation;
+- existing Chinese translation witnesses;
+- published project Chinese rendering / suggested translation where available;
+- user/proposed Chinese translation draft;
 - clickable Hebrew linguistic analysis;
 - morphology, syntax and textual notes;
 - published translation analysis;
@@ -229,7 +239,9 @@ The consolidated Google Drive academic library is a **mandatory curated scholarl
 
 Relevant material in that library must not be ignored in favour of generic LLM memory.
 
-For translation analysis, the system should retrieve and use relevant material from the curated library where available, preserving edition, source location, author terminology, qualification and disagreement.
+For translation analysis, the system should retrieve and use relevant material from the curated library where available and where the relevant machine-processing operation is permitted, preserving edition, source location, author terminology, qualification and disagreement.
+
+If a source cannot legally be persistently indexed or sent to a model, that restriction changes the processing route, not the scholarly importance of the source. Human/editorial research may still cite and review it where lawful.
 
 However, the Drive library is **not the epistemic boundary of scholarship**.
 
@@ -358,7 +370,7 @@ AI must not:
 
 # 9. Public runtime AI and BYOK
 
-All public runtime model use is **BYOK-only**.
+All **public/user-facing runtime** model use is **BYOK-only**.
 
 Gemini is the first supported provider.
 
@@ -371,6 +383,8 @@ Non-negotiable requirements:
 - user credential is not persisted in localStorage, IndexedDB, cookies, database, logs, analytics, telemetry or evidence;
 - missing/invalid BYOK disables only optional AI features;
 - deterministic scholarly features continue to work without AI.
+
+Private authoring/compiler infrastructure may use separately managed operator credentials when required for private research workflows, but such credentials are infrastructure secrets, are never embedded in or exposed through the public application, and never become a fallback credential for public users.
 
 BYOK credential permission does not imply permission to send private academic source text to the provider.
 
@@ -489,6 +503,8 @@ The project has reached its intended product direction only when a user can do t
 ## 15.1 Fixed / non-negotiable
 
 - research-grade Hebrew-to-Chinese focus;
+- long-term whole-Hebrew-Bible coverage target;
+- reviewed/versioned project Chinese rendering layer alongside external witnesses and user drafts;
 - database-backed product, not throwaway app;
 - evidence-led translation analysis;
 - Google Drive scholarly library is a mandatory curated authoring source base;
