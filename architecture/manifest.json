@@ -19,7 +19,9 @@
     "architecture/adr/004-research-pro-experience-layer.md",
     "architecture/adr/005-public-ai-byok-only.md",
     "contracts/v1.1/README.md",
-    "contracts/v1.1/freeze-checklist.md"
+    "contracts/v1.1/freeze-checklist.md",
+    "architecture/scholarly-discovery-aggregation.md",
+    "architecture/adr/006-multi-provider-scholarly-discovery-compiler.md"
   ],
   "superseded": [
     "architecture/database-api-cross-stage-contract-v1.md",
