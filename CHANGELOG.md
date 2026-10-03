@@ -42,7 +42,9 @@ All current governance authorities now agree with actual GitHub enforcement whil
 - first PR-head Project governance run `37103129603`: PASS;
 - first PR-head Contract validation run `37103129599`: PASS;
 - independent diff review found one documentation-structure defect: the now-resolved governance item still sat under a “Remaining open items” heading;
-- that defect is corrected in the second PR head, which must again pass both required checks against latest `main` before squash merge.
+- second reviewed PR-head Project governance run `37103197575`: PASS;
+- second reviewed PR-head Contract validation run `37103197574`: PASS;
+- the final merge gate is the latest GitHub-required `contracts` and `state-and-changelog` result against latest `main`; no CHANGELOG entry claims a permanently “final” run ID because editing this record itself creates a newer head.
 
 ## 2026-10-03 — Live repository protection enabled and verified
 
