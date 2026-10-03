@@ -743,5 +743,10 @@
     "PROMOTION",
     "BILLING_STATE",
     "MIGRATION"
+  ],
+  "rightsResolvedDecision": [
+    "ALLOW",
+    "DENY",
+    "CONDITIONAL"
   ]
 }
