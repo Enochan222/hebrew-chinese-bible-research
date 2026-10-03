@@ -40,7 +40,7 @@ Additional gate only when optional public BYOK AI is shipped.
 | CORE-SPIKE-008 | ResearchRelease payload/lifecycle/channel pointer are separate | PASS | release schemas |
 | CORE-SPIKE-009 | Public assertion evidence is assertion-level and public-safe | PASS | PublishedAssertion/Evidence contract |
 | CORE-SPIKE-010 | BYOK introduces no shared model credential dependency into core | PASS | ADR-005 / BYOK policy |
-| CORE-SPIKE-011 | Contract validation is executable from a fresh clone | PENDING until CI merge run | validator + GitHub Actions |
+| CORE-SPIKE-011 | Contract validation is executable from a fresh clone | PASS | GitHub Actions run 37071301356 checked out `7bc46c...`; validator + Core OpenAPI + Research Pro OpenAPI all succeeded |
 
 Database Spike 001 may begin when all CORE-SPIKE gates are PASS. This does not declare v1.1 FROZEN.
 
