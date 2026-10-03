@@ -114,6 +114,7 @@ Other active specialised architecture:
 - `architecture/academic-evidence-policy.md`
 - `architecture/academic-storage-and-rag.md`
 - `architecture/research-pro-scholarly-intelligence.md`
+- `architecture/scholarly-discovery-aggregation.md`
 - `architecture/ui-mode-cross-stage-contract.md`
 - `architecture/security-trust-boundaries.md`
 - `architecture/byok-credential-handling.md`
@@ -127,6 +128,7 @@ Architecture decisions:
 - `architecture/adr/003-mcp-agent-boundary.md`
 - `architecture/adr/004-research-pro-experience-layer.md`
 - `architecture/adr/005-public-ai-byok-only.md`
+- `architecture/adr/006-multi-provider-scholarly-discovery-compiler.md`
 
 Current validation records:
 
