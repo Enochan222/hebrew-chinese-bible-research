@@ -125,4 +125,4 @@ At the end of the substantive contract loop:
 - Project governance run `37101013160`: PASS;
 - PR remained mergeable against current `main`.
 
-A final CI run is still required after committing this review record and gate/status documentation. That final run verifies governance-only closeout and must not be treated as permission to weaken substantive tests.
+Merge is permitted only when the **latest** pull-request runs of both Contract validation and Project governance are successful. The PR checks are the authoritative final merge gate; this record deliberately does not pin a governance-only “last run” ID, so a documentation update cannot make the review text stale by definition.
