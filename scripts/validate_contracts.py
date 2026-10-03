@@ -86,6 +86,8 @@ NEG_SCHEMA = [
  ("contracts/v1.1/json-schema/citation-locator.schema.json","contracts/v1.1/negative-fixtures/citation-locator-source-span-missing-id.json"),
  ("contracts/v1.1/json-schema/rights-decision-snapshot.schema.json","contracts/v1.1/negative-fixtures/rights-snapshot-unknown-final-decision.json"),
  ("contracts/v1.1/json-schema/corpus-query-result.schema.json","contracts/v1.1/negative-fixtures/corpus-query-result-nonexact-with-total.json"),
+ ("contracts/v1.1/json-schema/translation-source-basis.schema.json","contracts/v1.1/negative-fixtures/translation-source-basis-stream-with-apparatus.json"),
+ ("contracts/v1.1/json-schema/published-evidence-item.schema.json","contracts/v1.1/negative-fixtures/published-evidence-excerpt-without-citation.json"),
 
 ]
 
@@ -133,6 +135,12 @@ def translation_semantic(d: dict) -> list[str]:
         if len(selected)!=1: out.append("resolved decision needs exactly one SELECTED")
         elif selected[0].get("rendering")!=sr: out.append("selected rendering mismatch")
     return out
+
+def translation_policy_semantic(d: dict) -> list[str]:
+    policy=set(d.get("policyRuleVersionIds",[]))
+    editorial=set(d.get("editorialConventionRuleVersionIds",[]))
+    if policy & editorial: return ["same RuleVersion appears in policy and editorial-convention membership"]
+    return []
 
 def manifest_semantic(d: dict) -> list[str]:
     orders=[x.get("componentOrder") for x in d.get("components",[])]
@@ -201,6 +209,7 @@ def validate_fixtures():
         d=load(f)
         if "corpus-query-1sam16-7" in f: ERRORS.extend(f"{f}: {e}" for e in query_semantic(d))
         if f.endswith("translation-decision.json"): ERRORS.extend(f"{f}: {e}" for e in translation_semantic(d))
+        if f.endswith("translation-policy-version.json"): ERRORS.extend(f"{f}: {e}" for e in translation_policy_semantic(d))
         if f.endswith("release-manifest.json"): ERRORS.extend(f"{f}: {e}" for e in manifest_semantic(d))
         if "rights-decision-" in f: ERRORS.extend(f"{f}: {e}" for e in rights_semantic(d))
         if f.endswith("query-execution-policy.json"): ERRORS.extend(f"{f}: {e}" for e in query_policy_semantic(d))
@@ -215,6 +224,7 @@ def validate_fixtures():
       ("contracts/v1.1/negative-fixtures/release-manifest-duplicate-order.json",manifest_semantic),
       ("contracts/v1.1/negative-fixtures/release-manifest-duplicate-logical-component.json",manifest_semantic),
       ("contracts/v1.1/negative-fixtures/query-execution-policy-invalid-bounds.json",query_policy_semantic),
+      ("contracts/v1.1/negative-fixtures/translation-policy-overlapping-rule-membership.json",translation_policy_semantic),
     ]
     for f,fn in semantic_neg:
         if not fn(load(f)): fail(f"{f}: expected semantic rejection")
@@ -273,6 +283,13 @@ def vocab_drift():
         value=branch.get("properties",{}).get("conditionSchemaId",{}).get("const")
         if value: condition_ids.add(value)
     if set(v["rightsConditionSchemaId"])!=condition_ids: fail("rightsConditionSchemaId drift")
+    ce=load("contracts/v1.1/json-schema/commentary-entry.schema.json")
+    if set(v["commentaryKind"])!=set(ce["properties"]["commentaryKind"]["enum"]): fail("commentaryKind drift")
+    if set(v["commentarySectionType"])!=set(ce["properties"]["sections"]["items"]["properties"]["sectionType"]["enum"]): fail("commentarySectionType drift")
+    dr=load("contracts/v1.1/json-schema/discovery-record.schema.json")
+    if set(v["discoveryAccessLevel"])!=set(dr["properties"]["accessLevel"]["enum"]): fail("discoveryAccessLevel drift")
+    if set(v["discoveryRecordStatus"])!=set(dr["properties"]["recordStatus"]["enum"]): fail("discoveryRecordStatus drift")
+    if set(v["discoveryPayloadStorageMode"])!=set(dr["properties"]["payloadStorageMode"]["enum"]): fail("discoveryPayloadStorageMode drift")
     rm=load("contracts/v1.1/json-schema/research-model-run.schema.json")
     if set(v["researchModelTaskType"])!=set(rm["properties"]["taskType"]["enum"]): fail("researchModelTaskType drift")
     if set(v["researchModelRunStatus"])!=set(rm["properties"]["status"]["enum"]): fail("researchModelRunStatus drift")
