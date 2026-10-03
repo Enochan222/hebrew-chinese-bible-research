@@ -120,5 +120,124 @@
         }
       }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "locatorType": {
+            "const": "SOURCE_SPAN"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "sourceSpanId"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "locatorType": {
+            "const": "PRINTED_PAGE"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "editionId",
+          "printedPageLabel"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "locatorType": {
+            "const": "SOURCE_ASSET_PAGE"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "sourceAssetPageId"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "locatorType": {
+            "const": "DOCUMENT_SECTION"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "editionId",
+          "sectionPath"
+        ],
+        "properties": {
+          "sectionPath": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "locatorType": {
+            "const": "LEXICON_ENTRY"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "editionId",
+          "entryLabel"
+        ],
+        "properties": {
+          "entryLabel": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "locatorType": {
+            "const": "BIBLICAL_REFERENCE"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "referenceSpanId"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "locatorType": {
+            "const": "CORPUS_RESULT"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "corpusQueryRunId"
+        ]
+      }
+    }
+  ]
 }
