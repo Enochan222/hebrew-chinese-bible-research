@@ -151,7 +151,8 @@ Reconstruct the useful passage workflow:
 - MT witness;
 - LXX witness placeholder or selected data;
 - variable Chinese translation witnesses;
-- proposed translation workspace;
+- published project rendering / suggested translation where available;
+- proposed user translation workspace;
 - analysis tab;
 - syntax/corpus tab;
 - source/citation tab.
@@ -228,6 +229,17 @@ Use:
 - provenance.
 
 Raw offsets are secondary locators only and must include coordinate basis and text revision hash.
+
+## Project rendering
+
+Support a distinct reviewed/versioned project Chinese rendering or suggested translation when available.
+
+It must remain separate from:
+
+- external Chinese translation witnesses;
+- the user's private translation draft.
+
+A project rendering must be linked to a TranslationDecision and published through ResearchRelease rather than generated ad hoc on page load.
 
 ## User workspace
 
