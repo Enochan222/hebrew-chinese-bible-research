@@ -3,7 +3,7 @@
   "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/passage-core.schema.json",
   "title": "PassageCoreV1",
   "type": "object",
-  "additionalProperties": false,
+  "additionalProperties": true,
   "required": [
     "researchReleaseId",
     "referenceSpanId",
@@ -32,5 +32,6 @@
       "type": "string",
       "minLength": 1
     }
-  }
+  },
+  "description": "Core passage envelope. Reference identity is closed and explicit; passage content fields remain extensible until the serving projection is frozen."
 }
