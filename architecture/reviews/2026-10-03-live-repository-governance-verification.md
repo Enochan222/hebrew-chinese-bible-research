@@ -156,3 +156,31 @@ feature branch
 ```
 
 This verification does not imply that the full product or v1.1 architecture is frozen. It verifies only repository-governance enforcement.
+
+
+## Independent post-sync re-audit
+
+After governance synchronization PR #4 was squash-merged, live GitHub state was re-read independently rather than inferred from repository prose.
+
+Re-audit baseline:
+
+- current `main`: `14cb67e9c70fa92c0dc629c0e8efcf6e4dc5659c`;
+- `main protected = true`;
+- ruleset `Protect main` ID `24409248`, enforcement `active`;
+- target condition remains the default branch;
+- bypass actors remain empty and current-user bypass remains `never`;
+- pull requests remain required with `0` approving reviews;
+- review conversation resolution remains required;
+- allowed merge method remains squash only;
+- required checks remain `contracts` and `state-and-changelog`, both bound to GitHub Actions;
+- strict latest-main status-check mode remains enabled;
+- deletion, non-fast-forward/force-push updates, and non-linear protected-branch history remain blocked.
+
+Post-merge push validation for `14cb67e...`:
+
+- Project governance run `37102653272`: PASS;
+- Contract validation run `37102653290`: PASS.
+
+A cross-document consistency audit then checked `PROJECT_STATE.md`, the canonical freeze checklist, repository-governance contract, README, closed issue #1, this verification record, and the panel review. The live/current sources were consistent except for one historical-looking sentence in the still-current panel review that continued to describe branch protection as unresolved. That sentence is corrected by the governance-consistency follow-up PR.
+
+Older CHANGELOG entries that record the repository before protection was enabled are intentionally retained as historical records; they are not current-state authority.

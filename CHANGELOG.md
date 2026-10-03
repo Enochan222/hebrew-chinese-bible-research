@@ -4,6 +4,43 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+
+## 2026-10-03 — Post-protection governance consistency audit
+
+### Push intent
+
+Independently re-check the live GitHub protection state and reconcile every current governance authority after the `Protect main` ruleset and governance-sync PR were already in place.
+
+### Why
+
+The live repository, freeze checklist, PROJECT_STATE, repository-governance contract, README, and closed issue #1 all reported governance as enforced. However, `architecture/reviews/2026-10-03-panel-contract-closure.md` is still registered as a current validation record and retained one sentence saying live branch protection was not enabled. That made the validation chain internally inconsistent even though the live GitHub configuration itself was correct.
+
+Historical CHANGELOG entries that recorded the repository before protection was enabled are valid historical evidence and must not be rewritten as though protection had always existed.
+
+### What changed
+
+- re-read live `main` metadata and confirmed `protected = true`;
+- re-read ruleset `Protect main` (ID `24409248`) and confirmed enforcement remains active on the default branch;
+- re-confirmed PR-only updates, `0` required approvals, conversation resolution, squash-only merge, strict latest-main checks, no bypass actors, linear history, deletion protection, and force-push/non-fast-forward protection;
+- re-confirmed required GitHub Actions checks are `contracts` and `state-and-changelog`;
+- re-confirmed post-merge push runs for governance-sync commit `14cb67e9c70fa92c0dc629c0e8efcf6e4dc5659c`: Project governance `37102653272` PASS and Contract validation `37102653290` PASS;
+- corrected the stale branch-protection sentence in the current panel review and pointed it to the later live-governance verification record;
+- appended an independent post-sync re-audit section to the canonical live-governance verification;
+- updated PROJECT_STATE revision and latest push intent;
+- deliberately left older CHANGELOG PENDING/unprotected-state statements untouched because they describe historical state rather than current authority.
+
+### Intended effect
+
+All current governance authorities now agree with actual GitHub enforcement while the repository retains an honest history of the earlier unprotected period. Future agents should not misread an old panel-review sentence as the current branch-protection state.
+
+### Validation
+
+- live GitHub ruleset and branch metadata were read directly during this audit;
+- canonical current-state files were checked individually rather than relying on GitHub search-index snippets;
+- freeze checklist already had `REPO-GOV-001/002/003` PASS and required no change;
+- issue #1 was already closed as completed and required no change;
+- this PR must pass both required checks, `contracts` and `state-and-changelog`, against latest `main` before squash merge.
+
 ## 2026-10-03 — Live repository protection enabled and verified
 
 ### Push intent
