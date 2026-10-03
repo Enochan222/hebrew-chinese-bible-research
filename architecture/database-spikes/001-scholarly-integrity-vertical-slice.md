@@ -1,6 +1,6 @@
 # Database Spike 001: Scholarly Integrity Vertical Slice
 
-Status: **APPROVED NEXT IMPLEMENTATION SPIKE AFTER CONTRACT-CLOSURE CI**
+Status: **IMPLEMENTATION IN PROGRESS — POSTGRESQL 17 EXECUTABLE HARNESS ADDED; REMOTE SUPABASE TARGET NOT YET DESIGNATED**
 
 ## 1. Purpose
 
@@ -213,3 +213,27 @@ Success means:
 > valid scholarly states are representable, invalid scholarly states are rejected at the correct trust boundary, and a release-pinned result can be reproduced from the stored dependencies.
 
 Any load-bearing contract contradicted by PostgreSQL or real corpus data must be corrected before CORE_FREEZE_V1_1.
+
+
+## 11. Executable implementation boundary
+
+The first implementation round is intentionally executed against clean PostgreSQL 17 in GitHub Actions.
+
+Reason:
+
+- the connected Supabase account currently exposes one inactive, generically named project;
+- the repository contains no Supabase project ref/link identifying that project as this product's target;
+- Database Spike 001 must not write DDL to an arbitrary remote project.
+
+Executable files:
+
+- `database/migrations/001_database_spike_001.sql`;
+- `database/spikes/001/00_bootstrap.sql`;
+- `database/spikes/001/01_seed.sql`;
+- `database/spikes/001/02_tests.sql`;
+- `database/spikes/001/03_query_plan.sql`;
+- `.github/workflows/database-spike-001.yml`.
+
+The CI bootstrap creates only the Supabase-compatible roles and `auth.uid()` shim needed by plain PostgreSQL. Those are not production schema objects to recreate in a real Supabase project.
+
+A green PostgreSQL job is implementation evidence, but it does not by itself prove Supabase Data API configuration, remote Auth/JWT behavior, advisor cleanliness, remote migration history, or production-scale performance.

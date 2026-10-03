@@ -1,0 +1,57 @@
+name: Database Spike 001
+
+on:
+  pull_request:
+    paths:
+      - 'database/**'
+      - 'architecture/database-spikes/001-scholarly-integrity-vertical-slice.md'
+      - '.github/workflows/database-spike-001.yml'
+      - 'PROJECT_STATE.md'
+      - 'CHANGELOG.md'
+  push:
+    branches: [main]
+    paths:
+      - 'database/**'
+      - 'architecture/database-spikes/001-scholarly-integrity-vertical-slice.md'
+      - '.github/workflows/database-spike-001.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  postgres-spike:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: hcb_spike
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d hcb_spike"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: hcb_spike
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Verify PostgreSQL client
+        run: psql --version
+      - name: Bootstrap Supabase-compatible test roles
+        run: psql -v ON_ERROR_STOP=1 -f database/spikes/001/00_bootstrap.sql
+      - name: Apply Database Spike 001 migration
+        run: psql -v ON_ERROR_STOP=1 -f database/migrations/001_database_spike_001.sql
+      - name: Load controlled fixtures
+        run: psql -v ON_ERROR_STOP=1 -f database/spikes/001/01_seed.sql
+      - name: Run adversarial SQL tests
+        run: psql -v ON_ERROR_STOP=1 -f database/spikes/001/02_tests.sql
+      - name: Capture representative query plan
+        run: psql -v ON_ERROR_STOP=1 -f database/spikes/001/03_query_plan.sql

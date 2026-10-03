@@ -4,6 +4,46 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+
+## 2026-10-04 — Begin executable Database Spike 001
+
+### Push intent
+
+Move the project from contract-only database design into a reproducible PostgreSQL implementation spike that can reject invalid scholarly states at real relational/RLS/publication trust boundaries.
+
+### Why
+
+Core contract gates permit Database Spike 001, but prior evidence was still synthetic JSON-schema/architecture validation. A database spike must execute real DDL, foreign keys, checks, triggers, RLS policies, security boundaries, deterministic corpus queries, and publication failure handling.
+
+The connected Supabase account currently exposes one inactive, generically named project, and the repository contains no project ref/link proving that it is the target for this product. Writing DDL there would violate the project's no-guessing deployment rule.
+
+### What changed
+
+- added a versioned PostgreSQL migration for the critical v1.1 vertical slice;
+- separated Authoring, Serving, Workspace, and Publication Control schemas;
+- implemented reference-order/book constraints and deterministic multi-atom labels;
+- implemented independent corpus annotation layers, same-layer edge FKs, explicit cross-layer mappings, and node/segment corpus-expression validation;
+- implemented WRITTEN/READ stream identity and stream-pinned Hebrew-Chinese alignment;
+- implemented shared-PK research-object identity for publishable/versioned objects used by the spike;
+- implemented SemanticSet, ConstructionDefinition/CompilationRun/Instance, RuleVersion/Application, TranslationSourceBasis, TranslationPolicyVersion, TranslationDecision, ResearchIssue/Position versioning, public evidence, and release/channel objects;
+- implemented fail-closed rights evaluation and rights-snapshot invariants;
+- implemented Workspace RLS using the Supabase-compatible `auth.uid()` contract;
+- kept Authoring and publication-control schemas unavailable to public/authenticated runtime roles;
+- implemented a non-public SECURITY DEFINER publication function available only to `publication_worker`;
+- implemented immutable ResearchRelease/component/event behavior and atomic visibility through a mutable release-channel pointer;
+- implemented a deterministic release-pinned 1 Samuel 16:7 corpus-query analogue and query-plan probe;
+- added controlled positive/adversarial SQL fixtures and negative tests;
+- added GitHub Actions PostgreSQL 17 integration workflow;
+- explicitly recorded that no remote Supabase project has been modified.
+
+### Intended effect
+
+Database Spike 001 now has executable evidence rather than prose-only expectations. CI should expose relational assumptions that JSON Schema cannot prove and provide a repeatable base for correcting the active v1.1 contract before Core Freeze.
+
+### Validation
+
+This is the first implementation round. The new `Database Spike 001 / postgres-spike` workflow must apply the migration from a blank PostgreSQL 17 database, load fixtures, pass all expected-failure assertions, and emit a representative query plan. Existing required `contracts` and `state-and-changelog` checks remain mandatory. Any SQL/contract defect found by the first clean run must be corrected before merge.
+
 ## 2026-10-04 — Re-verify live repository protection and PR enforcement
 
 ### Push intent

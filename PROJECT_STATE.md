@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.2**
+State Revision: **2026-10-04.3**
 
 ## Mandatory governance rule
 
@@ -192,4 +192,4 @@ Repository visibility remains public as observed state; this audit does not chan
 
 ## Latest push intent
 
-This revision refreshes repository-governance evidence after live re-verification of the active `Protect main` ruleset, latest required checks, repository merge settings, and recent protected-main PR history. It changes governance evidence only and does not change product architecture, scholarly method, repository visibility, approval-count policy, or merge semantics.
+This revision begins executable Database Spike 001 on a fresh PostgreSQL 17 CI database. It adds the first versioned relational migration, controlled scholarly/adversarial fixtures, RLS/grant tests, deterministic release-pinned corpus-query execution, translation source-basis/policy integrity checks, rights fail-closed tests, and publication pointer failure/rollback tests. No remote Supabase project is modified because the connected account exposes only an inactive generically named project and the repository contains no project ref proving it is the intended target. Remote Supabase deployment remains a separate explicit gate.
