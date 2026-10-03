@@ -4,6 +4,46 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+## 2026-10-03 — Independent contract-closure panel
+
+### Push intent
+
+Critically evaluate three architecture critique sets with independent academic, database/API, rights/security, Research Pro, and engineering/governance review lenses; accept only changes that close real load-bearing gaps; then independently re-review the modified contracts before Database Spike 001.
+
+### Why
+
+The pre-spike v1.1 contract was already strong, so indiscriminately implementing every critique would have increased ontology and API surface without proving scholarly or engineering value. The panel therefore separated true contract holes from production hardening, deferred work, and over-design.
+
+### What changed
+
+- added explicit ReferenceSystem-aware PassageLocator and PassageRequest contracts;
+- separated normalized CorpusQuery meaning from execution cursor/page state;
+- made corpus page-count versus exact-total semantics explicit;
+- added immutable TranslationSourceBasis and versioned TranslationPolicyVersion while reusing the existing RuleVersion engine;
+- required TranslationDecision to pin exact source basis and policy version;
+- removed the first-pass undefined TargetLanguageProfile dependency;
+- kept PassageCore content extensible until the serving projection is actually frozen;
+- kept passage-level TranslationSourceBasis out of top-level release-manifest enumeration to avoid whole-Bible manifest explosion;
+- hardened RightsDecisionSnapshot so UNKNOWN_RESTRICTIVE resolves DENY, final snapshots cannot remain UNKNOWN, conditions/obligations are typed, and permissive public evidence requires the right snapshot/hash state;
+- added typed CitationLocator with locator-specific required identity;
+- tightened DiscoveryRecord persistence rights, ProductEntitlement provenance vocabulary, ResearchPositionVersion issue-version framing, and commentary assertion provenance;
+- clarified publication visibility atomicity across separate Authoring and Serving stores;
+- defined Database Spike 001 as an adversarial scholarly-integrity vertical slice rather than a table-creation demo;
+- added CODEOWNERS/repository-governance documentation and pinned GitHub Actions used by panel-modified workflows to immutable SHAs;
+- synchronized the concurrent multi-provider scholarly discovery and Sacred Studies research-method work from latest main rather than overwriting it;
+- extended contract validation with new positive/negative fixtures, local-ref checks, vocabulary drift checks, provider/method checks, and second-pass adversarial invariants.
+
+### Intended effect
+
+Database Spike 001 can now test a smaller, more coherent contract surface in which the most important scholarly identities, rights outcomes, query semantics, translation dependencies, release boundaries, and governance assumptions are explicit without prematurely freezing every future API or bibliographic detail.
+
+### Validation
+
+- earlier clean PR Contract validation run 37099589859 passed after the first closure pass;
+- later Project governance run 37099830333 correctly failed because the new mandatory PROJECT_STATE/CHANGELOG rule landed concurrently on main and the panel branch had not yet adopted it;
+- the branch has now synchronized that governance baseline and updated both living governance documents;
+- final Contract validation + Project governance runs remain required before merge, followed by one more independent read-only adversarial review.
+
 ## 2026-10-03 — Sacred Studies method parity + mandatory push governance
 
 ### Push intent
