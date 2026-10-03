@@ -1,0 +1,25 @@
+{
+  "providerRequestId": "61616161-6161-4616-8616-616161616161",
+  "literatureSearchRunId": "62626262-6262-4626-8626-626262626262",
+  "literatureSearchQueryId": "63636363-6363-4636-8636-636363636363",
+  "providerKey": "OPENALEX",
+  "adapterVersion": "1.0.0",
+  "transportMode": "DIRECT_API",
+  "providerDatasetVersion": null,
+  "providerIndexVersion": null,
+  "providerQuerySyntaxVersion": "works-search",
+  "queryText": "\"Biblical Hebrew\" lamed preposition semantics",
+  "sortRankingMode": "relevance",
+  "requestCursor": null,
+  "requestedLimit": 25,
+  "capabilitiesUsed": [
+    "SEARCH_WORKS",
+    "GET_ABSTRACT",
+    "GET_OPEN_ACCESS_LOCATION"
+  ],
+  "responseHash": "1919191919191919191919191919191919191919191919191919191919191919",
+  "returnedCount": 25,
+  "status": "SUCCEEDED",
+  "executedAt": "2026-10-03T00:00:00Z",
+  "errorClass": null
+}
