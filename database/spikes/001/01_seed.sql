@@ -1,0 +1,327 @@
+\set ON_ERROR_STOP on
+
+BEGIN;
+
+INSERT INTO authoring.biblical_books(book_id,osis_code,english_name) VALUES
+('10000000-0000-4000-8000-000000000001','1Sam','1 Samuel'),
+('10000000-0000-4000-8000-000000000002','Ps','Psalms');
+
+INSERT INTO authoring.reference_systems(reference_system_id,code,name) VALUES
+('11000000-0000-4000-8000-000000000001','MT_TEST','Masoretic test addressing'),
+('11000000-0000-4000-8000-000000000002','ALT_TEST','Synthetic alternate addressing for superscription tests');
+
+INSERT INTO authoring.reference_atoms(reference_atom_id,book_id,sequence,atom_kind) VALUES
+('12000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000001',16007,'VERSE'),
+('12000000-0000-4000-8000-000000000002','10000000-0000-4000-8000-000000000002',3000,'SUPERSCRIPTION'),
+('12000000-0000-4000-8000-000000000003','10000000-0000-4000-8000-000000000002',3001,'VERSE');
+
+INSERT INTO authoring.reference_spans(reference_span_id,book_id,start_atom_id,start_sequence,end_atom_id,end_sequence,span_kind) VALUES
+('13000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000001','12000000-0000-4000-8000-000000000001',16007,'12000000-0000-4000-8000-000000000001',16007,'VERSE'),
+('13000000-0000-4000-8000-000000000002','10000000-0000-4000-8000-000000000002','12000000-0000-4000-8000-000000000002',3000,'12000000-0000-4000-8000-000000000002',3000,'SUPERSCRIPTION'),
+('13000000-0000-4000-8000-000000000003','10000000-0000-4000-8000-000000000002','12000000-0000-4000-8000-000000000002',3000,'12000000-0000-4000-8000-000000000003',3001,'MERGED_TEST_RANGE');
+
+INSERT INTO authoring.reference_labels(reference_label_id,reference_system_id,book_id,label,chapter_number,verse_label,sort_key) VALUES
+('14000000-0000-4000-8000-000000000001','11000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000001','1 Sam 16:7',16,'7',16007),
+('14000000-0000-4000-8000-000000000002','11000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000002','Ps 3:superscription',3,'sup',3000),
+('14000000-0000-4000-8000-000000000003','11000000-0000-4000-8000-000000000002','10000000-0000-4000-8000-000000000002','Ps 3:1-test',3,'1',3000);
+
+INSERT INTO authoring.reference_label_members(reference_label_id,book_id,reference_atom_id,atom_sequence,member_order) VALUES
+('14000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000001','12000000-0000-4000-8000-000000000001',16007,0),
+('14000000-0000-4000-8000-000000000002','10000000-0000-4000-8000-000000000002','12000000-0000-4000-8000-000000000002',3000,0),
+('14000000-0000-4000-8000-000000000003','10000000-0000-4000-8000-000000000002','12000000-0000-4000-8000-000000000002',3000,0),
+('14000000-0000-4000-8000-000000000003','10000000-0000-4000-8000-000000000002','12000000-0000-4000-8000-000000000003',3001,1);
+
+INSERT INTO authoring.research_objects(research_object_id,object_type) VALUES
+('30000000-0000-4000-8000-000000000001','CORPUS_RELEASE'),
+('32000000-0000-4000-8000-000000000001','ANNOTATION_LAYER'),
+('32000000-0000-4000-8000-000000000002','ANNOTATION_LAYER'),
+('32000000-0000-4000-8000-000000000003','ANNOTATION_LAYER'),
+('34000000-0000-4000-8000-000000000001','SEMANTIC_SET_VERSION'),
+('36000000-0000-4000-8000-000000000001','CONSTRUCTION_DEFINITION_VERSION'),
+('38000000-0000-4000-8000-000000000001','RULE_VERSION'),
+('38000000-0000-4000-8000-000000000002','RULE_VERSION'),
+('40000000-0000-4000-8000-000000000001','TRANSLATION_SOURCE_BASIS'),
+('42000000-0000-4000-8000-000000000001','TRANSLATION_POLICY_VERSION'),
+('43000000-0000-4000-8000-000000000001','RESEARCH_ISSUE_VERSION'),
+('43000000-0000-4000-8000-000000000002','RESEARCH_ISSUE_VERSION'),
+('44000000-0000-4000-8000-000000000001','RESEARCH_POSITION_VERSION'),
+('51000000-0000-4000-8000-000000000001','PUBLISHED_EVIDENCE_SOURCE');
+
+INSERT INTO authoring.textual_works(textual_work_id,work_kind,canonical_name,language_code,script_code) VALUES
+('20000000-0000-4000-8000-000000000001','HEBREW_BIBLE','Hebrew Test Text','hbo','Hebr'),
+('20000000-0000-4000-8000-000000000002','CHINESE_TRANSLATION','Chinese Test Witness','zh-Hant','Hant');
+
+INSERT INTO authoring.textual_editions(textual_edition_id,textual_work_id,edition_label,edition_status) VALUES
+('21000000-0000-4000-8000-000000000001','20000000-0000-4000-8000-000000000001','Hebrew spike edition','TEST'),
+('21000000-0000-4000-8000-000000000002','20000000-0000-4000-8000-000000000002','Chinese spike edition','TEST');
+
+INSERT INTO authoring.digital_expressions(digital_expression_id,textual_edition_id,textual_work_id,expression_label,expression_version) VALUES
+('22000000-0000-4000-8000-000000000001','21000000-0000-4000-8000-000000000001','20000000-0000-4000-8000-000000000001','Hebrew spike expression','1'),
+('22000000-0000-4000-8000-000000000002','21000000-0000-4000-8000-000000000002','20000000-0000-4000-8000-000000000002','Chinese spike expression','1');
+
+INSERT INTO authoring.text_streams(text_stream_id,digital_expression_id,stream_type,stream_version) VALUES
+('23000000-0000-4000-8000-000000000001','22000000-0000-4000-8000-000000000001','WRITTEN','1'),
+('23000000-0000-4000-8000-000000000002','22000000-0000-4000-8000-000000000001','READ','1'),
+('23000000-0000-4000-8000-000000000003','22000000-0000-4000-8000-000000000002','BASE','1');
+
+INSERT INTO authoring.text_segments(text_segment_id,text_stream_id,reference_span_id,segment_order,segment_storage_mode,surface_original,segment_kind) VALUES
+('24000000-0000-4000-8000-000000000001','23000000-0000-4000-8000-000000000001','13000000-0000-4000-8000-000000000001',1,'PERSISTED_CONTENT','יראה','WORD'),
+('24000000-0000-4000-8000-000000000002','23000000-0000-4000-8000-000000000001','13000000-0000-4000-8000-000000000001',2,'PERSISTED_CONTENT','ל','MORPHEME'),
+('24000000-0000-4000-8000-000000000003','23000000-0000-4000-8000-000000000001','13000000-0000-4000-8000-000000000001',3,'PERSISTED_CONTENT','עינים','WORD'),
+('24000000-0000-4000-8000-000000000004','23000000-0000-4000-8000-000000000002','13000000-0000-4000-8000-000000000001',1,'PERSISTED_CONTENT','יראה','WORD'),
+('24000000-0000-4000-8000-000000000010','23000000-0000-4000-8000-000000000003','13000000-0000-4000-8000-000000000001',1,'PERSISTED_CONTENT','人看外在可見之物','SEGMENT'),
+('24000000-0000-4000-8000-000000000011','23000000-0000-4000-8000-000000000003','13000000-0000-4000-8000-000000000001',2,'PERSISTED_CONTENT','而上主察看內心','SEGMENT');
+
+INSERT INTO authoring.annotation_frameworks(annotation_framework_id,framework_key,name,ontology_version) VALUES
+('31000000-0000-4000-8000-000000000001','OSHB_TEST','OSHB-like spike framework','test-1'),
+('31000000-0000-4000-8000-000000000002','MACULA_TEST','MACULA-like spike framework','test-1');
+
+INSERT INTO authoring.corpus_releases(corpus_release_id,digital_expression_id,release_name,release_version,importer_version) VALUES
+('30000000-0000-4000-8000-000000000001','22000000-0000-4000-8000-000000000001','Hebrew spike corpus','1','spike-1');
+
+INSERT INTO authoring.annotation_layers(annotation_layer_id,corpus_release_id,annotation_framework_id,layer_kind,layer_version) VALUES
+('32000000-0000-4000-8000-000000000001','30000000-0000-4000-8000-000000000001','31000000-0000-4000-8000-000000000001','MORPHOLOGY','1'),
+('32000000-0000-4000-8000-000000000002','30000000-0000-4000-8000-000000000001','31000000-0000-4000-8000-000000000001','MORPHEME_SEGMENTATION','1'),
+('32000000-0000-4000-8000-000000000003','30000000-0000-4000-8000-000000000001','31000000-0000-4000-8000-000000000002','CLAUSE_STRUCTURE','1');
+
+INSERT INTO authoring.analysis_nodes(analysis_node_id,annotation_layer_id,node_type,reference_span_id,node_order) VALUES
+('33000000-0000-4000-8000-000000000001','32000000-0000-4000-8000-000000000001','WORD','13000000-0000-4000-8000-000000000001',1),
+('33000000-0000-4000-8000-000000000002','32000000-0000-4000-8000-000000000001','WORD','13000000-0000-4000-8000-000000000001',2),
+('33000000-0000-4000-8000-000000000003','32000000-0000-4000-8000-000000000002','MORPHEME','13000000-0000-4000-8000-000000000001',1),
+('33000000-0000-4000-8000-000000000004','32000000-0000-4000-8000-000000000002','WORD','13000000-0000-4000-8000-000000000001',2),
+('33000000-0000-4000-8000-000000000005','32000000-0000-4000-8000-000000000003','CLAUSE','13000000-0000-4000-8000-000000000001',1);
+
+INSERT INTO authoring.analysis_node_features(analysis_node_id,feature_key,feature_value) VALUES
+('33000000-0000-4000-8000-000000000001','LEMMA','ראה'),
+('33000000-0000-4000-8000-000000000001','POS','VERB'),
+('33000000-0000-4000-8000-000000000002','LEMMA','עין'),
+('33000000-0000-4000-8000-000000000002','POS','NOUN'),
+('33000000-0000-4000-8000-000000000003','SURFACE','ל');
+
+INSERT INTO authoring.analysis_node_segments(analysis_node_id,text_segment_id,member_order) VALUES
+('33000000-0000-4000-8000-000000000001','24000000-0000-4000-8000-000000000001',0),
+('33000000-0000-4000-8000-000000000002','24000000-0000-4000-8000-000000000003',0),
+('33000000-0000-4000-8000-000000000003','24000000-0000-4000-8000-000000000002',0),
+('33000000-0000-4000-8000-000000000004','24000000-0000-4000-8000-000000000003',0),
+('33000000-0000-4000-8000-000000000005','24000000-0000-4000-8000-000000000001',0),
+('33000000-0000-4000-8000-000000000005','24000000-0000-4000-8000-000000000003',1);
+
+INSERT INTO authoring.analysis_edges(analysis_edge_id,annotation_layer_id,from_node_id,to_node_id,relation_type,relation_ontology) VALUES
+('33100000-0000-4000-8000-000000000001','32000000-0000-4000-8000-000000000002','33000000-0000-4000-8000-000000000003','33000000-0000-4000-8000-000000000004','PREFIX_MORPHEME_OF','SPIKE_RELATION_V1');
+
+INSERT INTO authoring.analysis_node_mappings(mapping_id,source_layer_id,source_node_id,target_layer_id,target_node_id,mapping_type) VALUES
+('33200000-0000-4000-8000-000000000001','32000000-0000-4000-8000-000000000001','33000000-0000-4000-8000-000000000002','32000000-0000-4000-8000-000000000002','33000000-0000-4000-8000-000000000004','EXPLICIT_NODE_EQUIVALENCE');
+
+INSERT INTO authoring.alignment_groups(alignment_group_id,source_expression_id,target_expression_id,source_text_stream_id,target_text_stream_id,reference_span_id,relation_type,method,review_status) VALUES
+('25000000-0000-4000-8000-000000000001','22000000-0000-4000-8000-000000000001','22000000-0000-4000-8000-000000000002','23000000-0000-4000-8000-000000000001','23000000-0000-4000-8000-000000000003','13000000-0000-4000-8000-000000000001','MANY_TO_MANY','HUMAN_TEST','HUMAN_REVIEWED');
+
+INSERT INTO authoring.alignment_source_members VALUES
+('25000000-0000-4000-8000-000000000001','24000000-0000-4000-8000-000000000001',0),
+('25000000-0000-4000-8000-000000000001','24000000-0000-4000-8000-000000000003',1);
+INSERT INTO authoring.alignment_target_members VALUES
+('25000000-0000-4000-8000-000000000001','24000000-0000-4000-8000-000000000010',0),
+('25000000-0000-4000-8000-000000000001','24000000-0000-4000-8000-000000000011',1);
+
+INSERT INTO authoring.semantic_sets(semantic_set_id,name,description,set_scope,official_status,current_version_id) VALUES
+('34100000-0000-4000-8000-000000000001','BODY_PART','Spike fixture body-part lexeme set','OFFICIAL','PUBLISHED',NULL);
+
+INSERT INTO authoring.semantic_set_versions(semantic_set_version_id,semantic_set_id,version_number,definition_json,review_status) VALUES
+('34000000-0000-4000-8000-000000000001','34100000-0000-4000-8000-000000000001',1,'{"kind":"LEXEME_SET"}','HUMAN_REVIEWED');
+
+UPDATE authoring.semantic_sets
+SET current_version_id='34000000-0000-4000-8000-000000000001'
+WHERE semantic_set_id='34100000-0000-4000-8000-000000000001';
+
+INSERT INTO authoring.semantic_set_members(semantic_set_version_id,member_object_type,member_key,inclusion_type,review_status) VALUES
+('34000000-0000-4000-8000-000000000001','LEMMA','עין','INCLUDE','HUMAN_REVIEWED');
+
+INSERT INTO authoring.construction_definitions(construction_definition_id,name,status,current_version_id) VALUES
+('36100000-0000-4000-8000-000000000001','ראה + prefixed ל + BODY_PART','PUBLISHED',NULL);
+
+INSERT INTO authoring.construction_definition_versions(construction_definition_version_id,construction_definition_id,version_number,dsl_version,query_ast,query_ast_hash,review_status) VALUES
+('36000000-0000-4000-8000-000000000001','36100000-0000-4000-8000-000000000001',1,'1.1','{"fixture":"1Sam16:7"}','aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa','HUMAN_REVIEWED');
+
+UPDATE authoring.construction_definitions
+SET current_version_id='36000000-0000-4000-8000-000000000001'
+WHERE construction_definition_id='36100000-0000-4000-8000-000000000001';
+
+INSERT INTO authoring.construction_compilation_runs(construction_compilation_run_id,construction_definition_version_id,corpus_release_id,query_ast_hash,dependency_manifest,compiler_version,started_at,completed_at,result_count,result_set_hash,status) VALUES
+('36200000-0000-4000-8000-000000000001','36000000-0000-4000-8000-000000000001','30000000-0000-4000-8000-000000000001','aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+ '{"annotationLayerIds":["32000000-0000-4000-8000-000000000001","32000000-0000-4000-8000-000000000002"],"semanticSetVersionIds":["34000000-0000-4000-8000-000000000001"]}',
+ 'spike-compiler-1',now(),now(),1,'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb','COMPLETED');
+
+INSERT INTO authoring.construction_instances(construction_instance_id,construction_compilation_run_id,reference_span_id,node_bindings,match_explanation,review_status,result_hash) VALUES
+('36300000-0000-4000-8000-000000000001','36200000-0000-4000-8000-000000000001','13000000-0000-4000-8000-000000000001',
+ '{"verb":"33000000-0000-4000-8000-000000000001","body":"33000000-0000-4000-8000-000000000002"}',
+ '{"why":"synthetic spike fixture"}','HUMAN_REVIEWED','cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc');
+
+INSERT INTO authoring.rules(rule_id,name,rule_kind,status,current_version_id) VALUES
+('38100000-0000-4000-8000-000000000001','Preserve ambiguity where evidence underdetermines','TRANSLATION_POLICY','PUBLISHED',NULL),
+('38100000-0000-4000-8000-000000000002','Traditional Chinese editorial convention','EDITORIAL_CONVENTION','PUBLISHED',NULL);
+
+INSERT INTO authoring.rule_versions(rule_version_id,rule_id,version_number,scope_json,implication_json,review_status) VALUES
+('38000000-0000-4000-8000-000000000001','38100000-0000-4000-8000-000000000001',1,'{}','{"policy":"PRESERVE_AMBIGUITY"}','HUMAN_REVIEWED'),
+('38000000-0000-4000-8000-000000000002','38100000-0000-4000-8000-000000000002',1,'{}','{"register":"HK_TRADITIONAL_CHINESE"}','HUMAN_REVIEWED');
+
+UPDATE authoring.rules
+SET current_version_id = CASE rule_id
+  WHEN '38100000-0000-4000-8000-000000000001'::uuid THEN '38000000-0000-4000-8000-000000000001'::uuid
+  WHEN '38100000-0000-4000-8000-000000000002'::uuid THEN '38000000-0000-4000-8000-000000000002'::uuid
+END
+WHERE rule_id IN (
+  '38100000-0000-4000-8000-000000000001',
+  '38100000-0000-4000-8000-000000000002'
+);
+
+INSERT INTO authoring.rule_applications(rule_application_id,rule_version_id,construction_instance_id,reference_span_id,matched_conditions,exception_status,effect,result_json,review_status,result_hash) VALUES
+('38200000-0000-4000-8000-000000000001','38000000-0000-4000-8000-000000000001','36300000-0000-4000-8000-000000000001','13000000-0000-4000-8000-000000000001','{}','NONE','QUALIFIES','{"note":"does not mechanically determine one Chinese rendering"}','HUMAN_REVIEWED','dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd');
+
+INSERT INTO authoring.translation_source_bases(translation_source_basis_id,reference_span_id,source_digital_expression_id,source_text_stream_id,basis_kind,review_status,content_hash) VALUES
+('40000000-0000-4000-8000-000000000001','13000000-0000-4000-8000-000000000001','22000000-0000-4000-8000-000000000001','23000000-0000-4000-8000-000000000001','STREAM_READING','HUMAN_REVIEWED','eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee');
+
+INSERT INTO authoring.translation_source_basis_segments VALUES
+('40000000-0000-4000-8000-000000000001','24000000-0000-4000-8000-000000000001',0),
+('40000000-0000-4000-8000-000000000001','24000000-0000-4000-8000-000000000003',1);
+
+INSERT INTO authoring.translation_policies(translation_policy_id,policy_key,current_version_id) VALUES
+('42100000-0000-4000-8000-000000000001','ZH_HANT_HK_RESEARCH',NULL);
+
+INSERT INTO authoring.translation_policy_versions(translation_policy_version_id,translation_policy_id,version_number,target_language_tag,audience_profile,register,ambiguity_policy,policy_summary,review_status,content_hash) VALUES
+('42000000-0000-4000-8000-000000000001','42100000-0000-4000-8000-000000000001',1,'zh-Hant-HK','RESEARCH','FORMAL_HK','PRESERVE_WHERE_MATERIAL','Spike fixture policy','HUMAN_REVIEWED','ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
+
+UPDATE authoring.translation_policies
+SET current_version_id='42000000-0000-4000-8000-000000000001'
+WHERE translation_policy_id='42100000-0000-4000-8000-000000000001';
+
+INSERT INTO authoring.translation_policy_rule_members VALUES
+('42000000-0000-4000-8000-000000000001','38000000-0000-4000-8000-000000000001','TRANSLATION_POLICY'),
+('42000000-0000-4000-8000-000000000001','38000000-0000-4000-8000-000000000002','EDITORIAL_CONVENTION');
+
+INSERT INTO authoring.translation_decisions(translation_decision_id,reference_span_id,translation_source_basis_id,translation_policy_version_id,target_language_tag,decision_kind,selected_rendering,ambiguity_strategy,decision_schema_version,decision_payload,review_status) VALUES
+('42200000-0000-4000-8000-000000000001','13000000-0000-4000-8000-000000000001','40000000-0000-4000-8000-000000000001','42000000-0000-4000-8000-000000000001','zh-Hant-HK','PROJECT_RENDERING','人看外在可見之物','PRESERVE_MATERIAL_AMBIGUITY','1.1','{"fixture":true}','HUMAN_REVIEWED');
+
+INSERT INTO authoring.research_issues(research_issue_id,issue_key,current_version_id) VALUES
+('43100000-0000-4000-8000-000000000001','ISSUE_A',NULL),
+('43100000-0000-4000-8000-000000000002','ISSUE_B',NULL);
+
+INSERT INTO authoring.research_issue_versions(research_issue_version_id,research_issue_id,version_number,title,question_text,issue_type,debate_status,review_status,content_hash) VALUES
+('43000000-0000-4000-8000-000000000001','43100000-0000-4000-8000-000000000001',1,'Issue A','Fixture issue A','TRANSLATIONAL','NOT_CLASSIFIED','HUMAN_REVIEWED','1111111111111111111111111111111111111111111111111111111111111111'),
+('43000000-0000-4000-8000-000000000002','43100000-0000-4000-8000-000000000002',1,'Issue B','Fixture issue B','TRANSLATIONAL','NOT_CLASSIFIED','HUMAN_REVIEWED','2222222222222222222222222222222222222222222222222222222222222222');
+
+UPDATE authoring.research_issues
+SET current_version_id = CASE research_issue_id
+  WHEN '43100000-0000-4000-8000-000000000001'::uuid THEN '43000000-0000-4000-8000-000000000001'::uuid
+  WHEN '43100000-0000-4000-8000-000000000002'::uuid THEN '43000000-0000-4000-8000-000000000002'::uuid
+END
+WHERE research_issue_id IN (
+  '43100000-0000-4000-8000-000000000001',
+  '43100000-0000-4000-8000-000000000002'
+);
+
+INSERT INTO authoring.research_positions(research_position_id,research_issue_id,current_version_id) VALUES
+('44100000-0000-4000-8000-000000000001','43100000-0000-4000-8000-000000000001',NULL);
+
+INSERT INTO authoring.research_position_versions(research_position_version_id,research_position_id,research_issue_id,research_issue_version_id,version_number,title,position_summary,position_status,review_status,content_hash) VALUES
+('44000000-0000-4000-8000-000000000001','44100000-0000-4000-8000-000000000001','43100000-0000-4000-8000-000000000001','43000000-0000-4000-8000-000000000001',1,'Position A','Fixture position','ACTIVE','HUMAN_REVIEWED','3333333333333333333333333333333333333333333333333333333333333333');
+
+UPDATE authoring.research_positions
+SET current_version_id='44000000-0000-4000-8000-000000000001'
+WHERE research_position_id='44100000-0000-4000-8000-000000000001';
+
+INSERT INTO authoring.rights_policies(rights_policy_id,policy_key,policy_version,rights_basis,verified_at) VALUES
+('45000000-0000-4000-8000-000000000001','PUBLIC_FIXTURE','1','TEST',now());
+
+INSERT INTO authoring.rights_rules(rights_rule_id,rights_policy_id,operation,decision,purpose_scope,audience_scope,commercial_context) VALUES
+('45100000-0000-4000-8000-000000000001','45000000-0000-4000-8000-000000000001','DISPLAY_EXCERPT','ALLOW','PUBLICATION','PUBLIC','COMMERCIAL'),
+('45100000-0000-4000-8000-000000000002','45000000-0000-4000-8000-000000000001','DISPLAY_EXCERPT','DENY','PUBLICATION','PUBLIC','COMMERCIAL'),
+('45100000-0000-4000-8000-000000000003','45000000-0000-4000-8000-000000000001','STORE_EXTRACTED_TEXT','DENY','PUBLICATION','PUBLIC','COMMERCIAL');
+
+INSERT INTO serving.rights_decision_snapshots(rights_decision_snapshot_id,subject_type,subject_identifier,operation,purpose_scope,audience_scope,commercial_context,applicable_rule_ids,winning_rule_ids,decision,decision_basis,obligations_json,resolver_version,evaluated_at,decision_hash) VALUES
+('45200000-0000-4000-8000-000000000001','RESEARCH_OBJECT','51000000-0000-4000-8000-000000000001','DISPLAY_EXCERPT','PUBLICATION','PUBLIC','COMMERCIAL',
+ ARRAY['45100000-0000-4000-8000-000000000001'::uuid],ARRAY['45100000-0000-4000-8000-000000000001'::uuid],'ALLOW','RULE','[]','spike-rights-1',now(),'4444444444444444444444444444444444444444444444444444444444444444'),
+('45200000-0000-4000-8000-000000000002','RESEARCH_OBJECT','51000000-0000-4000-8000-000000000001','STORE_EXTRACTED_TEXT','PUBLICATION','PUBLIC','COMMERCIAL',
+ ARRAY['45100000-0000-4000-8000-000000000003'::uuid],ARRAY['45100000-0000-4000-8000-000000000003'::uuid],'DENY','RULE','[]','spike-rights-1',now(),'5555555555555555555555555555555555555555555555555555555555555555');
+
+-- Publication copies only public/serving projections. Runtime Serving must not depend on Authoring.
+INSERT INTO serving.research_objects(research_object_id,object_type,source_content_hash,published_at) VALUES
+('30000000-0000-4000-8000-000000000001','CORPUS_RELEASE','corpus-fixture',now()),
+('34000000-0000-4000-8000-000000000001','SEMANTIC_SET_VERSION','semantic-fixture',now()),
+('42000000-0000-4000-8000-000000000001','TRANSLATION_POLICY_VERSION','ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',now()),
+('51000000-0000-4000-8000-000000000001','PUBLISHED_EVIDENCE_SOURCE','evidence-fixture',now());
+
+INSERT INTO serving.reference_spans(reference_span_id,book_code,start_sequence,end_sequence,span_kind) VALUES
+('13000000-0000-4000-8000-000000000001','1Sam',16007,16007,'VERSE');
+
+INSERT INTO serving.corpus_nodes(corpus_release_id,analysis_node_id,annotation_layer_id,node_type,reference_span_id) VALUES
+('30000000-0000-4000-8000-000000000001','33000000-0000-4000-8000-000000000001','32000000-0000-4000-8000-000000000001','WORD','13000000-0000-4000-8000-000000000001'),
+('30000000-0000-4000-8000-000000000001','33000000-0000-4000-8000-000000000002','32000000-0000-4000-8000-000000000001','WORD','13000000-0000-4000-8000-000000000001'),
+('30000000-0000-4000-8000-000000000001','33000000-0000-4000-8000-000000000003','32000000-0000-4000-8000-000000000002','MORPHEME','13000000-0000-4000-8000-000000000001'),
+('30000000-0000-4000-8000-000000000001','33000000-0000-4000-8000-000000000004','32000000-0000-4000-8000-000000000002','WORD','13000000-0000-4000-8000-000000000001');
+
+INSERT INTO serving.corpus_node_features(corpus_release_id,analysis_node_id,feature_key,feature_value) VALUES
+('30000000-0000-4000-8000-000000000001','33000000-0000-4000-8000-000000000001','LEMMA','ראה'),
+('30000000-0000-4000-8000-000000000001','33000000-0000-4000-8000-000000000002','LEMMA','עין'),
+('30000000-0000-4000-8000-000000000001','33000000-0000-4000-8000-000000000003','SURFACE','ל');
+
+INSERT INTO serving.corpus_edges(corpus_release_id,from_node_id,to_node_id,relation_type) VALUES
+('30000000-0000-4000-8000-000000000001','33000000-0000-4000-8000-000000000003','33000000-0000-4000-8000-000000000004','PREFIX_MORPHEME_OF');
+
+INSERT INTO serving.corpus_node_mappings(corpus_release_id,source_node_id,target_node_id,mapping_type) VALUES
+('30000000-0000-4000-8000-000000000001','33000000-0000-4000-8000-000000000002','33000000-0000-4000-8000-000000000004','EXPLICIT_NODE_EQUIVALENCE');
+
+INSERT INTO serving.semantic_set_members(semantic_set_version_id,member_key,inclusion_type) VALUES
+('34000000-0000-4000-8000-000000000001','עין','INCLUDE');
+
+INSERT INTO authoring.research_builds(research_build_id,build_version,status,started_at,completed_at,compiler_version,git_commit_sha) VALUES
+('46000000-0000-4000-8000-000000000001','spike-build-1','COMPLETED',now(),now(),'spike-compiler-1','fixture'),
+('46000000-0000-4000-8000-000000000002','spike-build-2','COMPLETED',now(),now(),'spike-compiler-1','fixture');
+
+INSERT INTO serving.research_releases(research_release_id,release_label,source_build_id,published_at,manifest_schema_version,manifest_hash,manifest_hash_algorithm,manifest_canonical_serialization,git_commit_sha,compiler_version) VALUES
+('47000000-0000-4000-8000-000000000001','spike-release-1','46000000-0000-4000-8000-000000000001',now(),'1.1','6666666666666666666666666666666666666666666666666666666666666666','SHA256','RFC8785_JSON_CANONICALIZATION_SCHEME','fixture','spike-compiler-1'),
+('47000000-0000-4000-8000-000000000002','spike-release-2','46000000-0000-4000-8000-000000000002',now(),'1.1','7777777777777777777777777777777777777777777777777777777777777777','SHA256','RFC8785_JSON_CANONICALIZATION_SCHEME','fixture','spike-compiler-1');
+
+INSERT INTO serving.research_release_components(research_release_id,component_kind,component_research_object_id,component_version,content_hash,component_order) VALUES
+('47000000-0000-4000-8000-000000000001','CORPUS','30000000-0000-4000-8000-000000000001','1','8888888888888888888888888888888888888888888888888888888888888888',0),
+('47000000-0000-4000-8000-000000000001','SEMANTIC_SET','34000000-0000-4000-8000-000000000001','1','9999999999999999999999999999999999999999999999999999999999999999',1),
+('47000000-0000-4000-8000-000000000001','TRANSLATION_POLICY','42000000-0000-4000-8000-000000000001','1','aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',2),
+('47000000-0000-4000-8000-000000000002','CORPUS','30000000-0000-4000-8000-000000000001','1','8888888888888888888888888888888888888888888888888888888888888888',0),
+('47000000-0000-4000-8000-000000000002','SEMANTIC_SET','34000000-0000-4000-8000-000000000001','1','9999999999999999999999999999999999999999999999999999999999999999',1),
+('47000000-0000-4000-8000-000000000002','TRANSLATION_POLICY','42000000-0000-4000-8000-000000000001','1','aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',2);
+
+INSERT INTO serving.research_release_events VALUES
+('47100000-0000-4000-8000-000000000001','47000000-0000-4000-8000-000000000001','PUBLISHED',now(),'fixture');
+
+INSERT INTO serving.release_channels(release_channel_id,channel_key,description) VALUES
+('47200000-0000-4000-8000-000000000001','PRODUCTION','Production pointer');
+
+INSERT INTO serving.release_channel_pointers(release_channel_id,research_release_id,updated_at,row_version) VALUES
+('47200000-0000-4000-8000-000000000001','47000000-0000-4000-8000-000000000001',now(),1);
+
+INSERT INTO serving.published_passage_analyses(published_analysis_id,research_release_id,reference_span_id,analysis_type,analysis_schema_version,rendered_payload,analysis_hash,review_status) VALUES
+('50000000-0000-4000-8000-000000000001','47000000-0000-4000-8000-000000000001','13000000-0000-4000-8000-000000000001','TRANSLATION_ANALYSIS','1.1','{"summary":"fixture"}','bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb','HUMAN_REVIEWED');
+
+INSERT INTO serving.published_evidence_packets VALUES
+('50100000-0000-4000-8000-000000000001','47000000-0000-4000-8000-000000000001','PASSAGE_ANALYSIS');
+
+INSERT INTO serving.published_evidence_items(published_evidence_item_id,published_evidence_packet_id,research_object_id,research_object_version,evidence_content_hash,evidence_class,citation_locator,permitted_excerpt,rights_decision_snapshot_id,evidence_stability_class,sort_order) VALUES
+('50200000-0000-4000-8000-000000000001','50100000-0000-4000-8000-000000000001','51000000-0000-4000-8000-000000000001','1','cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc','SCHOLARLY_SOURCE_TEXT','{"locatorType":"BIBLICAL_REFERENCE","referenceSpanId":"13000000-0000-4000-8000-000000000001"}','fixture excerpt','45200000-0000-4000-8000-000000000001','IMMUTABLE_SNAPSHOT',0);
+
+INSERT INTO serving.published_assertions VALUES
+('50300000-0000-4000-8000-000000000001','47000000-0000-4000-8000-000000000001','Fixture assertion','TRANSLATION','HIGH','dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd');
+
+INSERT INTO serving.published_assertion_evidence VALUES
+('50300000-0000-4000-8000-000000000001','50200000-0000-4000-8000-000000000001','SUPPORTS','VERIFIED',NULL);
+
+INSERT INTO workspace.research_projects(project_id,owner_user_id,title,visibility,status) VALUES
+('60000000-0000-4000-8000-000000000001','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','User A Project','PRIVATE','ACTIVE'),
+('60000000-0000-4000-8000-000000000002','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb','User B Project','PRIVATE','ACTIVE');
+
+INSERT INTO workspace.saved_queries(saved_query_id,owner_user_id,project_id,query_json) VALUES
+('60100000-0000-4000-8000-000000000001','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','60000000-0000-4000-8000-000000000001','{"q":"A"}'),
+('60100000-0000-4000-8000-000000000002','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb','60000000-0000-4000-8000-000000000002','{"q":"B"}');
+
+INSERT INTO workspace.user_translation_drafts(draft_id,owner_user_id,project_id,reference_span_id,rendering) VALUES
+('60200000-0000-4000-8000-000000000001','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','60000000-0000-4000-8000-000000000001','13000000-0000-4000-8000-000000000001','A draft'),
+('60200000-0000-4000-8000-000000000002','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb','60000000-0000-4000-8000-000000000002','13000000-0000-4000-8000-000000000001','B draft');
+
+COMMIT;

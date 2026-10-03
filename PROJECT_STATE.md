@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.2**
+State Revision: **2026-10-04.13**
 
 ## Mandatory governance rule
 
@@ -192,4 +192,4 @@ Repository visibility remains public as observed state; this audit does not chan
 
 ## Latest push intent
 
-This revision refreshes repository-governance evidence after live re-verification of the active `Protect main` ruleset, latest required checks, repository merge settings, and recent protected-main PR history. It changes governance evidence only and does not change product architecture, scholarly method, repository visibility, approval-count policy, or merge semantics.
+Database Spike 001 run `37143591152` again passed bootstrap, full Serving-isolation migration, and seed, then reached the PostgreSQL catalog isolation assertions. The no-Serving-FK-to-Authoring assertion passed. The following function-definition assertion failed because `pg_get_functiondef()` was evaluated against aggregate entries such as `array_agg`, for which that function is invalid. The catalog test is narrowed to ordinary functions with a guarded `prokind='f'` expression. No product schema or permission changed.
