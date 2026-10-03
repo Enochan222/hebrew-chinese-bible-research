@@ -148,6 +148,12 @@ def governance():
     gates=re.findall(r"\|\s*([A-Z]+(?:-[A-Z]+)*-\d{3})\s*\|",text)
     for g in set(gates):
         if gates.count(g)>1: fail(f"duplicate freeze gate {g}")
+    if "PROJECT_CHARTER.md" not in m.get("active",[]): fail("PROJECT_CHARTER.md must be active architecture authority")
+    charter=(ROOT/"PROJECT_CHARTER.md").read_text(encoding="utf-8")
+    for required in ("# 1. Product mission","# 13. Explicit non-goals","# 15. Fixed requirements versus open decisions"):
+        if required not in charter: fail(f"project charter missing canonical section {required}")
+    readme=(ROOT/"README.md").read_text(encoding="utf-8")
+    if "PROJECT_CHARTER.md" not in readme: fail("README must point to project charter")
     active=(ROOT/"architecture/database-api-cross-stage-contract-v1.1.md").read_text(encoding="utf-8")
     if "Expand " + chr(96) + "works.work_type" + chr(96) in active: fail("stale mixed work_type section")
     tax=(ROOT/"docs/academic-source-taxonomy.md").read_text(encoding="utf-8")
