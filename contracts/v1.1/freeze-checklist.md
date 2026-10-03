@@ -75,6 +75,10 @@ Database Spike 001 may begin when all CORE-SPIKE gates are PASS. This does not d
 | PRO-FZ-008 | Live discovery remains non-canonical and cannot mutate release-pinned synthesis |
 | PRO-FZ-009 | Research Pro machine schemas/OpenAPI extension validate representative fixtures |
 | PRO-FZ-010 | Snapshot-bounded field-state labels preserve classification basis and coverage limitations |
+| PRO-FZ-011 | Database build supports OpenAlex + Semantic Scholar + CORE + Crossref + Scite through typed provider adapters and records unavailable/skipped providers |
+| PRO-FZ-012 | Query expansion/synthesis uses a model-neutral ResearchModelAdapter and records model/prompt/input/output provenance |
+| PRO-FZ-013 | DiscoveryRecords are traceable to provider requests and multi-provider duplicates resolve to one canonical Work without losing provider provenance |
+| PRO-FZ-014 | Academic-provider credentials are absent from source, fixtures, logs and public runtime paths |
 
 ## PUBLIC_AI_SHIP_V1_1
 
