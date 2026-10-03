@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.3**
+State Revision: **2026-10-04.4**
 
 ## Mandatory governance rule
 
@@ -192,4 +192,4 @@ Repository visibility remains public as observed state; this audit does not chan
 
 ## Latest push intent
 
-This revision begins executable Database Spike 001 on a fresh PostgreSQL 17 CI database. It adds the first versioned relational migration, controlled scholarly/adversarial fixtures, RLS/grant tests, deterministic release-pinned corpus-query execution, translation source-basis/policy integrity checks, rights fail-closed tests, and publication pointer failure/rollback tests. No remote Supabase project is modified because the connected account exposes only an inactive generically named project and the repository contains no project ref proving it is the intended target. Remote Supabase deployment remains a separate explicit gate.
+Database Spike 001 first clean PostgreSQL run proved that the migration itself applies, then exposed a real fixture-ordering constraint: stable entities with a foreign-keyed `current_version_id` cannot be seeded with a not-yet-created append-only version. The spike keeps the FK and corrects all affected seeds to create the stable row with a null current pointer, insert the version, then set the pointer. This correction applies consistently to SemanticSet, ConstructionDefinition, Rule, TranslationPolicy, ResearchIssue, and ResearchPosition. The database workflow must rerun from a blank PostgreSQL 17 database before any further gate can be claimed.

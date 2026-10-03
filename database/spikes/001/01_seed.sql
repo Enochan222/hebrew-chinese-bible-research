@@ -123,19 +123,27 @@ INSERT INTO authoring.alignment_target_members VALUES
 ('25000000-0000-4000-8000-000000000001','24000000-0000-4000-8000-000000000011',1);
 
 INSERT INTO authoring.semantic_sets(semantic_set_id,name,description,set_scope,official_status,current_version_id) VALUES
-('34100000-0000-4000-8000-000000000001','BODY_PART','Spike fixture body-part lexeme set','OFFICIAL','PUBLISHED','34000000-0000-4000-8000-000000000001');
+('34100000-0000-4000-8000-000000000001','BODY_PART','Spike fixture body-part lexeme set','OFFICIAL','PUBLISHED',NULL);
 
 INSERT INTO authoring.semantic_set_versions(semantic_set_version_id,semantic_set_id,version_number,definition_json,review_status) VALUES
 ('34000000-0000-4000-8000-000000000001','34100000-0000-4000-8000-000000000001',1,'{"kind":"LEXEME_SET"}','HUMAN_REVIEWED');
+
+UPDATE authoring.semantic_sets
+SET current_version_id='34000000-0000-4000-8000-000000000001'
+WHERE semantic_set_id='34100000-0000-4000-8000-000000000001';
 
 INSERT INTO authoring.semantic_set_members(semantic_set_version_id,member_object_type,member_key,inclusion_type,review_status) VALUES
 ('34000000-0000-4000-8000-000000000001','LEMMA','עין','INCLUDE','HUMAN_REVIEWED');
 
 INSERT INTO authoring.construction_definitions(construction_definition_id,name,status,current_version_id) VALUES
-('36100000-0000-4000-8000-000000000001','ראה + prefixed ל + BODY_PART','PUBLISHED','36000000-0000-4000-8000-000000000001');
+('36100000-0000-4000-8000-000000000001','ראה + prefixed ל + BODY_PART','PUBLISHED',NULL);
 
 INSERT INTO authoring.construction_definition_versions(construction_definition_version_id,construction_definition_id,version_number,dsl_version,query_ast,query_ast_hash,review_status) VALUES
 ('36000000-0000-4000-8000-000000000001','36100000-0000-4000-8000-000000000001',1,'1.1','{"fixture":"1Sam16:7"}','aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa','HUMAN_REVIEWED');
+
+UPDATE authoring.construction_definitions
+SET current_version_id='36000000-0000-4000-8000-000000000001'
+WHERE construction_definition_id='36100000-0000-4000-8000-000000000001';
 
 INSERT INTO authoring.construction_compilation_runs(construction_compilation_run_id,construction_definition_version_id,corpus_release_id,query_ast_hash,dependency_manifest,compiler_version,started_at,completed_at,result_count,result_set_hash,status) VALUES
 ('36200000-0000-4000-8000-000000000001','36000000-0000-4000-8000-000000000001','30000000-0000-4000-8000-000000000001','aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
@@ -148,12 +156,22 @@ INSERT INTO authoring.construction_instances(construction_instance_id,constructi
  '{"why":"synthetic spike fixture"}','HUMAN_REVIEWED','cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc');
 
 INSERT INTO authoring.rules(rule_id,name,rule_kind,status,current_version_id) VALUES
-('38100000-0000-4000-8000-000000000001','Preserve ambiguity where evidence underdetermines','TRANSLATION_POLICY','PUBLISHED','38000000-0000-4000-8000-000000000001'),
-('38100000-0000-4000-8000-000000000002','Traditional Chinese editorial convention','EDITORIAL_CONVENTION','PUBLISHED','38000000-0000-4000-8000-000000000002');
+('38100000-0000-4000-8000-000000000001','Preserve ambiguity where evidence underdetermines','TRANSLATION_POLICY','PUBLISHED',NULL),
+('38100000-0000-4000-8000-000000000002','Traditional Chinese editorial convention','EDITORIAL_CONVENTION','PUBLISHED',NULL);
 
 INSERT INTO authoring.rule_versions(rule_version_id,rule_id,version_number,scope_json,implication_json,review_status) VALUES
 ('38000000-0000-4000-8000-000000000001','38100000-0000-4000-8000-000000000001',1,'{}','{"policy":"PRESERVE_AMBIGUITY"}','HUMAN_REVIEWED'),
 ('38000000-0000-4000-8000-000000000002','38100000-0000-4000-8000-000000000002',1,'{}','{"register":"HK_TRADITIONAL_CHINESE"}','HUMAN_REVIEWED');
+
+UPDATE authoring.rules
+SET current_version_id = CASE rule_id
+  WHEN '38100000-0000-4000-8000-000000000001'::uuid THEN '38000000-0000-4000-8000-000000000001'::uuid
+  WHEN '38100000-0000-4000-8000-000000000002'::uuid THEN '38000000-0000-4000-8000-000000000002'::uuid
+END
+WHERE rule_id IN (
+  '38100000-0000-4000-8000-000000000001',
+  '38100000-0000-4000-8000-000000000002'
+);
 
 INSERT INTO authoring.rule_applications(rule_application_id,rule_version_id,construction_instance_id,reference_span_id,matched_conditions,exception_status,effect,result_json,review_status,result_hash) VALUES
 ('38200000-0000-4000-8000-000000000001','38000000-0000-4000-8000-000000000001','36300000-0000-4000-8000-000000000001','13000000-0000-4000-8000-000000000001','{}','NONE','QUALIFIES','{"note":"does not mechanically determine one Chinese rendering"}','HUMAN_REVIEWED','dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd');
@@ -166,10 +184,14 @@ INSERT INTO authoring.translation_source_basis_segments VALUES
 ('40000000-0000-4000-8000-000000000001','24000000-0000-4000-8000-000000000003',1);
 
 INSERT INTO authoring.translation_policies(translation_policy_id,policy_key,current_version_id) VALUES
-('42100000-0000-4000-8000-000000000001','ZH_HANT_HK_RESEARCH','42000000-0000-4000-8000-000000000001');
+('42100000-0000-4000-8000-000000000001','ZH_HANT_HK_RESEARCH',NULL);
 
 INSERT INTO authoring.translation_policy_versions(translation_policy_version_id,translation_policy_id,version_number,target_language_tag,audience_profile,register,ambiguity_policy,policy_summary,review_status,content_hash) VALUES
 ('42000000-0000-4000-8000-000000000001','42100000-0000-4000-8000-000000000001',1,'zh-Hant-HK','RESEARCH','FORMAL_HK','PRESERVE_WHERE_MATERIAL','Spike fixture policy','HUMAN_REVIEWED','ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
+
+UPDATE authoring.translation_policies
+SET current_version_id='42000000-0000-4000-8000-000000000001'
+WHERE translation_policy_id='42100000-0000-4000-8000-000000000001';
 
 INSERT INTO authoring.translation_policy_rule_members VALUES
 ('42000000-0000-4000-8000-000000000001','38000000-0000-4000-8000-000000000001','TRANSLATION_POLICY'),
@@ -179,18 +201,32 @@ INSERT INTO authoring.translation_decisions(translation_decision_id,reference_sp
 ('42200000-0000-4000-8000-000000000001','13000000-0000-4000-8000-000000000001','40000000-0000-4000-8000-000000000001','42000000-0000-4000-8000-000000000001','zh-Hant-HK','PROJECT_RENDERING','人看外在可見之物','PRESERVE_MATERIAL_AMBIGUITY','1.1','{"fixture":true}','HUMAN_REVIEWED');
 
 INSERT INTO authoring.research_issues(research_issue_id,issue_key,current_version_id) VALUES
-('43100000-0000-4000-8000-000000000001','ISSUE_A','43000000-0000-4000-8000-000000000001'),
-('43100000-0000-4000-8000-000000000002','ISSUE_B','43000000-0000-4000-8000-000000000002');
+('43100000-0000-4000-8000-000000000001','ISSUE_A',NULL),
+('43100000-0000-4000-8000-000000000002','ISSUE_B',NULL);
 
 INSERT INTO authoring.research_issue_versions(research_issue_version_id,research_issue_id,version_number,title,question_text,issue_type,debate_status,review_status,content_hash) VALUES
 ('43000000-0000-4000-8000-000000000001','43100000-0000-4000-8000-000000000001',1,'Issue A','Fixture issue A','TRANSLATIONAL','NOT_CLASSIFIED','HUMAN_REVIEWED','1111111111111111111111111111111111111111111111111111111111111111'),
 ('43000000-0000-4000-8000-000000000002','43100000-0000-4000-8000-000000000002',1,'Issue B','Fixture issue B','TRANSLATIONAL','NOT_CLASSIFIED','HUMAN_REVIEWED','2222222222222222222222222222222222222222222222222222222222222222');
 
+UPDATE authoring.research_issues
+SET current_version_id = CASE research_issue_id
+  WHEN '43100000-0000-4000-8000-000000000001'::uuid THEN '43000000-0000-4000-8000-000000000001'::uuid
+  WHEN '43100000-0000-4000-8000-000000000002'::uuid THEN '43000000-0000-4000-8000-000000000002'::uuid
+END
+WHERE research_issue_id IN (
+  '43100000-0000-4000-8000-000000000001',
+  '43100000-0000-4000-8000-000000000002'
+);
+
 INSERT INTO authoring.research_positions(research_position_id,research_issue_id,current_version_id) VALUES
-('44100000-0000-4000-8000-000000000001','43100000-0000-4000-8000-000000000001','44000000-0000-4000-8000-000000000001');
+('44100000-0000-4000-8000-000000000001','43100000-0000-4000-8000-000000000001',NULL);
 
 INSERT INTO authoring.research_position_versions(research_position_version_id,research_position_id,research_issue_id,research_issue_version_id,version_number,title,position_summary,position_status,review_status,content_hash) VALUES
 ('44000000-0000-4000-8000-000000000001','44100000-0000-4000-8000-000000000001','43100000-0000-4000-8000-000000000001','43000000-0000-4000-8000-000000000001',1,'Position A','Fixture position','ACTIVE','HUMAN_REVIEWED','3333333333333333333333333333333333333333333333333333333333333333');
+
+UPDATE authoring.research_positions
+SET current_version_id='44000000-0000-4000-8000-000000000001'
+WHERE research_position_id='44100000-0000-4000-8000-000000000001';
 
 INSERT INTO authoring.rights_policies(rights_policy_id,policy_key,policy_version,rights_basis,verified_at) VALUES
 ('45000000-0000-4000-8000-000000000001','PUBLIC_FIXTURE','1','TEST',now());

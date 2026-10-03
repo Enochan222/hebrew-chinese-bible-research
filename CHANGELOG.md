@@ -40,7 +40,21 @@ The connected Supabase account currently exposes one inactive, generically named
 
 Database Spike 001 now has executable evidence rather than prose-only expectations. CI should expose relational assumptions that JSON Schema cannot prove and provide a repeatable base for correcting the active v1.1 contract before Core Freeze.
 
+### First executable finding
+
+The first clean PostgreSQL 17 run applied the full migration successfully but failed while loading the SemanticSet fixture because the stable `semantic_sets.current_version_id` FK pointed to a version row that had not yet been inserted. Independent inspection found the same latent ordering pattern in ConstructionDefinition, Rule, TranslationPolicy, ResearchIssue, and ResearchPosition fixtures.
+
+The correction retains the FK model. Stable rows are inserted with a null current pointer, immutable version rows are inserted next, and the stable current pointer is then updated. This is an implementation-order correction, not a weakening of the contract.
+
 ### Validation
+
+First Database Spike run `37142212945`:
+- bootstrap: PASS;
+- full migration: PASS;
+- seed: FAIL at the pre-version SemanticSet current pointer;
+- adversarial tests/query plan: not reached.
+
+A fresh run is required after the corrected seed ordering.
 
 This is the first implementation round. The new `Database Spike 001 / postgres-spike` workflow must apply the migration from a blank PostgreSQL 17 database, load fixtures, pass all expected-failure assertions, and emit a representative query plan. Existing required `contracts` and `state-and-changelog` checks remain mandatory. Any SQL/contract defect found by the first clean run must be corrected before merge.
 
