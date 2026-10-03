@@ -1,0 +1,16 @@
+{
+  "translationSourceBasisId": "90909090-9090-4909-8909-909090909090",
+  "referenceSpanId": "17171717-1717-4171-8171-171717171717",
+  "sourceDigitalExpressionId": "81818181-8181-4818-8818-818181818181",
+  "sourceTextStreamId": "82828282-8282-4828-8828-828282828282",
+  "sourceSegmentIds": [
+    "83838383-8383-4838-8838-838383838383"
+  ],
+  "basisKind": "EDITORIAL_EMENDATION",
+  "adoptedApparatusReadingIds": [],
+  "editorialEmendationSummary": "Fixture emendation rationale.",
+  "reviewStatus": "HUMAN_REVIEWED",
+  "contentHash": "9090909090909090909090909090909090909090909090909090909090909090",
+  "textualEvidenceObjectIds": [],
+  "adoptedReadingText": null
+}
