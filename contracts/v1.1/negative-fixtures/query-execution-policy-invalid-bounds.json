@@ -1,0 +1,12 @@
+{
+  "policyVersion": "fixture-policy-1",
+  "maxDeclaredNodes": 20,
+  "maxAstDepth": 12,
+  "maxRelations": 40,
+  "maxQuantifierDepth": 4,
+  "maxDistance": 100,
+  "defaultPageSize": 120,
+  "maxPageSize": 100,
+  "hardResultCap": 90,
+  "timeoutMs": 10000
+}
