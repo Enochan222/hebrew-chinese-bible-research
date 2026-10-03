@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "1.0",
+  "methodKey": "SACRED_STUDIES_DERIVED_SCHOLARLY_METHOD_V1",
+  "status": "CANONICAL_BUILD_METHOD",
+  "parityPolicy": "PRESERVE_RESEARCH_METHOD_CORRECT_IMPLEMENTATION_DEFECTS",
+  "searchMatrix": [
+    "TEXT",
+    "TOPIC",
+    "LENS"
+  ],
+  "queryOptimization": {
+    "outputLanguage": "ENGLISH",
+    "keyTermsOrPhrasesMin": 3,
+    "keyTermsOrPhrasesMax": 6,
+    "standardEnglishBookNames": true,
+    "academicTerminology": true,
+    "outputSearchTermsNotProse": true,
+    "preserveUsefulOriginalLanguageTerms": true,
+    "allowMultipleVariants": true
+  },
+  "coverage": {
+    "allAcademicEras": true,
+    "modernScholarshipPolicy": "ROLLING_RECENT_WINDOW",
+    "recentCompleteYears": 10,
+    "includeCurrentYear": true,
+    "prioritySourceClasses": [
+      "PEER_REVIEWED_JOURNAL",
+      "ACADEMIC_MONOGRAPH",
+      "CRITICAL_COMMENTARY",
+      "EDITED_VOLUME",
+      "DISSERTATION_OR_THESIS",
+      "ACADEMIC_REFERENCE_WORK"
+    ],
+    "defaultExclusions": [
+      "DEVOTIONAL_BLOG",
+      "SERMON",
+      "WIKI",
+      "GENERIC_SEO_CONTENT",
+      "UNSOURCED_SUMMARY"
+    ]
+  },
+  "librarian": {
+    "requireRealBibliographicIdentity": true,
+    "prohibitInventedBibliography": true,
+    "prohibitInventedPagesDatesDoisQuotes": true,
+    "sparseCoverageMustBeReported": true
+  },
+  "providerEnsemble": [
+    "OPENALEX",
+    "SEMANTIC_SCHOLAR",
+    "CORE",
+    "CROSSREF",
+    "SCITE"
+  ],
+  "synthesis": {
+    "mustUseRetrievedEvidence": true,
+    "mustEngagePrimaryBiblicalText": true,
+    "noInventedReferences": true,
+    "outputStatus": "CANDIDATE_UNTIL_REVIEW"
+  },
+  "criticalReview": {
+    "passThreshold": 88,
+    "maxAttempts": 3,
+    "malformedReviewerOutput": "REVIEW_INCOMPLETE",
+    "reviewerFailure": "REVIEW_INCOMPLETE",
+    "criteria": [
+      "SUBSTANTIVE_ACADEMIC_QUALITY",
+      "HEBREW_TEXTUAL_EXEGETICAL_ACCURACY",
+      "LOGICAL_COHERENCE",
+      "RESEARCH_ISSUE_FOCUS",
+      "SCOPE_ADHERENCE",
+      "CITATION_AUTHENTICITY_AND_ENTAILMENT",
+      "ORIGINAL_LANGUAGE_FIDELITY",
+      "ACCESS_LEVEL_HONESTY",
+      "COUNTEREVIDENCE_COVERAGE",
+      "PROVENANCE_RIGHTS_EPISTEMIC_CORRECTNESS"
+    ],
+    "modelPassDoesNotEqualHumanApproval": true
+  },
+  "modelBoundary": {
+    "adapter": "ResearchModelAdapter",
+    "allowedExamples": [
+      "OPENAI_GPT",
+      "GEMINI",
+      "CLAUDE",
+      "LOCAL_MODEL",
+      "FUTURE_APPROVED_MODEL"
+    ],
+    "vendorLocked": false
+  }
+}

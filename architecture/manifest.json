@@ -2,6 +2,7 @@
   "schemaVersion": "1.0",
   "active": [
     "PROJECT_CHARTER.md",
+    "PROJECT_STATE.md",
     "architecture/database-api-cross-stage-contract-v1.1.md",
     "architecture/product-platform-and-publication-model.md",
     "architecture/integration-boundaries-mcp-api-database.md",
@@ -21,7 +22,8 @@
     "contracts/v1.1/README.md",
     "contracts/v1.1/freeze-checklist.md",
     "architecture/scholarly-discovery-aggregation.md",
-    "architecture/adr/006-multi-provider-scholarly-discovery-compiler.md"
+    "architecture/adr/006-multi-provider-scholarly-discovery-compiler.md",
+    "architecture/sacred-studies-research-method.md"
   ],
   "superseded": [
     "architecture/database-api-cross-stage-contract-v1.md",
@@ -38,6 +40,8 @@
   ],
   "rules": [
     "PROJECT_CHARTER.md defines canonical product intent, fixed requirements, non-goals, and open decisions.",
+    "PROJECT_STATE.md defines the current living repository/product state and must be updated on every push/PR.",
+    "CHANGELOG.md records what each push changes, why, intended effect, and validation and must be updated on every push/PR.",
     "Active architecture documents implement the charter and must not contradict its non-negotiable requirements.",
     "Active documents must not depend normatively on superseded documents.",
     "AI/coding agents should consult active entries before semantic/code search results from superseded paths.",

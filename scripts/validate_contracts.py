@@ -150,6 +150,9 @@ def governance():
     gates=re.findall(r"\|\s*([A-Z]+(?:-[A-Z]+)*-\d{3})\s*\|",text)
     for g in set(gates):
         if gates.count(g)>1: fail(f"duplicate freeze gate {g}")
+    if not (ROOT/"PROJECT_STATE.md").exists(): fail("PROJECT_STATE.md missing")
+    if not (ROOT/"CHANGELOG.md").exists(): fail("CHANGELOG.md missing")
+    if "PROJECT_STATE.md" not in m.get("active",[]): fail("PROJECT_STATE.md must be active living authority")
     if "PROJECT_CHARTER.md" not in m.get("active",[]): fail("PROJECT_CHARTER.md must be active architecture authority")
     charter=(ROOT/"PROJECT_CHARTER.md").read_text(encoding="utf-8")
     for required in ("# 1. Product mission","# 13. Explicit non-goals","# 15. Fixed requirements versus open decisions"):
@@ -181,6 +184,14 @@ def vocab_drift():
     if set(v["scholarlyDiscoveryProviderKey"])!=set(spr["properties"]["providerKey"]["enum"]): fail("scholarlyDiscoveryProviderKey drift")
     if set(v["scholarlyDiscoveryTransportMode"])!=set(spr["properties"]["transportMode"]["enum"]): fail("scholarlyDiscoveryTransportMode drift")
     if set(v["scholarlyProviderRequestStatus"])!=set(spr["properties"]["status"]["enum"]): fail("scholarlyProviderRequestStatus drift")
+    method=load("contracts/v1.1/scholarly-research-method.json")
+    if method.get("searchMatrix")!=["TEXT","TOPIC","LENS"]: fail("Sacred Studies search matrix drift")
+    qo=method.get("queryOptimization",{})
+    if qo.get("keyTermsOrPhrasesMin")!=3 or qo.get("keyTermsOrPhrasesMax")!=6: fail("Sacred Studies query term-count drift")
+    cr=method.get("criticalReview",{})
+    if cr.get("passThreshold")!=88 or cr.get("maxAttempts")!=3: fail("Sacred Studies review-loop drift")
+    if cr.get("malformedReviewerOutput")!="REVIEW_INCOMPLETE": fail("reviewer parse failure must not auto-pass")
+    if method.get("modelBoundary",{}).get("vendorLocked") is not False: fail("research build model must remain vendor-neutral")
     reg=load("contracts/v1.1/scholarly-provider-registry.json")
     required={"OPENALEX","SEMANTIC_SCHOLAR","CORE","CROSSREF","SCITE"}
     registered={p["providerKey"] for p in reg.get("providers",[]) if p.get("requiredInFirstImplementation")}

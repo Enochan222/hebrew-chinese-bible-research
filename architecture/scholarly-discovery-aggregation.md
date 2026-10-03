@@ -33,6 +33,14 @@ The model used for query expansion, triage, claim extraction, clustering, counte
 
 ---
 
+## Sacred Studies method parity
+
+The exact scholarly-search/questioning method used for this compiler is defined in `architecture/sacred-studies-research-method.md` and `contracts/v1.1/scholarly-research-method.json`.
+
+The method preserves the Sacred Studies Text × Topic × Lens search matrix, concise English academic query optimization, all-era + recent-scholarship coverage, academic-source filtering, zero-hallucination librarian dossier, evidence-grounded synthesis, and three-attempt 88/100 critical review/revision loop.
+
+Implementation defects in the reference app are not normative. In particular, disconnected provider helpers, hard-coded credentials, stale date windows, and reviewer-parse auto-pass behavior are explicitly rejected.
+
 # 1. Why this exists
 
 The curated Google Drive library is mandatory but cannot represent the entire scholarly universe.
