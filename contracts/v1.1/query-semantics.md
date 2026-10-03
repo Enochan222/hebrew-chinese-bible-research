@@ -187,13 +187,18 @@ It must not be paraphrased as linguistic exhaustiveness beyond those boundaries.
 
 The system must distinguish at least:
 
-- match count;
+- page match count;
+- exact total match count where the engine has actually computed an exact total;
 - construction-instance count;
 - clause count;
 - verse/reference-label count;
 - reference-span count.
 
-UI and API must state which count is being shown.
+`pageMatchCount` is always the number of rows in the current `matches` page.
+
+`totalMatchCount` is populated only when `totalCountExact = true`. If the server has not computed a defensible exact total, `totalCountExact = false` and `totalMatchCount = null`.
+
+UI and API must state which count is being shown and must not present a page count or estimate as an exact corpus total.
 
 ## 14. HTTP, MCP, and UI equivalence
 
