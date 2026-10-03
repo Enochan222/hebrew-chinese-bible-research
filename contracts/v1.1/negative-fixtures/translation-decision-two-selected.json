@@ -1,7 +1,6 @@
 {
   "decisionSchemaVersion": "1.1",
   "decisionKind": "FIXTURE_TRANSLATION_DECISION",
-  "targetLanguageCode": "zh-Hant",
   "selectedRendering": "測試譯文 A",
   "ambiguityStrategy": "PRESERVE_AMBIGUITY",
   "candidateRenderings": [
@@ -18,5 +17,8 @@
       "reasonSummary": "Fixture only"
     }
   ],
-  "notes": "This fixture validates shape only and is not a scholarly translation."
+  "notes": "This fixture validates shape only and is not a scholarly translation.",
+  "translationSourceBasisId": "61616161-6161-4616-8616-616161616161",
+  "translationPolicyVersionId": "62626262-6262-4626-8626-626262626262",
+  "targetLanguageTag": "zh-Hant"
 }

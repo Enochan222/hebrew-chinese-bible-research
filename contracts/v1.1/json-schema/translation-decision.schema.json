@@ -7,7 +7,9 @@
   "required": [
     "decisionSchemaVersion",
     "decisionKind",
-    "targetLanguageCode",
+    "translationSourceBasisId",
+    "translationPolicyVersionId",
+    "targetLanguageTag",
     "candidateRenderings"
   ],
   "properties": {
@@ -18,15 +20,12 @@
       "type": "string",
       "minLength": 1
     },
-    "targetLanguageCode": {
-      "type": "string",
-      "minLength": 2
-    },
     "selectedRendering": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "minLength": 1
     },
     "ambiguityStrategy": {
       "type": [
@@ -51,7 +50,8 @@
             "pattern": "^[A-Za-z0-9_-]{1,64}$"
           },
           "rendering": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
           "status": {
             "enum": [
@@ -75,6 +75,18 @@
         "string",
         "null"
       ]
+    },
+    "translationSourceBasisId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "translationPolicyVersionId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "targetLanguageTag": {
+      "type": "string",
+      "pattern": "^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$"
     }
   }
 }

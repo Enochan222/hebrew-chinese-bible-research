@@ -1,0 +1,15 @@
+{
+  "externalDiscoveryRecordId": "85858585-8585-4858-8858-858585858585",
+  "providerId": "57575757-5757-4575-8575-575757575757",
+  "providerRecordId": "fixture-record-1",
+  "titleRaw": "Fixture scholarly record",
+  "doiRaw": null,
+  "abstractRaw": "fixture abstract",
+  "retrievedAt": "2026-10-03T00:00:00Z",
+  "payloadHash": "1818181818181818181818181818181818181818181818181818181818181818",
+  "accessLevel": "ABSTRACT_ONLY",
+  "recordStatus": "DISCOVERED",
+  "payloadStorageMode": "PERSISTED_ALLOWED_FIELDS",
+  "rightsDecisionSnapshotId": null,
+  "providerRequestId": "61616161-6161-4616-8616-616161616161"
+}

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/corpus-query-execution-request.schema.json",
+  "title": "CorpusQueryExecutionRequestV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "normalizedQuery"
+  ],
+  "properties": {
+    "normalizedQuery": {
+      "$ref": "./corpus-query-normalized.schema.json"
+    },
+    "cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "pageSize": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    }
+  }
+}

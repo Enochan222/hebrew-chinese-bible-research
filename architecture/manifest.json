@@ -23,7 +23,8 @@
     "contracts/v1.1/freeze-checklist.md",
     "architecture/scholarly-discovery-aggregation.md",
     "architecture/adr/006-multi-provider-scholarly-discovery-compiler.md",
-    "architecture/sacred-studies-research-method.md"
+    "architecture/sacred-studies-research-method.md",
+    "architecture/repository-governance.md"
   ],
   "superseded": [
     "architecture/database-api-cross-stage-contract-v1.md",
@@ -36,7 +37,9 @@
   "currentValidation": [
     "architecture/dry-runs/002-p0-contract-regression.md",
     "architecture/reviews/2026-10-03-adversarial-critique-remediation.md",
-    "architecture/reviews/2026-10-03-product-intent-coverage-audit.md"
+    "architecture/reviews/2026-10-03-product-intent-coverage-audit.md",
+    "architecture/database-spikes/001-scholarly-integrity-vertical-slice.md",
+    "architecture/reviews/2026-10-03-panel-contract-closure.md"
   ],
   "rules": [
     "PROJECT_CHARTER.md defines canonical product intent, fixed requirements, non-goals, and open decisions.",

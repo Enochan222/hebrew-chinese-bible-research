@@ -1,0 +1,28 @@
+{
+  "researchReleaseId": "11111111-1111-4111-8111-111111111111",
+  "normalizedQueryHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "queryExecutionPolicyVersion": "fixture-policy-1",
+  "epistemicClass": "FRAMEWORK_COMPLETE",
+  "pageMatchCount": 1,
+  "totalMatchCount": 5,
+  "totalCountExact": false,
+  "constructionCount": 1,
+  "clauseCount": 1,
+  "referenceSpanCount": 1,
+  "matches": [
+    {
+      "referenceSpanId": "17171717-1717-4171-8171-171717171717",
+      "bindings": {
+        "verb": "63636363-6363-4636-8636-636363636363"
+      },
+      "whyMatched": [
+        "fixture deterministic match"
+      ],
+      "sortKey": "0001"
+    }
+  ],
+  "nextCursor": null,
+  "dependencyManifest": {
+    "fixture": true
+  }
+}

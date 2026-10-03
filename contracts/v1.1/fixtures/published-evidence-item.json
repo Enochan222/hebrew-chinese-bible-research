@@ -7,8 +7,8 @@
   "evidenceContentHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
   "evidenceClass": "CORPUS_OBSERVATION",
   "citationLocator": {
-    "reference": "1Sam.16.7",
-    "fixture": true
+    "locatorType": "BIBLICAL_REFERENCE",
+    "referenceSpanId": "17171717-1717-4171-8171-171717171717"
   },
   "permittedExcerpt": null,
   "rightsDecisionSnapshotId": null,

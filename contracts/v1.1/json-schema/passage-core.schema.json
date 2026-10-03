@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/passage-core.schema.json",
   "title": "PassageCoreV1",
   "type": "object",
   "additionalProperties": true,
   "required": [
     "researchReleaseId",
-    "referenceSpanId",
-    "reference"
+    "referenceSpanId"
   ],
   "properties": {
     "researchReleaseId": {
@@ -17,8 +17,36 @@
       "type": "string",
       "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
     },
-    "reference": {
-      "type": "string"
+    "resolvedReference": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "referenceSystemId",
+            "referenceSystemCode",
+            "referenceLabel"
+          ],
+          "properties": {
+            "referenceSystemId": {
+              "type": "string",
+              "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+            },
+            "referenceSystemCode": {
+              "type": "string",
+              "minLength": 1
+            },
+            "referenceLabel": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
     }
-  }
+  },
+  "description": "Core passage envelope. Canonical ReferenceSpan identity is always present. A resolved human label is included when the request used a ReferenceSystem-aware label; direct ReferenceSpan requests need not invent a display system."
 }

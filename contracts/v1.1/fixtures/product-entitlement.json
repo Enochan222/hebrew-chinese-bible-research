@@ -4,7 +4,7 @@
   "principalType": "USER",
   "productFeatureId": "60606060-6060-4606-8606-606060606060",
   "entitlementDecision": "DENY",
-  "sourceType": "MANUAL",
+  "sourceType": "MANUAL_ADMIN",
   "sourceReference": "fixture",
   "validFrom": "2026-10-03T00:00:00Z",
   "validUntil": null

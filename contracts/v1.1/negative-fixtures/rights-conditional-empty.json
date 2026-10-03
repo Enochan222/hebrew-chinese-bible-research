@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "1.1",
+  "snapshotId": "72727272-7272-4727-8727-727272727272",
+  "subjectType": "SOURCE_ASSET",
+  "subjectIdentifier": "46464646-4646-4464-8464-464646464646",
+  "operation": "MODEL_CONTEXT",
+  "purposeScope": "MODEL_ASSISTANCE",
+  "audienceScope": "PUBLIC",
+  "commercialContext": "COMMERCIAL",
+  "applicableRuleIds": [
+    "73737373-7373-4737-8737-737373737373"
+  ],
+  "winningRuleIds": [
+    "73737373-7373-4737-8737-737373737373"
+  ],
+  "decision": "CONDITIONAL",
+  "decisionBasis": "RULE",
+  "conditions": null,
+  "obligations": [],
+  "resolverVersion": "rights-resolver-fixture-2",
+  "evaluatedAt": "2026-10-03T00:00:00Z",
+  "decisionHash": "7272727272727272727272727272727272727272727272727272727272727272"
+}

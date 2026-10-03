@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-03.1**
+State Revision: **2026-10-03.3**
 
 ## Mandatory governance rule
 
@@ -60,6 +60,34 @@ The current Sacred Studies repository contains useful search prompts, Librarian/
 
 This project therefore preserves the **full intended research method** and completes the provider aggregation path, while rejecting dead-code, credential, stale-date, and auto-pass defects.
 
+## Current contract-closure state
+
+The 2026-10-03 independent contract-closure panel has accepted a deliberately bounded set of changes before Database Spike 001:
+
+- human passage labels resolve through an explicit ReferenceSystem to canonical ReferenceSpan identity;
+- corpus query meaning is separated from pagination state through CorpusQueryExecutionRequest;
+- result pages distinguish page count from defensible exact total count;
+- official project TranslationDecision pins an immutable TranslationSourceBasis and exact TranslationPolicyVersion;
+- TranslationPolicy reuses existing RuleVersion infrastructure instead of creating a second rule engine;
+- passage-level TranslationSourceBasis is sealed through published translation/analysis aggregates rather than emitted as one top-level release component per passage;
+- rights snapshots fail closed, use typed conditions/obligations, and cannot resolve to UNKNOWN;
+- CitationLocator has locator-specific required identity;
+- public excerpts require rights snapshots and immutable evidence requires content hashes;
+- ResearchPositionVersion pins exact ResearchIssueVersion framing;
+- publication across Authoring/Serving guarantees atomic visibility by inactive materialization plus an atomic Serving pointer move, not a fictional distributed ACID transaction;
+- Database Spike 001 now attacks cross-layer, cross-stream, cross-issue-version, translation-policy, rights, RLS, query and publication invariants.
+
+Deliberately deferred rather than added to the Core closure patch:
+
+- large bibliographic ontology redesign;
+- full API-wide pagination/error ontology;
+- OCR ontology expansion;
+- full TEI modelling;
+- another BYOK architecture layer;
+- Research Pro provider-scale production normalization.
+
+Repository-admin branch protection remains the only unresolved repository-governance item in this closure and is tracked separately; source files cannot truthfully substitute for the live GitHub ruleset.
+
 ## Current architecture state
 
 - `PROJECT_CHARTER.md` is canonical product intent.
@@ -72,6 +100,15 @@ This project therefore preserves the **full intended research method** and compl
 - Multi-provider scholarly discovery is mandatory for Research Pro/database compilation.
 - Public runtime AI remains BYOK-only and Gemini-first, but private database-build ResearchModelAdapter is vendor-neutral.
 - Public passage rendering remains release-pinned and does not depend on live academic providers.
+- Human-readable passage labels resolve through an explicit ReferenceSystem to canonical ReferenceSpan identity.
+- Official project TranslationDecision pins an immutable TranslationSourceBasis and exact TranslationPolicyVersion.
+- Corpus query execution separates scholarly query meaning from cursor/page retrieval state and distinguishes exact from unavailable total counts.
+- RightsDecisionSnapshot is fail-closed: unresolved/unknown permission cannot surface as an UNKNOWN final outcome or ALLOW.
+- Public evidence uses typed CitationLocator semantics; excerpts require rights snapshots and immutable evidence requires content hashes.
+- ResearchPositionVersion pins the exact ResearchIssueVersion framing used for that scholarly position.
+- Database Spike 001 is specified as an adversarial scholarly-integrity vertical slice, not a table-creation demo.
+- Repository-admin branch protection remains operationally pending; issue #1 tracks required PR/status-check/force-push/deletion rules.
+- Panel contract-closure adjudication is recorded in `architecture/reviews/2026-10-03-panel-contract-closure.md` and registered as current validation authority.
 
 ## Current data/research boundaries
 
@@ -118,4 +155,4 @@ This project therefore preserves the **full intended research method** and compl
 
 ## Latest push intent
 
-This revision establishes exact Sacred Studies-derived research-method parity and mandatory per-push repository state/changelog governance.
+This revision completes the independent pre-Database-Spike contract-closure panel, three adversarial review rounds, concurrency/lost-update reconciliation, and governance evidence cleanup. All CORE_SPIKE contract gates are PASS. Live GitHub branch-protection rules remain separately PENDING under REPOSITORY_GOVERNANCE because the connected GitHub tooling has no repository-admin write capability.

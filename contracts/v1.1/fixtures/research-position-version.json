@@ -9,5 +9,6 @@
   "classificationBasis": "Fixture only.",
   "reviewStatus": "NEEDS_REVIEW",
   "contentHash": "1515151515151515151515151515151515151515151515151515151515151515",
-  "supersedesVersionId": null
+  "supersedesVersionId": null,
+  "researchIssueVersionId": "50505050-5050-4505-8505-505050505050"
 }

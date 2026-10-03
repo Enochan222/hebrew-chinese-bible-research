@@ -19,7 +19,8 @@
     "decisionBasis",
     "resolverVersion",
     "evaluatedAt",
-    "decisionHash"
+    "decisionHash",
+    "obligations"
   ],
   "properties": {
     "schemaVersion": {
@@ -30,8 +31,18 @@
       "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
     },
     "subjectType": {
-      "type": "string",
-      "minLength": 1
+      "enum": [
+        "SOURCE_ASSET",
+        "WORK",
+        "EDITION",
+        "TEXTUAL_WORK",
+        "TEXTUAL_EDITION",
+        "DIGITAL_EXPRESSION",
+        "PROVIDER_DISTRIBUTION",
+        "CORPUS_RELEASE",
+        "ANNOTATION_LAYER",
+        "RESEARCH_OBJECT"
+      ]
     },
     "subjectIdentifier": {
       "type": "string",
@@ -100,16 +111,18 @@
       "enum": [
         "ALLOW",
         "DENY",
-        "CONDITIONAL",
-        "UNKNOWN"
+        "CONDITIONAL"
       ]
     },
     "conditions": {
       "type": [
-        "object",
+        "array",
         "null"
       ],
-      "additionalProperties": true
+      "items": {
+        "$ref": "./rights-condition.schema.json"
+      },
+      "uniqueItems": true
     },
     "resolverVersion": {
       "type": "string",
@@ -133,52 +146,129 @@
     "obligations": {
       "type": "array",
       "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "obligationType"
-        ],
-        "properties": {
-          "obligationType": {
-            "enum": [
-              "ATTRIBUTION",
-              "MAX_EXCERPT",
-              "RETENTION_LIMIT",
-              "AUTHENTICATED_ONLY",
-              "TERRITORY_LIMIT",
-              "TEMPORARY_PROCESSING_ONLY"
-            ]
-          },
-          "value": {
-            "oneOf": [
-              {
-                "type": "string"
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "obligationType",
+              "value"
+            ],
+            "properties": {
+              "obligationType": {
+                "const": "ATTRIBUTION"
               },
-              {
-                "type": "number"
-              },
-              {
-                "type": "boolean"
+              "value": {
+                "type": "string",
+                "minLength": 1
               }
-            ]
+            }
           },
-          "unit": {
-            "enum": [
-              "WORD",
-              "UNICODE_CODEPOINT",
-              "GRAPHEME_CLUSTER",
-              "BYTE",
-              "PERCENT_OF_WORK",
-              "DAY"
-            ]
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "obligationType",
+              "value",
+              "unit"
+            ],
+            "properties": {
+              "obligationType": {
+                "const": "MAX_EXCERPT"
+              },
+              "value": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "unit": {
+                "enum": [
+                  "WORD",
+                  "UNICODE_CODEPOINT",
+                  "GRAPHEME_CLUSTER",
+                  "BYTE",
+                  "PERCENT_OF_WORK"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "obligationType",
+              "value",
+              "unit"
+            ],
+            "properties": {
+              "obligationType": {
+                "const": "RETENTION_LIMIT"
+              },
+              "value": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "unit": {
+                "const": "DAY"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "obligationType"
+            ],
+            "properties": {
+              "obligationType": {
+                "const": "AUTHENTICATED_ONLY"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "obligationType",
+              "value"
+            ],
+            "properties": {
+              "obligationType": {
+                "const": "TERRITORY_LIMIT"
+              },
+              "value": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 2
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "obligationType"
+            ],
+            "properties": {
+              "obligationType": {
+                "const": "TEMPORARY_PROCESSING_ONLY"
+              }
+            }
           }
-        }
-      }
+        ]
+      },
+      "uniqueItems": true
     }
   },
   "allOf": [
     {
       "if": {
+        "required": [
+          "decisionBasis"
+        ],
         "properties": {
           "decisionBasis": {
             "const": "RULE"
@@ -195,6 +285,9 @@
     },
     {
       "if": {
+        "required": [
+          "decisionBasis"
+        ],
         "properties": {
           "decisionBasis": {
             "const": "DEFAULT_DENY"
@@ -208,6 +301,123 @@
           },
           "decision": {
             "const": "DENY"
+          },
+          "conditions": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "array",
+                "maxItems": 0
+              }
+            ]
+          },
+          "obligations": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "decisionBasis"
+        ],
+        "properties": {
+          "decisionBasis": {
+            "const": "UNKNOWN_RESTRICTIVE"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "winningRuleIds": {
+            "maxItems": 0
+          },
+          "decision": {
+            "const": "DENY"
+          },
+          "conditions": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "array",
+                "maxItems": 0
+              }
+            ]
+          },
+          "obligations": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "decision"
+        ],
+        "properties": {
+          "decision": {
+            "const": "CONDITIONAL"
+          }
+        }
+      },
+      "then": {
+        "anyOf": [
+          {
+            "required": [
+              "conditions"
+            ],
+            "properties": {
+              "conditions": {
+                "type": "array",
+                "minItems": 1
+              }
+            }
+          },
+          {
+            "required": [
+              "obligations"
+            ],
+            "properties": {
+              "obligations": {
+                "minItems": 1
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "decision"
+        ],
+        "properties": {
+          "decision": {
+            "const": "ALLOW"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "conditions": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "array",
+                "maxItems": 0
+              }
+            ]
+          },
+          "obligations": {
+            "maxItems": 0
           }
         }
       }

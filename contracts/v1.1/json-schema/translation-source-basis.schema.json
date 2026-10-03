@@ -1,0 +1,207 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/translation-source-basis.schema.json",
+  "title": "TranslationSourceBasisV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "translationSourceBasisId",
+    "referenceSpanId",
+    "sourceDigitalExpressionId",
+    "sourceTextStreamId",
+    "sourceSegmentIds",
+    "basisKind",
+    "reviewStatus",
+    "contentHash"
+  ],
+  "properties": {
+    "translationSourceBasisId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "referenceSpanId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "sourceDigitalExpressionId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "sourceTextStreamId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "sourceSegmentIds": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+      }
+    },
+    "basisKind": {
+      "enum": [
+        "STREAM_READING",
+        "APPARATUS_READING",
+        "EDITORIAL_EMENDATION",
+        "COMPOSITE_EDITORIAL_READING"
+      ]
+    },
+    "adoptedApparatusReadingIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+      }
+    },
+    "editorialEmendationSummary": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reviewStatus": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contentHash": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{64}$"
+    },
+    "textualEvidenceObjectIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+      }
+    },
+    "adoptedReadingText": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "basisKind": {
+            "enum": [
+              "APPARATUS_READING",
+              "COMPOSITE_EDITORIAL_READING"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "adoptedApparatusReadingIds"
+        ],
+        "properties": {
+          "adoptedApparatusReadingIds": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "basisKind": {
+            "enum": [
+              "EDITORIAL_EMENDATION",
+              "COMPOSITE_EDITORIAL_READING"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "adoptedReadingText",
+          "editorialEmendationSummary"
+        ],
+        "properties": {
+          "adoptedReadingText": {
+            "type": "string",
+            "minLength": 1
+          },
+          "editorialEmendationSummary": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "basisKind": {
+            "const": "STREAM_READING"
+          }
+        },
+        "required": [
+          "basisKind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "adoptedApparatusReadingIds": {
+            "maxItems": 0
+          },
+          "editorialEmendationSummary": {
+            "type": "null"
+          },
+          "adoptedReadingText": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "basisKind": {
+            "const": "APPARATUS_READING"
+          }
+        },
+        "required": [
+          "basisKind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "editorialEmendationSummary": {
+            "type": "null"
+          },
+          "adoptedReadingText": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "basisKind": {
+            "const": "EDITORIAL_EMENDATION"
+          }
+        },
+        "required": [
+          "basisKind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "adoptedApparatusReadingIds": {
+            "maxItems": 0
+          }
+        }
+      }
+    }
+  ]
+}

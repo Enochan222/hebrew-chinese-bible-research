@@ -1,0 +1,15 @@
+{
+  "translationPolicyId": "84848484-8484-4848-8848-848484848484",
+  "translationPolicyVersionId": "62626262-6262-4626-8626-626262626262",
+  "versionNumber": 1,
+  "targetLanguageTag": "zh-Hant",
+  "audienceProfile": "SCHOLARLY_GENERAL",
+  "register": "FORMAL_WRITTEN_CHINESE",
+  "ambiguityPolicy": "PRESERVE_WHERE_TEXTUALLY_MATERIAL",
+  "policySummary": "Fixture only.",
+  "policyRuleVersionIds": [],
+  "editorialConventionRuleVersionIds": [],
+  "reviewStatus": "HUMAN_REVIEWED",
+  "contentHash": "8484848484848484848484848484848484848484848484848484848484848484",
+  "supersedesVersionId": null
+}

@@ -23,6 +23,7 @@ paths:
       operationId: getPassageExperience
       parameters:
         - $ref: '#/components/parameters/reference'
+        - $ref: '#/components/parameters/referenceSystemCode'
         - name: mode
           in: query
           required: true
@@ -117,6 +118,7 @@ paths:
       operationId: getLiteratureSnapshot
       parameters:
         - $ref: '#/components/parameters/literatureSnapshotId'
+        - $ref: '#/components/parameters/optionalReleaseId'
       responses:
         '200':
           description: Reviewed literature snapshot
@@ -135,6 +137,7 @@ paths:
       operationId: getPassageCommentary
       parameters:
         - $ref: '#/components/parameters/reference'
+        - $ref: '#/components/parameters/referenceSystemCode'
         - $ref: '#/components/parameters/optionalReleaseId'
       responses:
         '200':
@@ -170,6 +173,12 @@ components:
     reference:
       name: reference
       in: path
+      required: true
+      description: Human-readable label within the explicitly supplied reference system.
+      schema: {type: string, minLength: 1}
+    referenceSystemCode:
+      name: referenceSystemCode
+      in: query
       required: true
       schema: {type: string, minLength: 1}
     optionalReleaseId:

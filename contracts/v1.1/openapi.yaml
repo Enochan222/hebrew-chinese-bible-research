@@ -24,6 +24,7 @@ paths:
       operationId: getCurrentPassage
       parameters:
         - $ref: '#/components/parameters/reference'
+        - $ref: '#/components/parameters/referenceSystemCode'
       responses:
         '200':
           description: Current-release passage core
@@ -39,6 +40,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/releaseId'
         - $ref: '#/components/parameters/reference'
+        - $ref: '#/components/parameters/referenceSystemCode'
       responses:
         '200':
           description: Pinned passage core
@@ -53,6 +55,7 @@ paths:
       operationId: getCurrentPassageTranslations
       parameters:
         - $ref: '#/components/parameters/reference'
+        - $ref: '#/components/parameters/referenceSystemCode'
       responses:
         '200':
           description: Translation witnesses resolved from current release
@@ -66,6 +69,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/releaseId'
         - $ref: '#/components/parameters/reference'
+        - $ref: '#/components/parameters/referenceSystemCode'
       responses:
         '200':
           description: Translation witnesses from pinned release
@@ -78,6 +82,7 @@ paths:
       operationId: getCurrentPassageAnalysis
       parameters:
         - $ref: '#/components/parameters/reference'
+        - $ref: '#/components/parameters/referenceSystemCode'
       responses:
         '200':
           description: Current release published analysis
@@ -93,6 +98,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/releaseId'
         - $ref: '#/components/parameters/reference'
+        - $ref: '#/components/parameters/referenceSystemCode'
       responses:
         '200':
           description: Citation-stable pinned published analysis
@@ -107,6 +113,7 @@ paths:
       operationId: getCurrentRuleApplications
       parameters:
         - $ref: '#/components/parameters/reference'
+        - $ref: '#/components/parameters/referenceSystemCode'
       responses:
         '200':
           description: Rule applications from current release
@@ -120,6 +127,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/releaseId'
         - $ref: '#/components/parameters/reference'
+        - $ref: '#/components/parameters/referenceSystemCode'
       responses:
         '200':
           description: Rule applications from pinned release
@@ -189,7 +197,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: './json-schema/corpus-query-normalized.schema.json'
+              $ref: './json-schema/corpus-query-execution-request.schema.json'
       responses:
         '200':
           description: Deterministic release-pinned query page
@@ -230,6 +238,13 @@ components:
       name: reference
       in: path
       required: true
+      description: Human-readable label within the explicitly supplied reference system.
+      schema: {type: string, minLength: 1}
+    referenceSystemCode:
+      name: referenceSystemCode
+      in: query
+      required: true
+      description: Reference-system code used to resolve the human label deterministically to ReferenceSpan.
       schema: {type: string, minLength: 1}
     evidenceId:
       name: evidenceId
@@ -243,21 +258,9 @@ components:
       schema: {type: string, format: uuid}
   schemas:
     ReleasePointer:
-      type: object
-      additionalProperties: false
-      required: [researchReleaseId, releaseLabel, channel]
-      properties:
-        researchReleaseId: {type: string, format: uuid}
-        releaseLabel: {type: string}
-        channel: {const: PRODUCTION}
+      $ref: './json-schema/release-pointer.schema.json'
     PassageCore:
-      type: object
-      additionalProperties: true
-      required: [researchReleaseId, referenceSpanId, reference]
-      properties:
-        researchReleaseId: {type: string, format: uuid}
-        referenceSpanId: {type: string, format: uuid}
-        reference: {type: string}
+      $ref: './json-schema/passage-core.schema.json'
     TranslationWitnessList:
       type: object
       additionalProperties: false

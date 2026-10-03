@@ -82,7 +82,8 @@
               "LITERATURE_SNAPSHOT",
               "LITERATURE_REVIEW",
               "COMMENTARY",
-              "DISCOVERY_BIBLIOGRAPHY"
+              "DISCOVERY_BIBLIOGRAPHY",
+              "TRANSLATION_POLICY"
             ]
           },
           "researchObjectId": {

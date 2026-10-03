@@ -33,6 +33,14 @@ Core OpenAPI does not override Research Pro extension endpoints merely because t
 - `json-schema/corpus-query.schema.json`
 - `json-schema/corpus-query-normalized.schema.json`
 - `json-schema/corpus-query-result.schema.json`
+- `json-schema/rights-condition.schema.json`
+- `json-schema/citation-locator.schema.json`
+- `json-schema/translation-policy-version.schema.json`
+- `json-schema/translation-source-basis.schema.json`
+- `json-schema/corpus-query-execution-request.schema.json`
+- `json-schema/passage-core.schema.json`
+- `json-schema/passage-request.schema.json`
+- `json-schema/passage-locator.schema.json`
 - `json-schema/query-execution-policy.schema.json`
 - `json-schema/release-manifest.schema.json`
 - `json-schema/rights-decision-snapshot.schema.json`
@@ -90,3 +98,12 @@ Important invariants:
 - Build-time query expansion and synthesis use a provider-neutral ResearchModelAdapter; Gemini is not required.
 - Every DiscoveryRecord is traceable to a ScholarlyProviderRequest.
 - Provider/model credentials are never contract payloads.
+
+
+## Contract-closure invariants
+
+- Human passage labels are resolved through an explicit ReferenceSystem before domain execution.
+- Query meaning and pagination state are separate: CorpusQueryExecutionRequest wraps the normalized query plus cursor/page size.
+- Official project TranslationDecision pins an immutable TranslationSourceBasis and exact TranslationPolicyVersion.
+- Rights conditions and obligations are machine typed and UNKNOWN_RESTRICTIVE is fail-closed.
+- Public excerpts require a rights decision snapshot; immutable evidence requires a content hash.

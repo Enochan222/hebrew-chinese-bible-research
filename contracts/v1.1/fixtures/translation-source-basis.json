@@ -1,0 +1,16 @@
+{
+  "translationSourceBasisId": "61616161-6161-4616-8616-616161616161",
+  "referenceSpanId": "17171717-1717-4171-8171-171717171717",
+  "sourceDigitalExpressionId": "81818181-8181-4818-8818-818181818181",
+  "sourceTextStreamId": "82828282-8282-4828-8828-828282828282",
+  "sourceSegmentIds": [
+    "83838383-8383-4838-8838-838383838383"
+  ],
+  "basisKind": "STREAM_READING",
+  "adoptedApparatusReadingIds": [],
+  "editorialEmendationSummary": null,
+  "reviewStatus": "HUMAN_REVIEWED",
+  "contentHash": "8181818181818181818181818181818181818181818181818181818181818181",
+  "textualEvidenceObjectIds": [],
+  "adoptedReadingText": null
+}

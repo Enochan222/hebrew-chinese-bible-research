@@ -33,6 +33,25 @@
           "ALLOW",
           "DENY"
         ]
+      },
+      "propertyNames": {
+        "enum": [
+          "PASSAGE_STUDY",
+          "KEY_SCHOLARSHIP",
+          "BASIC_CORPUS_SEARCH",
+          "ADVANCED_CORPUS_QUERY",
+          "CONSTRUCTION_BROWSER",
+          "SCHOLARLY_ISSUE_SUMMARY",
+          "SCHOLARLY_DEBATE_GRAPH",
+          "FULL_BIBLIOGRAPHY",
+          "LITERATURE_REVIEW",
+          "LIVE_LITERATURE_DISCOVERY",
+          "CITATION_DEPENDENCY_GRAPH",
+          "ADVANCED_TEXTUAL_CRITICISM",
+          "RESEARCH_EXPORT",
+          "SAVED_RESEARCH_PROJECTS",
+          "OPTIONAL_AI_QUERY_INTERPRETATION"
+        ]
       }
     },
     "reasonCodes": {
@@ -46,6 +65,25 @@
           "DISCOVERY_PROVIDER_UNAVAILABLE",
           "COVERAGE_NOT_AVAILABLE",
           "DATA_TEMPORARILY_UNAVAILABLE"
+        ]
+      },
+      "propertyNames": {
+        "enum": [
+          "PASSAGE_STUDY",
+          "KEY_SCHOLARSHIP",
+          "BASIC_CORPUS_SEARCH",
+          "ADVANCED_CORPUS_QUERY",
+          "CONSTRUCTION_BROWSER",
+          "SCHOLARLY_ISSUE_SUMMARY",
+          "SCHOLARLY_DEBATE_GRAPH",
+          "FULL_BIBLIOGRAPHY",
+          "LITERATURE_REVIEW",
+          "LIVE_LITERATURE_DISCOVERY",
+          "CITATION_DEPENDENCY_GRAPH",
+          "ADVANCED_TEXTUAL_CRITICISM",
+          "RESEARCH_EXPORT",
+          "SAVED_RESEARCH_PROJECTS",
+          "OPTIONAL_AI_QUERY_INTERPRETATION"
         ]
       }
     },
