@@ -110,7 +110,7 @@ Attack:
 
 - official TranslationDecision without TranslationSourceBasis;
 - official TranslationDecision without TranslationPolicyVersion;
-- TranslationDecision reference span differs from pinned TranslationSourceBasis reference span;
+- TranslationDecision passage locus is not contained within / covered by the pinned TranslationSourceBasis reference span;
 - TranslationDecision target language differs from pinned TranslationPolicyVersion target language;
 - source basis stream and source basis segments do not agree;
 - apparatus-based basis names a reading outside the passage/locus;
