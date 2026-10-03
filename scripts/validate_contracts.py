@@ -48,6 +48,8 @@ POSITIVE = [
  ("contracts/v1.1/json-schema/discovery-record.schema.json","contracts/v1.1/fixtures/discovery-record.json"),
  ("contracts/v1.1/json-schema/experience-capabilities.schema.json","contracts/v1.1/fixtures/experience-capabilities.json"),
  ("contracts/v1.1/json-schema/product-entitlement.schema.json","contracts/v1.1/fixtures/product-entitlement.json"),
+ ("contracts/v1.1/json-schema/research-model-run.schema.json","contracts/v1.1/fixtures/research-model-run.json"),
+ ("contracts/v1.1/json-schema/scholarly-provider-request.schema.json","contracts/v1.1/fixtures/scholarly-provider-request.json"),
 ]
 
 NEG_SCHEMA = [
@@ -172,10 +174,22 @@ def vocab_drift():
     if set(v["releaseComponentKind"])!=set(rm["properties"]["components"]["items"]["properties"]["componentKind"]["enum"]): fail("releaseComponentKind drift")
     ri=load("contracts/v1.1/json-schema/research-issue-version.schema.json")
     if set(v["researchDebateStatus"])!=set(ri["properties"]["debateStatus"]["enum"]): fail("researchDebateStatus drift")
+    rm=load("contracts/v1.1/json-schema/research-model-run.schema.json")
+    if set(v["researchModelTaskType"])!=set(rm["properties"]["taskType"]["enum"]): fail("researchModelTaskType drift")
+    if set(v["researchModelRunStatus"])!=set(rm["properties"]["status"]["enum"]): fail("researchModelRunStatus drift")
+    spr=load("contracts/v1.1/json-schema/scholarly-provider-request.schema.json")
+    if set(v["scholarlyDiscoveryProviderKey"])!=set(spr["properties"]["providerKey"]["enum"]): fail("scholarlyDiscoveryProviderKey drift")
+    if set(v["scholarlyDiscoveryTransportMode"])!=set(spr["properties"]["transportMode"]["enum"]): fail("scholarlyDiscoveryTransportMode drift")
+    if set(v["scholarlyProviderRequestStatus"])!=set(spr["properties"]["status"]["enum"]): fail("scholarlyProviderRequestStatus drift")
+    reg=load("contracts/v1.1/scholarly-provider-registry.json")
+    required={"OPENALEX","SEMANTIC_SCHOLAR","CORE","CROSSREF","SCITE"}
+    registered={p["providerKey"] for p in reg.get("providers",[]) if p.get("requiredInFirstImplementation")}
+    if registered!=required: fail(f"initial scholarly provider ensemble drift: {registered}")
+    if "GEMINI" in rm["properties"]["modelProvider"].get("enum",[]): fail("research model provider must not be Gemini-locked")
 
 def secret_scan():
-    assignment=re.compile(r"(?i)\b(GEMINI_API_KEY|GOOGLE_API_KEY|OPENAI_API_KEY|ANTHROPIC_API_KEY)\s*=\s*[\"']?([A-Za-z0-9_\-]{8,})")
-    literals=[re.compile(r"AIza[0-9A-Za-z_\-]{30,}"),re.compile(r"sk-[A-Za-z0-9_\-]{20,}")]
+    assignment=re.compile(r"(?i)\b(GEMINI_API_KEY|GOOGLE_API_KEY|OPENAI_API_KEY|ANTHROPIC_API_KEY|SCITE_API_KEY|CORE_API_KEY|SEMANTIC_SCHOLAR_API_KEY|OPENALEX_API_KEY)\s*=\s*[\"']?([A-Za-z0-9_\-]{8,})")
+    literals=[re.compile(r"AIza[0-9A-Za-z_\-]{30,}"),re.compile(r"sk-[A-Za-z0-9_\-]{20,}"),re.compile(r"scite_[A-Za-z0-9_\-]{20,}")]
     for p in ROOT.rglob("*"):
         if not p.is_file() or ".git" in p.parts: continue
         rel=p.relative_to(ROOT)
