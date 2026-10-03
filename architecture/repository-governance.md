@@ -1,36 +1,116 @@
 # Repository Governance Contract
 
-Status: **REQUIRED OPERATIONAL GOVERNANCE**
+Status: **LIVE ENFORCEMENT VERIFIED**
 
 The repository's product charter, architecture, machine contracts and validation workflow are source-of-truth assets. Contract CI existing after a direct push is not equivalent to enforced merge governance.
 
 ## Required main-branch rules
 
-The `main` branch should enforce:
+The `main` branch must enforce:
 
 1. changes enter through pull requests;
-2. the `Contract validation` workflow is a required status check;
-3. force pushes are blocked;
-4. branch deletion is blocked;
-5. stale/out-of-date branches are handled according to the repository's chosen merge policy;
-6. CODEOWNERS applies to Charter, architecture, contracts, contract validator and workflows.
+2. required status checks pass before merge;
+3. protected-branch changes are tested against the latest `main`;
+4. force pushes are blocked;
+5. branch deletion is blocked;
+6. linear history is maintained;
+7. unresolved review conversations block merge;
+8. canonical truth files have declared CODEOWNERS.
 
-For a single-maintainer phase, mandatory second-person review may remain disabled. Required CI is still mandatory.
+For the current collaboration model, mandatory second-person approval is intentionally disabled. Required machine checks remain mandatory.
 
-## Current verified state
+## Current verified live state
 
-At the start of the 2026-10-03 panel closure review:
+Verified on 2026-10-03 from live GitHub repository metadata.
 
-- `main protected = false`;
-- repository rulesets were empty;
-- Contract validation ran after pushes but did not prevent an invalid direct push from entering `main`.
+Repository ruleset:
 
-The current ChatGPT GitHub connector exposes ruleset/protection reads but not repository-admin writes. Therefore this repository setting cannot be truthfully marked complete by a file commit alone.
+- name: `Protect main`;
+- ruleset ID: `24409248`;
+- target: default branch;
+- enforcement: `active`;
+- bypass actors: none;
+- current user bypass: never.
 
-Track the live configuration under `REPO-GOV-001` and `REPO-GOV-002` in `contracts/v1.1/freeze-checklist.md`.
+Live branch metadata reports:
 
-## Development practice until live enforcement exists
+- `main protected = true`.
 
-Even before the GitHub ruleset is enabled, architecture/contract changes should use a branch + pull request + successful Contract validation before merge.
+### Enforced branch rules
+
+- deletion blocked;
+- non-fast-forward / force push blocked;
+- linear history required.
+
+### Pull-request rule
+
+- pull request required;
+- approving reviews required: `0`;
+- stale approvals are not relevant because approval count is zero;
+- team review not required;
+- Code Owner approval not required;
+- most-recent-push approval not required;
+- review conversation resolution required;
+- allowed merge method: squash only.
+
+This supports multiple collaborators without requiring mutual approval while still preventing direct ordinary updates to `main`.
+
+### Required status checks
+
+Required checks:
+
+- `contracts`;
+- `state-and-changelog`.
+
+Both checks are bound to GitHub Actions.
+
+Strict status-check mode is enabled:
+
+- `strict_required_status_checks_policy = true`.
+
+Therefore a pull request must be validated against the latest protected-branch state before merge.
+
+### Repository merge settings
+
+Live repository metadata also verifies:
+
+- merge commit disabled;
+- rebase merge disabled;
+- squash merge enabled;
+- update branch enabled;
+- auto merge enabled.
+
+## Required contribution path
+
+The enforced normal contribution path is:
+
+```text
+feature branch
+  -> pull request
+  -> synchronize with latest main when required
+  -> contracts PASS
+  -> state-and-changelog PASS
+  -> resolve review conversations
+  -> squash merge
+  -> protected main
+```
 
 A validator change and the contract change it permits should receive explicit review as one trust-boundary change, because a PR must not make an unsafe contract pass merely by weakening the validator.
+
+## Governance evidence
+
+Canonical live-verification record:
+
+- `architecture/reviews/2026-10-03-live-repository-governance-verification.md`.
+
+Canonical gate status:
+
+- `contracts/v1.1/freeze-checklist.md`.
+
+`REPO-GOV-001`, `REPO-GOV-002`, and `REPO-GOV-003` are PASS.
+
+## Repository visibility
+
+Live repository metadata currently reports the repository as **public**.
+
+This document records that fact but does not change repository visibility. Visibility changes require a separate deliberate repository-administration decision.
