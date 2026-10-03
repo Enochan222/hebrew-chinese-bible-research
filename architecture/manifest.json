@@ -29,7 +29,8 @@
     "architecture/dry-runs/001-1sam16-7-mcp-api-db.md"
   ],
   "currentValidation": [
-    "architecture/dry-runs/002-p0-contract-regression.md"
+    "architecture/dry-runs/002-p0-contract-regression.md",
+    "architecture/reviews/2026-10-03-adversarial-critique-remediation.md"
   ],
   "rules": [
     "Active documents must not depend normatively on superseded documents.",
