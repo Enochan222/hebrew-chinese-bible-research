@@ -66,9 +66,11 @@
     "read_authoring_database"
   ],
   "protocolPolicy": {
-    "preferredRevision": "2026-07-28",
+    "serverTargetRevision": "2026-07-28",
+    "clientNegotiationDefault": "AUTO",
+    "legacyCompatibility": "ALLOW_2025_ERA_WHEN_HOST_NEGOTIATION_REQUIRES_IT",
     "transport": "STREAMABLE_HTTP_OR_SUPPORTED_STATELESS_HTTP",
-    "notes": "Runtime implementation must explicitly opt into and negotiate the intended MCP revision rather than assuming SDK defaults."
+    "notes": "Server implementation targets the final 2026-07-28 revision. Client integrations should use protocol auto-negotiation where supported, probing the modern era and falling back to supported 2025-era behavior rather than relying on SDK defaults or silently pinning a legacy handshake."
   },
   "releaseResolution": "For read tools, omitted/null researchReleaseId resolves current PRODUCTION exactly once and every scholarly output returns the resolved researchReleaseId. run_corpus_query requires a normalized release-pinned CorpusQuery.",
   "securityRequirements": [
