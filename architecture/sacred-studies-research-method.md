@@ -11,6 +11,15 @@ The Hebrew-Chinese Bible Research database-building process must preserve the re
 
 The following method is mandatory for relevant scholarly-discovery builds.
 
+## 1.1 Production runtime authority
+
+Static inspection of the reference repository is not the final authority for what the deployed lineage application actually executes.
+
+A production Academic Biblical Study run verified a real retrieval fan-out involving Sefaria, Scite, CORE, OpenAlex, Crossref, and Open Library / Internet Archive before Librarian/Writer synthesis, including explicit degraded-mode fallback when one provider failed.
+
+Accordingly, `architecture/pastoral-studio-runtime-scholarly-rag.md` defines the production-verified retrieval orchestration. This document continues to define the inherited research-question, query, Librarian, synthesis, and review method.
+
+
 ## 2. Sacred Studies method that must be preserved
 
 ### 2.1 Research question framing
@@ -92,7 +101,7 @@ The intended Sacred Studies provider-aggregation idea is completed here as an ac
 
 Provider roles and adapter semantics are defined in `architecture/scholarly-discovery-aggregation.md`.
 
-Current Sacred Studies `main` contains provider UI/config/helper code whose integration into the execution path is incomplete. This project preserves the intended multi-provider research method but does not reproduce disconnected helper code.
+The deployed Pastoral Studio production workflow has been verified to execute multi-source retrieval before Librarian/Writer synthesis. The Hebrew-Chinese Bible project therefore preserves that production-proven orchestration while implementing provider adapters behind its own normalized DiscoveryRecord / Work / LiteratureSnapshot contracts.
 
 ### 2.8 Synthesis from retrieved evidence
 

@@ -33,6 +33,24 @@ The model used for query expansion, triage, claim extraction, clustering, counte
 
 ---
 
+## Pastoral Studio production-verified orchestration
+
+The active retrieval sequence is additionally governed by `architecture/pastoral-studio-runtime-scholarly-rag.md`.
+
+A production Academic Biblical Study run verified the practical pattern:
+
+```text
+source-specialized retrieval fan-out
+  -> explicit provider success/failure state
+  -> provider-specific enrichment
+  -> Librarian dossier
+  -> Writer/synthesis
+```
+
+Observed production routes included Sefaria, Scite, CORE, OpenAlex, Crossref, and Open Library / Internet Archive. This project adds Semantic Scholar as a required complementary scholarly provider and inserts normalization, canonical Work deduplication, rights/access resolution, counterevidence, LiteratureSnapshot, and ResearchRelease gates before any result becomes canonical.
+
+Provider failure may degrade coverage but must never be replaced by model-memory fabrication.
+
 ## Sacred Studies method parity
 
 The exact scholarly-search/questioning method used for this compiler is defined in `architecture/sacred-studies-research-method.md` and `contracts/v1.1/scholarly-research-method.json`.
