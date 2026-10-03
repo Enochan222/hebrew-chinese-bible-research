@@ -107,11 +107,14 @@ Cross-file and relational review found additional issues:
 
 All were corrected.
 
+## Post-review governance resolution
+
+Live `main` branch protection / required status-check enforcement was still open at the time this panel review closed. It was subsequently resolved by active ruleset `Protect main` (ID `24409248`); `REPO-GOV-001`, `REPO-GOV-002`, and `REPO-GOV-003` are now PASS. The current authority for live repository enforcement is `architecture/reviews/2026-10-03-live-repository-governance-verification.md`, and GitHub issue #1 is closed as completed.
+
 ## Remaining open items
 
 The following remain explicit rather than being disguised as completed work:
 
-- live `main` branch protection / required status-check enforcement was still open at the time this panel review closed. It was subsequently resolved by active ruleset `Protect main` (ID `24409248`); `REPO-GOV-001`, `REPO-GOV-002`, and `REPO-GOV-003` are now PASS. The current authority for live repository enforcement is `architecture/reviews/2026-10-03-live-repository-governance-verification.md`, and GitHub issue #1 is closed as completed;
 - PostgreSQL/Supabase relational constraints, RLS/grants, query compiler, publication transaction behavior, and real corpus ingestion remain implementation work for Database Spike 001;
 - publishable-object content-hash canonical projections still require golden-vector implementation evidence;
 - Research Pro provider licence/quota decisions remain deployment/commercial decisions;

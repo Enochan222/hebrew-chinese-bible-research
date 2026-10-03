@@ -39,7 +39,10 @@ All current governance authorities now agree with actual GitHub enforcement whil
 - canonical current-state files were checked individually rather than relying on GitHub search-index snippets;
 - freeze checklist already had `REPO-GOV-001/002/003` PASS and required no change;
 - issue #1 was already closed as completed and required no change;
-- this PR must pass both required checks, `contracts` and `state-and-changelog`, against latest `main` before squash merge.
+- first PR-head Project governance run `37103129603`: PASS;
+- first PR-head Contract validation run `37103129599`: PASS;
+- independent diff review found one documentation-structure defect: the now-resolved governance item still sat under a “Remaining open items” heading;
+- that defect is corrected in the second PR head, which must again pass both required checks against latest `main` before squash merge.
 
 ## 2026-10-03 — Live repository protection enabled and verified
 

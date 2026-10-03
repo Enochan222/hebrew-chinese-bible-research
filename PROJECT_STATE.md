@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-03.7**
+State Revision: **2026-10-03.8**
 
 ## Mandatory governance rule
 
@@ -157,4 +157,4 @@ Live repository governance is now enforced and independently verified. The activ
 
 ## Latest push intent
 
-This revision performs an independent post-activation governance consistency audit. Live GitHub metadata, ruleset `Protect main`, post-merge push checks, the canonical freeze checklist, repository-governance contract, README, closed issue #1, and current validation records were re-checked against each other. The audit found no live-enforcement drift; it found one stale statement in the still-current panel contract-closure review, which is corrected to point to the later live-governance verification. Historical CHANGELOG entries that describe the earlier unprotected state remain unchanged as history.
+This revision completes the post-activation governance consistency audit and its independent diff review. Live protection remains unchanged and correct. The follow-up review separates the panel's subsequently resolved repository-governance item from genuinely remaining implementation work, preserving the panel record's chronology without leaving a resolved condition under a “Remaining open items” heading. The first PR-head validation passed both required checks: Project governance run `37103129603` and Contract validation run `37103129599`. Exact-head checks must pass again after this review correction before merge.
