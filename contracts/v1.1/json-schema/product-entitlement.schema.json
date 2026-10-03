@@ -39,8 +39,14 @@
       ]
     },
     "sourceType": {
-      "type": "string",
-      "minLength": 1
+      "enum": [
+        "PLAN_ASSIGNMENT",
+        "ORGANIZATION_POLICY",
+        "MANUAL_ADMIN",
+        "PROMOTION",
+        "BILLING_STATE",
+        "MIGRATION"
+      ]
     },
     "sourceReference": {
       "type": [
