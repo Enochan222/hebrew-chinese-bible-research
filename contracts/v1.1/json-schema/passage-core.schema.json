@@ -6,10 +6,7 @@
   "additionalProperties": true,
   "required": [
     "researchReleaseId",
-    "referenceSpanId",
-    "referenceSystemId",
-    "referenceSystemCode",
-    "reference"
+    "referenceSpanId"
   ],
   "properties": {
     "researchReleaseId": {
@@ -20,18 +17,36 @@
       "type": "string",
       "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
     },
-    "referenceSystemId": {
-      "type": "string",
-      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
-    },
-    "referenceSystemCode": {
-      "type": "string",
-      "minLength": 1
-    },
-    "reference": {
-      "type": "string",
-      "minLength": 1
+    "resolvedReference": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "referenceSystemId",
+            "referenceSystemCode",
+            "referenceLabel"
+          ],
+          "properties": {
+            "referenceSystemId": {
+              "type": "string",
+              "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+            },
+            "referenceSystemCode": {
+              "type": "string",
+              "minLength": 1
+            },
+            "referenceLabel": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
     }
   },
-  "description": "Core passage envelope. Reference identity is closed and explicit; passage content fields remain extensible until the serving projection is frozen."
+  "description": "Core passage envelope. Canonical ReferenceSpan identity is always present. A resolved human label is included when the request used a ReferenceSystem-aware label; direct ReferenceSpan requests need not invent a display system."
 }
