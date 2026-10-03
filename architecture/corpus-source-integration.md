@@ -109,7 +109,10 @@ BHSA 2021:
 - source Hebrew/text features;
 - selected lexical and morphology features;
 - phrase/clause function/type/relation features;
-- selected language and Qere features.
+- selected language and Qere features;
+- the Text-Fabric format dependency closure referenced by `otext.tf`, including transliterated/UTF-8 text, trailer, qere, and lexeme features required for Text-Fabric format initialization.
+
+The fetch remains a bounded feature subset rather than a clone of the whole BHSA repository. The extra closure files are present because Text-Fabric loads the configured formats even when the exporter requests only a smaller analysis feature set.
 
 ETCBC bridging 2021:
 

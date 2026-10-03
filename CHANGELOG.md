@@ -61,6 +61,9 @@ Before creating the repository commit:
 - independent review found that BHSA uses `Samuel_I`, not `1_Samuel`, as the section book label and corrected the adapter/docs;
 - independent review also found that ETCBC bridging 2021 must not be treated as a direct mapping from this project's current OSHB commit to BHSA nodes because the bridge artifact does not embed that current immutable OSHB input pin;
 - a dedicated `Corpus source smoke` workflow was therefore added to fetch all three pinned sources and execute the OSHB exporter, BHSA exporter, and conservative crosswalk on 1 Samuel 16:7.
+- first real smoke run `37141481533` proved all three pinned-source downloads and cache hashes, and exported 25 OSHB words, but failed at BHSA Text-Fabric load with `KeyError: g_cons`;
+- inspection of BHSA 2021 `otext.tf` showed that Text-Fabric format initialization references a closure of transliterated/UTF-8 word, consonantal, trailer, qere, and lexeme features even when the exporter requests only a narrower analysis subset;
+- the BHSA acquisition subset is expanded to that exact format dependency closure, preserving the bounded-download design; the failed smoke is retained as validation evidence and the workflow must pass on the corrected PR head.
 
 The reviewed PR head must pass the repository-required `contracts` and `state-and-changelog` checks plus the non-required `Corpus source smoke` integration workflow against latest `main` before squash merge. Database Spike 001 remains responsible for the real PostgreSQL and real-corpus semantic/relational validation.
 

@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.4**
+State Revision: **2026-10-04.5**
 
 ## Mandatory governance rule
 
@@ -210,4 +210,4 @@ See `architecture/corpus-source-integration.md` and `contracts/v1.1/corpus-sourc
 
 ## Latest push intent
 
-This revision connects the project to real, version-pinned OSHB/morphhb, BHSA 2021 and ETCBC bridging inputs for Database Spike 001, then incorporates an independent adapter review. The review corrected the BHSA section label to the real `Samuel_I` convention, explicitly prevents 2021 bridging features from being mistaken for current-OSHB word-ID mappings, adds a fail-closed current-OSHB/BHSA candidate crosswalk compiler, and adds a dedicated corpus-source smoke workflow that downloads the exact pins and runs the real 1 Samuel 16:7 adapters on GitHub Actions. It does not vendor upstream corpora or authorize automatic/canonical cross-layer mappings.
+This revision continues the real-corpus integration review after the first `Corpus source smoke` run. The runner successfully installed Text-Fabric, fetched and SHA-verified all three pinned upstream sources, and exported 25 real OSHB words for 1 Samuel 16:7. The BHSA export then failed because BHSA `otext.tf` format initialization depends on transliterated and UTF-8 text/lexeme/trailer/qere features beyond the direct query subset. The source registry is therefore expanded only to the exact Text-Fabric format dependency closure, not to the whole BHSA repository. The smoke workflow remains mandatory for this PR and will be rerun rather than bypassed.
