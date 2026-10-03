@@ -5,13 +5,13 @@ CREATE SCHEMA IF NOT EXISTS spike_test;
 CREATE OR REPLACE FUNCTION spike_test.assert_true(ok boolean, message text)
 RETURNS void
 LANGUAGE plpgsql
-AS $
+AS $assert$
 BEGIN
   IF NOT COALESCE(ok,false) THEN
     RAISE EXCEPTION 'ASSERTION FAILED: %', message;
   END IF;
 END
-$;
+$assert$;
 
 GRANT USAGE ON SCHEMA spike_test TO authenticated, anon;
 GRANT EXECUTE ON FUNCTION spike_test.assert_true(boolean,text) TO authenticated, anon;

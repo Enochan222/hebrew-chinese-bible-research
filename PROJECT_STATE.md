@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.6**
+State Revision: **2026-10-04.7**
 
 ## Mandatory governance rule
 
@@ -192,4 +192,4 @@ Repository visibility remains public as observed state; this audit does not chan
 
 ## Latest push intent
 
-Database Spike 001 third clean run again proved bootstrap, migration, and seed. The adversarial suite advanced into the authenticated RLS phase, where the test role could not call the temporary `spike_test.assert_true()` helper. The correction grants only the temporary test schema/function to `authenticated` and `anon`; production schemas/grants are unchanged, and the test schema is dropped at the end. Independent review has also identified a separate Serving-plane concern: the first corpus-query implementation still reads Authoring tables. Even if the SQL suite becomes green, that coupling must be removed or explicitly failed before claiming public-serving isolation.
+Database Spike 001 fourth clean run was stopped at the temporary assertion helper because its PL/pgSQL dollar quote was malformed as a single `$`. The helper now uses an explicit named dollar quote. This is a harness syntax correction only; migration, production grants, RLS, and domain constraints are unchanged. The independent architecture review remains open on the more important Serving-to-Authoring dependency and will be resolved before merge even if the SQL suite becomes green.
