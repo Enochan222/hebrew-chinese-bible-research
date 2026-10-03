@@ -1,6 +1,7 @@
 {
   "schemaVersion": "1.0",
   "active": [
+    "PROJECT_CHARTER.md",
     "architecture/database-api-cross-stage-contract-v1.1.md",
     "architecture/product-platform-and-publication-model.md",
     "architecture/integration-boundaries-mcp-api-database.md",
@@ -33,6 +34,8 @@
     "architecture/reviews/2026-10-03-adversarial-critique-remediation.md"
   ],
   "rules": [
+    "PROJECT_CHARTER.md defines canonical product intent, fixed requirements, non-goals, and open decisions.",
+    "Active architecture documents implement the charter and must not contradict its non-negotiable requirements.",
     "Active documents must not depend normatively on superseded documents.",
     "AI/coding agents should consult active entries before semantic/code search results from superseded paths.",
     "Superseded documents remain design history only."
