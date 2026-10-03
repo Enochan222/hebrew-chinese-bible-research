@@ -69,6 +69,8 @@ POSITIVE = [
  ("contracts/v1.1/json-schema/translation-source-basis.schema.json","contracts/v1.1/fixtures/translation-source-basis.json"),
  ("contracts/v1.1/json-schema/translation-policy-version.schema.json","contracts/v1.1/fixtures/translation-policy-version.json"),
  ("contracts/v1.1/json-schema/rights-decision-snapshot.schema.json","contracts/v1.1/fixtures/rights-decision-conditional.json"),
+ ("contracts/v1.1/json-schema/scholarly-provider-request.schema.json","contracts/v1.1/fixtures/scholarly-provider-request.json"),
+ ("contracts/v1.1/json-schema/research-model-run.schema.json","contracts/v1.1/fixtures/research-model-run.json"),
 ]
 
 NEG_SCHEMA = [
@@ -258,6 +260,21 @@ def vocab_drift():
         value=branch.get("properties",{}).get("conditionSchemaId",{}).get("const")
         if value: condition_ids.add(value)
     if set(v["rightsConditionSchemaId"])!=condition_ids: fail("rightsConditionSchemaId drift")
+    spr=load("contracts/v1.1/json-schema/scholarly-provider-request.schema.json")
+    if set(v["scholarlyDiscoveryProviderKey"])!=set(spr["properties"]["providerKey"]["enum"]): fail("scholarlyDiscoveryProviderKey drift")
+    if set(v["scholarlyDiscoveryTransportMode"])!=set(spr["properties"]["transportMode"]["enum"]): fail("scholarlyDiscoveryTransportMode drift")
+    if set(v["scholarlyProviderRequestStatus"])!=set(spr["properties"]["status"]["enum"]): fail("scholarlyProviderRequestStatus drift")
+    rmr=load("contracts/v1.1/json-schema/research-model-run.schema.json")
+    if set(v["researchModelTaskType"])!=set(rmr["properties"]["taskType"]["enum"]): fail("researchModelTaskType drift")
+    if set(v["researchModelRunStatus"])!=set(rmr["properties"]["status"]["enum"]): fail("researchModelRunStatus drift")
+    registry=load("contracts/v1.1/scholarly-provider-registry.json")
+    registry_keys={x["providerKey"] for x in registry.get("providers",[])}
+    if registry_keys!=set(v["scholarlyDiscoveryProviderKey"]): fail("scholarly-provider-registry provider keys drift")
+    allowed_caps=set(v["scholarlyDiscoveryCapability"])
+    allowed_transports=set(v["scholarlyDiscoveryTransportMode"])
+    for provider in registry.get("providers",[]):
+        if not set(provider.get("expectedCapabilities",[])).issubset(allowed_caps): fail(f"provider registry unknown capabilities: {provider.get('providerKey')}")
+        if not set(provider.get("transportModes",[])).issubset(allowed_transports): fail(f"provider registry unknown transport mode: {provider.get('providerKey')}")
 
 def secret_scan():
     assignment=re.compile(r"(?i)\b(GEMINI_API_KEY|GOOGLE_API_KEY|OPENAI_API_KEY|ANTHROPIC_API_KEY)\s*=\s*[\"']?([A-Za-z0-9_\-]{8,})")
