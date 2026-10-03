@@ -108,6 +108,10 @@ A provider adapter may declare support for capabilities such as:
 
 No single provider is assumed to support all capabilities.
 
+The first implementation must provide adapters for OpenAlex, Semantic Scholar, CORE, Crossref, and Scite. Provider availability/capabilities may vary by account and terms, and unavailable capabilities must be recorded rather than simulated.
+
+Query expansion and synthesis are performed through a replaceable ResearchModelAdapter. GPT, Gemini, Claude, local models, and future approved models are interchangeable at this boundary; none is the canonical scholarly authority.
+
 ## 3.2 Provider identity
 
 Provider IDs are external identifiers only.
@@ -119,6 +123,8 @@ They must never become the primary key of a canonical scholarly work.
 # 4. Structural contract authority
 
 This document defines Research Pro scholarly semantics and guardrails.
+
+The normative multi-provider database-build workflow is defined in `architecture/scholarly-discovery-aggregation.md`.
 
 Authoritative table/field definitions for DiscoveryRecord, ResearchTarget, ResearchIssue/Version, ResearchPosition/Version, LiteratureSnapshot, CommentaryEntry, ProductEntitlement, and SourceAccessRoute are maintained in:
 
