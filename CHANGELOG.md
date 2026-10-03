@@ -133,5 +133,5 @@ Database Spike 001 can now test a narrower, more explicit set of scholarly invar
 - substantive closeout Project governance run 37101013160 passed;
 - CORE-SPIKE-012/013/014 are therefore marked PASS with explicit CI evidence;
 - the panel adjudication record is stored at `architecture/reviews/2026-10-03-panel-contract-closure.md`;
-- one final CI run is required after these governance-only status/manifest updates before merge;
+- merge is allowed only when the latest PR Contract validation and Project governance runs are both successful; the PR checks are the authoritative final gate rather than a hard-coded “last run” ID in this changelog;
 - live GitHub branch protection remains unresolved and is tracked in issue #1 rather than falsely marked complete.
