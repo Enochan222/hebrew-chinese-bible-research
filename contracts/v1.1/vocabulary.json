@@ -682,5 +682,43 @@
     "EXPRESSION_OF_CONCERN",
     "UPDATED",
     "UNKNOWN"
+  ],
+  "scholarlyDiscoveryProviderKey": [
+    "OPENALEX",
+    "SEMANTIC_SCHOLAR",
+    "CORE",
+    "CROSSREF",
+    "SCITE"
+  ],
+  "scholarlyDiscoveryTransportMode": [
+    "DIRECT_API",
+    "MCP"
+  ],
+  "scholarlyProviderRequestStatus": [
+    "SUCCEEDED",
+    "FAILED",
+    "RATE_LIMITED",
+    "SKIPPED",
+    "UNAVAILABLE"
+  ],
+  "researchModelTaskType": [
+    "QUERY_EXPANSION",
+    "QUERY_NORMALIZATION",
+    "SEARCH_STRATEGY_DRAFT",
+    "RESULT_TRIAGE",
+    "RELEVANCE_CLASSIFICATION",
+    "BIBLIOGRAPHIC_RESOLUTION_SUGGESTION",
+    "COUNTEREVIDENCE_QUERY_GENERATION",
+    "CANDIDATE_CLAIM_EXTRACTION",
+    "ISSUE_CLUSTERING",
+    "POSITION_CLUSTERING",
+    "SCHOLARLY_DEPENDENCY_SUGGESTION",
+    "SYNTHESIS_DRAFT",
+    "LITERATURE_REVIEW_DRAFT"
+  ],
+  "researchModelRunStatus": [
+    "SUCCEEDED",
+    "FAILED",
+    "PARTIAL"
   ]
 }
