@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-03.4**
+State Revision: **2026-10-03.3**
 
 ## Mandatory governance rule
 
@@ -86,7 +86,7 @@ Deliberately deferred rather than added to the Core closure patch:
 - another BYOK architecture layer;
 - Research Pro provider-scale production normalization.
 
-Repository-admin branch protection remains operationally unresolved and is tracked separately; source files cannot truthfully substitute for the live GitHub ruleset.
+Repository-admin branch protection remains the only unresolved repository-governance item in this closure and is tracked separately; source files cannot truthfully substitute for the live GitHub ruleset.
 
 ## Current architecture state
 
@@ -155,4 +155,4 @@ Repository-admin branch protection remains operationally unresolved and is track
 
 ## Latest push intent
 
-This revision records the completed panel contract-closure loop, marks the new pre-spike closure gates PASS on substantive CI evidence, registers the governance/review/spike documents in the authority graph, and defines the latest successful PR Contract validation plus Project governance checks as the final merge gate. Only explicitly tracked implementation or repository-admin work remains open.
+This revision completes the independent pre-Database-Spike contract-closure panel, three adversarial review rounds, concurrency/lost-update reconciliation, and governance evidence cleanup. All CORE_SPIKE contract gates are PASS. Live GitHub branch-protection rules remain separately PENDING under REPOSITORY_GOVERNANCE because the connected GitHub tooling has no repository-admin write capability.
