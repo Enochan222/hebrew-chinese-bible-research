@@ -27,7 +27,7 @@
       "name": "run_corpus_query",
       "access": "READ_ONLY",
       "domainOperation": "runCorpusQuery",
-      "inputSchemaRef": "./json-schema/corpus-query-normalized.schema.json",
+      "inputSchemaRef": "./json-schema/corpus-query-execution-request.schema.json",
       "outputSchemaRef": "./json-schema/corpus-query-result.schema.json"
     },
     {
@@ -72,7 +72,7 @@
     "transport": "STREAMABLE_HTTP_OR_SUPPORTED_STATELESS_HTTP",
     "notes": "Server implementation targets the final 2026-07-28 revision. Client integrations should use protocol auto-negotiation where supported, probing the modern era and falling back to supported 2025-era behavior rather than relying on SDK defaults or silently pinning a legacy handshake."
   },
-  "releaseResolution": "For read tools, omitted/null researchReleaseId resolves current PRODUCTION exactly once and every scholarly output returns the resolved researchReleaseId. run_corpus_query requires a normalized release-pinned CorpusQuery.",
+  "releaseResolution": "For passage reads, a human reference label is valid only with an explicit referenceSystemCode; direct referenceSpanId locators are also accepted through PassageRequestV1. Omitted/null researchReleaseId resolves current PRODUCTION exactly once. run_corpus_query accepts CorpusQueryExecutionRequestV1 containing an already normalized release-pinned query plus optional pagination state.",
   "securityRequirements": [
     "rate limit per principal and tool",
     "validate authorization audience/scopes if authenticated Research tools are later added",
