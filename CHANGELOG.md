@@ -168,3 +168,8 @@ The governance architecture, live repository state, and canonical freeze registr
 - PR #2 post-merge Contract validation push run `37101307953`: PASS;
 - PR #2 post-merge Project governance push run `37101307963`: PASS;
 - this follow-up PR must pass both latest PR checks before merge.
+
+
+### Independent self-review correction
+
+The first follow-up patch inserted the repository-governance gate table at an ambiguous Markdown anchor and accidentally displaced the `CORE_SPIKE_V1_1` profile heading. Independent PR diff review caught this before merge. The freeze checklist was rebuilt from current `main`, preserving the original Profiles taxonomy and adding a separate `## REPOSITORY_GOVERNANCE` gate section before the Core Spike gate table.
