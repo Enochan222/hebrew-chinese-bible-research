@@ -1095,6 +1095,8 @@ BEGIN
   WHERE rights_decision_snapshot_id = NEW.rights_decision_snapshot_id;
 
   IF snap.rights_decision_snapshot_id IS NULL
+     OR snap.subject_type <> 'RESEARCH_OBJECT'
+     OR snap.subject_identifier <> NEW.research_object_id
      OR snap.decision NOT IN ('ALLOW','CONDITIONAL')
      OR snap.operation NOT IN ('DISPLAY_EXCERPT','QUOTE')
      OR snap.purpose_scope NOT IN ('PUBLICATION','PUBLIC_DISPLAY')
@@ -1413,7 +1415,7 @@ REVOKE ALL ON FUNCTION serving.valid_rights_obligations(jsonb) FROM PUBLIC, anon
 GRANT EXECUTE ON FUNCTION serving.valid_rights_conditions(jsonb), serving.valid_rights_obligations(jsonb)
 TO publication_worker;
 
-DO $
+DO $authoring_rls$
 DECLARE
   r record;
 BEGIN
@@ -1424,7 +1426,7 @@ BEGIN
     EXECUTE format('ALTER TABLE %I.%I ENABLE ROW LEVEL SECURITY', r.schemaname, r.tablename);
   END LOOP;
 END
-$$;
+$authoring_rls$;
 
 REVOKE ALL ON ALL TABLES IN SCHEMA authoring FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON ALL FUNCTIONS IN SCHEMA authoring FROM PUBLIC, anon, authenticated;

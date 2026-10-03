@@ -198,6 +198,39 @@ BEGIN
   IF NOT failed THEN RAISE EXCEPTION 'wrong-operation rights snapshot must not publish excerpt'; END IF;
 END $$;
 
+-- Public excerpt cannot borrow an ALLOW snapshot from a different subject.
+INSERT INTO serving.rights_decision_snapshots(
+  rights_decision_snapshot_id,subject_type,subject_identifier,operation,purpose_scope,audience_scope,
+  commercial_context,applicable_rule_ids,winning_rule_ids,decision,decision_basis,obligations_json,
+  resolver_version,evaluated_at,decision_hash
+) VALUES (
+  '45200000-0000-4000-8000-000000000098','RESEARCH_OBJECT','42000000-0000-4000-8000-000000000001',
+  'DISPLAY_EXCERPT','PUBLICATION','PUBLIC','COMMERCIAL',
+  ARRAY['45100000-0000-4000-8000-000000000001'::uuid],
+  ARRAY['45100000-0000-4000-8000-000000000001'::uuid],
+  'ALLOW','RULE','[]','spike',now(),
+  'abababababababababababababababababababababababababababababababab'
+);
+
+DO $
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    INSERT INTO serving.published_evidence_items(
+      published_evidence_item_id,published_evidence_packet_id,research_object_id,evidence_content_hash,
+      evidence_class,citation_locator,permitted_excerpt,rights_decision_snapshot_id,evidence_stability_class,sort_order
+    ) VALUES (
+      '50200000-0000-4000-8000-000000000097','50100000-0000-4000-8000-000000000001',
+      '51000000-0000-4000-8000-000000000001',
+      'edededededededededededededededededededededededededededededededed',
+      'SCHOLARLY_SOURCE_TEXT','{"locatorType":"BIBLICAL_REFERENCE","referenceSpanId":"13000000-0000-4000-8000-000000000001"}',
+      'must fail','45200000-0000-4000-8000-000000000098','IMMUTABLE_SNAPSHOT',7
+    );
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'rights snapshot for another subject must not publish excerpt'; END IF;
+END $;
+
 -- Immutable evidence requires a content hash.
 DO $$
 DECLARE failed boolean := false;

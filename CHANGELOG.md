@@ -138,6 +138,157 @@ Database Spike run `37143277018`:
 
 The correction does not widen the SECURITY DEFINER search path. It removes the pgcrypto dependency and uses PostgreSQL 17 core `sha256(bytea)` with `convert_to(..., 'UTF8')`, preserving SHA-256 while avoiding extension-schema ambiguity between plain PostgreSQL and Supabase.
 
+### Serving migration delimiter + rights subject-binding findings
+
+Database Spike run `37143374434`:
+- bootstrap: PASS;
+- migration: progressed through Serving projection creation and failed at the final Authoring-RLS `DO` block because its anonymous dollar quote serialized as a single `# Repository Change Log
+
+Every push/PR must update this file together with `PROJECT_STATE.md`.
+
+Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
+
+
+## 2026-10-04 — Begin executable Database Spike 001
+
+### Push intent
+
+Move the project from contract-only database design into a reproducible PostgreSQL implementation spike that can reject invalid scholarly states at real relational/RLS/publication trust boundaries.
+
+### Why
+
+Core contract gates permit Database Spike 001, but prior evidence was still synthetic JSON-schema/architecture validation. A database spike must execute real DDL, foreign keys, checks, triggers, RLS policies, security boundaries, deterministic corpus queries, and publication failure handling.
+
+The connected Supabase account currently exposes one inactive, generically named project, and the repository contains no project ref/link proving that it is the target for this product. Writing DDL there would violate the project's no-guessing deployment rule.
+
+### What changed
+
+- added a versioned PostgreSQL migration for the critical v1.1 vertical slice;
+- separated Authoring, Serving, Workspace, and Publication Control schemas;
+- implemented reference-order/book constraints and deterministic multi-atom labels;
+- implemented independent corpus annotation layers, same-layer edge FKs, explicit cross-layer mappings, and node/segment corpus-expression validation;
+- implemented WRITTEN/READ stream identity and stream-pinned Hebrew-Chinese alignment;
+- implemented shared-PK research-object identity for publishable/versioned objects used by the spike;
+- implemented SemanticSet, ConstructionDefinition/CompilationRun/Instance, RuleVersion/Application, TranslationSourceBasis, TranslationPolicyVersion, TranslationDecision, ResearchIssue/Position versioning, public evidence, and release/channel objects;
+- implemented fail-closed rights evaluation and rights-snapshot invariants;
+- implemented Workspace RLS using the Supabase-compatible `auth.uid()` contract;
+- kept Authoring and publication-control schemas unavailable to public/authenticated runtime roles;
+- implemented a non-public SECURITY DEFINER publication function available only to `publication_worker`;
+- implemented immutable ResearchRelease/component/event behavior and atomic visibility through a mutable release-channel pointer;
+- implemented a deterministic release-pinned 1 Samuel 16:7 corpus-query analogue and query-plan probe;
+- added controlled positive/adversarial SQL fixtures and negative tests;
+- added GitHub Actions PostgreSQL 17 integration workflow;
+- explicitly recorded that no remote Supabase project has been modified.
+
+### First complete green harness and independent rejection
+
+After the harness-syntax repairs, Database Spike run `37142607945` passed bootstrap, migration, seed, the full adversarial SQL suite, and the representative query-plan step. Required Contract validation and Project governance also passed on that head.
+
+Independent architecture review nevertheless rejected the green harness as sufficient evidence for merge. The reason was structural: several `serving.*` foreign keys and `serving.spike_corpus_query()` still depended directly on `authoring.*`. That is legal inside one PostgreSQL database but contradicts the established production invariant that Public Serving must remain functional when Authoring is unavailable.
+
+### Architecture correction from implementation evidence
+
+The implementation is changed so that publication materializes Serving-owned projections rather than leaving runtime referential dependence on Authoring:
+
+- Serving-owned research-object registry;
+- Serving-owned reference-span projection;
+- release-pinned corpus nodes, node features, relations, explicit cross-layer mappings, and semantic-set members;
+- release components and published evidence terminate FKs in the Serving registry;
+- public deterministic corpus query reads only Serving projections;
+- TranslationDecision aggregate hashing moves to Publication Control;
+- Workspace passage identity references the public-side reference projection;
+- PostgreSQL catalog tests reject any Serving FK whose target schema is Authoring;
+- PostgreSQL catalog tests reject any Serving function whose definition references `authoring.`;
+- an `anon` execution test proves the corpus query works without Authoring privileges.
+
+The active database/API contract and publication model are clarified accordingly.
+
+### Serving-isolation executable run
+
+Database Spike run `37143183450`, the first clean run after the Serving-isolation correction:
+- bootstrap: PASS;
+- migration: FAIL at the newly added Serving rights-validator functions because their SQL dollar-quote delimiters were serialized as a single `# Repository Change Log
+
+Every push/PR must update this file together with `PROJECT_STATE.md`.
+
+Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
+
+
+## 2026-10-04 — Begin executable Database Spike 001
+
+### Push intent
+
+Move the project from contract-only database design into a reproducible PostgreSQL implementation spike that can reject invalid scholarly states at real relational/RLS/publication trust boundaries.
+
+### Why
+
+Core contract gates permit Database Spike 001, but prior evidence was still synthetic JSON-schema/architecture validation. A database spike must execute real DDL, foreign keys, checks, triggers, RLS policies, security boundaries, deterministic corpus queries, and publication failure handling.
+
+The connected Supabase account currently exposes one inactive, generically named project, and the repository contains no project ref/link proving that it is the target for this product. Writing DDL there would violate the project's no-guessing deployment rule.
+
+### What changed
+
+- added a versioned PostgreSQL migration for the critical v1.1 vertical slice;
+- separated Authoring, Serving, Workspace, and Publication Control schemas;
+- implemented reference-order/book constraints and deterministic multi-atom labels;
+- implemented independent corpus annotation layers, same-layer edge FKs, explicit cross-layer mappings, and node/segment corpus-expression validation;
+- implemented WRITTEN/READ stream identity and stream-pinned Hebrew-Chinese alignment;
+- implemented shared-PK research-object identity for publishable/versioned objects used by the spike;
+- implemented SemanticSet, ConstructionDefinition/CompilationRun/Instance, RuleVersion/Application, TranslationSourceBasis, TranslationPolicyVersion, TranslationDecision, ResearchIssue/Position versioning, public evidence, and release/channel objects;
+- implemented fail-closed rights evaluation and rights-snapshot invariants;
+- implemented Workspace RLS using the Supabase-compatible `auth.uid()` contract;
+- kept Authoring and publication-control schemas unavailable to public/authenticated runtime roles;
+- implemented a non-public SECURITY DEFINER publication function available only to `publication_worker`;
+- implemented immutable ResearchRelease/component/event behavior and atomic visibility through a mutable release-channel pointer;
+- implemented a deterministic release-pinned 1 Samuel 16:7 corpus-query analogue and query-plan probe;
+- added controlled positive/adversarial SQL fixtures and negative tests;
+- added GitHub Actions PostgreSQL 17 integration workflow;
+- explicitly recorded that no remote Supabase project has been modified.
+
+### First complete green harness and independent rejection
+
+After the harness-syntax repairs, Database Spike run `37142607945` passed bootstrap, migration, seed, the full adversarial SQL suite, and the representative query-plan step. Required Contract validation and Project governance also passed on that head.
+
+Independent architecture review nevertheless rejected the green harness as sufficient evidence for merge. The reason was structural: several `serving.*` foreign keys and `serving.spike_corpus_query()` still depended directly on `authoring.*`. That is legal inside one PostgreSQL database but contradicts the established production invariant that Public Serving must remain functional when Authoring is unavailable.
+
+### Architecture correction from implementation evidence
+
+The implementation is changed so that publication materializes Serving-owned projections rather than leaving runtime referential dependence on Authoring:
+
+- Serving-owned research-object registry;
+- Serving-owned reference-span projection;
+- release-pinned corpus nodes, node features, relations, explicit cross-layer mappings, and semantic-set members;
+- release components and published evidence terminate FKs in the Serving registry;
+- public deterministic corpus query reads only Serving projections;
+- TranslationDecision aggregate hashing moves to Publication Control;
+- Workspace passage identity references the public-side reference projection;
+- PostgreSQL catalog tests reject any Serving FK whose target schema is Authoring;
+- PostgreSQL catalog tests reject any Serving function whose definition references `authoring.`;
+- an `anon` execution test proves the corpus query works without Authoring privileges.
+
+The active database/API contract and publication model are clarified accordingly.
+
+;
+- seed/tests/query plan: not reached.
+
+Both functions now use named PostgreSQL dollar quotes. No relational/security invariant was relaxed.
+
+### Secure hash portability finding
+
+Database Spike run `37143277018`:
+- bootstrap: PASS;
+- Serving-isolation migration: progressed to the Publication Control hash function, then failed because `pgcrypto.digest()` was not visible under the intentionally restricted SECURITY DEFINER search path;
+- seed/tests/query plan: not reached.
+
+The correction does not widen the SECURITY DEFINER search path. It removes the pgcrypto dependency and uses PostgreSQL 17 core `sha256(bytea)` with `convert_to(..., 'UTF8')`, preserving SHA-256 while avoiding extension-schema ambiguity between plain PostgreSQL and Supabase.
+
+;
+- seed/tests/query plan: not reached.
+
+The block now uses a named delimiter.
+
+A separate rights-focused review found a real authorization gap independent of that syntax failure: the public-evidence trigger validated an ALLOW/CONDITIONAL snapshot's operation, purpose, and audience, but did not require the snapshot's subject to equal the published evidence object's research-object identity. The trigger now requires exact subject binding and the SQL suite contains a wrong-subject ALLOW snapshot that must be rejected.
+
 ### Intended effect
 
 Database Spike 001 now has executable evidence rather than prose-only expectations. CI should expose relational assumptions that JSON Schema cannot prove and provide a repeatable base for correcting the active v1.1 contract before Core Freeze.

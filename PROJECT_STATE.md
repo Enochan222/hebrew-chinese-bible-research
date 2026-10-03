@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.10**
+State Revision: **2026-10-04.11**
 
 ## Mandatory governance rule
 
@@ -192,4 +192,4 @@ Repository visibility remains public as observed state; this audit does not chan
 
 ## Latest push intent
 
-Database Spike 001 run `37143277018` applied the Serving-isolation migration until the Publication Control translation aggregate hash, then failed because `pgcrypto.digest()` was hidden by the deliberately restricted SECURITY DEFINER search path. The correction removes the pgcrypto dependency and uses PostgreSQL 17's core `pg_catalog.sha256(bytea)` primitive via `sha256(convert_to(...))`. The secure search path remains restricted; no mutable `public` schema is added to SECURITY DEFINER resolution. All Serving-isolation catalog/RLS/public-query assertions still require a fresh blank-database run.
+Database Spike 001 run `37143374434` progressed through the Serving-isolation migration until the final Authoring-RLS bootstrap block, where another anonymous dollar quote had serialized as a single `$`. That block now uses a named delimiter. Independent rights review also found that the published-excerpt trigger checked decision/operation/purpose/audience but not whether the RightsDecisionSnapshot actually authorized the same evidence research object. The trigger now requires `subject_type = RESEARCH_OBJECT` and exact `subject_identifier = research_object_id`, with an explicit wrong-subject negative fixture. No permission is broadened.
