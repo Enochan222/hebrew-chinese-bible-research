@@ -1754,3 +1754,31 @@ The public product must not require this private academic retrieval system to:
 - show approved rule applications.
 
 This preserves scholarly stability, reduces rights risk and allows the public product to operate during model/retrieval-provider outages.
+
+
+## Multi-provider external scholarly discovery
+
+External journal/article discovery is a separate authoring pipeline from private-library RAG.
+
+The initial provider ensemble is OpenAlex, Semantic Scholar, CORE, Crossref, and Scite. Direct APIs and MCPs are transport options behind the same adapter boundary.
+
+Pipeline:
+
+```text
+ResearchTarget / ResearchIssue
+ -> ResearchModelAdapter query expansion
+ -> multi-provider search
+ -> DiscoveryRecord normalization
+ -> DOI/PID/title-author identity resolution
+ -> RightsPolicy / access resolution
+ -> permitted evidence enrichment/full text
+ -> candidate claim extraction / counterevidence search
+ -> review
+ -> LiteratureSnapshot
+```
+
+The ResearchModelAdapter is model-neutral. GPT, Gemini, Claude, local models, or future approved models may be used at build time. Model memory is never a substitute for provider records.
+
+Do not merge external scholarly discovery results into the private-library vector index as if they were equivalent source assets. Preserve provider identity, access level, rights, retrieval time, and canonical Work resolution.
+
+See `architecture/scholarly-discovery-aggregation.md`.
