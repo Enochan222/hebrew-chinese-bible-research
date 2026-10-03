@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "1.1",
+  "snapshotId": "86868686-8686-4868-8868-868686868686",
+  "subjectType": "SOURCE_ASSET",
+  "subjectIdentifier": "87878787-8787-4878-8878-878787878787",
+  "operation": "DISPLAY_EXCERPT",
+  "purposeScope": "PUBLIC_DISPLAY",
+  "audienceScope": "AUTHENTICATED_USER",
+  "commercialContext": "COMMERCIAL",
+  "applicableRuleIds": [
+    "88888888-8888-4888-8888-888888888888"
+  ],
+  "winningRuleIds": [
+    "88888888-8888-4888-8888-888888888888"
+  ],
+  "decision": "CONDITIONAL",
+  "decisionBasis": "RULE",
+  "conditions": [
+    {
+      "conditionSchemaId": "AUTHENTICATED_AUDIENCE",
+      "conditionSchemaVersion": "1.0",
+      "evaluatorVersion": "rights-condition-fixture-1",
+      "payload": {
+        "required": true
+      }
+    }
+  ],
+  "obligations": [
+    {
+      "obligationType": "MAX_EXCERPT",
+      "value": 100,
+      "unit": "WORD"
+    }
+  ],
+  "resolverVersion": "rights-resolver-fixture-3",
+  "evaluatedAt": "2026-10-03T00:00:00Z",
+  "decisionHash": "8686868686868686868686868686868686868686868686868686868686868686"
+}
