@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/scholarly-provider-request.schema.json",
+  "title": "ScholarlyProviderRequestV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "providerRequestId",
+    "literatureSearchRunId",
+    "providerKey",
+    "adapterVersion",
+    "transportMode",
+    "queryText",
+    "status",
+    "executedAt"
+  ],
+  "properties": {
+    "providerRequestId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "literatureSearchRunId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "literatureSearchQueryId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "providerKey": {
+      "enum": [
+        "OPENALEX",
+        "SEMANTIC_SCHOLAR",
+        "CORE",
+        "CROSSREF",
+        "SCITE"
+      ]
+    },
+    "adapterVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "transportMode": {
+      "enum": [
+        "DIRECT_API",
+        "MCP"
+      ]
+    },
+    "providerDatasetVersion": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "providerIndexVersion": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "providerQuerySyntaxVersion": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "queryText": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sortRankingMode": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "requestCursor": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "requestedLimit": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "capabilitiesUsed": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "responseHash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-fA-F]{64}$"
+    },
+    "returnedCount": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "status": {
+      "enum": [
+        "SUCCEEDED",
+        "FAILED",
+        "RATE_LIMITED",
+        "SKIPPED",
+        "UNAVAILABLE"
+      ]
+    },
+    "executedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "errorClass": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "SUCCEEDED"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "required": [
+          "responseHash",
+          "returnedCount"
+        ],
+        "properties": {
+          "responseHash": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{64}$"
+          },
+          "returnedCount": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    }
+  ]
+}
