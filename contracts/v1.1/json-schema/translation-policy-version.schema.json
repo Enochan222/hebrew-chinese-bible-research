@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/translation-policy-version.schema.json",
+  "title": "TranslationPolicyVersionV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "translationPolicyId",
+    "translationPolicyVersionId",
+    "versionNumber",
+    "targetLanguageTag",
+    "audienceProfile",
+    "register",
+    "ambiguityPolicy",
+    "policyRuleVersionIds",
+    "editorialConventionRuleVersionIds",
+    "reviewStatus",
+    "contentHash"
+  ],
+  "properties": {
+    "translationPolicyId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "translationPolicyVersionId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "versionNumber": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "targetLanguageTag": {
+      "type": "string",
+      "minLength": 2
+    },
+    "targetLanguageProfileVersionId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "audienceProfile": {
+      "type": "string",
+      "minLength": 1
+    },
+    "register": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ambiguityPolicy": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policySummary": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "policyRuleVersionIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+      }
+    },
+    "editorialConventionRuleVersionIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+      }
+    },
+    "reviewStatus": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contentHash": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{64}$"
+    },
+    "supersedesVersionId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    }
+  }
+}
