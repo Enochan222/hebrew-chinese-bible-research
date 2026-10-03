@@ -294,8 +294,12 @@ SELECT spike_test.assert_true(
 );
 SELECT spike_test.assert_true(
   NOT EXISTS (
-    SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
-    WHERE n.nspname='serving' AND pg_get_functiondef(p.oid) ILIKE '%authoring.%'
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid=p.pronamespace
+    WHERE n.nspname='serving'
+      AND p.prokind='f'
+      AND CASE WHEN p.prokind='f' THEN pg_get_functiondef(p.oid) ELSE '' END ILIKE '%authoring.%'
   ),
   'serving functions must not query authoring schema'
 );

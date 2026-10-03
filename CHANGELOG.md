@@ -300,6 +300,19 @@ Database Spike run `37143497384`:
 
 The disposable test block now uses a named PL/pgSQL delimiter. No schema, grant, RLS, or rights rule is weakened.
 
+### Catalog-isolation test finding
+
+Database Spike run `37143591152`:
+- bootstrap: PASS;
+- full Serving-isolation migration: PASS;
+- controlled seed: PASS;
+- adversarial suite reached the new PostgreSQL catalog isolation section;
+- the assertion that Serving has no FK targeting Authoring passed;
+- the next function-definition scan failed because `pg_get_functiondef()` was applied to aggregate catalog rows such as `array_agg`;
+- query plan: not reached.
+
+The test now guards `pg_get_functiondef()` to ordinary functions only. This changes the test query, not the Serving boundary.
+
 ### Intended effect
 
 Database Spike 001 now has executable evidence rather than prose-only expectations. CI should expose relational assumptions that JSON Schema cannot prove and provide a repeatable base for correcting the active v1.1 contract before Core Freeze.

@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.12**
+State Revision: **2026-10-04.13**
 
 ## Mandatory governance rule
 
@@ -192,4 +192,4 @@ Repository visibility remains public as observed state; this audit does not chan
 
 ## Latest push intent
 
-Database Spike 001 run `37143497384` is the first Serving-isolation run to pass both the full migration and controlled seed. The adversarial suite then stopped at the newly added wrong-subject rights test because its inserted anonymous PL/pgSQL block had serialized with single-dollar delimiters. That disposable test block now uses a named delimiter. The relational Serving projections, exact rights-subject check, catalog no-cross-plane assertions, RLS tests, publication rollback tests, and anon corpus-query test remain unchanged and require a fresh run.
+Database Spike 001 run `37143591152` again passed bootstrap, full Serving-isolation migration, and seed, then reached the PostgreSQL catalog isolation assertions. The no-Serving-FK-to-Authoring assertion passed. The following function-definition assertion failed because `pg_get_functiondef()` was evaluated against aggregate entries such as `array_agg`, for which that function is invalid. The catalog test is narrowed to ordinary functions with a guarded `prokind='f'` expression. No product schema or permission changed.
