@@ -138,6 +138,8 @@ Current validation records:
 
 - `architecture/dry-runs/002-p0-contract-regression.md`
 - `architecture/reviews/2026-10-03-adversarial-critique-remediation.md`
+- `architecture/reviews/2026-10-03-panel-contract-closure.md`
+- `architecture/reviews/2026-10-03-live-repository-governance-verification.md`
 
 Historical / superseded design records are listed in `architecture/manifest.json` and are not implementation authority.
 
