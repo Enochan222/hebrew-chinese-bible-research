@@ -12,7 +12,7 @@ Core research functionality must pass acceptance tests with no BYOK credential p
 
 See `architecture/byok-credential-handling.md` and ADR-005.
 
-Status: **ARCHITECTURE STAGING PLAN, IMPLEMENTATION HOLD UNTIL v1.1 CONTRACT FREEZE**
+Status: **ACTIVE STAGING PLAN; DATABASE SPIKE MAY PROCEED AFTER CORE_SPIKE_V1_1, FULL PRODUCT FREEZE REMAINS SEPARATE**
 
 This project is a database-backed scholarly product platform, not a single runtime AI application.
 
@@ -31,8 +31,11 @@ The product planes are:
 
 These continue to exist after launch. They are not one-time stages.
 
-Before production schema implementation begins, the active candidate contract must pass its freeze preconditions:
+Implementation must follow the canonical product intent in `PROJECT_CHARTER.md`.
 
+Database Spike 001 may begin when `CORE_SPIKE_V1_1` passes. Full Core freeze, Research Pro extension freeze, and public BYOK shipping remain separate gates:
+
+- `contracts/v1.1/freeze-checklist.md`
 - `architecture/database-api-cross-stage-contract-v1.1.md`
 
 Canonical vocabularies:
