@@ -10,5 +10,6 @@
   "accessLevel": "METADATA_ONLY",
   "recordStatus": "DISCOVERED",
   "payloadStorageMode": "METADATA_ONLY",
-  "rightsDecisionSnapshotId": null
+  "rightsDecisionSnapshotId": null,
+  "providerRequestId": "61616161-6161-4616-8616-616161616161"
 }
