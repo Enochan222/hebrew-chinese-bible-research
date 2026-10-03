@@ -136,6 +136,72 @@
           }
         }
       }
+    },
+    {
+      "if": {
+        "properties": {
+          "basisKind": {
+            "const": "STREAM_READING"
+          }
+        },
+        "required": [
+          "basisKind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "adoptedApparatusReadingIds": {
+            "maxItems": 0
+          },
+          "editorialEmendationSummary": {
+            "type": "null"
+          },
+          "adoptedReadingText": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "basisKind": {
+            "const": "APPARATUS_READING"
+          }
+        },
+        "required": [
+          "basisKind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "editorialEmendationSummary": {
+            "type": "null"
+          },
+          "adoptedReadingText": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "basisKind": {
+            "const": "EDITORIAL_EMENDATION"
+          }
+        },
+        "required": [
+          "basisKind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "adoptedApparatusReadingIds": {
+            "maxItems": 0
+          }
+        }
+      }
     }
   ]
 }
