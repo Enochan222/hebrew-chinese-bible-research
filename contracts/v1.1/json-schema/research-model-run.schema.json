@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/research-model-run.schema.json",
+  "title": "ResearchModelRunV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "researchModelRunId",
+    "taskType",
+    "modelProvider",
+    "modelId",
+    "hostEnvironment",
+    "promptVersion",
+    "inputHash",
+    "status",
+    "startedAt"
+  ],
+  "properties": {
+    "researchModelRunId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "taskType": {
+      "enum": [
+        "QUERY_EXPANSION",
+        "QUERY_NORMALIZATION",
+        "SEARCH_STRATEGY_DRAFT",
+        "RESULT_TRIAGE",
+        "RELEVANCE_CLASSIFICATION",
+        "BIBLIOGRAPHIC_RESOLUTION_SUGGESTION",
+        "COUNTEREVIDENCE_QUERY_GENERATION",
+        "CANDIDATE_CLAIM_EXTRACTION",
+        "ISSUE_CLUSTERING",
+        "POSITION_CLUSTERING",
+        "SCHOLARLY_DEPENDENCY_SUGGESTION",
+        "SYNTHESIS_DRAFT",
+        "LITERATURE_REVIEW_DRAFT"
+      ]
+    },
+    "modelProvider": {
+      "type": "string",
+      "minLength": 1
+    },
+    "modelId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "hostEnvironment": {
+      "type": "string",
+      "minLength": 1
+    },
+    "promptVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "inputHash": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{64}$"
+    },
+    "outputHash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-fA-F]{64}$"
+    },
+    "provenanceActivityId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "inputObjectIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+      },
+      "uniqueItems": true
+    },
+    "status": {
+      "enum": [
+        "SUCCEEDED",
+        "FAILED",
+        "PARTIAL"
+      ]
+    },
+    "startedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "reviewStatus": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "SUCCEEDED"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "required": [
+          "outputHash",
+          "completedAt"
+        ],
+        "properties": {
+          "outputHash": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{64}$"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  ]
+}
