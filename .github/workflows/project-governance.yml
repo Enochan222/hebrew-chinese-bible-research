@@ -1,0 +1,50 @@
+name: Project governance
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  state-and-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Determine changed files
+        id: diff
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+            HEAD="${{ github.event.pull_request.head.sha }}"
+          else
+            BASE="${{ github.event.before }}"
+            HEAD="${{ github.sha }}"
+          fi
+          if [ -z "$BASE" ] || echo "$BASE" | grep -Eq '^0+$'; then
+            BASE="$(git rev-parse "$HEAD^" 2>/dev/null || true)"
+          fi
+          if [ -n "$BASE" ]; then
+            git diff --name-only "$BASE" "$HEAD" | tee /tmp/changed-files.txt
+          else
+            git ls-tree -r --name-only "$HEAD" | tee /tmp/changed-files.txt
+          fi
+      - name: Require PROJECT_STATE update
+        run: grep -Fx 'PROJECT_STATE.md' /tmp/changed-files.txt
+      - name: Require CHANGELOG update
+        run: grep -Fx 'CHANGELOG.md' /tmp/changed-files.txt
+      - name: Validate governance document structure
+        shell: bash
+        run: |
+          grep -F 'State Revision:' PROJECT_STATE.md
+          grep -F '## Latest push intent' PROJECT_STATE.md
+          grep -F '### Push intent' CHANGELOG.md
+          grep -F '### Why' CHANGELOG.md
+          grep -F '### What changed' CHANGELOG.md
+          grep -F '### Intended effect' CHANGELOG.md
+          grep -F '### Validation' CHANGELOG.md
