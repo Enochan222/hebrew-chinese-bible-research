@@ -9,8 +9,10 @@
     "normalizedQueryHash",
     "queryExecutionPolicyVersion",
     "epistemicClass",
-    "matchCount",
-    "matches"
+    "matches",
+    "pageMatchCount",
+    "totalMatchCount",
+    "totalCountExact"
   ],
   "properties": {
     "researchReleaseId": {
@@ -33,10 +35,6 @@
         "HEURISTIC_CANDIDATE",
         "INCOMPLETE_COVERAGE"
       ]
-    },
-    "matchCount": {
-      "type": "integer",
-      "minimum": 0
     },
     "constructionCount": {
       "type": [
@@ -103,6 +101,20 @@
     "dependencyManifest": {
       "type": "object",
       "additionalProperties": true
+    },
+    "pageMatchCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "totalMatchCount": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "totalCountExact": {
+      "type": "boolean"
     }
   }
 }
