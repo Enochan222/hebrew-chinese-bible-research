@@ -5,6 +5,39 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
 
+## 2026-10-04 — Adopt production-verified Pastoral Studio scholarly retrieval/RAG method
+
+### Push intent
+
+Make the private Hebrew-Bible Research Compiler use the scholarly retrieval method actually observed in the deployed Pastoral Studio Academic Biblical Study workflow, while preserving this project's stronger research-grade database and publication controls.
+
+### Why
+
+Earlier architecture correctly preserved the Sacred Studies Text × Topic × Lens, Librarian, synthesis, and review ideas, but one state record still relied on a static-code conclusion that several provider helpers were not wired into runtime.
+
+A production browser run against the deployed Pastoral Studio showed a real multi-source retrieval phase before model synthesis, including Sefaria, Scite, CORE, OpenAlex, Crossref, and Open Library / Internet Archive, with explicit degraded-mode fallback when CORE authentication failed.
+
+### What changed
+
+- added `architecture/pastoral-studio-runtime-scholarly-rag.md` as the active retrieval-orchestration reference;
+- defined Pastoral Studio parity as behavioral/method parity, not code copying;
+- formalized source-specialized parallel retrieval before Librarian synthesis;
+- retained OpenAlex, Semantic Scholar, CORE, Crossref, and Scite as the required scholarly-provider ensemble;
+- documented Sefaria and Open Library / Internet Archive as auxiliary source-specialized retrieval routes;
+- formalized explicit degraded-mode fallback and prohibited model-memory substitution for failed providers;
+- formalized normalization, Work/Edition deduplication, access/rights resolution, enrichment, Librarian dossier, candidate claims, counterevidence, review, LiteratureSnapshot, ResearchBuild, and ResearchRelease;
+- updated the machine-readable scholarly research method, active architecture, living state, README, and contract validation.
+
+### Intended effect
+
+Future GPT/Codex/Gemini/Claude database builds should search academic material using the same practical retrieval pattern that proved operational in Pastoral Studio, but persist and govern the results as research-grade data instead of immediately turning provider output into an unversioned answer.
+
+### Validation
+
+- contract validation asserts the production-runtime reference, capability-routed fan-out, degraded-mode policy, Librarian-after-retrieval ordering, model-memory prohibition, and auxiliary source routes;
+- existing provider-ensemble, model-neutrality, rights, schema, OpenAPI, and governance checks remain mandatory;
+- GitHub PR checks are the merge authority.
+
 ## 2026-10-03 — Post-protection governance consistency audit
 
 ### Push intent

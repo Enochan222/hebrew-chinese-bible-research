@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-03.9**
+State Revision: **2026-10-04.1**
 
 ## Mandatory governance rule
 
@@ -54,11 +54,17 @@ Core method:
 - independent critical review with 88/100 authoring threshold and maximum 3 revision attempts;
 - human/review/publication gates before ResearchRelease.
 
-## Important Sacred Studies audit finding
+## Pastoral Studio production-runtime method verification
 
-The current Sacred Studies repository contains useful search prompts, Librarian/Writer/Reviewer method, provider UI/config, and some provider helper implementations, but not all provider helpers are fully wired into its main generation path.
+A real production Academic Biblical Study run against the deployed Pastoral Studio showed that its scholarly retrieval path executes multi-source retrieval before Librarian/Writer synthesis. The observed production flow included Sefaria, Scite, CORE, OpenAlex, Crossref, Open Library / Internet Archive, followed by a Librarian model stage and later synthesis. CORE demonstrated explicit degraded-mode fallback when authentication failed.
 
-This project therefore preserves the **full intended research method** and completes the provider aggregation path, while rejecting dead-code, credential, stale-date, and auto-pass defects.
+The repository therefore treats Pastoral Studio production behavior, not the earlier static-helper assumption, as the lineage reference for retrieval orchestration.
+
+The Hebrew-Chinese Bible project adopts that method but strengthens it with canonical Work/Edition identity, DiscoveryRecord provenance, multi-provider deduplication, RightsPolicy, access-level truth, counterevidence, LiteratureSnapshot, human review, and immutable ResearchRelease publication.
+
+Semantic Scholar remains part of this project's required first implementation as a deliberate coverage extension even though it was not observed in that specific Pastoral Studio runtime test.
+
+See `architecture/pastoral-studio-runtime-scholarly-rag.md`.
 
 ## Current contract-closure state
 
@@ -115,7 +121,8 @@ Live repository governance is now enforced and independently verified. The activ
 ## Current data/research boundaries
 
 - Google Drive: curated private scholarly source base, subject to operation-specific rights.
-- OpenAlex/Semantic Scholar/CORE/Crossref/Scite: external discovery/evidence providers.
+- OpenAlex/Semantic Scholar/CORE/Crossref/Scite: required external scholarly discovery/evidence ensemble.
+- Sefaria and Open Library / Internet Archive: auxiliary source-specialized retrieval routes where relevant and rights-permitted.
 - PostgreSQL/Supabase-style relational storage: canonical structured database.
 - Object storage: permitted source assets/extractions.
 - GitHub: code/contracts/migrations/docs/tests, not copyrighted source corpora. Current repository visibility is public and is recorded as observed state, not changed by this update.
@@ -157,4 +164,4 @@ Live repository governance is now enforced and independently verified. The activ
 
 ## Latest push intent
 
-This revision completes the post-activation governance consistency audit and its independent diff review. Live protection remains unchanged and correct. The panel record now separates the repository-governance condition that was open at panel close but later resolved from genuinely remaining implementation work. Successive reviewed PR heads passed both required workflows. The authoritative merge gate is always the latest GitHub-required `contracts` and `state-and-changelog` checks against latest `main`; this living state deliberately does not hard-code a “final” run ID that would become stale whenever the state record itself is updated.
+This revision replaces the earlier static-code assumption about Sacred Studies provider wiring with a production-runtime-verified Pastoral Studio retrieval method. The private Research Compiler now explicitly preserves provider fan-out, specialized routing, degraded-mode fallback, post-retrieval enrichment, Librarian-after-retrieval sequencing, and then applies this project's stricter deduplication, rights, provenance, counterevidence, snapshot, review, and release controls.

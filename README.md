@@ -117,6 +117,7 @@ Other active specialised architecture:
 - `architecture/academic-storage-and-rag.md`
 - `architecture/research-pro-scholarly-intelligence.md`
 - `architecture/scholarly-discovery-aggregation.md`
+- `architecture/pastoral-studio-runtime-scholarly-rag.md`
 - `architecture/sacred-studies-research-method.md`
 - `architecture/ui-mode-cross-stage-contract.md`
 - `architecture/security-trust-boundaries.md`

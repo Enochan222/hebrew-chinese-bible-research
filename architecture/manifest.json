@@ -23,6 +23,7 @@
     "contracts/v1.1/freeze-checklist.md",
     "architecture/scholarly-discovery-aggregation.md",
     "architecture/adr/006-multi-provider-scholarly-discovery-compiler.md",
+    "architecture/pastoral-studio-runtime-scholarly-rag.md",
     "architecture/sacred-studies-research-method.md",
     "architecture/repository-governance.md"
   ],

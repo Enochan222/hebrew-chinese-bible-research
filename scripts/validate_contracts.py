@@ -310,6 +310,19 @@ def vocab_drift():
     if cr.get("passThreshold")!=88 or cr.get("maxAttempts")!=3: fail("Sacred Studies review-loop drift")
     if cr.get("malformedReviewerOutput")!="REVIEW_INCOMPLETE": fail("reviewer parse failure must not auto-pass")
     if method.get("modelBoundary",{}).get("vendorLocked") is not False: fail("research build model must remain vendor-neutral")
+    runtime_ref=method.get("runtimeReference",{})
+    if runtime_ref.get("system")!="PASTORAL_STUDIO_PRODUCTION_RUNTIME": fail("Pastoral Studio runtime reference drift")
+    if runtime_ref.get("parityPolicy")!="BEHAVIORAL_RETRIEVAL_ORCHESTRATION_NOT_CODE_COPY": fail("Pastoral Studio parity policy drift")
+    orch=method.get("retrievalOrchestration",{})
+    if orch.get("parallelCapabilityRoutedFanOut") is not True: fail("scholarly retrieval must preserve capability-routed fan-out")
+    if orch.get("providerFailurePolicy")!="DEGRADED_CONTINUE_WITH_EXPLICIT_STATUS": fail("provider degraded-mode policy drift")
+    if orch.get("modelMemoryMayReplaceMissingProviderResults") is not False: fail("model memory may not replace failed provider results")
+    if orch.get("normalizeBeforeSynthesis") is not True: fail("provider results must normalize before synthesis")
+    if orch.get("rightsBeforeModelContext") is not True: fail("rights must be resolved before model context")
+    if orch.get("librarianRunsAfterRetrieval") is not True: fail("Librarian must run after evidence retrieval")
+    if orch.get("counterevidencePassRequired") is not True: fail("counterevidence pass must remain required")
+    if set(orch.get("auxiliarySourceRoutes",[]))!={"CURATED_PRIVATE_LIBRARY","SEFARIA","OPEN_LIBRARY_INTERNET_ARCHIVE"}: fail("auxiliary source-route drift")
+
     reg=load("contracts/v1.1/scholarly-provider-registry.json")
     required={"OPENALEX","SEMANTIC_SCHOLAR","CORE","CROSSREF","SCITE"}
     registered={p["providerKey"] for p in reg.get("providers",[]) if p.get("requiredInFirstImplementation")}

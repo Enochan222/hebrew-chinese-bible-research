@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.1",
   "methodKey": "SACRED_STUDIES_DERIVED_SCHOLARLY_METHOD_V1",
   "status": "CANONICAL_BUILD_METHOD",
   "parityPolicy": "PRESERVE_RESEARCH_METHOD_CORRECT_IMPLEMENTATION_DEFECTS",
@@ -87,5 +87,46 @@
       "FUTURE_APPROVED_MODEL"
     ],
     "vendorLocked": false
+  },
+  "runtimeReference": {
+    "system": "PASTORAL_STUDIO_PRODUCTION_RUNTIME",
+    "verificationDate": "2026-10-04",
+    "parityPolicy": "BEHAVIORAL_RETRIEVAL_ORCHESTRATION_NOT_CODE_COPY",
+    "productionBehaviorControlsRetrievalLineage": true,
+    "notes": [
+      "Production verification observed source-specialized multi-source retrieval before Librarian/Writer synthesis.",
+      "Semantic Scholar remains a deliberate required extension even though it was not observed in the verified production run."
+    ]
+  },
+  "retrievalOrchestration": {
+    "queryPlanBeforeRetrieval": true,
+    "parallelCapabilityRoutedFanOut": true,
+    "requiredScholarlyProviders": [
+      "OPENALEX",
+      "SEMANTIC_SCHOLAR",
+      "CORE",
+      "CROSSREF",
+      "SCITE"
+    ],
+    "auxiliarySourceRoutes": [
+      "CURATED_PRIVATE_LIBRARY",
+      "SEFARIA",
+      "OPEN_LIBRARY_INTERNET_ARCHIVE"
+    ],
+    "providerFailurePolicy": "DEGRADED_CONTINUE_WITH_EXPLICIT_STATUS",
+    "modelMemoryMayReplaceMissingProviderResults": false,
+    "normalizeBeforeSynthesis": true,
+    "deduplicateToCanonicalWork": true,
+    "rightsBeforeModelContext": true,
+    "postRetrievalEnrichment": [
+      "DOI_METADATA_RECONCILIATION",
+      "CITATION_GRAPH",
+      "CITATION_CONTEXT",
+      "SUPPORT_CONTRAST_INTEGRITY",
+      "OPEN_ACCESS_LOCATION"
+    ],
+    "librarianRunsAfterRetrieval": true,
+    "counterevidencePassRequired": true,
+    "snapshotBeforePublication": true
   }
 }
