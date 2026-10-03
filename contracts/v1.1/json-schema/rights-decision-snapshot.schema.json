@@ -301,6 +301,20 @@
           },
           "decision": {
             "const": "DENY"
+          },
+          "conditions": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "array",
+                "maxItems": 0
+              }
+            ]
+          },
+          "obligations": {
+            "maxItems": 0
           }
         }
       }
@@ -323,6 +337,20 @@
           },
           "decision": {
             "const": "DENY"
+          },
+          "conditions": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "array",
+                "maxItems": 0
+              }
+            ]
+          },
+          "obligations": {
+            "maxItems": 0
           }
         }
       }
