@@ -12,7 +12,19 @@ Gate IDs are stable and must be referenced by fixtures/CI.
 
 Minimum contract closure required before Database Spike 001 begins.
 
-### CORE_FREEZE_V1_1
+### REPOSITORY_GOVERNANCE
+
+Operational source-of-truth protection. This profile does not block Database Spike 001, but it must be enforced before the repository is treated as production-governed.
+
+### REPOSITORY_GOVERNANCE
+
+| Gate ID | Requirement | Current status | Evidence |
+|---|---|---|---|
+| REPO-GOV-001 | `main` requires PR-based changes and Contract validation before merge | PENDING | live GitHub branch reports `protected:false` |
+| REPO-GOV-002 | force-push and deletion of `main` are blocked | PENDING | repository rulesets currently empty |
+| REPO-GOV-003 | product/architecture/contract/validator ownership is declared in CODEOWNERS | PENDING | panel contract-closure PR |
+
+## CORE_FREEZE_V1_1
 
 Core Hebrew-Chinese scholarly data platform freeze.
 
@@ -41,6 +53,9 @@ Additional gate only when optional public BYOK AI is shipped.
 | CORE-SPIKE-009 | Public assertion evidence is assertion-level and public-safe | PASS | PublishedAssertion/Evidence contract |
 | CORE-SPIKE-010 | BYOK introduces no shared model credential dependency into core | PASS | ADR-005 / BYOK policy |
 | CORE-SPIKE-011 | Contract validation is executable from a fresh clone | PASS | GitHub Actions run 37071301356 checked out `7bc46c...`; validator + Core OpenAPI + Research Pro OpenAPI all succeeded |
+| CORE-SPIKE-012 | Passage labels resolve through explicit ReferenceSystem and corpus pagination has an executable request contract | PENDING | panel contract-closure PR CI |
+| CORE-SPIKE-013 | Official TranslationDecision pins immutable adopted source basis and exact TranslationPolicyVersion | PENDING | panel contract-closure PR CI |
+| CORE-SPIKE-014 | Rights machine contract fails closed and typed condition/obligation negative fixtures pass | PENDING | panel contract-closure PR CI |
 
 Database Spike 001 may begin when all CORE-SPIKE gates are PASS. This does not declare v1.1 FROZEN.
 
@@ -48,25 +63,27 @@ Database Spike 001 may begin when all CORE-SPIKE gates are PASS. This does not d
 
 | Gate ID | Requirement |
 |---|---|
-| CORE-FZ-REF-001 | ReferenceAtom identity is tested against superscription/split-merge/edition-specific edge cases |
+| CORE-FZ-REF-001 | ReferenceAtom identity and PassageLocator resolution are tested against superscription/split-merge/alternate-versification edge cases |
 | CORE-FZ-TEXT-001 | Ketiv/Qere fixture uses WRITTEN/READ streams and alignment stream pinning |
 | CORE-FZ-CORPUS-001 | OSHB plus structurally different MACULA/BHSA layer coexist without forced phrase/clause identity |
 | CORE-FZ-TRANS-001 | FHL/provider distribution is distinct from work/edition/expression identity |
 | CORE-FZ-ALIGN-001 | Hebrew-Chinese many-to-many alignment fixture passes |
 | CORE-FZ-TC-001 | Grouped apparatus reading retains raw apparatus, witness uncertainty, siglum source context, and exact locus |
-| CORE-FZ-RIGHTS-001 | Conflicting rights + default deny + typed excerpt obligation fixtures pass |
-| CORE-FZ-RELEASE-001 | Real database publication is atomic; partial failure cannot move production pointer |
+| CORE-FZ-RIGHTS-001 | Conflicting rights + default/unknown restrictive deny + typed conditions/obligations fixtures pass |
+| CORE-FZ-RELEASE-001 | Real database publication provides visibility atomicity; partial failure cannot move production pointer |
 | CORE-FZ-RLS-001 | RLS/grants/views/RPC negative tests pass |
-| CORE-FZ-QUERY-001 | Real deterministic query compiler reproduces fixture results with stable pagination |
+| CORE-FZ-QUERY-001 | Real deterministic query compiler reproduces fixture results with stable cursor pagination and explicit page/total count semantics |
 | CORE-FZ-VOCAB-001 | Active docs/vocabulary/schema enum drift check passes |
 | CORE-FZ-API-001 | Core OpenAPI validates and generated/client compatibility smoke test passes |
+| CORE-FZ-EVIDENCE-001 | CitationLocator is typed; public excerpts require rights snapshots; immutable evidence requires content hash |
+| CORE-FZ-HASH-001 | Publishable subtype content-hash canonical projections have versioned golden vectors |
 
 ## RESEARCH_PRO_EXTENSION_V1_1
 
 | Gate ID | Requirement |
 |---|---|
 | PRO-FZ-001 | DiscoveryRecord can resolve to canonical Work without duplicate identity |
-| PRO-FZ-002 | ResearchIssue/ResearchPosition are versioned and historical releases never dereference mutable current rows |
+| PRO-FZ-002 | ResearchIssue/ResearchPosition are versioned, PositionVersion pins exact IssueVersion framing, and historical releases never dereference mutable current rows |
 | PRO-FZ-003 | ResearchTarget registry supports passage/book/lexeme/construction target identities with typed bridges |
 | PRO-FZ-004 | LiteratureSnapshot records provider/query/version/coverage audit data |
 | PRO-FZ-005 | Commentary and LiteratureReview reuse PublishedAssertion -> PublishedEvidenceItem semantics |
