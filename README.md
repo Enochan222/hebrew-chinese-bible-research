@@ -4,11 +4,19 @@ Research-grade Hebrew Bible and Chinese translation **data product and research 
 
 ## Current project status
 
-**Architecture contract closure / pre-database-spike stage.**
+**Core contract closure complete for Database Spike 001; full v1.1 product freeze still pending.**
 
 Do not implement the superseded v1 database contract.
 
 The active architecture is the amended **v1.1 candidate**, which is not yet frozen.
+
+## Canonical project intent
+
+Read first:
+
+- `PROJECT_CHARTER.md`
+
+This is the canonical product-intent and requirements document. Architecture and machine contracts implement it; they do not redefine the product goal.
 
 ## Product definition
 
