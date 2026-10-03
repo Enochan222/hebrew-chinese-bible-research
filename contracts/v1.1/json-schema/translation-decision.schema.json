@@ -24,7 +24,8 @@
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "minLength": 1
     },
     "ambiguityStrategy": {
       "type": [
@@ -49,7 +50,8 @@
             "pattern": "^[A-Za-z0-9_-]{1,64}$"
           },
           "rendering": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
           "status": {
             "enum": [
@@ -84,7 +86,7 @@
     },
     "targetLanguageTag": {
       "type": "string",
-      "minLength": 2
+      "pattern": "^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$"
     }
   }
 }
