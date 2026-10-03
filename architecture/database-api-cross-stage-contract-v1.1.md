@@ -2446,6 +2446,15 @@ Fields:
 
 Every official project TranslationDecision must pin exactly which textual state was translated and which project translation policy version governed the target-language decision.
 
+Cross-object invariants enforced by the database/compiler:
+
+- the TranslationDecision target-language tag must equal the pinned TranslationPolicyVersion target-language tag;
+- the TranslationSourceBasis reference span must cover the decision's passage locus;
+- every source-basis segment must belong to the pinned source text stream;
+- apparatus readings adopted by a source basis must belong to a locus compatible with that passage/source context.
+
+TranslationSourceBasis is passage/decision-level immutable research data. It is normally sealed transitively inside the published TRANSLATION/PUBLISHED_ANALYSIS aggregate rather than emitted as one top-level ResearchRelease manifest component per passage. TranslationPolicyVersion remains suitable as a release component because it is a shared policy dependency.
+
 `decision_payload` must validate against a versioned schema. It is not an untyped escape hatch.
 
 Typed junction tables must link:
@@ -2875,6 +2884,8 @@ Fields:
 
 
 A ResearchPositionVersion belongs to the exact ResearchIssueVersion framing under which it was formulated. Release assembly must reject an issue/position graph that mixes incompatible historical versions.
+
+The stable `research_issue_id` recorded on the position version must equal the parent ResearchIssue identity of `research_issue_version_id`. Redundant identity is retained for efficient grouping, but mismatch is an invalid database state.
 
 ## 39.6 `position_claim_links`
 
