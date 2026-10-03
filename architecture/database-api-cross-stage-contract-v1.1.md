@@ -2592,6 +2592,23 @@ Fields:
 
 Provider capability names are controlled by canonical vocabulary.
 
+Initial implementation must register OpenAlex, Semantic Scholar, CORE, Crossref, and Scite. Capability declarations are runtime/adapter truth and may be narrower than the provider registry expectation.
+
+## 38.1A `scholarly_discovery_provider_adapters`
+
+Fields:
+
+- `scholarly_discovery_provider_adapter_id uuid PK`
+- `scholarly_discovery_provider_id uuid FK`
+- `adapter_version text`
+- `transport_mode text`
+- `capabilities jsonb`
+- `configuration_profile_ref text nullable`
+- `active boolean`
+- `metadata jsonb`
+
+Raw provider credentials are forbidden in this table. DIRECT_API and MCP are transport modes over the same provider/domain semantics.
+
 ## 38.2 `external_discovery_records`
 
 External records are staging/discovery objects and must not automatically become canonical works.
@@ -2600,6 +2617,7 @@ Fields:
 
 - `external_discovery_record_id uuid PK`
 - `scholarly_discovery_provider_id uuid FK`
+- `provider_request_id uuid FK`
 - `provider_record_id text`
 - `title_raw text nullable`
 - `authors_raw jsonb nullable`
@@ -2839,14 +2857,21 @@ Fields:
 - `literature_search_provider_request_id uuid PK`
 - `literature_search_run_id uuid FK`
 - `scholarly_discovery_provider_id uuid FK`
+- `scholarly_discovery_provider_adapter_id uuid FK`
+- `transport_mode text`
+- `literature_search_query_id uuid nullable FK`
 - `provider_dataset_version text nullable`
 - `provider_index_version text nullable`
 - `adapter_version text`
 - `provider_query_syntax_version text nullable`
+- `query_text text`
 - `sort_ranking_mode text nullable`
 - `request_cursor text nullable`
 - `requested_limit integer nullable`
 - `raw_response_hash text nullable`
+- `returned_count integer nullable`
+- `request_status text`
+- `error_class text nullable`
 - `executed_at timestamptz`
 
 ## 40.3 `literature_search_queries`
@@ -2860,8 +2885,35 @@ Fields:
 - `query_type text`
 - `generated_by text`
 - `query_order integer`
-- `ai_expansion_model text nullable`
+- `research_model_run_id uuid nullable FK`
+- `ai_expansion_model text nullable` (compatibility/display field; provenance authority is `research_model_run_id`)
 - `ai_expansion_prompt_version text nullable`
+
+## 40.3A `research_model_runs`
+
+Records model-assisted private authoring operations. It is provenance, not a credential store.
+
+Fields:
+
+- `research_model_run_id uuid PK`
+- `task_type text`
+- `model_provider text`
+- `model_id text`
+- `host_environment text`
+- `prompt_version text`
+- `input_hash text`
+- `output_hash text nullable`
+- `provenance_activity_id uuid nullable FK`
+- `run_status text`
+- `started_at timestamptz`
+- `completed_at timestamptz nullable`
+- `review_status text nullable`
+
+Allowed tasks include query expansion/normalization, search-strategy drafting, result triage, relevance classification, bibliographic-resolution suggestion, counterevidence query generation, candidate claim extraction, issue/position clustering, scholarly-dependency suggestion, synthesis drafting, and literature-review drafting.
+
+The model provider is deliberately open. GPT in ChatGPT/Codex, Gemini, Claude, local models, or future approved models must fit this same contract.
+
+No model credential is stored here.
 
 ## 40.4 `literature_inclusions`
 
@@ -2913,6 +2965,10 @@ Fields:
 Literature-review prose is derivative rendering. Substantive public claims reuse the same PublishedAssertion -> PublishedEvidenceItem graph as passage analysis and commentary.
 
 Search history is auditable. Exact external-provider result reproduction is claimed only where provider/version behavior makes that defensible.
+
+### Multi-provider discovery compiler invariant
+
+Database/research compilation must support the initial provider ensemble OpenAlex + Semantic Scholar + CORE + Crossref + Scite through the provider-adapter layer. A LiteratureSnapshot records providers queried, skipped, unavailable, or rate-limited. Model-assisted query expansion/synthesis is executed through `research_model_runs` and must not be hard-wired to Gemini.
 
 ---
 
