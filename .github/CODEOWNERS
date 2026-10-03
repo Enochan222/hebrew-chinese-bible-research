@@ -1,0 +1,9 @@
+# Canonical product/architecture/contract truth
+/PROJECT_CHARTER.md @Enochan222
+/architecture/ @Enochan222
+/contracts/ @Enochan222
+/scripts/validate_contracts.py @Enochan222
+/.github/workflows/ @Enochan222
+
+# Default ownership
+* @Enochan222
