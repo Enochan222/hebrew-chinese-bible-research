@@ -61,7 +61,8 @@ POSITIVE = [
  ("contracts/v1.1/json-schema/discovery-record.schema.json","contracts/v1.1/fixtures/discovery-record.json"),
  ("contracts/v1.1/json-schema/experience-capabilities.schema.json","contracts/v1.1/fixtures/experience-capabilities.json"),
  ("contracts/v1.1/json-schema/product-entitlement.schema.json","contracts/v1.1/fixtures/product-entitlement.json"),
- ("contracts/v1.1/json-schema/passage-locator.schema.json","contracts/v1.1/fixtures/passage-locator-label.json"),
+ ("contracts/v1.1/json-schema/research-model-run.schema.json","contracts/v1.1/fixtures/research-model-run.json"),
+ ("contracts/v1.1/json-schema/scholarly-provider-request.schema.json","contracts/v1.1/fixtures/scholarly-provider-request.json"), ("contracts/v1.1/json-schema/passage-locator.schema.json","contracts/v1.1/fixtures/passage-locator-label.json"),
  ("contracts/v1.1/json-schema/passage-request.schema.json","contracts/v1.1/fixtures/passage-request.json"),
  ("contracts/v1.1/json-schema/passage-core.schema.json","contracts/v1.1/fixtures/passage-core.json"),
  ("contracts/v1.1/json-schema/corpus-query-execution-request.schema.json","contracts/v1.1/fixtures/corpus-query-execution-request.json"),
@@ -69,20 +70,19 @@ POSITIVE = [
  ("contracts/v1.1/json-schema/translation-source-basis.schema.json","contracts/v1.1/fixtures/translation-source-basis.json"),
  ("contracts/v1.1/json-schema/translation-policy-version.schema.json","contracts/v1.1/fixtures/translation-policy-version.json"),
  ("contracts/v1.1/json-schema/rights-decision-snapshot.schema.json","contracts/v1.1/fixtures/rights-decision-conditional.json"),
- ("contracts/v1.1/json-schema/scholarly-provider-request.schema.json","contracts/v1.1/fixtures/scholarly-provider-request.json"),
- ("contracts/v1.1/json-schema/research-model-run.schema.json","contracts/v1.1/fixtures/research-model-run.json"),
+
 ]
 
 NEG_SCHEMA = [
  ("contracts/v1.1/json-schema/corpus-query.schema.json","contracts/v1.1/negative-fixtures/corpus-query-empty-bind.json"),
- ("contracts/v1.1/json-schema/rights-decision-snapshot.schema.json","contracts/v1.1/negative-fixtures/rights-default-deny-with-winner.json"),
- ("contracts/v1.1/json-schema/rights-decision-snapshot.schema.json","contracts/v1.1/negative-fixtures/rights-unknown-restrictive-allow.json"),
+ ("contracts/v1.1/json-schema/rights-decision-snapshot.schema.json","contracts/v1.1/negative-fixtures/rights-default-deny-with-winner.json"), ("contracts/v1.1/json-schema/rights-decision-snapshot.schema.json","contracts/v1.1/negative-fixtures/rights-unknown-restrictive-allow.json"),
  ("contracts/v1.1/json-schema/rights-decision-snapshot.schema.json","contracts/v1.1/negative-fixtures/rights-conditional-empty.json"),
  ("contracts/v1.1/json-schema/rights-decision-snapshot.schema.json","contracts/v1.1/negative-fixtures/rights-max-excerpt-missing-unit.json"),
  ("contracts/v1.1/json-schema/rights-decision-snapshot.schema.json","contracts/v1.1/negative-fixtures/rights-unregistered-condition.json"),
  ("contracts/v1.1/json-schema/published-evidence-item.schema.json","contracts/v1.1/negative-fixtures/published-evidence-excerpt-without-rights.json"),
  ("contracts/v1.1/json-schema/published-evidence-item.schema.json","contracts/v1.1/negative-fixtures/published-evidence-immutable-without-hash.json"),
  ("contracts/v1.1/json-schema/discovery-record.schema.json","contracts/v1.1/negative-fixtures/discovery-persisted-without-rights.json"),
+
 ]
 
 UUID = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$")
@@ -163,9 +163,12 @@ def experience_semantic(d: dict) -> list[str]:
     return out
 
 def rights_semantic(d: dict) -> list[str]:
-    if d.get("decisionBasis")=="RULE" and not d.get("winningRuleIds"): return ["RULE without winner"]
-    if d.get("decisionBasis")=="DEFAULT_DENY" and (d.get("winningRuleIds") or d.get("decision")!="DENY"): return ["bad DEFAULT_DENY"]
-    return []
+    out=[]
+    if d.get("decisionBasis")=="RULE" and not d.get("winningRuleIds"): out.append("RULE without winner")
+    if d.get("decisionBasis")=="DEFAULT_DENY" and (d.get("winningRuleIds") or d.get("decision")!="DENY"): out.append("bad DEFAULT_DENY")
+    if d.get("decisionBasis")=="UNKNOWN_RESTRICTIVE" and (d.get("winningRuleIds") or d.get("decision")!="DENY"): out.append("bad UNKNOWN_RESTRICTIVE")
+    if d.get("decision")=="CONDITIONAL" and not (d.get("conditions") or d.get("obligations")): out.append("empty CONDITIONAL")
+    return out
 
 def validate_schema_documents():
     for path in (ROOT/"contracts/v1.1/json-schema").glob("*.json"):
@@ -260,25 +263,27 @@ def vocab_drift():
         value=branch.get("properties",{}).get("conditionSchemaId",{}).get("const")
         if value: condition_ids.add(value)
     if set(v["rightsConditionSchemaId"])!=condition_ids: fail("rightsConditionSchemaId drift")
+    rm=load("contracts/v1.1/json-schema/research-model-run.schema.json")
+    if set(v["researchModelTaskType"])!=set(rm["properties"]["taskType"]["enum"]): fail("researchModelTaskType drift")
+    if set(v["researchModelRunStatus"])!=set(rm["properties"]["status"]["enum"]): fail("researchModelRunStatus drift")
     spr=load("contracts/v1.1/json-schema/scholarly-provider-request.schema.json")
     if set(v["scholarlyDiscoveryProviderKey"])!=set(spr["properties"]["providerKey"]["enum"]): fail("scholarlyDiscoveryProviderKey drift")
     if set(v["scholarlyDiscoveryTransportMode"])!=set(spr["properties"]["transportMode"]["enum"]): fail("scholarlyDiscoveryTransportMode drift")
     if set(v["scholarlyProviderRequestStatus"])!=set(spr["properties"]["status"]["enum"]): fail("scholarlyProviderRequestStatus drift")
-    rmr=load("contracts/v1.1/json-schema/research-model-run.schema.json")
-    if set(v["researchModelTaskType"])!=set(rmr["properties"]["taskType"]["enum"]): fail("researchModelTaskType drift")
-    if set(v["researchModelRunStatus"])!=set(rmr["properties"]["status"]["enum"]): fail("researchModelRunStatus drift")
-    registry=load("contracts/v1.1/scholarly-provider-registry.json")
-    registry_keys={x["providerKey"] for x in registry.get("providers",[])}
-    if registry_keys!=set(v["scholarlyDiscoveryProviderKey"]): fail("scholarly-provider-registry provider keys drift")
+    reg=load("contracts/v1.1/scholarly-provider-registry.json")
+    required={"OPENALEX","SEMANTIC_SCHOLAR","CORE","CROSSREF","SCITE"}
+    registered={p["providerKey"] for p in reg.get("providers",[]) if p.get("requiredInFirstImplementation")}
+    if registered!=required: fail(f"initial scholarly provider ensemble drift: {registered}")
     allowed_caps=set(v["scholarlyDiscoveryCapability"])
     allowed_transports=set(v["scholarlyDiscoveryTransportMode"])
-    for provider in registry.get("providers",[]):
+    for provider in reg.get("providers",[]):
         if not set(provider.get("expectedCapabilities",[])).issubset(allowed_caps): fail(f"provider registry unknown capabilities: {provider.get('providerKey')}")
         if not set(provider.get("transportModes",[])).issubset(allowed_transports): fail(f"provider registry unknown transport mode: {provider.get('providerKey')}")
+    if "GEMINI" in rm["properties"]["modelProvider"].get("enum",[]): fail("research model provider must not be Gemini-locked")
 
 def secret_scan():
-    assignment=re.compile(r"(?i)\b(GEMINI_API_KEY|GOOGLE_API_KEY|OPENAI_API_KEY|ANTHROPIC_API_KEY)\s*=\s*[\"']?([A-Za-z0-9_\-]{8,})")
-    literals=[re.compile(r"AIza[0-9A-Za-z_\-]{30,}"),re.compile(r"sk-[A-Za-z0-9_\-]{20,}")]
+    assignment=re.compile(r"(?i)\b(GEMINI_API_KEY|GOOGLE_API_KEY|OPENAI_API_KEY|ANTHROPIC_API_KEY|SCITE_API_KEY|CORE_API_KEY|SEMANTIC_SCHOLAR_API_KEY|OPENALEX_API_KEY)\s*=\s*[\"']?([A-Za-z0-9_\-]{8,})")
+    literals=[re.compile(r"AIza[0-9A-Za-z_\-]{30,}"),re.compile(r"sk-[A-Za-z0-9_\-]{20,}"),re.compile(r"scite_[A-Za-z0-9_\-]{20,}")]
     for p in ROOT.rglob("*"):
         if not p.is_file() or ".git" in p.parts: continue
         rel=p.relative_to(ROOT)
