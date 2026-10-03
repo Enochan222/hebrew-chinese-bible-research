@@ -2379,6 +2379,8 @@ Typed members:
 
 If an editorial emendation is used, the adopted reading and editorial rationale are explicit research data.
 
+For an editorial or composite emendation, `adopted_reading_text` is mandatory. A prose rationale without the actual adopted source reading is not reproducible.
+
 Translation-source-basis evidence links point to registered research objects and the compiler validates allowed evidence subtypes. They do not point to PublishedAssertion, because the source basis exists before publication.
 
 This object is immutable. A changed adopted reading creates a new basis object; v1.1 does not add a second mutable "current basis" hierarchy.
