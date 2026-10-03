@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.11**
+State Revision: **2026-10-04.12**
 
 ## Mandatory governance rule
 
@@ -192,4 +192,4 @@ Repository visibility remains public as observed state; this audit does not chan
 
 ## Latest push intent
 
-Database Spike 001 run `37143374434` progressed through the Serving-isolation migration until the final Authoring-RLS bootstrap block, where another anonymous dollar quote had serialized as a single `$`. That block now uses a named delimiter. Independent rights review also found that the published-excerpt trigger checked decision/operation/purpose/audience but not whether the RightsDecisionSnapshot actually authorized the same evidence research object. The trigger now requires `subject_type = RESEARCH_OBJECT` and exact `subject_identifier = research_object_id`, with an explicit wrong-subject negative fixture. No permission is broadened.
+Database Spike 001 run `37143497384` is the first Serving-isolation run to pass both the full migration and controlled seed. The adversarial suite then stopped at the newly added wrong-subject rights test because its inserted anonymous PL/pgSQL block had serialized with single-dollar delimiters. That disposable test block now uses a named delimiter. The relational Serving projections, exact rights-subject check, catalog no-cross-plane assertions, RLS tests, publication rollback tests, and anon corpus-query test remain unchanged and require a fresh run.

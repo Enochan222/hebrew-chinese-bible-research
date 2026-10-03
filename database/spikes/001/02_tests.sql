@@ -212,7 +212,7 @@ INSERT INTO serving.rights_decision_snapshots(
   'abababababababababababababababababababababababababababababababab'
 );
 
-DO $
+DO $wrong_subject$
 DECLARE failed boolean := false;
 BEGIN
   BEGIN
@@ -229,7 +229,7 @@ BEGIN
   EXCEPTION WHEN raise_exception THEN failed := true;
   END;
   IF NOT failed THEN RAISE EXCEPTION 'rights snapshot for another subject must not publish excerpt'; END IF;
-END $;
+END $wrong_subject$;
 
 -- Immutable evidence requires a content hash.
 DO $$

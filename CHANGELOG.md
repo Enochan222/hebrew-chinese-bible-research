@@ -289,6 +289,17 @@ The block now uses a named delimiter.
 
 A separate rights-focused review found a real authorization gap independent of that syntax failure: the public-evidence trigger validated an ALLOW/CONDITIONAL snapshot's operation, purpose, and audience, but did not require the snapshot's subject to equal the published evidence object's research-object identity. The trigger now requires exact subject binding and the SQL suite contains a wrong-subject ALLOW snapshot that must be rejected.
 
+### First Serving-isolation migration + seed pass
+
+Database Spike run `37143497384`:
+- bootstrap: PASS;
+- full Serving-isolation migration: PASS;
+- controlled seed including Serving projections: PASS;
+- adversarial suite: reached the new wrong-subject rights test and stopped because that inserted test block had malformed single-dollar delimiters;
+- query plan: not reached.
+
+The disposable test block now uses a named PL/pgSQL delimiter. No schema, grant, RLS, or rights rule is weakened.
+
 ### Intended effect
 
 Database Spike 001 now has executable evidence rather than prose-only expectations. CI should expose relational assumptions that JSON Schema cannot prove and provide a repeatable base for correcting the active v1.1 contract before Core Freeze.
