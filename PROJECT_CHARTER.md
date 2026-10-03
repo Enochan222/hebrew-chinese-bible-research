@@ -576,3 +576,22 @@ Database implementation, RLS/grants, real corpus ingestion, query compilation, r
 Research Pro and public BYOK shipping retain their own freeze/acceptance gates.
 
 Do not deploy to Vercel until explicitly requested.
+
+
+# 17. Repository change governance
+
+Every repository push/PR must begin from the current canonical project context and must leave an explicit state/history trail.
+
+Required before change:
+
+- read `PROJECT_CHARTER.md`;
+- read `PROJECT_STATE.md`;
+- read `architecture/manifest.json`;
+- read the latest `CHANGELOG.md` entry.
+
+Required in every push/PR:
+
+- update `PROJECT_STATE.md` to the post-change state;
+- update `CHANGELOG.md` with what changed, why, intended effect, and validation.
+
+GitHub Actions must block a push/PR change set that omits either living-state update.
