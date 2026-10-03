@@ -129,6 +129,8 @@ Test:
 - MAX_EXCERPT without unit -> reject;
 - display permitted but persistence denied -> provider content is not copied into persistent public store;
 - permitted public excerpt without rights snapshot -> publication reject;
+- permitted public excerpt linked to a DENY snapshot, wrong operation, wrong audience/purpose, expired policy, or otherwise incompatible rights decision -> publication reject;
+- RightsDecisionSnapshot winning rule not among applicable rules -> reject;
 - IMMUTABLE_SNAPSHOT evidence without content hash -> publication reject.
 
 ## 5. Corpus-query attacks
