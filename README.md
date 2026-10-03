@@ -270,6 +270,26 @@ See:
 
 ## Mandatory repository governance
 
+`main` is protected by the active `Protect main` repository ruleset.
+
+Normal changes require:
+
+- a pull request;
+- synchronization with latest `main` when required;
+- `contracts` PASS;
+- `state-and-changelog` PASS;
+- resolved review conversations;
+- squash merge.
+
+No second-person approval is required by default, so collaborators can independently complete compliant PRs.
+
+Force pushes and deletion of `main` are blocked, linear history is required, and there are no bypass actors.
+
 Every push/PR must update both `PROJECT_STATE.md` and `CHANGELOG.md`.
 
-See `AGENTS.md` and `.github/workflows/project-governance.yml`.
+See:
+
+- `AGENTS.md`
+- `.github/workflows/project-governance.yml`
+- `architecture/repository-governance.md`
+- `architecture/reviews/2026-10-03-live-repository-governance-verification.md`

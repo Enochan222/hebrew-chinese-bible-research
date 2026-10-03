@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-03.5**
+State Revision: **2026-10-03.6**
 
 ## Mandatory governance rule
 
@@ -86,7 +86,7 @@ Deliberately deferred rather than added to the Core closure patch:
 - another BYOK architecture layer;
 - Research Pro provider-scale production normalization.
 
-Repository-admin branch protection remains the only unresolved repository-governance item in this closure and is tracked separately; source files cannot truthfully substitute for the live GitHub ruleset.
+Live repository governance is now enforced and independently verified. The active `Protect main` ruleset requires pull requests, strict `contracts` and `state-and-changelog` checks, linear history, review-thread resolution, and blocks deletion/force-push without any bypass actors.
 
 ## Current architecture state
 
@@ -107,8 +107,9 @@ Repository-admin branch protection remains the only unresolved repository-govern
 - Public evidence uses typed CitationLocator semantics; excerpts require rights snapshots and immutable evidence requires content hashes.
 - ResearchPositionVersion pins the exact ResearchIssueVersion framing used for that scholarly position.
 - Database Spike 001 is specified as an adversarial scholarly-integrity vertical slice, not a table-creation demo.
-- Repository-admin branch protection remains operationally pending; issue #1 tracks required PR/status-check/force-push/deletion rules.
-- `REPO-GOV-001/002` remain PENDING in the canonical freeze checklist; `REPO-GOV-003` is PASS via CODEOWNERS.
+- `main` is live-protected by active repository ruleset `Protect main` (ID `24409248`).
+- `REPO-GOV-001`, `REPO-GOV-002`, and `REPO-GOV-003` are PASS in the canonical freeze checklist.
+- Normal changes require PR + latest-main synchronization + `contracts` PASS + `state-and-changelog` PASS + resolved conversations + squash merge.
 - Panel contract-closure adjudication is recorded in `architecture/reviews/2026-10-03-panel-contract-closure.md` and registered as current validation authority.
 
 ## Current data/research boundaries
@@ -117,7 +118,7 @@ Repository-admin branch protection remains the only unresolved repository-govern
 - OpenAlex/Semantic Scholar/CORE/Crossref/Scite: external discovery/evidence providers.
 - PostgreSQL/Supabase-style relational storage: canonical structured database.
 - Object storage: permitted source assets/extractions.
-- GitHub: code/contracts/migrations/docs/tests, not copyrighted source corpora.
+- GitHub: code/contracts/migrations/docs/tests, not copyrighted source corpora. Current repository visibility is public and is recorded as observed state, not changed by this update.
 - Vercel/public app: stateless serving layer for compiled scholarship.
 
 ## Current non-negotiables
@@ -156,4 +157,4 @@ Repository-admin branch protection remains the only unresolved repository-govern
 
 ## Latest push intent
 
-This revision repairs the post-merge governance registry drift and the first follow-up patch's heading-placement defect discovered by independent self-review. The canonical freeze checklist now preserves the profile taxonomy and separately tracks `REPO-GOV-001/002 = PENDING` plus `REPO-GOV-003 = PASS`. Core Database Spike 001 remains permitted; full repository production governance does not.
+This revision synchronizes the repository's canonical governance documents with the newly enabled live GitHub `Protect main` ruleset. It verifies that PR-only updates, strict required checks, linear history, conversation resolution, squash-only merging, deletion protection, force-push protection, and CODEOWNERS are now operationally enforced. The repository-governance profile is therefore fully PASS. Repository visibility remains public and was not changed by this update.

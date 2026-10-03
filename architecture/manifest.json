@@ -39,7 +39,8 @@
     "architecture/reviews/2026-10-03-adversarial-critique-remediation.md",
     "architecture/reviews/2026-10-03-product-intent-coverage-audit.md",
     "architecture/database-spikes/001-scholarly-integrity-vertical-slice.md",
-    "architecture/reviews/2026-10-03-panel-contract-closure.md"
+    "architecture/reviews/2026-10-03-panel-contract-closure.md",
+    "architecture/reviews/2026-10-03-live-repository-governance-verification.md"
   ],
   "rules": [
     "PROJECT_CHARTER.md defines canonical product intent, fixed requirements, non-goals, and open decisions.",

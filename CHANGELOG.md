@@ -4,6 +4,54 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+## 2026-10-03 — Live repository protection enabled and verified
+
+### Push intent
+
+Synchronize repository governance documents with the live GitHub `Protect main` ruleset after repository-admin protection was enabled.
+
+### Why
+
+The repository previously documented branch protection as an unresolved operational gap:
+
+- `main protected = false`;
+- no repository ruleset;
+- required CI existed but did not prevent direct updates.
+
+Live GitHub state has now changed. Leaving `REPO-GOV-001/002`, PROJECT_STATE, issue #1, and repository-governance prose in PENDING state would make the repository's canonical governance record false.
+
+### What changed
+
+- verified live `main protected = true`;
+- verified active repository ruleset `Protect main` (ID `24409248`);
+- verified pull requests are mandatory with `0` required approvals;
+- verified unresolved review conversations block merge;
+- verified squash is the only allowed merge method;
+- verified required GitHub Actions checks are `contracts` and `state-and-changelog`;
+- verified strict required-status-check mode is enabled, requiring validation against latest `main`;
+- verified branch deletion and non-fast-forward/force-push updates are blocked;
+- verified linear history is required;
+- verified there are no bypass actors;
+- verified CODEOWNERS remains present;
+- recorded current repository visibility as public without changing it;
+- changed `REPO-GOV-001` and `REPO-GOV-002` from PENDING to PASS;
+- retained `REPO-GOV-003` as PASS;
+- replaced stale pending-state text in `architecture/repository-governance.md` and `PROJECT_STATE.md`;
+- added `architecture/reviews/2026-10-03-live-repository-governance-verification.md` as the auditable live-state record;
+- updated README/manifest to expose the verified governance state.
+
+### Intended effect
+
+The repository's canonical state now matches actual GitHub enforcement. Contributors can work independently without mandatory mutual approval, but ordinary changes cannot bypass pull requests, latest-main validation, required CI, conversation resolution, or squash-only protected-main history.
+
+### Validation
+
+- live GitHub ruleset API verified ruleset ID `24409248`, enforcement `active`, default-branch target, no bypass actors;
+- live branch API verified `main protected = true`;
+- latest `main` commit `7923a56e9bce4046363834071ba625c28db2980b` had successful `contracts` and `state-and-changelog` GitHub Actions checks before this governance-sync PR;
+- this PR must itself pass the same required checks before merge;
+- after merge, issue #1 should be closed as completed and main push checks re-verified.
+
 ## 2026-10-03 — Independent contract-closure panel
 
 ### Push intent
