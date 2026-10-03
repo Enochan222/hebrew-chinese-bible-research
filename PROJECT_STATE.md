@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.1**
+State Revision: **2026-10-04.2**
 
 ## Mandatory governance rule
 
@@ -94,6 +94,34 @@ Deliberately deferred rather than added to the Core closure patch:
 
 Live repository governance is now enforced and independently verified. The active `Protect main` ruleset requires pull requests, strict `contracts` and `state-and-changelog` checks, linear history, review-thread resolution, and blocks deletion/force-push without any bypass actors.
 
+## Latest live repository-governance audit
+
+Re-verified on 2026-10-04 against live GitHub repository metadata.
+
+Current audited main:
+
+- `3d2dc4d8f07b67f3be44f9fedc69a60acb775405`;
+- produced by merged PR #6 rather than a direct push;
+- PR #6 head passed `contracts` and `state-and-changelog`;
+- post-merge main also passed both workflows.
+
+The active `Protect main` ruleset remains:
+
+- active on the default branch;
+- PR-required;
+- required approvals = 0;
+- review-thread resolution required;
+- squash-only;
+- strict latest-main status checks required;
+- `contracts` and `state-and-changelog` required from GitHub Actions;
+- deletion and force-push blocked;
+- linear history required;
+- bypass actors empty.
+
+A recent protected-main history audit verified PR provenance for PR #4, #5, and #6. No bypass evidence was found.
+
+Repository visibility remains public as observed state; this audit does not change visibility.
+
 ## Current architecture state
 
 - `PROJECT_CHARTER.md` is canonical product intent.
@@ -164,4 +192,4 @@ Live repository governance is now enforced and independently verified. The activ
 
 ## Latest push intent
 
-This revision replaces the earlier static-code assumption about Sacred Studies provider wiring with a production-runtime-verified Pastoral Studio retrieval method. The private Research Compiler now explicitly preserves provider fan-out, specialized routing, degraded-mode fallback, post-retrieval enrichment, Librarian-after-retrieval sequencing, and then applies this project's stricter deduplication, rights, provenance, counterevidence, snapshot, review, and release controls.
+This revision refreshes repository-governance evidence after live re-verification of the active `Protect main` ruleset, latest required checks, repository merge settings, and recent protected-main PR history. It changes governance evidence only and does not change product architecture, scholarly method, repository visibility, approval-count policy, or merge semantics.
