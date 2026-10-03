@@ -31,8 +31,18 @@
       "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
     },
     "subjectType": {
-      "type": "string",
-      "minLength": 1
+      "enum": [
+        "SOURCE_ASSET",
+        "WORK",
+        "EDITION",
+        "TEXTUAL_WORK",
+        "TEXTUAL_EDITION",
+        "DIGITAL_EXPRESSION",
+        "PROVIDER_DISTRIBUTION",
+        "CORPUS_RELEASE",
+        "ANNOTATION_LAYER",
+        "RESEARCH_OBJECT"
+      ]
     },
     "subjectIdentifier": {
       "type": "string",
@@ -101,8 +111,7 @@
       "enum": [
         "ALLOW",
         "DENY",
-        "CONDITIONAL",
-        "UNKNOWN"
+        "CONDITIONAL"
       ]
     },
     "conditions": {
@@ -112,7 +121,8 @@
       ],
       "items": {
         "$ref": "./rights-condition.schema.json"
-      }
+      },
+      "uniqueItems": true
     },
     "resolverVersion": {
       "type": "string",
@@ -249,7 +259,8 @@
             }
           }
         ]
-      }
+      },
+      "uniqueItems": true
     }
   },
   "allOf": [
@@ -351,6 +362,36 @@
             }
           }
         ]
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "decision"
+        ],
+        "properties": {
+          "decision": {
+            "const": "ALLOW"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "conditions": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "array",
+                "maxItems": 0
+              }
+            ]
+          },
+          "obligations": {
+            "maxItems": 0
+          }
+        }
       }
     }
   ]
