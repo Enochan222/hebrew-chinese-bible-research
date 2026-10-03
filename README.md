@@ -97,30 +97,28 @@ In practical terms:
 - corpus pattern matching is not itself a translation conclusion;
 - canonical public analysis is release-pinned.
 
-## Active architecture documents
+## Architecture and contract authority
 
-Start here:
+Read in this order:
 
+- `PROJECT_CHARTER.md`
+- `architecture/manifest.json`
 - `architecture/product-platform-and-publication-model.md`
-- `architecture/integration-boundaries-mcp-api-database.md`
-- `architecture/dry-runs/001-1sam16-7-mcp-api-db.md`
-- `architecture/dry-runs/002-p0-contract-regression.md`
 - `architecture/database-api-cross-stage-contract-v1.1.md`
-- `architecture/site-build-staging-plan.md`
-- `architecture/research-pro-scholarly-intelligence.md`
-- `architecture/ui-mode-cross-stage-contract.md`
 - `contracts/v1.1/README.md`
-- `contracts/v1.1/vocabulary.json`
+- `contracts/v1.1/freeze-checklist.md`
+
+Other active specialised architecture:
+
+- `architecture/integration-boundaries-mcp-api-database.md`
 - `architecture/academic-evidence-policy.md`
 - `architecture/academic-storage-and-rag.md`
+- `architecture/research-pro-scholarly-intelligence.md`
+- `architecture/ui-mode-cross-stage-contract.md`
 - `architecture/security-trust-boundaries.md`
+- `architecture/byok-credential-handling.md`
 - `architecture/research-evaluation-and-benchmarks.md`
-- `docs/academic-source-taxonomy.md`
-- `docs/master-academic-source-inventory-and-gaps.md`
-
-Architecture authority manifest:
-
-- `architecture/manifest.json`
+- `architecture/site-build-staging-plan.md`
 
 Architecture decisions:
 
@@ -128,11 +126,14 @@ Architecture decisions:
 - `architecture/adr/002-compiled-research-product.md`
 - `architecture/adr/003-mcp-agent-boundary.md`
 - `architecture/adr/004-research-pro-experience-layer.md`
+- `architecture/adr/005-public-ai-byok-only.md`
 
-Superseded design history:
+Current validation records:
 
-- `architecture/database-api-cross-stage-contract-v1.md`
-- `architecture/source-taxonomy-storage-rag.md`
+- `architecture/dry-runs/002-p0-contract-regression.md`
+- `architecture/reviews/2026-10-03-adversarial-critique-remediation.md`
+
+Historical / superseded design records are listed in `architecture/manifest.json` and are not implementation authority.
 
 ## Study and Research experiences
 
