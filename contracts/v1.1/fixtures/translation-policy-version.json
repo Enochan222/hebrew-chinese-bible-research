@@ -3,7 +3,6 @@
   "translationPolicyVersionId": "62626262-6262-4626-8626-626262626262",
   "versionNumber": 1,
   "targetLanguageTag": "zh-Hant",
-  "targetLanguageProfileVersionId": null,
   "audienceProfile": "SCHOLARLY_GENERAL",
   "register": "FORMAL_WRITTEN_CHINESE",
   "ambiguityPolicy": "PRESERVE_WHERE_TEXTUALLY_MATERIAL",
