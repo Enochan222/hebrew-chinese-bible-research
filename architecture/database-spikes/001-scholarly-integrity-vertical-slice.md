@@ -237,3 +237,20 @@ Executable files:
 The CI bootstrap creates only the Supabase-compatible roles and `auth.uid()` shim needed by plain PostgreSQL. Those are not production schema objects to recreate in a real Supabase project.
 
 A green PostgreSQL job is implementation evidence, but it does not by itself prove Supabase Data API configuration, remote Auth/JWT behavior, advisor cleanliness, remote migration history, or production-scale performance.
+
+
+### 11.1 First independent implementation-review finding
+
+The initial one-database migration allowed several `serving.*` objects and the deterministic corpus-query function to reference `authoring.*` directly. That was relationally valid in one PostgreSQL instance but contradicted the stronger product invariant that Public Serving must continue when Authoring is unavailable.
+
+The spike therefore corrects the implementation boundary:
+
+- Serving has its own release-visible research-object registry;
+- Serving has its own reference-span projection;
+- Serving has release-pinned corpus node/feature/edge/mapping and semantic-set-member projections;
+- public deterministic corpus queries read only those Serving projections;
+- public evidence/release component FKs terminate in Serving-owned registries;
+- TranslationDecision aggregate hashing is a Publication Control operation, not a public Serving runtime operation;
+- CI inspects PostgreSQL catalog metadata to reject any Serving FK or Serving function that reaches back into Authoring.
+
+This is a contract clarification derived from implementation evidence, not merely an implementation refactor.

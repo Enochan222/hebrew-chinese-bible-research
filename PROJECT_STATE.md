@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.7**
+State Revision: **2026-10-04.8**
 
 ## Mandatory governance rule
 
@@ -192,4 +192,4 @@ Repository visibility remains public as observed state; this audit does not chan
 
 ## Latest push intent
 
-Database Spike 001 fourth clean run was stopped at the temporary assertion helper because its PL/pgSQL dollar quote was malformed as a single `$`. The helper now uses an explicit named dollar quote. This is a harness syntax correction only; migration, production grants, RLS, and domain constraints are unchanged. The independent architecture review remains open on the more important Serving-to-Authoring dependency and will be resolved before merge even if the SQL suite becomes green.
+Database Spike 001 has now produced its first load-bearing architecture correction. Head `01a8092c...` passed the complete PostgreSQL 17 harness (Database Spike run `37142607945`), but independent review rejected that green result as insufficient because the public Serving schema and deterministic corpus-query path still depended on private Authoring tables. The implementation now introduces Serving-owned research-object, reference-span, corpus, mapping, and semantic-set projections; removes Serving-to-Authoring foreign keys; moves TranslationDecision aggregate hashing into Publication Control; and adds PostgreSQL-catalog tests that reject any Serving FK/function referencing Authoring. The public `anon` corpus query must succeed while Authoring remains inaccessible. A fresh blank-database run is required after this architecture correction.

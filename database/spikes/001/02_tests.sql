@@ -243,8 +243,28 @@ SELECT spike_test.assert_true(
 
 -- Translation aggregate hash seals source-basis identity.
 SELECT spike_test.assert_true(
-  length(serving.translation_aggregate_hash('42200000-0000-4000-8000-000000000001')) = 64,
+  length(publication_control.translation_aggregate_hash('42200000-0000-4000-8000-000000000001')) = 64,
   'translation aggregate hash must be SHA-256 hex'
+);
+
+-- Serving must be physically separable: no Serving FK/function may depend on Authoring.
+SELECT spike_test.assert_true(
+  NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint c
+    JOIN pg_namespace n ON n.oid=c.connamespace
+    JOIN pg_class parent ON parent.oid=c.confrelid
+    JOIN pg_namespace pn ON pn.oid=parent.relnamespace
+    WHERE n.nspname='serving' AND c.contype='f' AND pn.nspname='authoring'
+  ),
+  'serving schema must not contain foreign keys to authoring schema'
+);
+SELECT spike_test.assert_true(
+  NOT EXISTS (
+    SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+    WHERE n.nspname='serving' AND pg_get_functiondef(p.oid) ILIKE '%authoring.%'
+  ),
+  'serving functions must not query authoring schema'
 );
 
 -- RLS: User A sees only User A private workspace data.
@@ -345,11 +365,18 @@ BEGIN
   IF NOT failed THEN RAISE EXCEPTION 'ResearchRelease mutation must fail'; END IF;
 END $$;
 
--- Public read path uses security-invoker view and exposes no Authoring tables.
+-- Public read path uses only Serving projections and no Authoring privileges.
 SET ROLE anon;
 SELECT spike_test.assert_true(
   (SELECT count(*) FROM serving.current_release WHERE channel_key='PRODUCTION') = 1,
   'anon public read must resolve current production release'
+);
+SELECT spike_test.assert_true(
+  (SELECT count(*) FROM serving.spike_corpus_query(
+    '47000000-0000-4000-8000-000000000001',
+    '34000000-0000-4000-8000-000000000001',NULL,50
+  )) = 1,
+  'anon corpus query must work entirely from Serving projections'
 );
 RESET ROLE;
 

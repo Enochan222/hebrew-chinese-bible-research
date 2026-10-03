@@ -36,6 +36,29 @@ The connected Supabase account currently exposes one inactive, generically named
 - added GitHub Actions PostgreSQL 17 integration workflow;
 - explicitly recorded that no remote Supabase project has been modified.
 
+### First complete green harness and independent rejection
+
+After the harness-syntax repairs, Database Spike run `37142607945` passed bootstrap, migration, seed, the full adversarial SQL suite, and the representative query-plan step. Required Contract validation and Project governance also passed on that head.
+
+Independent architecture review nevertheless rejected the green harness as sufficient evidence for merge. The reason was structural: several `serving.*` foreign keys and `serving.spike_corpus_query()` still depended directly on `authoring.*`. That is legal inside one PostgreSQL database but contradicts the established production invariant that Public Serving must remain functional when Authoring is unavailable.
+
+### Architecture correction from implementation evidence
+
+The implementation is changed so that publication materializes Serving-owned projections rather than leaving runtime referential dependence on Authoring:
+
+- Serving-owned research-object registry;
+- Serving-owned reference-span projection;
+- release-pinned corpus nodes, node features, relations, explicit cross-layer mappings, and semantic-set members;
+- release components and published evidence terminate FKs in the Serving registry;
+- public deterministic corpus query reads only Serving projections;
+- TranslationDecision aggregate hashing moves to Publication Control;
+- Workspace passage identity references the public-side reference projection;
+- PostgreSQL catalog tests reject any Serving FK whose target schema is Authoring;
+- PostgreSQL catalog tests reject any Serving function whose definition references `authoring.`;
+- an `anon` execution test proves the corpus query works without Authoring privileges.
+
+The active database/API contract and publication model are clarified accordingly.
+
 ### Intended effect
 
 Database Spike 001 now has executable evidence rather than prose-only expectations. CI should expose relational assumptions that JSON Schema cannot prove and provide a repeatable base for correcting the active v1.1 contract before Core Freeze.

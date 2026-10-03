@@ -807,6 +807,128 @@ AS $$
   )
 $$;
 
+CREATE OR REPLACE FUNCTION serving.valid_rights_conditions(value jsonb)
+RETURNS boolean
+LANGUAGE sql
+IMMUTABLE
+AS $
+  SELECT CASE
+    WHEN value IS NULL THEN true
+    WHEN jsonb_typeof(value) <> 'array' THEN false
+    ELSE NOT EXISTS (
+      SELECT 1 FROM jsonb_array_elements(value) e
+      WHERE e->>'conditionSchemaId' NOT IN (
+        'AUTHENTICATED_AUDIENCE','TERRITORY_ALLOWLIST','PURPOSE_ALLOWLIST',
+        'COMMERCIAL_CONTEXT_ALLOWLIST','PROVIDER_TERMS_VERSION'
+      )
+      OR COALESCE(e->>'conditionSchemaVersion','') = ''
+      OR COALESCE(e->>'evaluatorVersion','') = ''
+      OR jsonb_typeof(e->'payload') IS DISTINCT FROM 'object'
+    )
+  END
+$;
+
+CREATE OR REPLACE FUNCTION serving.valid_rights_obligations(value jsonb)
+RETURNS boolean
+LANGUAGE sql
+IMMUTABLE
+AS $
+  SELECT CASE
+    WHEN value IS NULL THEN true
+    WHEN jsonb_typeof(value) <> 'array' THEN false
+    ELSE NOT EXISTS (
+      SELECT 1 FROM jsonb_array_elements(value) e
+      WHERE
+        (e->>'type' = 'MAX_EXCERPT' AND (
+          NOT (e ? 'value') OR COALESCE(e->>'unit','') NOT IN ('WORD','UNICODE_CODEPOINT','GRAPHEME_CLUSTER','BYTE','PERCENT_OF_WORK')
+        ))
+        OR
+        (e->>'type' = 'RETENTION_LIMIT' AND (
+          NOT (e ? 'duration') OR e->>'unit' <> 'DAY'
+        ))
+        OR
+        (COALESCE(e->>'type','') NOT IN ('MAX_EXCERPT','RETENTION_LIMIT','ATTRIBUTION'))
+    )
+  END
+$;
+
+CREATE TABLE serving.research_objects (
+  research_object_id uuid PRIMARY KEY,
+  object_type text NOT NULL,
+  source_content_hash text,
+  published_at timestamptz NOT NULL
+);
+
+CREATE TABLE serving.reference_spans (
+  reference_span_id uuid PRIMARY KEY,
+  book_code text NOT NULL,
+  start_sequence integer NOT NULL,
+  end_sequence integer NOT NULL,
+  span_kind text NOT NULL,
+  CHECK (start_sequence <= end_sequence)
+);
+
+CREATE TABLE serving.corpus_nodes (
+  corpus_release_id uuid NOT NULL REFERENCES serving.research_objects(research_object_id),
+  analysis_node_id uuid NOT NULL,
+  annotation_layer_id uuid NOT NULL,
+  node_type text NOT NULL,
+  reference_span_id uuid NOT NULL REFERENCES serving.reference_spans(reference_span_id),
+  PRIMARY KEY (corpus_release_id, analysis_node_id)
+);
+
+CREATE TABLE serving.corpus_node_features (
+  corpus_release_id uuid NOT NULL,
+  analysis_node_id uuid NOT NULL,
+  feature_key text NOT NULL,
+  feature_value text NOT NULL,
+  PRIMARY KEY (corpus_release_id, analysis_node_id, feature_key, feature_value),
+  FOREIGN KEY (corpus_release_id, analysis_node_id)
+    REFERENCES serving.corpus_nodes(corpus_release_id, analysis_node_id) ON DELETE CASCADE
+);
+
+CREATE TABLE serving.corpus_edges (
+  corpus_release_id uuid NOT NULL,
+  from_node_id uuid NOT NULL,
+  to_node_id uuid NOT NULL,
+  relation_type text NOT NULL,
+  PRIMARY KEY (corpus_release_id, from_node_id, to_node_id, relation_type),
+  FOREIGN KEY (corpus_release_id, from_node_id)
+    REFERENCES serving.corpus_nodes(corpus_release_id, analysis_node_id),
+  FOREIGN KEY (corpus_release_id, to_node_id)
+    REFERENCES serving.corpus_nodes(corpus_release_id, analysis_node_id)
+);
+
+CREATE TABLE serving.corpus_node_mappings (
+  corpus_release_id uuid NOT NULL,
+  source_node_id uuid NOT NULL,
+  target_node_id uuid NOT NULL,
+  mapping_type text NOT NULL,
+  PRIMARY KEY (corpus_release_id, source_node_id, target_node_id, mapping_type),
+  FOREIGN KEY (corpus_release_id, source_node_id)
+    REFERENCES serving.corpus_nodes(corpus_release_id, analysis_node_id),
+  FOREIGN KEY (corpus_release_id, target_node_id)
+    REFERENCES serving.corpus_nodes(corpus_release_id, analysis_node_id)
+);
+
+CREATE TABLE serving.semantic_set_members (
+  semantic_set_version_id uuid NOT NULL REFERENCES serving.research_objects(research_object_id),
+  member_key text NOT NULL,
+  inclusion_type text NOT NULL,
+  PRIMARY KEY (semantic_set_version_id, member_key)
+);
+
+CREATE INDEX serving_corpus_nodes_release_span_idx
+  ON serving.corpus_nodes(corpus_release_id, reference_span_id);
+CREATE INDEX serving_corpus_features_lookup_idx
+  ON serving.corpus_node_features(feature_key, feature_value, corpus_release_id, analysis_node_id);
+CREATE INDEX serving_corpus_edges_lookup_idx
+  ON serving.corpus_edges(relation_type, corpus_release_id, to_node_id, from_node_id);
+CREATE INDEX serving_corpus_mappings_source_idx
+  ON serving.corpus_node_mappings(corpus_release_id, source_node_id, target_node_id);
+CREATE INDEX serving_semantic_members_lookup_idx
+  ON serving.semantic_set_members(semantic_set_version_id, member_key);
+
 CREATE TABLE serving.rights_decision_snapshots (
   rights_decision_snapshot_id uuid PRIMARY KEY,
   subject_type text NOT NULL,
@@ -825,8 +947,8 @@ CREATE TABLE serving.rights_decision_snapshots (
   evaluated_at timestamptz NOT NULL,
   decision_hash text NOT NULL,
   CHECK (winning_rule_ids <@ applicable_rule_ids),
-  CHECK (authoring.valid_rights_conditions(conditions_json)),
-  CHECK (authoring.valid_rights_obligations(obligations_json)),
+  CHECK (serving.valid_rights_conditions(conditions_json)),
+  CHECK (serving.valid_rights_obligations(obligations_json)),
   CHECK (
     (decision_basis = 'RULE' AND cardinality(winning_rule_ids) > 0)
     OR
@@ -856,7 +978,7 @@ CREATE TABLE authoring.research_builds (
 CREATE TABLE serving.research_releases (
   research_release_id uuid PRIMARY KEY,
   release_label text NOT NULL UNIQUE,
-  source_build_id uuid NOT NULL REFERENCES authoring.research_builds(research_build_id),
+  source_build_id uuid NOT NULL,
   published_at timestamptz NOT NULL,
   manifest_schema_version text NOT NULL,
   manifest_hash text NOT NULL,
@@ -869,7 +991,7 @@ CREATE TABLE serving.research_releases (
 CREATE TABLE serving.research_release_components (
   research_release_id uuid NOT NULL REFERENCES serving.research_releases(research_release_id),
   component_kind text NOT NULL,
-  component_research_object_id uuid NOT NULL REFERENCES authoring.research_objects(research_object_id),
+  component_research_object_id uuid NOT NULL REFERENCES serving.research_objects(research_object_id),
   component_version text NOT NULL,
   content_hash text NOT NULL,
   component_order integer NOT NULL,
@@ -924,7 +1046,7 @@ FOR EACH ROW EXECUTE FUNCTION serving.reject_immutable_update();
 CREATE TABLE serving.published_passage_analyses (
   published_analysis_id uuid PRIMARY KEY,
   research_release_id uuid NOT NULL REFERENCES serving.research_releases(research_release_id),
-  reference_span_id uuid NOT NULL REFERENCES authoring.reference_spans(reference_span_id),
+  reference_span_id uuid NOT NULL REFERENCES serving.reference_spans(reference_span_id),
   analysis_type text NOT NULL,
   analysis_schema_version text NOT NULL,
   rendered_payload jsonb,
@@ -941,7 +1063,7 @@ CREATE TABLE serving.published_evidence_packets (
 CREATE TABLE serving.published_evidence_items (
   published_evidence_item_id uuid PRIMARY KEY,
   published_evidence_packet_id uuid NOT NULL REFERENCES serving.published_evidence_packets(published_evidence_packet_id),
-  research_object_id uuid NOT NULL REFERENCES authoring.research_objects(research_object_id),
+  research_object_id uuid NOT NULL REFERENCES serving.research_objects(research_object_id),
   research_object_version text,
   evidence_content_hash text,
   evidence_class text NOT NULL,
@@ -1086,85 +1208,82 @@ AS $$
   WITH pinned_corpus AS (
     SELECT component_research_object_id AS corpus_release_id
     FROM serving.research_release_components
-    WHERE research_release_id = p_release_id
-      AND component_kind = 'CORPUS'
+    WHERE research_release_id = p_release_id AND component_kind = 'CORPUS'
   ),
   pinned_semantic_set AS (
-    SELECT 1
-    FROM serving.research_release_components
+    SELECT 1 FROM serving.research_release_components
     WHERE research_release_id = p_release_id
       AND component_kind = 'SEMANTIC_SET'
       AND component_research_object_id = p_semantic_set_version_id
   ),
   verb_nodes AS (
-    SELECT n.analysis_node_id, n.reference_span_id
-    FROM authoring.analysis_nodes n
-    JOIN authoring.annotation_layers al ON al.annotation_layer_id = n.annotation_layer_id
-    JOIN pinned_corpus pc ON pc.corpus_release_id = al.corpus_release_id
-    JOIN authoring.analysis_node_features f
-      ON f.analysis_node_id = n.analysis_node_id
-     AND f.feature_key = 'LEMMA'
-     AND f.feature_value = 'ראה'
+    SELECT n.corpus_release_id, n.analysis_node_id, n.reference_span_id
+    FROM serving.corpus_nodes n
+    JOIN pinned_corpus pc ON pc.corpus_release_id = n.corpus_release_id
+    JOIN serving.corpus_node_features f
+      ON f.corpus_release_id=n.corpus_release_id AND f.analysis_node_id=n.analysis_node_id
+     AND f.feature_key='LEMMA' AND f.feature_value='ראה'
   ),
   body_nodes AS (
-    SELECT n.analysis_node_id, n.reference_span_id
-    FROM authoring.analysis_nodes n
-    JOIN authoring.annotation_layers al ON al.annotation_layer_id = n.annotation_layer_id
-    JOIN pinned_corpus pc ON pc.corpus_release_id = al.corpus_release_id
-    JOIN authoring.analysis_node_features f
-      ON f.analysis_node_id = n.analysis_node_id
-     AND f.feature_key = 'LEMMA'
-    JOIN authoring.semantic_set_members sm
-      ON sm.semantic_set_version_id = p_semantic_set_version_id
-     AND sm.member_key = f.feature_value
+    SELECT n.corpus_release_id, n.analysis_node_id, n.reference_span_id
+    FROM serving.corpus_nodes n
+    JOIN pinned_corpus pc ON pc.corpus_release_id = n.corpus_release_id
+    JOIN serving.corpus_node_features f
+      ON f.corpus_release_id=n.corpus_release_id AND f.analysis_node_id=n.analysis_node_id
+     AND f.feature_key='LEMMA'
+    JOIN serving.semantic_set_members sm
+      ON sm.semantic_set_version_id=p_semantic_set_version_id AND sm.member_key=f.feature_value
     JOIN pinned_semantic_set ps ON true
   ),
   prefixed_body AS (
-    SELECT m.source_node_id AS body_node_id
-    FROM authoring.analysis_node_mappings m
-    JOIN authoring.analysis_edges e ON e.to_node_id = m.target_node_id
-    JOIN authoring.analysis_node_features pf
-      ON pf.analysis_node_id = e.from_node_id
-     AND pf.feature_key = 'SURFACE'
-     AND pf.feature_value = 'ל'
-    WHERE e.relation_type = 'PREFIX_MORPHEME_OF'
+    SELECT mp.corpus_release_id, mp.source_node_id AS body_node_id
+    FROM serving.corpus_node_mappings mp
+    JOIN serving.corpus_edges e
+      ON e.corpus_release_id=mp.corpus_release_id AND e.to_node_id=mp.target_node_id
+    JOIN serving.corpus_node_features pf
+      ON pf.corpus_release_id=e.corpus_release_id AND pf.analysis_node_id=e.from_node_id
+     AND pf.feature_key='SURFACE' AND pf.feature_value='ל'
+    WHERE e.relation_type='PREFIX_MORPHEME_OF'
   )
   SELECT DISTINCT v.reference_span_id
   FROM verb_nodes v
-  JOIN body_nodes b USING (reference_span_id)
-  JOIN prefixed_body pb ON pb.body_node_id = b.analysis_node_id
+  JOIN body_nodes b
+    ON b.corpus_release_id=v.corpus_release_id AND b.reference_span_id=v.reference_span_id
+  JOIN prefixed_body pb
+    ON pb.corpus_release_id=b.corpus_release_id AND pb.body_node_id=b.analysis_node_id
   WHERE p_after_reference_span_id IS NULL OR v.reference_span_id > p_after_reference_span_id
   ORDER BY v.reference_span_id
   LIMIT LEAST(GREATEST(p_limit,1),200)
 $$;
 
-CREATE OR REPLACE FUNCTION serving.translation_aggregate_hash(p_translation_decision_id uuid)
+CREATE OR REPLACE FUNCTION publication_control.translation_aggregate_hash(p_translation_decision_id uuid)
 RETURNS text
 LANGUAGE sql
 STABLE
+SECURITY DEFINER
+SET search_path = pg_catalog, authoring
 AS $$
-  SELECT encode(
-    digest(
-      concat_ws('|',
-        td.translation_decision_id::text,
-        td.translation_source_basis_id::text,
-        td.translation_policy_version_id::text,
-        td.target_language_tag,
-        COALESCE(td.selected_rendering,''),
-        tsb.content_hash,
-        tpv.content_hash
-      ),
-      'sha256'
-    ),
-    'hex'
-  )
+  SELECT encode(digest(concat_ws('|',
+    td.translation_decision_id::text,
+    td.translation_source_basis_id::text,
+    td.translation_policy_version_id::text,
+    td.target_language_tag,
+    COALESCE(td.selected_rendering,''),
+    tsb.content_hash,
+    tpv.content_hash
+  ),'sha256'),'hex')
   FROM authoring.translation_decisions td
   JOIN authoring.translation_source_bases tsb
-    ON tsb.translation_source_basis_id = td.translation_source_basis_id
+    ON tsb.translation_source_basis_id=td.translation_source_basis_id
   JOIN authoring.translation_policy_versions tpv
-    ON tpv.translation_policy_version_id = td.translation_policy_version_id
-  WHERE td.translation_decision_id = p_translation_decision_id
+    ON tpv.translation_policy_version_id=td.translation_policy_version_id
+  WHERE td.translation_decision_id=p_translation_decision_id
 $$;
+
+REVOKE ALL ON FUNCTION publication_control.translation_aggregate_hash(uuid)
+  FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION publication_control.translation_aggregate_hash(uuid)
+  TO publication_worker;
 
 CREATE TABLE workspace.research_projects (
   project_id uuid PRIMARY KEY,
@@ -1189,7 +1308,7 @@ CREATE TABLE workspace.user_translation_drafts (
   draft_id uuid PRIMARY KEY,
   owner_user_id uuid NOT NULL,
   project_id uuid NOT NULL REFERENCES workspace.research_projects(project_id) ON DELETE CASCADE,
-  reference_span_id uuid NOT NULL REFERENCES authoring.reference_spans(reference_span_id),
+  reference_span_id uuid NOT NULL REFERENCES serving.reference_spans(reference_span_id),
   rendering text NOT NULL,
   updated_at timestamptz NOT NULL DEFAULT now()
 );
@@ -1229,6 +1348,14 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON workspace.research_projects TO authentic
 GRANT SELECT, INSERT, UPDATE, DELETE ON workspace.saved_queries TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON workspace.user_translation_drafts TO authenticated;
 
+ALTER TABLE serving.research_objects ENABLE ROW LEVEL SECURITY;
+ALTER TABLE serving.reference_spans ENABLE ROW LEVEL SECURITY;
+ALTER TABLE serving.corpus_nodes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE serving.corpus_node_features ENABLE ROW LEVEL SECURITY;
+ALTER TABLE serving.corpus_edges ENABLE ROW LEVEL SECURITY;
+ALTER TABLE serving.corpus_node_mappings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE serving.semantic_set_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE serving.rights_decision_snapshots ENABLE ROW LEVEL SECURITY;
 ALTER TABLE serving.research_releases ENABLE ROW LEVEL SECURITY;
 ALTER TABLE serving.research_release_components ENABLE ROW LEVEL SECURITY;
 ALTER TABLE serving.release_channels ENABLE ROW LEVEL SECURITY;
@@ -1238,6 +1365,19 @@ ALTER TABLE serving.published_evidence_packets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE serving.published_evidence_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE serving.published_assertions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE serving.published_assertion_evidence ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY public_read_reference_spans ON serving.reference_spans
+FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY public_read_corpus_nodes ON serving.corpus_nodes
+FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY public_read_corpus_node_features ON serving.corpus_node_features
+FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY public_read_corpus_edges ON serving.corpus_edges
+FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY public_read_corpus_node_mappings ON serving.corpus_node_mappings
+FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY public_read_semantic_set_members ON serving.semantic_set_members
+FOR SELECT TO anon, authenticated USING (true);
 
 CREATE POLICY public_read_releases ON serving.research_releases
 FOR SELECT TO anon, authenticated USING (true);
@@ -1258,7 +1398,10 @@ FOR SELECT TO anon, authenticated USING (true);
 CREATE POLICY public_read_assertion_evidence ON serving.published_assertion_evidence
 FOR SELECT TO anon, authenticated USING (true);
 
-GRANT SELECT ON serving.research_releases, serving.research_release_components,
+GRANT SELECT ON serving.reference_spans,
+  serving.corpus_nodes, serving.corpus_node_features, serving.corpus_edges,
+  serving.corpus_node_mappings, serving.semantic_set_members,
+  serving.research_releases, serving.research_release_components,
   serving.release_channels, serving.release_channel_pointers,
   serving.published_passage_analyses, serving.published_evidence_packets,
   serving.published_evidence_items, serving.published_assertions,
@@ -1267,10 +1410,12 @@ TO anon, authenticated;
 
 GRANT EXECUTE ON FUNCTION serving.spike_corpus_query(uuid,uuid,uuid,integer)
 TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION serving.translation_aggregate_hash(uuid)
-TO anon, authenticated;
+REVOKE ALL ON FUNCTION serving.valid_rights_conditions(jsonb) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION serving.valid_rights_obligations(jsonb) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION serving.valid_rights_conditions(jsonb), serving.valid_rights_obligations(jsonb)
+TO publication_worker;
 
-DO $$
+DO $
 DECLARE
   r record;
 BEGIN

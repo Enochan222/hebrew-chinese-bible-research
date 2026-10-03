@@ -63,6 +63,8 @@ including:
 - public excerpt rights/citation/hash requirements;
 - user-workspace RLS isolation;
 - public denial of Authoring/Publication Control;
+- Serving-owned projection identity with no Serving FK/function dependency on Authoring;
+- anon deterministic corpus query over Serving-only projections;
 - release immutability;
 - publication visibility atomicity and rollback by channel pointer;
 - deterministic, release-pinned corpus-query result membership.
