@@ -1,0 +1,16 @@
+{
+  "publishedEvidenceItemId": "78787878-7878-4787-8787-787878787878",
+  "researchReleaseId": "11111111-1111-4111-8111-111111111111",
+  "publishedEvidencePacketId": "28282828-2828-4282-8282-282828282828",
+  "researchObjectId": "29292929-2929-4292-8292-292929292929",
+  "researchObjectVersion": "fixture-v1",
+  "evidenceContentHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "evidenceClass": "CORPUS_OBSERVATION",
+  "citationLocator": {
+    "locatorType": "BIBLICAL_REFERENCE",
+    "referenceSpanId": "17171717-1717-4171-8171-171717171717"
+  },
+  "permittedExcerpt": "fixture excerpt",
+  "rightsDecisionSnapshotId": null,
+  "evidenceStabilityClass": "IMMUTABLE_SNAPSHOT"
+}
