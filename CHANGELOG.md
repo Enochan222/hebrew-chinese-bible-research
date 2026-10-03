@@ -139,3 +139,37 @@ Database Spike 001 can now test a narrower, more explicit set of scholarly invar
 - the panel adjudication record is stored at `architecture/reviews/2026-10-03-panel-contract-closure.md`;
 - merge is allowed only when the latest PR Contract validation and Project governance runs are both successful; the PR checks are the authoritative final gate rather than a hard-coded “last run” ID in this changelog;
 - live GitHub branch protection remains unresolved and is tracked in issue #1 rather than falsely marked complete.
+
+
+## 2026-10-03 — Repository governance gate registry correction
+
+### Push intent
+
+Repair a post-merge source-of-truth inconsistency found by the final independent read-only review.
+
+### Why
+
+`architecture/repository-governance.md` explicitly required live branch-protection/ruleset state to be tracked as `REPO-GOV-001/002` in the canonical freeze checklist, but those gate rows were absent after PR #2 merged. The operational state itself was already documented correctly as pending, but the canonical gate registry did not contain the promised IDs.
+
+### What changed
+
+- restored `REPO-GOV-001` for PR + required Contract validation enforcement on `main`;
+- restored `REPO-GOV-002` for force-push/deletion protection;
+- recorded both as PENDING using live GitHub evidence: `main protected = false`, repository rulesets empty;
+- recorded `REPO-GOV-003` as PASS because `.github/CODEOWNERS` exists;
+- updated PROJECT_STATE to distinguish Database Spike readiness from repository production-governance readiness.
+
+### Intended effect
+
+The governance architecture, live repository state, and canonical freeze registry now say the same thing. Database Spike 001 remains unblocked, while branch protection is not falsely represented as complete.
+
+### Validation
+
+- PR #2 post-merge Contract validation push run `37101307953`: PASS;
+- PR #2 post-merge Project governance push run `37101307963`: PASS;
+- this follow-up PR must pass both latest PR checks before merge.
+
+
+### Independent self-review correction
+
+The first follow-up patch inserted the repository-governance gate table at an ambiguous Markdown anchor and accidentally displaced the `CORE_SPIKE_V1_1` profile heading. Independent PR diff review caught this before merge. The freeze checklist was rebuilt from current `main`, preserving the original Profiles taxonomy and adding a separate `## REPOSITORY_GOVERNANCE` gate section before the Core Spike gate table.

@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-03.3**
+State Revision: **2026-10-03.5**
 
 ## Mandatory governance rule
 
@@ -108,6 +108,7 @@ Repository-admin branch protection remains the only unresolved repository-govern
 - ResearchPositionVersion pins the exact ResearchIssueVersion framing used for that scholarly position.
 - Database Spike 001 is specified as an adversarial scholarly-integrity vertical slice, not a table-creation demo.
 - Repository-admin branch protection remains operationally pending; issue #1 tracks required PR/status-check/force-push/deletion rules.
+- `REPO-GOV-001/002` remain PENDING in the canonical freeze checklist; `REPO-GOV-003` is PASS via CODEOWNERS.
 - Panel contract-closure adjudication is recorded in `architecture/reviews/2026-10-03-panel-contract-closure.md` and registered as current validation authority.
 
 ## Current data/research boundaries
@@ -155,4 +156,4 @@ Repository-admin branch protection remains the only unresolved repository-govern
 
 ## Latest push intent
 
-This revision completes the independent pre-Database-Spike contract-closure panel, three adversarial review rounds, concurrency/lost-update reconciliation, and governance evidence cleanup. All CORE_SPIKE contract gates are PASS. Live GitHub branch-protection rules remain separately PENDING under REPOSITORY_GOVERNANCE because the connected GitHub tooling has no repository-admin write capability.
+This revision repairs the post-merge governance registry drift and the first follow-up patch's heading-placement defect discovered by independent self-review. The canonical freeze checklist now preserves the profile taxonomy and separately tracks `REPO-GOV-001/002 = PENDING` plus `REPO-GOV-003 = PASS`. Core Database Spike 001 remains permitted; full repository production governance does not.
