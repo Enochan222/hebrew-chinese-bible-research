@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.2**
+State Revision: **2026-10-04.5**
 
 ## Mandatory governance rule
 
@@ -146,6 +146,24 @@ Repository visibility remains public as observed state; this audit does not chan
 - Normal changes require PR + latest-main synchronization + `contracts` PASS + `state-and-changelog` PASS + resolved conversations + squash merge.
 - Panel contract-closure adjudication is recorded in `architecture/reviews/2026-10-03-panel-contract-closure.md` and registered as current validation authority.
 
+## Current pinned Hebrew corpus integration
+
+The first real-corpus integration for Database Spike 001 is now machine-pinned and reproducible:
+
+- OSHB/morphhb commit `3d15126fb1ef74867fc1434be1942e837932691f` is the initial text/word/lemma/morpheme/morphology baseline;
+- BHSA frozen dataset `2021`, fetched from repository commit `4db00e2157915495e1a4d3d57e41223df24775da`, is an independent framework-scoped phrase/clause/syntactic annotation source;
+- ETCBC bridging `2021`, commit `324598bb3f9cb3a36543e77ac61e4b0f77addf82`, is 2021-derived morphology-comparison evidence on BHSA word nodes and is not assumed to map the current OSHB pin's provider word IDs;
+- project SemanticSetVersion remains the authority for project-curated semantic categories such as BODY_PART;
+- upstream corpus data is downloaded on demand into gitignored `.local/corpora/`, never vendored as the repository's canonical data;
+- source exact Unicode is preserved; OSHB source identity is not NFC-normalized;
+- a conservative candidate crosswalk compiler may propose current-OSHB to BHSA word mappings only when reference/order/consonantal signatures agree; mismatch is `NEEDS_REVIEW`, and automatic canonical promotion is forbidden;
+- source pins never auto-advance and every upstream change requires reviewed PR, corpus diff, spike rerun and a new ResearchBuild/ResearchRelease;
+- OSHB public serving defaults to attribution-compatible use under its upstream terms;
+- BHSA public/commercial serving requires an explicit RightsDecision;
+- bridging-derived public serving is denied until its mixed upstream rights are reviewed.
+
+See `architecture/corpus-source-integration.md` and `contracts/v1.1/corpus-source-registry.json`.
+
 ## Current data/research boundaries
 
 - Google Drive: curated private scholarly source base, subject to operation-specific rights.
@@ -176,7 +194,7 @@ Repository visibility remains public as observed state; this audit does not chan
 
 - exact Chinese translation witness launch list;
 - final provider for each translation witness;
-- final production mix/releases of OSHB/MACULA/BHSA layers;
+- final production/public-serving mix of OSHB/MACULA/BHSA layers after Database Spike evidence and BHSA/MACULA rights review; the initial Spike pins and OSHB/BHSA/bridging roles are now fixed in the corpus source registry;
 - commercial provider licences/quotas for Scite/CORE/Semantic Scholar where applicable;
 - final Research Pro rollout sequence;
 - final entitlement/pricing model;
@@ -185,11 +203,11 @@ Repository visibility remains public as observed state; this audit does not chan
 ## Current implementation priority
 
 1. Preserve contract/governance consistency.
-2. Database Spike 001 for real PostgreSQL/Supabase schema and constraints.
+2. Database Spike 001 using the pinned OSHB/BHSA/ETCBC-bridging real-corpus inputs for PostgreSQL/Supabase constraints and cross-layer query validation.
 3. Implement provider adapters and ResearchModelAdapter interfaces.
 4. Validate one end-to-end literature-discovery build against a real Hebrew-Bible ResearchIssue.
 5. Continue later application stages without weakening publication/rights/reproducibility boundaries.
 
 ## Latest push intent
 
-This revision refreshes repository-governance evidence after live re-verification of the active `Protect main` ruleset, latest required checks, repository merge settings, and recent protected-main PR history. It changes governance evidence only and does not change product architecture, scholarly method, repository visibility, approval-count policy, or merge semantics.
+This revision continues the real-corpus integration review after the first `Corpus source smoke` run. The runner successfully installed Text-Fabric, fetched and SHA-verified all three pinned upstream sources, and exported 25 real OSHB words for 1 Samuel 16:7. The BHSA export then failed because BHSA `otext.tf` format initialization depends on transliterated and UTF-8 text/lexeme/trailer/qere features beyond the direct query subset. The source registry is therefore expanded only to the exact Text-Fabric format dependency closure, not to the whole BHSA repository. The smoke workflow remains mandatory for this PR and will be rerun rather than bypassed.

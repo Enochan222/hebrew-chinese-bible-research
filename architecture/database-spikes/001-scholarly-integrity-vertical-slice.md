@@ -34,6 +34,29 @@ Reference label + ReferenceSystem
 
 1 Samuel 16:7 remains the primary vertical case because existing fixtures and scholarly work already exercise the translation-analysis domain. It is not sufficient as the only adversarial case.
 
+## 1.1 Pinned real-corpus inputs
+
+Database Spike 001 now has concrete upstream inputs rather than placeholder corpus labels.
+
+Machine authority:
+
+- `contracts/v1.1/corpus-source-registry.json`.
+
+Initial pins:
+
+- OSHB/morphhb commit `3d15126fb1ef74867fc1434be1942e837932691f`;
+- BHSA frozen dataset version `2021`, fetched from repository commit `4db00e2157915495e1a4d3d57e41223df24775da`;
+- ETCBC bridging dataset `2021`, repository commit `324598bb3f9cb3a36543e77ac61e4b0f77addf82`.
+
+Bootstrap and provider-scoped export tooling:
+
+- `scripts/corpora/fetch_sources.py`;
+- `scripts/corpora/export_oshb_words.py`;
+- `scripts/corpora/export_bhsa_features.py`;
+- `scripts/corpora/build_candidate_crosswalk.py`.
+
+The spike must preserve the source roles defined in `architecture/corpus-source-integration.md`: OSHB is the initial morphology/morpheme baseline; BHSA phrase/clause/syntax stays framework-scoped; ETCBC bridging is derived comparison/mapping evidence; project SemanticSetVersion remains the authority for project-curated semantic classes.
+
 ## 2. Explicit non-goals
 
 This spike does not:
@@ -143,7 +166,9 @@ Prove:
 - exact total is reported only when defensible;
 - join expansion does not inflate construction/clause/reference counts;
 - query execution policy enforces `defaultPageSize <= maxPageSize <= hardResultCap`;
-- OSHB and a structurally different layer can coexist without universal phrase/clause identity.
+- pinned OSHB morphology/morpheme layers and pinned BHSA 2021 phrase/clause layers can coexist without universal phrase/clause identity;
+- a mixed OSHB + project SemanticSetVersion + BHSA clause query cannot execute without an explicit compatible cross-layer mapping;
+- candidate crosswalk output remains non-canonical until reviewed/imported through the typed cross-annotation mapping boundary; any unresolved verse must not be guessed into a match.
 
 ## 6. RLS / authorization attacks
 
@@ -197,6 +222,7 @@ The spike should produce:
 - real PostgreSQL migrations;
 - constraint/index definitions;
 - seed fixtures for the adversarial cases;
+- pinned source manifests / SHA-256 evidence for the OSHB, BHSA and bridging inputs used;
 - pgTAP or equivalent SQL-level tests where suitable;
 - RLS/grants/RPC tests;
 - publication-worker transaction/failure tests;

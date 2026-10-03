@@ -1,0 +1,182 @@
+{
+  "schemaVersion": "1.0",
+  "cacheRoot": ".local/corpora",
+  "sources": [
+    {
+      "sourceKey": "OSHB_MORPHHB",
+      "providerKey": "OPEN_SCRIPTURES",
+      "repository": "openscriptures/morphhb",
+      "pin": {
+        "commitSha": "3d15126fb1ef74867fc1434be1942e837932691f",
+        "datasetVersion": null
+      },
+      "acquisition": {
+        "method": "GITHUB_ARCHIVE_SUBSET",
+        "paths": [
+          "README.md",
+          "LICENSE.md",
+          "wlc/*.xml"
+        ],
+        "localSubdir": "oshb-morphhb"
+      },
+      "roles": [
+        "TEXT_EXPRESSION",
+        "WORD_IDENTITY",
+        "MORPHEME_SEGMENTATION",
+        "MORPHOLOGY",
+        "LEMMA"
+      ],
+      "licensing": {
+        "dataLicense": "CC-BY-4.0_FOR_LEMMA_AND_MORPHOLOGY; WLC_TEXT_PUBLIC_DOMAIN_PER_UPSTREAM",
+        "softwareLicense": null,
+        "commercialUse": "ALLOWED_SUBJECT_TO_TERMS",
+        "attributionRequired": true,
+        "publicServingDefault": "ALLOW_WITH_ATTRIBUTION"
+      },
+      "integration": {
+        "canonicality": "PROVIDER_SCOPED",
+        "annotationLayers": [
+          "ORTHOGRAPHIC_SEGMENTATION",
+          "MORPHEME_SEGMENTATION",
+          "MORPHOLOGY"
+        ],
+        "preserveSourceUnicode": true,
+        "normalizationRule": "PRESERVE_SOURCE_CODEPOINT_ORDER; DO_NOT_NFC_SOURCE_IDENTITY",
+        "automaticPromotionToCanonical": false
+      },
+      "updatePolicy": "PINNED_REVIEWED_PR_ONLY"
+    },
+    {
+      "sourceKey": "BHSA_2021",
+      "providerKey": "ETCBC",
+      "repository": "ETCBC/bhsa",
+      "pin": {
+        "commitSha": "4db00e2157915495e1a4d3d57e41223df24775da",
+        "datasetVersion": "2021"
+      },
+      "acquisition": {
+        "method": "RAW_FILES",
+        "paths": [
+          "LICENSE",
+          "README.md",
+          "tf/2021/book.tf",
+          "tf/2021/book@en.tf",
+          "tf/2021/chapter.tf",
+          "tf/2021/function.tf",
+          "tf/2021/g_cons.tf",
+          "tf/2021/g_cons_utf8.tf",
+          "tf/2021/g_lex.tf",
+          "tf/2021/g_lex_utf8.tf",
+          "tf/2021/g_word.tf",
+          "tf/2021/g_word_utf8.tf",
+          "tf/2021/gn.tf",
+          "tf/2021/language.tf",
+          "tf/2021/languageISO.tf",
+          "tf/2021/lex.tf",
+          "tf/2021/lex_utf8.tf",
+          "tf/2021/mother.tf",
+          "tf/2021/nu.tf",
+          "tf/2021/oslots.tf",
+          "tf/2021/otext.tf",
+          "tf/2021/otype.tf",
+          "tf/2021/pdp.tf",
+          "tf/2021/qere.tf",
+          "tf/2021/qere_trailer.tf",
+          "tf/2021/qere_trailer_utf8.tf",
+          "tf/2021/qere_utf8.tf",
+          "tf/2021/rela.tf",
+          "tf/2021/sp.tf",
+          "tf/2021/st.tf",
+          "tf/2021/trailer.tf",
+          "tf/2021/trailer_utf8.tf",
+          "tf/2021/typ.tf",
+          "tf/2021/verse.tf",
+          "tf/2021/voc_lex_utf8.tf",
+          "tf/2021/vs.tf",
+          "tf/2021/vt.tf"
+        ],
+        "localSubdir": "bhsa-2021"
+      },
+      "roles": [
+        "TEXT_EXPRESSION",
+        "LEXEME",
+        "MORPHOLOGY",
+        "PHRASE_STRUCTURE",
+        "CLAUSE_STRUCTURE",
+        "SYNTACTIC_FUNCTION",
+        "LINGUISTIC_RELATION",
+        "KETIV_QERE"
+      ],
+      "licensing": {
+        "dataLicense": "CC-BY-NC-4.0_PER_BHSA_DATA_DOCUMENTATION",
+        "softwareLicense": "MIT_FOR_REPOSITORY_SOFTWARE",
+        "commercialUse": "NONCOMMERCIAL_UNLESS_PERMISSION",
+        "attributionRequired": true,
+        "publicServingDefault": "CONDITIONAL_RIGHTS_REVIEW"
+      },
+      "integration": {
+        "canonicality": "PROVIDER_SCOPED",
+        "annotationLayers": [
+          "MORPHOLOGY",
+          "PHRASE_STRUCTURE",
+          "CLAUSE_STRUCTURE",
+          "DEPENDENCY"
+        ],
+        "preserveSourceUnicode": true,
+        "normalizationRule": "PRESERVE_SOURCE_CODEPOINT_ORDER; DERIVATIVES_REQUIRE_VERSIONED_NORMALIZATION_PROFILE",
+        "automaticPromotionToCanonical": false
+      },
+      "updatePolicy": "PINNED_REVIEWED_PR_ONLY"
+    },
+    {
+      "sourceKey": "ETCBC_BRIDGING_2021",
+      "providerKey": "ETCBC",
+      "repository": "ETCBC/bridging",
+      "pin": {
+        "commitSha": "324598bb3f9cb3a36543e77ac61e4b0f77addf82",
+        "datasetVersion": "2021"
+      },
+      "acquisition": {
+        "method": "RAW_FILES",
+        "paths": [
+          "README.md",
+          "LICENSE",
+          "tf/2021/osm.tf",
+          "tf/2021/osm_sf.tf"
+        ],
+        "localSubdir": "etcbc-bridging-2021"
+      },
+      "roles": [
+        "CROSS_ANNOTATION_MAPPING",
+        "MORPHOLOGY_COMPARISON"
+      ],
+      "licensing": {
+        "dataLicense": "DERIVED_FROM_BHSA_AND_OPEN_SCRIPTURES; APPLY_MOST_RESTRICTIVE_RELEVANT_UPSTREAM_RIGHTS_PENDING_REVIEW",
+        "softwareLicense": "MIT_FOR_REPOSITORY_SOFTWARE",
+        "commercialUse": "RIGHTS_REVIEW_REQUIRED",
+        "attributionRequired": true,
+        "publicServingDefault": "DENY_UNTIL_RIGHTS_REVIEW"
+      },
+      "integration": {
+        "canonicality": "DERIVED_MAPPING_EVIDENCE",
+        "annotationLayers": [
+          "MORPHOLOGY"
+        ],
+        "preserveSourceUnicode": true,
+        "normalizationRule": "DO_NOT_TREAT_BRIDGE_FEATURES_AS_CANONICAL_TEXT_IDENTITY",
+        "automaticPromotionToCanonical": false
+      },
+      "updatePolicy": "PINNED_REVIEWED_PR_ONLY"
+    }
+  ],
+  "usagePolicy": {
+    "morphologyDefaultSource": "OSHB_MORPHHB",
+    "morphemeDefaultSource": "OSHB_MORPHHB",
+    "phraseClauseDefaultSource": "BHSA_2021",
+    "crossLayerMappingEvidenceSource": "ETCBC_BRIDGING_2021",
+    "semanticSetAuthority": "PROJECT_SEMANTIC_SET_VERSION",
+    "disagreementPolicy": "PRESERVE_SEPARATE_ANNOTATION_LAYERS",
+    "bhsaPublicServing": "RIGHTS_DECISION_REQUIRED",
+    "upstreamUpdatePolicy": "NEVER_AUTO_ADVANCE"
+  }
+}
