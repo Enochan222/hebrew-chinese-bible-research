@@ -532,6 +532,8 @@ An official project rendering must pin:
 
 TranslationPolicyVersion aggregates existing TRANSLATION_POLICY / EDITORIAL_CONVENTION RuleVersions; it does not create a parallel rule engine.
 
+Source-basis objects are immutable passage-level dependencies reached through TranslationDecision and the published translation/analysis aggregate. They are not required to appear one-by-one as top-level ResearchRelease manifest components. The aggregate's canonical hash/projection must seal the exact decision -> source-basis identities it contains.
+
 ### 12.1 `translation_decisions`
 
 Records an editorial/research decision.
