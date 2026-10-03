@@ -147,7 +147,7 @@ def manifest_semantic(d: dict) -> list[str]:
     if any(x is None for x in orders): return ["missing componentOrder"]
     if len(orders)!=len(set(orders)): return ["duplicate componentOrder"]
     if sorted(orders)!=list(range(len(orders))): return ["componentOrder not contiguous"]
-    logical=[(x.get("componentKind"),x.get("researchObjectId"),x.get("componentVersion")) for x in d.get("components",[])]
+    logical=[(x.get("componentKind"),x.get("researchObjectId")) for x in d.get("components",[])]
     if len(logical)!=len(set(logical)): return ["duplicate logical release component"]
     return []
 
@@ -181,6 +181,9 @@ def rights_semantic(d: dict) -> list[str]:
     if d.get("decisionBasis")=="DEFAULT_DENY" and (d.get("winningRuleIds") or d.get("decision")!="DENY"): out.append("bad DEFAULT_DENY")
     if d.get("decisionBasis")=="UNKNOWN_RESTRICTIVE" and (d.get("winningRuleIds") or d.get("decision")!="DENY"): out.append("bad UNKNOWN_RESTRICTIVE")
     if d.get("decision")=="CONDITIONAL" and not (d.get("conditions") or d.get("obligations")): out.append("empty CONDITIONAL")
+    applicable=set(d.get("applicableRuleIds") or [])
+    winning=set(d.get("winningRuleIds") or [])
+    if not winning.issubset(applicable): out.append("winning rule not in applicable rules")
     return out
 
 def validate_schema_documents():
@@ -223,6 +226,8 @@ def validate_fixtures():
       ("contracts/v1.1/negative-fixtures/translation-decision-selected-mismatch.json",translation_semantic),
       ("contracts/v1.1/negative-fixtures/release-manifest-duplicate-order.json",manifest_semantic),
       ("contracts/v1.1/negative-fixtures/release-manifest-duplicate-logical-component.json",manifest_semantic),
+      ("contracts/v1.1/negative-fixtures/release-manifest-same-object-different-version.json",manifest_semantic),
+      ("contracts/v1.1/negative-fixtures/rights-winner-not-applicable.json",rights_semantic),
       ("contracts/v1.1/negative-fixtures/query-execution-policy-invalid-bounds.json",query_policy_semantic),
       ("contracts/v1.1/negative-fixtures/translation-policy-overlapping-rule-membership.json",translation_policy_semantic),
     ]
