@@ -2375,9 +2375,11 @@ Typed members:
 
 - `translation_source_basis_segments(translation_source_basis_id, text_segment_id, member_order)`
 - `translation_source_basis_apparatus_readings(translation_source_basis_id, apparatus_reading_id)`
-- `translation_source_basis_assertions(translation_source_basis_id, assertion_id)`
+- `translation_source_basis_evidence(translation_source_basis_id, research_object_id, stance, review_status)`
 
 If an editorial emendation is used, the adopted reading and editorial rationale are explicit research data.
+
+Translation-source-basis evidence links point to registered research objects and the compiler validates allowed evidence subtypes. They do not point to PublishedAssertion, because the source basis exists before publication.
 
 This object is immutable. A changed adopted reading creates a new basis object; v1.1 does not add a second mutable "current basis" hierarchy.
 
@@ -2402,7 +2404,6 @@ The project Chinese rendering requires a versioned editorial policy. Hebrew evid
 - `translation_policy_id uuid FK`
 - `version_number integer`
 - `target_language_tag text`
-- `target_language_profile_version_id uuid nullable`
 - `audience_profile text`
 - `register text`
 - `ambiguity_policy text`
