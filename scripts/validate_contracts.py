@@ -248,6 +248,16 @@ def vocab_drift():
     if set(v["releaseComponentKind"])!=set(rm["properties"]["components"]["items"]["properties"]["componentKind"]["enum"]): fail("releaseComponentKind drift")
     ri=load("contracts/v1.1/json-schema/research-issue-version.schema.json")
     if set(v["researchDebateStatus"])!=set(ri["properties"]["debateStatus"]["enum"]): fail("researchDebateStatus drift")
+    ts=load("contracts/v1.1/json-schema/translation-source-basis.schema.json")
+    if set(v["translationSourceBasisKind"])!=set(ts["properties"]["basisKind"]["enum"]): fail("translationSourceBasisKind drift")
+    pe=load("contracts/v1.1/json-schema/product-entitlement.schema.json")
+    if set(v["productEntitlementSourceType"])!=set(pe["properties"]["sourceType"]["enum"]): fail("productEntitlementSourceType drift")
+    rc=load("contracts/v1.1/json-schema/rights-condition.schema.json")
+    condition_ids=set()
+    for branch in rc.get("oneOf",[]):
+        value=branch.get("properties",{}).get("conditionSchemaId",{}).get("const")
+        if value: condition_ids.add(value)
+    if set(v["rightsConditionSchemaId"])!=condition_ids: fail("rightsConditionSchemaId drift")
 
 def secret_scan():
     assignment=re.compile(r"(?i)\b(GEMINI_API_KEY|GOOGLE_API_KEY|OPENAI_API_KEY|ANTHROPIC_API_KEY)\s*=\s*[\"']?([A-Za-z0-9_\-]{8,})")
