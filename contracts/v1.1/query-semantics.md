@@ -293,4 +293,6 @@ A cursor must pin:
 
 A cursor must not be reusable after the release/query hash changes.
 
+Execution is requested through `CorpusQueryExecutionRequestV1`, which wraps the immutable normalized query plus retrieval state (`cursor`, `pageSize`). Cursor/page state must never mutate query meaning.
+
 Counts must continue to distinguish match, construction, clause, verse/reference-label, and reference-span counts.
