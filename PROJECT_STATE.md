@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-03.1**
+State Revision: **2026-10-03.2**
 
 ## Mandatory governance rule
 
@@ -72,6 +72,14 @@ This project therefore preserves the **full intended research method** and compl
 - Multi-provider scholarly discovery is mandatory for Research Pro/database compilation.
 - Public runtime AI remains BYOK-only and Gemini-first, but private database-build ResearchModelAdapter is vendor-neutral.
 - Public passage rendering remains release-pinned and does not depend on live academic providers.
+- Human-readable passage labels resolve through an explicit ReferenceSystem to canonical ReferenceSpan identity.
+- Official project TranslationDecision pins an immutable TranslationSourceBasis and exact TranslationPolicyVersion.
+- Corpus query execution separates scholarly query meaning from cursor/page retrieval state and distinguishes exact from unavailable total counts.
+- RightsDecisionSnapshot is fail-closed: unresolved/unknown permission cannot surface as an UNKNOWN final outcome or ALLOW.
+- Public evidence uses typed CitationLocator semantics; excerpts require rights snapshots and immutable evidence requires content hashes.
+- ResearchPositionVersion pins the exact ResearchIssueVersion framing used for that scholarly position.
+- Database Spike 001 is specified as an adversarial scholarly-integrity vertical slice, not a table-creation demo.
+- Repository-admin branch protection remains operationally pending; issue #1 tracks required PR/status-check/force-push/deletion rules.
 
 ## Current data/research boundaries
 
@@ -118,4 +126,4 @@ This project therefore preserves the **full intended research method** and compl
 
 ## Latest push intent
 
-This revision establishes exact Sacred Studies-derived research-method parity and mandatory per-push repository state/changelog governance.
+This revision closes the remaining pre-Database-Spike reference, translation-source-basis, translation-policy, rights, evidence, pagination, Research Pro versioning, CI, and repository-governance contract gaps after independent panel review and adversarial re-review.
