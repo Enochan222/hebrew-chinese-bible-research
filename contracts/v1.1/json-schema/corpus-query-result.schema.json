@@ -116,5 +116,46 @@
     "totalCountExact": {
       "type": "boolean"
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "totalCountExact"
+        ],
+        "properties": {
+          "totalCountExact": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "totalMatchCount": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "totalCountExact"
+        ],
+        "properties": {
+          "totalCountExact": {
+            "const": false
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "totalMatchCount": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ]
 }
