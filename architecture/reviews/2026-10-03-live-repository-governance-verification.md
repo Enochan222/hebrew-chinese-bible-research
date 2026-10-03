@@ -109,9 +109,9 @@ Therefore a pull request must be tested against the latest protected-branch stat
 
 `do_not_enforce_on_create = false`.
 
-## Latest main validation evidence
+## Initial verification evidence
 
-At verification time, latest `main` was:
+At the initial verification time, `main` was:
 
 - `7923a56e9bce4046363834071ba625c28db2980b`.
 
