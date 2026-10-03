@@ -811,7 +811,7 @@ CREATE OR REPLACE FUNCTION serving.valid_rights_conditions(value jsonb)
 RETURNS boolean
 LANGUAGE sql
 IMMUTABLE
-AS $
+AS $rights_conditions$
   SELECT CASE
     WHEN value IS NULL THEN true
     WHEN jsonb_typeof(value) <> 'array' THEN false
@@ -826,13 +826,13 @@ AS $
       OR jsonb_typeof(e->'payload') IS DISTINCT FROM 'object'
     )
   END
-$;
+$rights_conditions$;
 
 CREATE OR REPLACE FUNCTION serving.valid_rights_obligations(value jsonb)
 RETURNS boolean
 LANGUAGE sql
 IMMUTABLE
-AS $
+AS $rights_obligations$
   SELECT CASE
     WHEN value IS NULL THEN true
     WHEN jsonb_typeof(value) <> 'array' THEN false
@@ -850,7 +850,7 @@ AS $
         (COALESCE(e->>'type','') NOT IN ('MAX_EXCERPT','RETENTION_LIMIT','ATTRIBUTION'))
     )
   END
-$;
+$rights_obligations$;
 
 CREATE TABLE serving.research_objects (
   research_object_id uuid PRIMARY KEY,

@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.8**
+State Revision: **2026-10-04.9**
 
 ## Mandatory governance rule
 
@@ -192,4 +192,4 @@ Repository visibility remains public as observed state; this audit does not chan
 
 ## Latest push intent
 
-Database Spike 001 has now produced its first load-bearing architecture correction. Head `01a8092c...` passed the complete PostgreSQL 17 harness (Database Spike run `37142607945`), but independent review rejected that green result as insufficient because the public Serving schema and deterministic corpus-query path still depended on private Authoring tables. The implementation now introduces Serving-owned research-object, reference-span, corpus, mapping, and semantic-set projections; removes Serving-to-Authoring foreign keys; moves TranslationDecision aggregate hashing into Publication Control; and adds PostgreSQL-catalog tests that reject any Serving FK/function referencing Authoring. The public `anon` corpus query must succeed while Authoring remains inaccessible. A fresh blank-database run is required after this architecture correction.
+Database Spike 001 run `37143183450`, the first clean run after the Serving-isolation architecture correction, stopped while applying the migration because the two newly added Serving-side rights-validator functions were serialized with invalid single-dollar delimiters. They now use named PostgreSQL dollar quotes. This is a migration-syntax correction only; the Serving-owned projection design, no-cross-plane FK/function catalog assertions, and public-anon corpus-query test remain unchanged and still require a complete blank-database rerun.
