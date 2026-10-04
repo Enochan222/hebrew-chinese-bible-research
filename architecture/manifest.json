@@ -5,6 +5,7 @@
     "PROJECT_STATE.md",
     "architecture/database-api-cross-stage-contract-v1.1.md",
     "architecture/corpus-source-integration.md",
+    "architecture/whole-bible-base-product.md",
     "architecture/product-platform-and-publication-model.md",
     "architecture/integration-boundaries-mcp-api-database.md",
     "architecture/security-trust-boundaries.md",
