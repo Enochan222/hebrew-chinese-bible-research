@@ -40,8 +40,40 @@ A successful exact-head run will demonstrate that the accepted whole-source corp
 
 ### Validation
 
-Pending full real-corpus execution on the exact PR head. The first plausible implementation is provisional: CI/source-database evidence, not code review alone, determines acceptance.
+The first complete exact-head execution on PR #20 passed the whole-corpus relational workflow and all independent repository regressions. It observed 39/39 configured books, 23,213 selected/reference atoms, 306,785 OSHB word nodes, 426,590 BHSA word nodes, 253,203 BHSA phrase nodes, 88,131 BHSA clause nodes, 1,106,383 BHSA graph-membership edges, 469,484 bridging feature values, 287,216 grouped candidate mappings of which 103,987 are non-1:1, 6,409 reviewed annotation-only BHSA nodes, 79 explicit unclassified empty-source BHSA nodes, 1,138 unresolved cross-framework references, zero provider-ID duplicates, zero importer/parity failures, zero OSHB missing-surface records, and zero real-corpus Serving rows.
 
+Independent review recomputed the 39-book totals and source/database arithmetic, confirmed the 1,138 unresolved references match WB-CORPUS-001 and remain mapping exceptions rather than silently dropped provider records, and confirmed WB-0 UUID identity compatibility. Before final acceptance, this synchronized revision hardens the orthographic-candidate guard against all empty-source BHSA targets and strengthens report-verification assertions. CORE-FZ-WB-002 remains pending until the synchronized final head reruns all required gates.
+
+
+## 2026-10-05 — Prohibit GitHub Copilot consumption for project AI work
+
+### Push intent
+
+Make the repository-owner requirement explicit: this project must not intentionally consume GitHub Copilot quota, premium requests or equivalent Copilot AI credits. AI-assisted implementation, analysis, orchestration and code review are assigned to the project's ChatGPT workflow.
+
+### Why
+
+Recent WB-1 pull requests received automatic comments from `copilot-pull-request-reviewer`, including quota-limit notices. Live repository ruleset inspection showed no repository rule requiring Copilot review, while draft pull requests did not receive the automatic review. The owner has now disabled account-level Automatic Copilot code review and requires a repository-level policy so future project agents do not request or depend on Copilot.
+
+The GitHub connector cannot independently read the user's account-level Copilot toggle, so the disabled account setting is recorded as owner-reported, not as verified repository metadata.
+
+### What changed
+
+- added `contracts/v1.1/github-ai-usage-policy.json` and its JSON Schema;
+- set GitHub Copilot `authorized=false` and automatic code review `false`;
+- prohibit Copilot PR review, Coding Agent, Autofix, Chat/code generation and any project operation consuming Copilot quota/premium requests;
+- designate ChatGPT as the authorized project AI execution/review channel;
+- preserve deterministic GitHub Actions, ordinary non-AI GitHub features and human collaboration;
+- added the policy to `AGENTS.md` and `architecture/repository-governance.md`;
+- extended contract validation to enforce the machine policy, required governance wording and absence of Copilot dependencies in `.github/workflows`.
+
+### Intended effect
+
+Opening or updating repository work must not deliberately trigger or rely on GitHub Copilot. Copilot output cannot become acceptance evidence. Existing GitHub Actions CI continues unchanged because it is deterministic infrastructure rather than Copilot AI usage.
+
+### Validation
+
+Contract validation must pass with the new policy fixture and semantic checks. Project governance/state-and-changelog must pass. After the owner disabled Automatic Copilot code review, the governance PR is opened normally and its review list is checked to confirm no new `copilot-pull-request-reviewer` review appears; absence on that PR is operational evidence, not a general API-level proof of the user setting.
 
 ## 2026-10-05 — Add WB-CORPUS-001 whole-Bible source foundation
 
