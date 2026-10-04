@@ -53,6 +53,49 @@ SELECT wb0_test.assert_true(
     FROM authoring.analysis_nodes n
     JOIN authoring.annotation_layers l USING (annotation_layer_id)
     JOIN authoring.annotation_frameworks f USING (annotation_framework_id)
+    WHERE f.framework_key='BHSA_2021_REAL' AND n.node_type='PHRASE'
+  ) = 22,
+  'pinned WB-0 BHSA phrase-node count must be 22'
+);
+
+SELECT wb0_test.assert_true(
+  (
+    SELECT count(*)
+    FROM authoring.analysis_nodes n
+    JOIN authoring.annotation_layers l USING (annotation_layer_id)
+    JOIN authoring.annotation_frameworks f USING (annotation_framework_id)
+    WHERE f.framework_key='BHSA_2021_REAL' AND n.node_type='CLAUSE'
+  ) = 7,
+  'pinned WB-0 BHSA clause-node count must be 7'
+);
+
+SELECT wb0_test.assert_true(
+  (
+    SELECT count(*)
+    FROM authoring.analysis_edges e
+    JOIN authoring.annotation_layers l USING (annotation_layer_id)
+    JOIN authoring.annotation_frameworks f USING (annotation_framework_id)
+    WHERE f.framework_key='BHSA_2021_REAL'
+      AND e.relation_type IN ('MEMBER_OF_PHRASE','MEMBER_OF_CLAUSE')
+  ) = 90,
+  'pinned WB-0 BHSA graph membership-edge count must be 90'
+);
+
+SELECT wb0_test.assert_true(
+  (
+    SELECT count(*)
+    FROM authoring.analysis_node_features
+    WHERE feature_key IN ('BRIDGE_OSM_PRIMARY_RAW','BRIDGE_OSM_SECONDARY_RAW')
+  ) = 35,
+  'pinned WB-0 bridging feature-value count must be 35'
+);
+
+SELECT wb0_test.assert_true(
+  (
+    SELECT count(*)
+    FROM authoring.analysis_nodes n
+    JOIN authoring.annotation_layers l USING (annotation_layer_id)
+    JOIN authoring.annotation_frameworks f USING (annotation_framework_id)
     WHERE f.framework_key='BHSA_2021_REAL'
       AND n.node_type='WORD'
       AND n.metadata @> '{"annotationOnly":true}'::jsonb
@@ -240,8 +283,14 @@ BEGIN
     INSERT INTO authoring.cross_annotation_mapping_to_members(
       mapping_group_id,to_annotation_layer_id,to_node_id,member_order
     ) VALUES (g_id,target_layer,source_node,999);
-  EXCEPTION WHEN foreign_key_violation THEN
-    failed := true;
+  EXCEPTION
+    WHEN foreign_key_violation THEN
+      failed := true;
+    WHEN raise_exception THEN
+      IF SQLERRM <> 'cross-annotation mapping member must share the mapping-group reference span' THEN
+        RAISE;
+      END IF;
+      failed := true;
   END;
 
   IF NOT failed THEN
