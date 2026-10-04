@@ -697,8 +697,12 @@ def process_book(
             missing_target=[x for x in target_ids if x not in bhsa_word_node_ids]
             if missing_source or missing_target:
                 raise ValueError(f"{code}: candidate mapping references absent nodes source={missing_source} target={missing_target}")
-            if set(target_ids) & annotation_only_ids:
-                raise ValueError(f"{code}: reviewed annotation-only BHSA node entered orthographic crosswalk")
+            non_orthographic_target_ids = annotation_only_ids | unclassified_empty_ids
+            bad_targets = sorted(set(target_ids) & non_orthographic_target_ids, key=lambda x:int(x))
+            if bad_targets:
+                raise ValueError(
+                    f"{code}: empty-source BHSA node entered orthographic crosswalk: {bad_targets}"
+                )
             group_id=stable_uuid(
                 "cross-annotation-mapping-group",code,ref[1],ref[2],
                 ",".join(source_ids),",".join(target_ids),candidate["mappingMethod"]
