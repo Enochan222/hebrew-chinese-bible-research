@@ -8,6 +8,7 @@ from collections import defaultdict
 from pathlib import Path
 
 from reference_aliases import parse_reference_label
+
 def load_ndjson(path: Path) -> list[dict]:
     with path.open(encoding="utf-8") as fh:
         return [json.loads(line) for line in fh if line.strip()]
@@ -21,15 +22,112 @@ def hebrew_letters_only(value: str | None) -> str:
         if "\u0590" <= ch <= "\u05ff" and unicodedata.category(ch).startswith("L")
     )
 
+def oshb_signature(row: dict) -> str:
+    return hebrew_letters_only(row.get("surfaceSourceExact"))
+
+def bhsa_signature(row: dict) -> str:
+    return hebrew_letters_only(row.get("consonantalSourceExact") or row.get("surfaceSourceExact"))
+
+def align_contiguous_spans(o_rows: list[dict], b_rows: list[dict]) -> tuple[list[tuple[list[dict], list[dict], str]] | None, str | None]:
+    if not o_rows or not b_rows:
+        return None, "MISSING_PROVIDER_ROWS"
+
+    osigs = [oshb_signature(r) for r in o_rows]
+    bsigs = [bhsa_signature(r) for r in b_rows]
+    if any(not s for s in osigs) or any(not s for s in bsigs):
+        return None, "EMPTY_CONSONANTAL_SIGNATURE"
+
+    if "".join(osigs) != "".join(bsigs):
+        return None, "VERSE_CONSONANTAL_STREAM_MISMATCH"
+
+    groups: list[tuple[list[dict], list[dict], str]] = []
+    i = j = 0
+    while i < len(o_rows) or j < len(b_rows):
+        oi, bj = i, j
+        os = bs = ""
+
+        while True:
+            if os and os == bs:
+                break
+
+            if not os:
+                if i >= len(o_rows):
+                    return None, "SOURCE_EXHAUSTED_DURING_ALIGNMENT"
+                os += osigs[i]
+                i += 1
+                continue
+
+            if not bs:
+                if j >= len(b_rows):
+                    return None, "TARGET_EXHAUSTED_DURING_ALIGNMENT"
+                bs += bsigs[j]
+                j += 1
+                continue
+
+            if len(os) < len(bs) and bs.startswith(os):
+                if i >= len(o_rows):
+                    return None, "SOURCE_EXHAUSTED_DURING_ALIGNMENT"
+                os += osigs[i]
+                i += 1
+                continue
+
+            if len(bs) < len(os) and os.startswith(bs):
+                if j >= len(b_rows):
+                    return None, "TARGET_EXHAUSTED_DURING_ALIGNMENT"
+                bs += bsigs[j]
+                j += 1
+                continue
+
+            return None, "NON_PREFIX_TOKENIZATION_DIVERGENCE"
+
+        groups.append((o_rows[oi:i], b_rows[bj:j], os))
+
+    if i != len(o_rows) or j != len(b_rows):
+        return None, "UNCONSUMED_PROVIDER_ROWS"
+    return groups, None
+
+def unresolved_record(ref: tuple[str, int, int], o_rows: list[dict], b_rows: list[dict], reason: str) -> dict:
+    return {
+        "recordType": "UNRESOLVED_REFERENCE",
+        "reference": {"book": ref[0], "chapter": ref[1], "verse": ref[2]},
+        "oshbWordCount": len(o_rows),
+        "bhsaWordCount": len(b_rows),
+        "reason": reason,
+        "signatureAlgorithm": "HEBREW_LETTERS_ONLY_NFD_V1",
+        "reviewStatus": "NEEDS_REVIEW",
+        "canonical": False,
+    }
+
+def mapping_record(ref: tuple[str, int, int], o_group: list[dict], b_group: list[dict], signature: str) -> dict:
+    return {
+        "recordType": "CANDIDATE_SPAN_MAPPING",
+        "sourceKey": "OSHB_MORPHHB",
+        "sourceProviderScopedWordIds": [r.get("providerScopedWordId") for r in o_group],
+        "sourceWordOrders": [r["wordOrderInVerse"] for r in o_group],
+        "targetKey": "BHSA_2021",
+        "targetProviderScopedNodeIds": [r.get("providerScopedNodeId") for r in b_group],
+        "targetWordOrders": [r["wordOrderInVerse"] for r in b_group],
+        "sourceCount": len(o_group),
+        "targetCount": len(b_group),
+        "reference": {"book": ref[0], "chapter": ref[1], "verse": ref[2]},
+        "signatureAlgorithm": "HEBREW_LETTERS_ONLY_NFD_V1",
+        "consonantalSignature": signature,
+        "mappingMethod": "CONTIGUOUS_CONSONANTAL_SPAN_ALIGNMENT_V1",
+        "reviewStatus": "CANDIDATE_AUTOMATED",
+        "canonical": False,
+    }
+
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Build conservative candidate OSHB-to-BHSA word mappings for Database Spike review.")
+    parser = argparse.ArgumentParser(
+        description="Build conservative many-to-many candidate OSHB-to-BHSA span mappings for Database Spike review."
+    )
     parser.add_argument("--oshb", type=Path, required=True)
     parser.add_argument("--bhsa", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
-    groups_o = defaultdict(list)
-    groups_b = defaultdict(list)
+    groups_o: dict[tuple[str, int, int], list[dict]] = defaultdict(list)
+    groups_b: dict[tuple[str, int, int], list[dict]] = defaultdict(list)
     for row in load_ndjson(args.oshb):
         groups_o[parse_reference_label(row["referenceLabel"])].append(row)
     for row in load_ndjson(args.bhsa):
@@ -38,55 +136,23 @@ def main() -> int:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     mapping_count = 0
     unresolved_count = 0
+
     with args.output.open("w", encoding="utf-8") as out:
         for ref in sorted(set(groups_o) | set(groups_b)):
             o_rows = sorted(groups_o.get(ref, []), key=lambda r: r["wordOrderInVerse"])
             b_rows = sorted(groups_b.get(ref, []), key=lambda r: r["wordOrderInVerse"])
-            if len(o_rows) != len(b_rows) or not o_rows:
-                out.write(json.dumps({
-                    "recordType": "UNRESOLVED_REFERENCE",
-                    "reference": {"book": ref[0], "chapter": ref[1], "verse": ref[2]},
-                    "oshbWordCount": len(o_rows), "bhsaWordCount": len(b_rows),
-                    "reason": "WORD_COUNT_MISMATCH_OR_MISSING", "reviewStatus": "NEEDS_REVIEW"
-                }, ensure_ascii=False, sort_keys=True) + "\n")
+            groups, reason = align_contiguous_spans(o_rows, b_rows)
+
+            if groups is None:
+                out.write(json.dumps(unresolved_record(ref, o_rows, b_rows, reason or "UNKNOWN_ALIGNMENT_FAILURE"), ensure_ascii=False, sort_keys=True) + "\n")
                 unresolved_count += 1
                 continue
-            pairs = []
-            valid = True
-            for o, b in zip(o_rows, b_rows):
-                osig = hebrew_letters_only(o.get("surfaceSourceExact"))
-                bsig = hebrew_letters_only(b.get("consonantalSourceExact") or b.get("surfaceSourceExact"))
-                if not osig or osig != bsig:
-                    valid = False
-                    break
-                pairs.append((o, b, osig))
-            if not valid:
-                out.write(json.dumps({
-                    "recordType": "UNRESOLVED_REFERENCE",
-                    "reference": {"book": ref[0], "chapter": ref[1], "verse": ref[2]},
-                    "oshbWordCount": len(o_rows), "bhsaWordCount": len(b_rows),
-                    "reason": "ORDERED_CONSONANTAL_SIGNATURE_MISMATCH",
-                    "signatureAlgorithm": "HEBREW_LETTERS_ONLY_V1", "reviewStatus": "NEEDS_REVIEW"
-                }, ensure_ascii=False, sort_keys=True) + "\n")
-                unresolved_count += 1
-                continue
-            for o, b, sig in pairs:
-                out.write(json.dumps({
-                    "recordType": "CANDIDATE_WORD_MAPPING",
-                    "sourceKey": "OSHB_MORPHHB",
-                    "sourceProviderScopedWordId": o.get("providerScopedWordId"),
-                    "targetKey": "BHSA_2021",
-                    "targetProviderScopedNodeId": b.get("providerScopedNodeId"),
-                    "reference": {"book": ref[0], "chapter": ref[1], "verse": ref[2]},
-                    "wordOrderInVerse": o["wordOrderInVerse"],
-                    "signatureAlgorithm": "HEBREW_LETTERS_ONLY_V1",
-                    "consonantalSignature": sig,
-                    "mappingMethod": "SAME_REFERENCE_ORDER_AND_CONSONANTAL_SIGNATURE",
-                    "reviewStatus": "CANDIDATE_AUTOMATED",
-                    "canonical": False
-                }, ensure_ascii=False, sort_keys=True) + "\n")
+
+            for o_group, b_group, signature in groups:
+                out.write(json.dumps(mapping_record(ref, o_group, b_group, signature), ensure_ascii=False, sort_keys=True) + "\n")
                 mapping_count += 1
-    print(f"candidate mappings={mapping_count}; unresolved references={unresolved_count}; output={args.output}")
+
+    print(f"candidate span mappings={mapping_count}; unresolved references={unresolved_count}; output={args.output}")
     return 0
 
 if __name__ == "__main__":

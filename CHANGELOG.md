@@ -89,6 +89,27 @@ Repair:
 - make current-OSHB/BHSA crosswalk normalize both provider labels through the same shared function;
 - use `1Sam.16.7` as the common smoke input and rerun the real workflow.
 
+#### Third real smoke finding: segmentation is genuinely many-to-many
+
+Run `37192627166` passed the complete existing smoke and produced the first reliable real-data comparison:
+
+- OSHB 1 Samuel 16:7: 25 word records;
+- BHSA 1 Samuel 16:7: 34 word records;
+- all pinned downloads, Text-Fabric load, both exporters, crosswalk process, and output-format validation succeeded;
+- the previous 1:1/count-equality crosswalk correctly refused to fabricate mappings and emitted one `UNRESOLVED_REFERENCE`.
+
+This result is not treated as a nuisance to suppress. It proves the architecture's framework-scoped segmentation premise on the primary spike verse.
+
+Repair/extension:
+
+- replace count-equality/zip mapping with conservative contiguous many-to-many span alignment;
+- require exact equality of the whole normalized verse consonantal stream before any automatic span proposal;
+- form the smallest contiguous source/target groups whose Hebrew-letter signatures match;
+- support 1:1, 1:n, n:1, and n:m candidates while preserving provider IDs and word orders;
+- keep every generated mapping `CANDIDATE_AUTOMATED`, `canonical = false`;
+- fail closed to `NEEDS_REVIEW` for textual stream mismatch, empty signatures, exhaustion, or non-prefix divergence;
+- tighten the 1 Samuel 16:7 smoke so it must produce at least one actual many-to-many candidate and no unresolved reference.
+
 Before creating the repository commit:
 
 - current upstream repository heads and frozen BHSA/bridging 2021 directories were inspected;

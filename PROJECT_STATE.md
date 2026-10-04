@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.6**
+State Revision: **2026-10-04.7**
 
 ## Mandatory governance rule
 
@@ -158,7 +158,8 @@ The first real-corpus integration for Database Spike 001 is now machine-pinned a
 - BHSA local cache is now required to contain every feature referenced by its pinned `otext.tf` formats and section configuration; the fetcher rejects incomplete caches before Text-Fabric loading;
 - source exact Unicode is preserved; OSHB source identity is not NFC-normalized;
 - provider book-name aliases are normalized only for passage filtering/candidate comparison; emitted provider reference labels remain source-native and canonical project passage identity still resolves through ReferenceSystem/ReferenceSpan;
-- a conservative candidate crosswalk compiler may propose current-OSHB to BHSA word mappings only when reference/order/consonantal signatures agree; mismatch is `NEEDS_REVIEW`, and automatic canonical promotion is forbidden;
+- live 1 Samuel 16:7 smoke evidence shows OSHB and BHSA do not share 1:1 tokenization (25 OSHB word records versus 34 BHSA word records);
+- a conservative candidate crosswalk compiler therefore proposes contiguous many-to-many span mappings only when normalized verse identity and concatenated consonantal signatures agree; mismatch is `NEEDS_REVIEW`, and automatic canonical promotion is forbidden;
 - source pins never auto-advance and every upstream change requires reviewed PR, corpus diff, spike rerun and a new ResearchBuild/ResearchRelease;
 - OSHB public serving defaults to attribution-compatible use under its upstream terms;
 - BHSA public/commercial serving requires an explicit RightsDecision;
@@ -212,4 +213,4 @@ See `architecture/corpus-source-integration.md` and `contracts/v1.1/corpus-sourc
 
 ## Latest push intent
 
-This revision continues PR #8 after the second real-corpus smoke. The corrected BHSA Text-Fabric cache loaded successfully, but the exporter returned zero rows because the runtime section book label did not match the hard-coded Latin label used by the CLI filter. The corpus tools now share a complete OSHB/BHSA Latin/BHSA English book-alias normalizer for filtering only, while preserving raw provider reference labels in exported records. The BHSA exporter now fails explicitly on zero-row requested passages, the smoke uses the common `1Sam.16.7` input for both providers, and the crosswalk normalizes both provider labels through the same comparison function. This keeps provider identity separate from project canonical ReferenceSystem identity.
+This revision treats the successful real-corpus smoke as evidence rather than merely a green check. The smoke showed 25 OSHB and 34 BHSA word records for 1 Samuel 16:7, proving that a 1:1 provider-word crosswalk is structurally wrong for the very passage used by Database Spike 001. The candidate crosswalk is therefore upgraded to conservative contiguous many-to-many span alignment: it requires the same normalized verse and identical concatenated Hebrew-letter consonantal streams, then emits the smallest prefix-compatible source/target span groups. Any textual divergence remains `NEEDS_REVIEW`. The smoke is tightened to require at least one real many-to-many candidate and zero unresolved references for this fixture before the integration is considered complete.

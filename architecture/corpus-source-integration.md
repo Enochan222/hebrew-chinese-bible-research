@@ -192,7 +192,7 @@ python scripts/corpora/build_candidate_crosswalk.py \
   --output .local/exports/crosswalk-1sam16-7.ndjson
 ```
 
-The crosswalk emits mappings only when reference, word count, word order, and a derived Hebrew-letter consonantal signature agree. Any disagreement becomes `NEEDS_REVIEW`. Its mappings remain `CANDIDATE_AUTOMATED` and `canonical = false` until Database Spike review promotes them through the project's typed mapping workflow.
+The crosswalk does not require equal token counts. It aligns only contiguous spans within the same normalized verse when the concatenated Hebrew-letter consonantal signatures are exactly equal. This allows conservative 1:1, 1:n, n:1, and n:m candidate mappings across framework-specific tokenization. If the full verse consonantal streams differ, an empty signature appears, or the two token streams cease to be prefix-compatible, the whole reference becomes `NEEDS_REVIEW`. Its mappings remain `CANDIDATE_AUTOMATED` and `canonical = false` until Database Spike review promotes them through the project's typed mapping workflow.
 
 ## 5. Decision table: when to use which source
 
@@ -212,6 +212,8 @@ The crosswalk emits mappings only when reference, word count, word order, and a 
 
 ## 6. Example: 1 Samuel 16:7
 
+The live PR smoke observed 25 OSHB word records and 34 BHSA word records for this verse. That is direct implementation evidence that the two providers cannot be connected through a universal 1:1 word identity. The project therefore treats segmentation divergence as normal framework-scoped data and uses explicit many-to-many cross-annotation mappings where the textual evidence supports them.
+
 For a query such as:
 
 `ראה + ל-prefixed BODY_PART + SAME_CLAUSE`
@@ -222,7 +224,7 @@ the first implementation should resolve it as a multi-layer query:
 2. OSHB morphology/morpheme data identifies the relevant prefixed form.
 3. the project SemanticSetVersion determines BODY_PART membership.
 4. BHSA 2021 supplies the declared clause-structure relation.
-5. an explicit reviewed mapping establishes which objects may participate in the cross-layer query; the candidate crosswalk may propose mappings but cannot promote itself to canonical/reviewed state.
+5. an explicit reviewed mapping establishes which objects may participate in the cross-layer query; the candidate span crosswalk may propose many-to-many mappings but cannot promote itself to canonical/reviewed state.
 6. CorpusQuery executes against one ResearchRelease that pins all dependencies.
 
 The query result must disclose the annotation layers used.

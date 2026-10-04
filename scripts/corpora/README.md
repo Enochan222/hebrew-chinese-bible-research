@@ -52,7 +52,7 @@ python scripts/corpora/build_candidate_crosswalk.py \
   --output .local/exports/crosswalk-1sam16-7.ndjson
 ```
 
-The crosswalk fails closed at verse level: count/signature mismatch becomes `NEEDS_REVIEW`; generated mappings are `CANDIDATE_AUTOMATED` and never canonical by themselves.
+The crosswalk supports conservative contiguous many-to-many token spans. Equal token counts are not required. It first requires equal whole-verse consonantal streams, then emits the smallest prefix-compatible contiguous span groups. Any textual/prefix divergence becomes `NEEDS_REVIEW`; generated mappings are `CANDIDATE_AUTOMATED` and never canonical by themselves.
 
 ## Updating upstream data
 
