@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.13**
+State Revision: **2026-10-04.14**
 
 ## Mandatory governance rule
 
@@ -192,4 +192,4 @@ Repository visibility remains public as observed state; this audit does not chan
 
 ## Latest push intent
 
-Database Spike 001 run `37143591152` again passed bootstrap, full Serving-isolation migration, and seed, then reached the PostgreSQL catalog isolation assertions. The no-Serving-FK-to-Authoring assertion passed. The following function-definition assertion failed because `pg_get_functiondef()` was evaluated against aggregate entries such as `array_agg`, for which that function is invalid. The catalog test is narrowed to ordinary functions with a guarded `prokind='f'` expression. No product schema or permission changed.
+Database Spike 001 has reached a second independent critical-review round after the Serving-isolation head passed all three workflows. That review found six remaining implementation-quality defects that a green harness did not prove: Workspace cross-tenant child/project consistency, shared-PK subtype/object_type consistency, locator-specific CitationLocator validation, post-PUBLISHED payload/projection immutability, atomic creation of the first PUBLISHED event with the channel-pointer move, and canonical reference ordering rather than UUID ordering for the spike cursor. The migration/tests now enforce those invariants, and the duplicated/corrupted Database Spike CHANGELOG history has been consolidated into one auditable chronology. No remote Supabase project is modified. A new blank PostgreSQL 17 run is required before merge.

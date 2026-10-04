@@ -23,6 +23,30 @@ SELECT spike_test.assert_true(
   'alternate label must deterministically map to two ordered atoms'
 );
 
+-- Shared-PK subtype identity must match research_objects.object_type.
+INSERT INTO authoring.research_objects(research_object_id,object_type)
+VALUES ('30000000-0000-4000-8000-000000000099','RULE_VERSION');
+
+DO $wrong_object_type$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    INSERT INTO authoring.corpus_releases(
+      corpus_release_id,digital_expression_id,release_name,release_version,importer_version
+    ) VALUES (
+      '30000000-0000-4000-8000-000000000099',
+      '22000000-0000-4000-8000-000000000001',
+      'invalid wrong object type','1','spike'
+    );
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'wrong research_object subtype must fail'; END IF;
+END
+$wrong_object_type$;
+
+DELETE FROM authoring.research_objects
+WHERE research_object_id='30000000-0000-4000-8000-000000000099';
+
 DO $$
 DECLARE failed boolean := false;
 BEGIN
@@ -231,8 +255,31 @@ BEGIN
   IF NOT failed THEN RAISE EXCEPTION 'rights snapshot for another subject must not publish excerpt'; END IF;
 END $wrong_subject$;
 
+-- Typed CitationLocator must enforce locator-specific identity.
+DO $bad_locator$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    INSERT INTO serving.published_evidence_items(
+      published_evidence_item_id,published_evidence_packet_id,research_object_id,evidence_content_hash,
+      evidence_class,citation_locator,evidence_stability_class,sort_order
+    ) VALUES (
+      '50200000-0000-4000-8000-000000000096',
+      '50100000-0000-4000-8000-000000000001',
+      '51000000-0000-4000-8000-000000000001',
+      'cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd',
+      'SCHOLARLY_SOURCE_TEXT',
+      '{"locatorType":"BIBLICAL_REFERENCE"}',
+      'IMMUTABLE_SNAPSHOT',6
+    );
+  EXCEPTION WHEN check_violation THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'BIBLICAL_REFERENCE without referenceSpanId must fail'; END IF;
+END
+$bad_locator$;
+
 -- Immutable evidence requires a content hash.
-DO $$
+DO $
 DECLARE failed boolean := false;
 BEGIN
   BEGIN
@@ -319,6 +366,23 @@ SELECT spike_test.assert_true(
   (SELECT count(*) FROM workspace.user_translation_drafts) = 1,
   'RLS must hide User B translation draft from User A'
 );
+
+DO $cross_tenant_project$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    INSERT INTO workspace.saved_queries(saved_query_id,owner_user_id,project_id,query_json)
+    VALUES (
+      '60100000-0000-4000-8000-000000000099',
+      'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      '60000000-0000-4000-8000-000000000002',
+      '{"q":"must-fail"}'
+    );
+  EXCEPTION WHEN foreign_key_violation THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'User A must not attach a child row to User B project'; END IF;
+END
+$cross_tenant_project$;
 RESET ROLE;
 
 -- Public/authenticated role cannot read Authoring.
@@ -369,6 +433,13 @@ SELECT spike_test.assert_true(
   'failed publication must not move production pointer'
 );
 
+SELECT spike_test.assert_true(
+  (SELECT count(*) FROM serving.research_release_events
+   WHERE research_release_id='47000000-0000-4000-8000-000000000002'
+     AND event_type='PUBLISHED') = 0,
+  'failed publication must roll back the candidate PUBLISHED event'
+);
+
 -- Successful publication moves one mutable pointer; rollback is another pointer move.
 SELECT publication_control.publish_release_to_channel(
   'PRODUCTION','47000000-0000-4000-8000-000000000002',NULL,false
@@ -379,6 +450,66 @@ SELECT spike_test.assert_true(
    = '47000000-0000-4000-8000-000000000002',
   'successful publication must move production pointer to complete candidate release'
 );
+SELECT spike_test.assert_true(
+  (SELECT count(*) FROM serving.research_release_events
+   WHERE research_release_id='47000000-0000-4000-8000-000000000002'
+     AND event_type='PUBLISHED') = 1,
+  'successful publication must append exactly one PUBLISHED event'
+);
+
+INSERT INTO serving.research_objects(research_object_id,object_type,source_content_hash,published_at)
+VALUES (
+  '52000000-0000-4000-8000-000000000001','PUBLISHED_ANALYSIS_SET',
+  'post-publish-negative-fixture',now()
+);
+
+DO $late_component$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    INSERT INTO serving.research_release_components(
+      research_release_id,component_kind,component_research_object_id,
+      component_version,content_hash,component_order
+    ) VALUES (
+      '47000000-0000-4000-8000-000000000002','PUBLISHED_ANALYSIS',
+      '52000000-0000-4000-8000-000000000001','1',
+      '1212121212121212121212121212121212121212121212121212121212121212',99
+    );
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'cannot add a release component after PUBLISHED'; END IF;
+END
+$late_component$;
+
+DO $late_analysis_update$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    UPDATE serving.published_passage_analyses
+    SET rendered_payload='{"mutated":true}'
+    WHERE published_analysis_id='50000000-0000-4000-8000-000000000001';
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'published passage analysis must be immutable'; END IF;
+END
+$late_analysis_update$;
+
+DO $late_projection$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    INSERT INTO serving.corpus_node_features(
+      corpus_release_id,analysis_node_id,feature_key,feature_value
+    ) VALUES (
+      '30000000-0000-4000-8000-000000000001',
+      '33000000-0000-4000-8000-000000000001',
+      'POST_PUBLISH_MUTATION','must-fail'
+    );
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'published corpus projection must be immutable'; END IF;
+END
+$late_projection$;
 SELECT publication_control.publish_release_to_channel(
   'PRODUCTION','47000000-0000-4000-8000-000000000001',NULL,false
 );

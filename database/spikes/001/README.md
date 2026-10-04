@@ -55,19 +55,19 @@ including:
 - node/segment corpus-expression compatibility;
 - explicit cross-layer mappings;
 - source/target alignment stream pinning;
-- immutable shared-PK research-object identity for publishable subtypes;
+- shared-PK research-object identity with subtype/object_type compatibility;
 - ResearchPositionVersion -> exact ResearchIssueVersion compatibility;
 - TranslationSourceBasis stream/locus integrity;
 - TranslationDecision source-basis coverage and policy-language consistency;
 - fail-closed rights decisions and winning-rule subset integrity;
-- public excerpt rights/citation/hash requirements;
-- user-workspace RLS isolation;
+- public excerpt rights, typed CitationLocator, and immutable-evidence hash requirements;
+- user-workspace RLS isolation plus project-owner relational consistency;
 - public denial of Authoring/Publication Control;
 - Serving-owned projection identity with no Serving FK/function dependency on Authoring;
 - anon deterministic corpus query over Serving-only projections;
-- release immutability;
-- publication visibility atomicity and rollback by channel pointer;
-- deterministic, release-pinned corpus-query result membership.
+- release and component-projection immutability after PUBLISHED;
+- publication visibility atomicity, transactional first-PUBLISHED event creation, and rollback by channel pointer;
+- deterministic, release-pinned corpus-query result membership in canonical reference order.
 
 ## What this does not prove
 
@@ -79,6 +79,7 @@ This harness does **not** yet prove:
 - remote migration history;
 - production corpus scale/latency;
 - the HTTP OpenAPI handlers;
+- the full opaque cursor contract that binds researchReleaseId + normalized query hash + execution-policy version;
 - real OSHB/MACULA/BHSA ingestion correctness;
 - full textual-apparatus richness;
 - every Core Freeze gate.

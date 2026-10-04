@@ -249,8 +249,8 @@ INSERT INTO serving.research_objects(research_object_id,object_type,source_conte
 ('42000000-0000-4000-8000-000000000001','TRANSLATION_POLICY_VERSION','ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',now()),
 ('51000000-0000-4000-8000-000000000001','PUBLISHED_EVIDENCE_SOURCE','evidence-fixture',now());
 
-INSERT INTO serving.reference_spans(reference_span_id,book_code,start_sequence,end_sequence,span_kind) VALUES
-('13000000-0000-4000-8000-000000000001','1Sam',16007,16007,'VERSE');
+INSERT INTO serving.reference_spans(reference_span_id,book_code,start_sequence,end_sequence,reference_sort_key,span_kind) VALUES
+('13000000-0000-4000-8000-000000000001','1Sam',16007,16007,90016007,'VERSE');
 
 INSERT INTO serving.corpus_nodes(corpus_release_id,analysis_node_id,annotation_layer_id,node_type,reference_span_id) VALUES
 ('30000000-0000-4000-8000-000000000001','33000000-0000-4000-8000-000000000001','32000000-0000-4000-8000-000000000001','WORD','13000000-0000-4000-8000-000000000001'),
@@ -288,15 +288,6 @@ INSERT INTO serving.research_release_components(research_release_id,component_ki
 ('47000000-0000-4000-8000-000000000002','SEMANTIC_SET','34000000-0000-4000-8000-000000000001','1','9999999999999999999999999999999999999999999999999999999999999999',1),
 ('47000000-0000-4000-8000-000000000002','TRANSLATION_POLICY','42000000-0000-4000-8000-000000000001','1','aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',2);
 
-INSERT INTO serving.research_release_events VALUES
-('47100000-0000-4000-8000-000000000001','47000000-0000-4000-8000-000000000001','PUBLISHED',now(),'fixture');
-
-INSERT INTO serving.release_channels(release_channel_id,channel_key,description) VALUES
-('47200000-0000-4000-8000-000000000001','PRODUCTION','Production pointer');
-
-INSERT INTO serving.release_channel_pointers(release_channel_id,research_release_id,updated_at,row_version) VALUES
-('47200000-0000-4000-8000-000000000001','47000000-0000-4000-8000-000000000001',now(),1);
-
 INSERT INTO serving.published_passage_analyses(published_analysis_id,research_release_id,reference_span_id,analysis_type,analysis_schema_version,rendered_payload,analysis_hash,review_status) VALUES
 ('50000000-0000-4000-8000-000000000001','47000000-0000-4000-8000-000000000001','13000000-0000-4000-8000-000000000001','TRANSLATION_ANALYSIS','1.1','{"summary":"fixture"}','bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb','HUMAN_REVIEWED');
 
@@ -311,6 +302,13 @@ INSERT INTO serving.published_assertions VALUES
 
 INSERT INTO serving.published_assertion_evidence VALUES
 ('50300000-0000-4000-8000-000000000001','50200000-0000-4000-8000-000000000001','SUPPORTS','VERIFIED',NULL);
+
+INSERT INTO serving.release_channels(release_channel_id,channel_key,description) VALUES
+('47200000-0000-4000-8000-000000000001','PRODUCTION','Production pointer');
+
+SELECT publication_control.publish_release_to_channel(
+  'PRODUCTION','47000000-0000-4000-8000-000000000001',NULL,false
+);
 
 INSERT INTO workspace.research_projects(project_id,owner_user_id,title,visibility,status) VALUES
 ('60000000-0000-4000-8000-000000000001','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','User A Project','PRIVATE','ACTIVE'),

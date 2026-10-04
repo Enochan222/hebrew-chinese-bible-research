@@ -254,3 +254,28 @@ The spike therefore corrects the implementation boundary:
 - CI inspects PostgreSQL catalog metadata to reject any Serving FK or Serving function that reaches back into Authoring.
 
 This is a contract clarification derived from implementation evidence, not merely an implementation refactor.
+
+
+## 12. Independent final critical review after Serving isolation
+
+A green SQL harness is not sufficient by itself. After Serving/Authoring separation passed, a separate read-only review found further defects that were not covered by the earlier tests:
+
+1. Workspace child rows could claim User A ownership while referencing User B's project because RLS checked the child owner but no composite FK tied project and owner.
+2. Shared-PK subtype rows only proved that a research-object ID existed, not that its `object_type` matched the subtype table.
+3. `citation_locator` was only checked as generic JSON rather than the locator-specific `CitationLocatorV1` contract.
+4. A PUBLISHED ResearchRelease could still receive late release-payload/projection inserts from privileged publication code.
+5. The first PUBLISHED event and production channel-pointer move were not created by one publication transaction.
+6. The spike pagination cursor used UUID order rather than release-pinned canonical textual/reference order.
+7. Repeated automated history updates duplicated and partially corrupted the Database Spike CHANGELOG entry.
+
+The implementation now:
+
+- uses composite `(project_id, owner_user_id)` Workspace FKs;
+- enforces expected `research_objects.object_type` for every shared-PK subtype exercised by the spike;
+- validates locator-specific CitationLocator requirements in PostgreSQL;
+- locks release-owned payload and component projections after PUBLISHED;
+- creates the first PUBLISHED event and channel-pointer move inside the same publication function transaction;
+- orders deterministic results by a publication-projected canonical reference sort key plus stable ID;
+- consolidates the Database Spike history into one chronological CHANGELOG entry.
+
+These corrections must pass a new blank PostgreSQL 17 run before this review is considered closed.
