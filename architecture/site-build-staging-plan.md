@@ -59,6 +59,19 @@ The core product must still work when no LLM provider is available.
 
 The current Vercel application remains a reference implementation for useful interaction patterns, not an ontology or data-model authority.
 
+
+## Whole-Bible baseline ordering
+
+Implementation staging must not confuse fixture depth with product coverage.
+
+The base public product is the whole Hebrew Bible. Named passage fixtures are used to prove difficult invariants before full-corpus execution, but they do not define importer scope, passage availability or UI navigation.
+
+Research Pro is layered after the whole-Bible base path exists. Academic enrichment may be progressive and sparse; base Hebrew passage serving may not be intentionally limited to a small hand-picked passage set.
+
+Canonical execution detail:
+
+- `architecture/whole-bible-base-product.md`.
+
 ---
 
 # Phase 1: Product Foundation, Identity, Release Model, and Serving Shell
@@ -180,7 +193,56 @@ Pass only when:
 
 ---
 
-# Phase 2: Published Passage Data, Translation Witnesses, Alignment, and Workspace
+# Phase 2A: Whole-Bible Hebrew Corpus Foundation and Reader
+
+## Goal
+
+Turn the validated corpus adapters and Database Spike into the first real whole-Bible base-product data path.
+
+The established 1 Samuel 16:7 fixture is the relational-import acceptance canary. Passing it authorizes a whole-corpus run; it does not authorize a passage-by-passage manual build.
+
+## Required implementation
+
+- import pinned OSHB provider-scoped words/morphemes into the relational model;
+- import pinned BHSA framework-scoped word/phrase/clause/syntax nodes;
+- preserve annotation-only BHSA nodes without invented TextSegments;
+- persist explicit reviewed/candidate cross-framework mappings without canonical promotion;
+- resolve source-native references through ReferenceSystem / ReferenceSpan;
+- run the importer across the complete configured Hebrew-Bible source coverage;
+- generate whole-corpus coverage/error evidence;
+- compile release-scoped passage serving projections;
+- replace fixture-only Hebrew passage reads with database-backed release-pinned reads;
+- implement whole-Bible book/chapter/passage navigation over the configured CanonSystem.
+
+## Required QA
+
+Coverage evidence must include:
+
+- book/reference coverage;
+- per-source/framework counts;
+- intentionally excluded records;
+- unresolved mappings separated from ingestion failures;
+- annotation-only nodes separated from missing source text;
+- duplicate/stale provider IDs;
+- hashes and source pins;
+- traversal/sampling across Torah, Prophets and Writings plus known edge cases.
+
+Do not claim whole-Bible completion from a representative-passage smoke.
+
+## Acceptance gate
+
+Pass only when:
+
+- the real-corpus relational canary passes;
+- the same importer runs over the whole configured corpus without silent drops;
+- coverage/exception evidence is reviewable;
+- passage APIs read real release-pinned database content;
+- navigation is not hard-coded to fixtures;
+- the public base passage path works with Research Pro and BYOK disabled.
+
+---
+
+# Phase 2B: Published Passage Data, Translation Witnesses, Alignment, and Workspace
 
 ## Goal
 
