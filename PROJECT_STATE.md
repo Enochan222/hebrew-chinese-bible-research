@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.8**
+State Revision: **2026-10-04.9**
 
 ## Mandatory governance rule
 
@@ -192,4 +192,4 @@ Repository visibility remains public as observed state; this audit does not chan
 
 ## Latest push intent
 
-Database Spike 001 independent review found that the Serving-projection repair had been serialized twice: a complete, valid Serving-only implementation existed inside the main migration transaction, followed by a 26K duplicate/partial SQL tail after the first `COMMIT;`. Every CREATE object in the tail already exists in the valid transaction; no tail-only object exists. The duplicate tail is removed, and CI now statically requires exactly one migration `COMMIT;` with no SQL after it. The intended Serving isolation remains: public corpus query and public read paths use `serving.*` projections, while publication-only hashing may read Authoring only through the publication-control boundary.
+Database Spike 001 now applies the migration and loads fixtures cleanly after removing the duplicated SQL tail. The latest adversarial run exposed a test-isolation defect: the negative ResearchPositionVersion case was rejected by shared-PK research-object registration before it reached the intended cross-issue composite FK. The test now registers the synthetic version object inside the expected-failure subtransaction so the exact issue/version compatibility constraint is what must fail. Independent review also strengthens public-plane evidence by temporarily renaming the Authoring schema offline and requiring anonymous current-release and corpus-query reads to continue entirely from Serving projections.

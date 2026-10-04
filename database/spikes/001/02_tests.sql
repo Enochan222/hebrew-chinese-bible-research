@@ -97,10 +97,13 @@ BEGIN
 END $$;
 
 -- Research position must pin an IssueVersion belonging to the same stable issue.
-DO $$
+DO $cross_issue_position$
 DECLARE failed boolean := false;
 BEGIN
   BEGIN
+    INSERT INTO authoring.research_objects(research_object_id,object_type)
+    VALUES ('44000000-0000-4000-8000-000000000099','RESEARCH_POSITION_VERSION');
+
     INSERT INTO authoring.research_position_versions(
       research_position_version_id,research_position_id,research_issue_id,research_issue_version_id,
       version_number,title,position_summary,position_status,review_status,content_hash
@@ -110,10 +113,14 @@ BEGIN
       2,'Invalid','Invalid','ACTIVE','HUMAN_REVIEWED',
       '9999999999999999999999999999999999999999999999999999999999999999'
     );
-  EXCEPTION WHEN foreign_key_violation THEN failed := true;
+  EXCEPTION WHEN foreign_key_violation THEN
+    failed := true;
   END;
-  IF NOT failed THEN RAISE EXCEPTION 'cross-issue ResearchPositionVersion must fail'; END IF;
-END $$;
+  IF NOT failed THEN
+    RAISE EXCEPTION 'cross-issue ResearchPositionVersion must fail on exact issue/version compatibility';
+  END IF;
+END
+$cross_issue_position$;
 
 -- Translation source basis must use pinned stream.
 DO $$
@@ -548,5 +555,24 @@ SELECT spike_test.assert_true(
   'anon corpus query must work entirely from Serving projections'
 );
 RESET ROLE;
+
+-- Stronger plane-isolation proof: make Authoring unavailable by name, then rerun public reads.
+ALTER SCHEMA authoring RENAME TO authoring_offline;
+
+SET ROLE anon;
+SELECT spike_test.assert_true(
+  (SELECT count(*) FROM serving.current_release WHERE channel_key='PRODUCTION') = 1,
+  'current release must remain readable while Authoring is offline'
+);
+SELECT spike_test.assert_true(
+  (SELECT count(*) FROM serving.spike_corpus_query(
+    '47000000-0000-4000-8000-000000000001',
+    '34000000-0000-4000-8000-000000000001',NULL,50
+  )) = 1,
+  'public corpus query must remain functional while Authoring is offline'
+);
+RESET ROLE;
+
+ALTER SCHEMA authoring_offline RENAME TO authoring;
 
 DROP SCHEMA spike_test CASCADE;
