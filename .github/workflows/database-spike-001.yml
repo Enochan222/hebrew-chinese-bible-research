@@ -45,6 +45,20 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Verify PostgreSQL client
         run: psql --version
+      - name: Static-check migration transaction boundary
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path("database/migrations/001_database_spike_001.sql")
+          text = p.read_text(encoding="utf-8")
+          if text.count("COMMIT;") != 1:
+              raise SystemExit("Database Spike migration must contain exactly one COMMIT;")
+          before, after = text.split("COMMIT;", 1)
+          if after.strip():
+              raise SystemExit("Unexpected SQL exists after the Database Spike migration COMMIT;")
+          if "BEGIN;" not in before:
+              raise SystemExit("Database Spike migration must begin an explicit transaction")
+          PY
       - name: Bootstrap Supabase-compatible test roles
         run: psql -v ON_ERROR_STOP=1 -f database/spikes/001/00_bootstrap.sql
       - name: Apply Database Spike 001 migration

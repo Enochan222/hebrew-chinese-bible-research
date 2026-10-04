@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.15**
+State Revision: **2026-10-04.8**
 
 ## Mandatory governance rule
 
@@ -192,4 +192,4 @@ Repository visibility remains public as observed state; this audit does not chan
 
 ## Latest push intent
 
-Database Spike 001 run `37192756787` failed during migration because a JavaScript string-replacement operation interpreted PostgreSQL/regex dollar tokens (`$'` and `$$`) as replacement directives, corrupting the newly added CitationLocator function and one disposable test block. The SQL logic is rebuilt using direct slicing/named delimiters rather than replacement-string semantics. A repository scan found no other obvious single-dollar corruption in the migration/tests. The new relational/security invariants remain unchanged and require a fresh blank PostgreSQL 17 run.
+Database Spike 001 independent review found that the Serving-projection repair had been serialized twice: a complete, valid Serving-only implementation existed inside the main migration transaction, followed by a 26K duplicate/partial SQL tail after the first `COMMIT;`. Every CREATE object in the tail already exists in the valid transaction; no tail-only object exists. The duplicate tail is removed, and CI now statically requires exactly one migration `COMMIT;` with no SQL after it. The intended Serving isolation remains: public corpus query and public read paths use `serving.*` projections, while publication-only hashing may read Authoring only through the publication-control boundary.
