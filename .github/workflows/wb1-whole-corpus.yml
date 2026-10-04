@@ -1,0 +1,143 @@
+name: WB-1 Whole Corpus
+
+on:
+  pull_request:
+    paths:
+      - 'database/**'
+      - 'scripts/corpora/**'
+      - 'requirements-corpus.txt'
+      - 'contracts/v1.1/corpus-source-registry.json'
+      - 'contracts/v1.1/hebrew-bible-canon-system.json'
+      - 'contracts/v1.1/json-schema/corpus-source-registry.schema.json'
+      - 'contracts/v1.1/json-schema/hebrew-bible-canon-system.schema.json'
+      - 'architecture/whole-bible-base-product.md'
+      - 'architecture/corpus-source-integration.md'
+      - 'architecture/database-api-cross-stage-contract-v1.1.md'
+      - '.github/workflows/wb1-whole-corpus.yml'
+      - 'PROJECT_STATE.md'
+      - 'CHANGELOG.md'
+  push:
+    branches: [main]
+    paths:
+      - 'database/**'
+      - 'scripts/corpora/**'
+      - 'requirements-corpus.txt'
+      - 'contracts/v1.1/corpus-source-registry.json'
+      - 'contracts/v1.1/hebrew-bible-canon-system.json'
+      - 'contracts/v1.1/json-schema/corpus-source-registry.schema.json'
+      - 'contracts/v1.1/json-schema/hebrew-bible-canon-system.schema.json'
+      - 'architecture/whole-bible-base-product.md'
+      - 'architecture/corpus-source-integration.md'
+      - 'architecture/database-api-cross-stage-contract-v1.1.md'
+      - '.github/workflows/wb1-whole-corpus.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  whole-corpus-import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: hcb_wb1
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d hcb_wb1"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: hcb_wb1
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - name: Install corpus tooling
+        run: python -m pip install -r requirements-corpus.txt
+      - name: Compile WB-1 tooling
+        run: |
+          python -m py_compile \
+            scripts/corpora/export_oshb_books.py \
+            scripts/corpora/export_bhsa_books.py \
+            scripts/corpora/build_wb1_crosswalks.py \
+            scripts/corpora/load_wb1_postgres.py \
+            scripts/corpora/verify_wb1_report.py
+      - name: Bootstrap clean whole-corpus database
+        run: |
+          psql --version
+          psql -v ON_ERROR_STOP=1 -f database/spikes/001/00_bootstrap.sql
+          psql -v ON_ERROR_STOP=1 -f database/migrations/001_database_spike_001.sql
+      - name: Fetch exact pinned sources
+        run: python scripts/corpora/fetch_sources.py
+      - name: Export configured OSHB books
+        run: |
+          mkdir -p .local/wb1/oshb .local/wb1/reports
+          python scripts/corpora/export_oshb_books.py \
+            --output-dir .local/wb1/oshb \
+            --report .local/wb1/reports/oshb-export.json
+      - name: Export configured BHSA books
+        run: |
+          mkdir -p .local/wb1/bhsa
+          python scripts/corpora/export_bhsa_books.py \
+            --output-dir .local/wb1/bhsa \
+            --report .local/wb1/reports/bhsa-export.json
+      - name: Build bounded per-book crosswalks
+        run: |
+          mkdir -p .local/wb1/crosswalk
+          python scripts/corpora/build_wb1_crosswalks.py \
+            --oshb-dir .local/wb1/oshb \
+            --bhsa-dir .local/wb1/bhsa \
+            --output-dir .local/wb1/crosswalk \
+            --report .local/wb1/reports/crosswalk.json
+      - name: Import complete configured corpus
+        run: |
+          mkdir -p .local/wb1/sql
+          python scripts/corpora/load_wb1_postgres.py \
+            --oshb-dir .local/wb1/oshb \
+            --bhsa-dir .local/wb1/bhsa \
+            --crosswalk-dir .local/wb1/crosswalk \
+            --report .local/wb1/reports/wb1-coverage.json \
+            --sql-dir .local/wb1/sql
+      - name: Verify whole-corpus coverage and no silent drops
+        run: |
+          python scripts/corpora/verify_wb1_report.py \
+            --report .local/wb1/reports/wb1-coverage.json \
+            --canon contracts/v1.1/hebrew-bible-canon-system.json \
+            --oshb-export-report .local/wb1/reports/oshb-export.json \
+            --bhsa-export-report .local/wb1/reports/bhsa-export.json \
+            --crosswalk-report .local/wb1/reports/crosswalk.json
+      - name: Print compact WB-1 evidence
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path(".local/wb1/reports/wb1-coverage.json").read_text(encoding="utf-8"))
+          print(json.dumps({
+              "milestone":r["milestone"],
+              "canonSystem":r["canonSystem"]["code"],
+              "aggregateExportHash":r["aggregateExportHash"],
+              "sourcePins":r["sourcePins"],
+              "totals":r["totals"],
+              "gate":r["gate"],
+              "coverage":r["coverage"],
+          },ensure_ascii=False,sort_keys=True,indent=2))
+          PY
+      - name: Upload WB-1 coverage evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: wb1-whole-corpus-evidence
+          path: .local/wb1/reports/
+          if-no-files-found: warn
+          retention-days: 30
