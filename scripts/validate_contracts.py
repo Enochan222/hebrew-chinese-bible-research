@@ -292,7 +292,7 @@ def governance():
     if "architecture/whole-bible-base-product.md" not in m.get("active",[]):
         fail("whole-Bible base-product authority must be active")
     whole_bible=(ROOT/"architecture/whole-bible-base-product.md").read_text(encoding="utf-8")
-    for required in ("whole Hebrew Bible","acceptance vectors","Research Pro is an academic overlay"):
+    for required in ("Whole-Bible coverage is the baseline product scope.","acceptance vectors","Research Pro is an academic overlay"):
         if required not in whole_bible:
             fail(f"whole-Bible base-product authority missing invariant: {required}")
     if not (ROOT/"PROJECT_STATE.md").exists(): fail("PROJECT_STATE.md missing")
