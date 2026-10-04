@@ -19,6 +19,23 @@ CREATE TABLE authoring.biblical_books (
   english_name text NOT NULL
 );
 
+CREATE TABLE authoring.canon_systems (
+  canon_system_id uuid PRIMARY KEY,
+  code text NOT NULL UNIQUE,
+  name text NOT NULL,
+  tradition text,
+  description text
+);
+
+CREATE TABLE authoring.canon_books (
+  canon_system_id uuid NOT NULL REFERENCES authoring.canon_systems(canon_system_id) ON DELETE CASCADE,
+  book_id uuid NOT NULL REFERENCES authoring.biblical_books(book_id),
+  book_order integer NOT NULL CHECK (book_order >= 1),
+  included boolean NOT NULL DEFAULT true,
+  PRIMARY KEY (canon_system_id, book_id),
+  UNIQUE (canon_system_id, book_order)
+);
+
 CREATE TABLE authoring.reference_systems (
   reference_system_id uuid PRIMARY KEY,
   code text NOT NULL UNIQUE,
@@ -197,36 +214,45 @@ CREATE TABLE authoring.analysis_node_segments (
 CREATE OR REPLACE FUNCTION authoring.validate_node_segment_compatibility()
 RETURNS trigger
 LANGUAGE plpgsql
-AS $$
+AS $
 DECLARE
   node_expression uuid;
   segment_expression uuid;
-  node_span uuid;
-  segment_span uuid;
+  node_book uuid;
+  segment_book uuid;
+  node_start integer;
+  node_end integer;
+  segment_start integer;
+  segment_end integer;
 BEGIN
-  SELECT cr.digital_expression_id, n.reference_span_id
-    INTO node_expression, node_span
+  SELECT cr.digital_expression_id, rs.book_id, rs.start_sequence, rs.end_sequence
+    INTO node_expression, node_book, node_start, node_end
   FROM authoring.analysis_nodes n
   JOIN authoring.annotation_layers al ON al.annotation_layer_id = n.annotation_layer_id
   JOIN authoring.corpus_releases cr ON cr.corpus_release_id = al.corpus_release_id
+  JOIN authoring.reference_spans rs ON rs.reference_span_id = n.reference_span_id
   WHERE n.analysis_node_id = NEW.analysis_node_id;
 
-  SELECT ts.digital_expression_id, s.reference_span_id
-    INTO segment_expression, segment_span
+  SELECT ts.digital_expression_id, rs.book_id, rs.start_sequence, rs.end_sequence
+    INTO segment_expression, segment_book, segment_start, segment_end
   FROM authoring.text_segments s
   JOIN authoring.text_streams ts ON ts.text_stream_id = s.text_stream_id
+  JOIN authoring.reference_spans rs ON rs.reference_span_id = s.reference_span_id
   WHERE s.text_segment_id = NEW.text_segment_id;
 
   IF node_expression IS NULL OR segment_expression IS NULL OR node_expression <> segment_expression THEN
     RAISE EXCEPTION 'analysis node and text segment belong to incompatible digital expressions';
   END IF;
 
-  IF node_span <> segment_span THEN
-    RAISE EXCEPTION 'analysis node and text segment must share the same reference span in Spike 001';
+  IF node_book IS NULL OR segment_book IS NULL
+     OR node_book <> segment_book
+     OR segment_start < node_start
+     OR segment_end > node_end THEN
+    RAISE EXCEPTION 'analysis-node reference span must contain every member text-segment span';
   END IF;
   RETURN NEW;
 END
-$$;
+$;
 
 CREATE TRIGGER analysis_node_segments_compatibility
 BEFORE INSERT OR UPDATE ON authoring.analysis_node_segments
