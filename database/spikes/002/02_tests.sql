@@ -77,8 +77,8 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM authoring.reference_labels WHERE label='Gen.1.1') THEN
     RAISE EXCEPTION 'Gen.1.1 missing from whole-Bible import';
   END IF;
-  IF NOT EXISTS (SELECT 1 FROM authoring.reference_labels WHERE label='Mal.4.6') THEN
-    RAISE EXCEPTION 'Mal.4.6 missing from whole-Bible import';
+  IF NOT EXISTS (SELECT 1 FROM authoring.reference_labels WHERE label='Mal.3.24') THEN
+    RAISE EXCEPTION 'Mal.3.24 missing from whole-Bible import';
   END IF;
 END
 $whole_bible$;
