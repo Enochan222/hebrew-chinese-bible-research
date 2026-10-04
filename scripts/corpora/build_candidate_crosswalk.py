@@ -226,9 +226,13 @@ def main() -> int:
             o_rows = sorted(groups_o.get(ref, []), key=lambda r: r["wordOrderInVerse"])
             all_b_rows = sorted(groups_b.get(ref, []), key=lambda r: r["wordOrderInVerse"])
             annotation_only = [r for r in all_b_rows if is_bhsa_annotation_only_node(r)]
-            b_rows = [r for r in all_b_rows if r not in annotation_only]
+            annotation_only_ids = {r.get("providerScopedNodeId") for r in annotation_only}
+            b_rows = [r for r in all_b_rows if r.get("providerScopedNodeId") not in annotation_only_ids]
 
-            unclassified_empty = [r for r in all_b_rows if not bhsa_signature(r) and r not in annotation_only]
+            unclassified_empty = [
+                r for r in all_b_rows
+                if not bhsa_signature(r) and r.get("providerScopedNodeId") not in annotation_only_ids
+            ]
             if unclassified_empty:
                 record = unresolved_record(ref, o_rows, all_b_rows, "UNCLASSIFIED_EMPTY_TARGET_SIGNATURE")
                 out.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
