@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.13**
+State Revision: **2026-10-04.14**
 
 ## Mandatory governance rule
 
@@ -194,4 +194,4 @@ Repository visibility remains public as observed state; this audit does not chan
 
 ## Latest push intent
 
-Post-merge review of Database Spike 001 and the still-unmerged Product MCP surface found two contract holes that existing green validation did not exercise: required CitationLocator identities accepted null/empty values, and `get_rule_applications` accepted an ambiguous bare human reference without ReferenceSystem identity. This revision makes locator identities non-null, moves rule-application reads to PassageLocatorV1, and adds positive/negative regression fixtures. Database Spike 001 is now merged on `main` at `be0c66086371f2e318ec1616482d4ceaceddca6b`; its post-merge PostgreSQL, contract, and governance checks all passed. No remote Supabase project has been designated or modified.
+Post-merge adversarial review has now closed two distinct trust-boundary gaps. Main at `c9e45594c40fc04b5b0e241a82142b3897d92486` gates inactive Serving candidates behind a committed PUBLISHED event so direct public reads cannot bypass the atomic channel pointer. This revision closes the remaining machine-contract holes: required CitationLocator identities can no longer be null or empty, and `get_rule_applications` now uses PassageLocatorV1 so every human reference label carries explicit ReferenceSystem identity. Positive and negative regression fixtures cover both changes. No remote Supabase project has been designated or modified.

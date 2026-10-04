@@ -1281,6 +1281,8 @@ CREATE OR REPLACE FUNCTION serving.release_is_published(p_release_id uuid)
 RETURNS boolean
 LANGUAGE sql
 STABLE
+SECURITY DEFINER
+SET search_path = pg_catalog, serving
 AS $release_is_published$
   SELECT EXISTS (
     SELECT 1
@@ -1294,6 +1296,8 @@ CREATE OR REPLACE FUNCTION serving.component_is_published(p_research_object_id u
 RETURNS boolean
 LANGUAGE sql
 STABLE
+SECURITY DEFINER
+SET search_path = pg_catalog, serving
 AS $component_is_published$
   SELECT EXISTS (
     SELECT 1
@@ -1721,35 +1725,67 @@ ALTER TABLE serving.published_assertion_evidence ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY public_read_reference_spans ON serving.reference_spans
 FOR SELECT TO anon, authenticated USING (true);
+
+-- Release-scoped Serving rows remain physically materialized before publication,
+-- but public roles must not observe them until the release has a committed
+-- PUBLISHED event. The publication function creates that event and moves the
+-- channel pointer in one transaction, so visibility changes atomically.
 CREATE POLICY public_read_corpus_nodes ON serving.corpus_nodes
-FOR SELECT TO anon, authenticated USING (true);
+FOR SELECT TO anon, authenticated
+USING (serving.component_is_published(corpus_release_id));
 CREATE POLICY public_read_corpus_node_features ON serving.corpus_node_features
-FOR SELECT TO anon, authenticated USING (true);
+FOR SELECT TO anon, authenticated
+USING (serving.component_is_published(corpus_release_id));
 CREATE POLICY public_read_corpus_edges ON serving.corpus_edges
-FOR SELECT TO anon, authenticated USING (true);
+FOR SELECT TO anon, authenticated
+USING (serving.component_is_published(corpus_release_id));
 CREATE POLICY public_read_corpus_node_mappings ON serving.corpus_node_mappings
-FOR SELECT TO anon, authenticated USING (true);
+FOR SELECT TO anon, authenticated
+USING (serving.component_is_published(corpus_release_id));
 CREATE POLICY public_read_semantic_set_members ON serving.semantic_set_members
-FOR SELECT TO anon, authenticated USING (true);
+FOR SELECT TO anon, authenticated
+USING (serving.component_is_published(semantic_set_version_id));
 
 CREATE POLICY public_read_releases ON serving.research_releases
-FOR SELECT TO anon, authenticated USING (true);
+FOR SELECT TO anon, authenticated
+USING (serving.release_is_published(research_release_id));
 CREATE POLICY public_read_release_components ON serving.research_release_components
-FOR SELECT TO anon, authenticated USING (true);
+FOR SELECT TO anon, authenticated
+USING (serving.release_is_published(research_release_id));
 CREATE POLICY public_read_release_channels ON serving.release_channels
 FOR SELECT TO anon, authenticated USING (true);
 CREATE POLICY public_read_release_channel_pointers ON serving.release_channel_pointers
-FOR SELECT TO anon, authenticated USING (true);
+FOR SELECT TO anon, authenticated
+USING (serving.release_is_published(research_release_id));
 CREATE POLICY public_read_passage_analyses ON serving.published_passage_analyses
-FOR SELECT TO anon, authenticated USING (true);
+FOR SELECT TO anon, authenticated
+USING (serving.release_is_published(research_release_id));
 CREATE POLICY public_read_evidence_packets ON serving.published_evidence_packets
-FOR SELECT TO anon, authenticated USING (true);
+FOR SELECT TO anon, authenticated
+USING (serving.release_is_published(research_release_id));
 CREATE POLICY public_read_evidence_items ON serving.published_evidence_items
-FOR SELECT TO anon, authenticated USING (true);
+FOR SELECT TO anon, authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM serving.published_evidence_packets p
+    WHERE p.published_evidence_packet_id = published_evidence_items.published_evidence_packet_id
+      AND serving.release_is_published(p.research_release_id)
+  )
+);
 CREATE POLICY public_read_assertions ON serving.published_assertions
-FOR SELECT TO anon, authenticated USING (true);
+FOR SELECT TO anon, authenticated
+USING (serving.release_is_published(research_release_id));
 CREATE POLICY public_read_assertion_evidence ON serving.published_assertion_evidence
-FOR SELECT TO anon, authenticated USING (true);
+FOR SELECT TO anon, authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM serving.published_assertions a
+    WHERE a.published_assertion_id = published_assertion_evidence.published_assertion_id
+      AND serving.release_is_published(a.research_release_id)
+  )
+);
 
 GRANT SELECT ON serving.reference_spans,
   serving.corpus_nodes, serving.corpus_node_features, serving.corpus_edges,
@@ -1774,6 +1810,10 @@ GRANT EXECUTE ON FUNCTION serving.valid_rights_conditions(jsonb),
   serving.release_is_published(uuid),
   serving.component_is_published(uuid)
 TO publication_worker;
+
+GRANT EXECUTE ON FUNCTION serving.release_is_published(uuid),
+  serving.component_is_published(uuid)
+TO anon, authenticated;
 
 DO $authoring_rls$
 DECLARE
