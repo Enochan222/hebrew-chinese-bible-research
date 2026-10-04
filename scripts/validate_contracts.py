@@ -286,6 +286,15 @@ def governance():
     gates=re.findall(r"\|\s*([A-Z]+(?:-[A-Z]+)*-\d{3})\s*\|",text)
     for g in set(gates):
         if gates.count(g)>1: fail(f"duplicate freeze gate {g}")
+    required_scope_gates={"CORE-FZ-WB-001","CORE-FZ-WB-002","CORE-FZ-WB-003"}
+    missing_scope_gates=sorted(required_scope_gates-set(gates))
+    if missing_scope_gates: fail(f"whole-Bible core freeze gates missing: {missing_scope_gates}")
+    if "architecture/whole-bible-base-product.md" not in m.get("active",[]):
+        fail("whole-Bible base-product authority must be active")
+    whole_bible=(ROOT/"architecture/whole-bible-base-product.md").read_text(encoding="utf-8")
+    for required in ("whole Hebrew Bible","acceptance vectors","Research Pro is an academic overlay"):
+        if required not in whole_bible:
+            fail(f"whole-Bible base-product authority missing invariant: {required}")
     if not (ROOT/"PROJECT_STATE.md").exists(): fail("PROJECT_STATE.md missing")
     if not (ROOT/"CHANGELOG.md").exists(): fail("CHANGELOG.md missing")
     if "PROJECT_STATE.md" not in m.get("active",[]): fail("PROJECT_STATE.md must be active living authority")
