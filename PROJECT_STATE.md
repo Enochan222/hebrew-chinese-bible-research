@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.12**
+State Revision: **2026-10-04.13**
 
 ## Mandatory governance rule
 
@@ -192,4 +192,4 @@ Repository visibility remains public as observed state; this audit does not chan
 
 ## Latest push intent
 
-Database Spike 001 has reached a clean PostgreSQL 17 executable vertical-slice result on PR #9: Database Spike run `37195991129`, Contract validation `37195991128`, and Project governance `37195991176` all PASS. The result includes blank migration, controlled fixtures, adversarial relational/RLS/rights/publication tests, Serving-with-Authoring-offline public reads, and query-plan execution. This closes only the local PostgreSQL/Supabase-compatible implementation slice. No remote Supabase project has been designated or modified, and remote Data API/Auth/advisor/production-scale evidence remains pending.
+A post-merge adversarial review found a publication-visibility defect in Database Spike 001: public RLS policies on release-scoped Serving tables used `USING (true)`, so a fully materialized but inactive candidate release could be queried directly before the atomic channel-pointer move. This revision closes that gap by gating public release/component/payload rows on a committed `PUBLISHED` event, using narrowly scoped SECURITY DEFINER boolean predicates, and adding negative/positive anon tests that prove release 2 is invisible before publication and visible after the publication transaction. Reference-span and channel registries remain publicly readable because they are not candidate scholarly payload.

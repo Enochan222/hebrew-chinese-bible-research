@@ -410,6 +410,35 @@ END
 $cross_tenant_project$;
 RESET ROLE;
 
+-- Inactive candidate materialization must not be publicly visible before publication.
+-- Release 2 already has release/component rows, and the candidate evidence packet
+-- was created above, so these assertions detect direct-table leaks that a
+-- pointer-only test would miss.
+SET ROLE anon;
+SELECT spike_test.assert_true(
+  (SELECT count(*) FROM serving.research_releases
+   WHERE research_release_id='47000000-0000-4000-8000-000000000002') = 0,
+  'anon must not read an unpublished ResearchRelease directly'
+);
+SELECT spike_test.assert_true(
+  (SELECT count(*) FROM serving.research_release_components
+   WHERE research_release_id='47000000-0000-4000-8000-000000000002') = 0,
+  'anon must not read components of an unpublished ResearchRelease directly'
+);
+SELECT spike_test.assert_true(
+  (SELECT count(*) FROM serving.published_evidence_packets
+   WHERE published_evidence_packet_id='50100000-0000-4000-8000-000000000002') = 0,
+  'anon must not read materialized evidence for an unpublished ResearchRelease'
+);
+SELECT spike_test.assert_true(
+  (SELECT count(*) FROM serving.spike_corpus_query(
+    '47000000-0000-4000-8000-000000000002',
+    '34000000-0000-4000-8000-000000000001',NULL,50
+  )) = 0,
+  'anon corpus query must not use an unpublished ResearchRelease'
+);
+RESET ROLE;
+
 -- Public/authenticated role cannot read Authoring.
 SET ROLE authenticated;
 DO $$
@@ -481,6 +510,26 @@ SELECT spike_test.assert_true(
      AND event_type='PUBLISHED') = 1,
   'successful publication must append exactly one PUBLISHED event'
 );
+
+-- The same materialized candidate becomes visible only after the publication
+-- transaction commits its PUBLISHED event and channel-pointer move.
+SET ROLE anon;
+SELECT spike_test.assert_true(
+  (SELECT count(*) FROM serving.research_releases
+   WHERE research_release_id='47000000-0000-4000-8000-000000000002') = 1,
+  'published ResearchRelease must become visible to anon'
+);
+SELECT spike_test.assert_true(
+  (SELECT count(*) FROM serving.research_release_components
+   WHERE research_release_id='47000000-0000-4000-8000-000000000002') = 3,
+  'published ResearchRelease components must become visible to anon'
+);
+SELECT spike_test.assert_true(
+  (SELECT count(*) FROM serving.published_evidence_packets
+   WHERE published_evidence_packet_id='50100000-0000-4000-8000-000000000002') = 1,
+  'published evidence packet must become visible to anon'
+);
+RESET ROLE;
 
 INSERT INTO serving.research_objects(research_object_id,object_type,source_content_hash,published_at)
 VALUES (
