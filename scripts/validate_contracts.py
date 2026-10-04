@@ -70,6 +70,7 @@ POSITIVE = [
  ("contracts/v1.1/json-schema/translation-source-basis.schema.json","contracts/v1.1/fixtures/translation-source-basis.json"),
  ("contracts/v1.1/json-schema/translation-policy-version.schema.json","contracts/v1.1/fixtures/translation-policy-version.json"),
  ("contracts/v1.1/json-schema/rights-decision-snapshot.schema.json","contracts/v1.1/fixtures/rights-decision-conditional.json"),
+ ("contracts/v1.1/json-schema/rule-applications-request.schema.json","contracts/v1.1/fixtures/rule-applications-request.json"),
 
 ]
 
@@ -88,6 +89,15 @@ NEG_SCHEMA = [
  ("contracts/v1.1/json-schema/corpus-query-result.schema.json","contracts/v1.1/negative-fixtures/corpus-query-result-nonexact-with-total.json"),
  ("contracts/v1.1/json-schema/translation-source-basis.schema.json","contracts/v1.1/negative-fixtures/translation-source-basis-stream-with-apparatus.json"),
  ("contracts/v1.1/json-schema/published-evidence-item.schema.json","contracts/v1.1/negative-fixtures/published-evidence-excerpt-without-citation.json"),
+ ("contracts/v1.1/json-schema/citation-locator.schema.json","contracts/v1.1/negative-fixtures/citation-locator-source-span-null-id.json"),
+ ("contracts/v1.1/json-schema/citation-locator.schema.json","contracts/v1.1/negative-fixtures/citation-locator-printed-page-null-edition.json"),
+ ("contracts/v1.1/json-schema/citation-locator.schema.json","contracts/v1.1/negative-fixtures/citation-locator-printed-page-empty-label.json"),
+ ("contracts/v1.1/json-schema/citation-locator.schema.json","contracts/v1.1/negative-fixtures/citation-locator-source-asset-page-null-id.json"),
+ ("contracts/v1.1/json-schema/citation-locator.schema.json","contracts/v1.1/negative-fixtures/citation-locator-biblical-reference-null-id.json"),
+ ("contracts/v1.1/json-schema/citation-locator.schema.json","contracts/v1.1/negative-fixtures/citation-locator-corpus-result-null-id.json"),
+ ("contracts/v1.1/json-schema/citation-locator.schema.json","contracts/v1.1/negative-fixtures/citation-locator-document-section-null-edition.json"),
+ ("contracts/v1.1/json-schema/citation-locator.schema.json","contracts/v1.1/negative-fixtures/citation-locator-lexicon-entry-null-edition.json"),
+ ("contracts/v1.1/json-schema/rule-applications-request.schema.json","contracts/v1.1/negative-fixtures/rule-applications-label-without-reference-system.json"),
 
 ]
 
@@ -337,8 +347,9 @@ def vocab_drift():
 def secret_scan():
     assignment=re.compile(r"(?i)\b(GEMINI_API_KEY|GOOGLE_API_KEY|OPENAI_API_KEY|ANTHROPIC_API_KEY|SCITE_API_KEY|CORE_API_KEY|SEMANTIC_SCHOLAR_API_KEY|OPENALEX_API_KEY)\s*=\s*[\"']?([A-Za-z0-9_\-]{8,})")
     literals=[re.compile(r"AIza[0-9A-Za-z_\-]{30,}"),re.compile(r"sk-[A-Za-z0-9_\-]{20,}"),re.compile(r"scite_[A-Za-z0-9_\-]{20,}")]
+    excluded_dirs={".git", ".next", "node_modules", "playwright-report", "test-results", "dist", "build", "coverage", "__pycache__"}
     for p in ROOT.rglob("*"):
-        if not p.is_file() or ".git" in p.parts: continue
+        if not p.is_file() or excluded_dirs.intersection(p.relative_to(ROOT).parts): continue
         rel=p.relative_to(ROOT)
         if rel.name in {".env",".env.local",".env.production",".env.development"}: fail(f"forbidden env file {rel}")
         if p.suffix.lower() not in {".md",".json",".yaml",".yml",".py",".ts",".tsx",".js",".jsx",".toml",".txt"}: continue

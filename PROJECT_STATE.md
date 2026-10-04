@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.13**
+State Revision: **2026-10-04.14**
 
 ## Mandatory governance rule
 
@@ -138,7 +138,8 @@ Repository visibility remains public as observed state; this audit does not chan
 - Official project TranslationDecision pins an immutable TranslationSourceBasis and exact TranslationPolicyVersion.
 - Corpus query execution separates scholarly query meaning from cursor/page retrieval state and distinguishes exact from unavailable total counts.
 - RightsDecisionSnapshot is fail-closed: unresolved/unknown permission cannot surface as an UNKNOWN final outcome or ALLOW.
-- Public evidence uses typed CitationLocator semantics; excerpts require rights snapshots and immutable evidence requires content hashes.
+- Public evidence uses typed CitationLocator semantics whose required identity cannot be null or empty; excerpts require rights snapshots and immutable evidence requires content hashes.
+- Passage-scoped rule-application MCP reads use the shared ReferenceSystem-aware PassageLocator contract rather than an ambiguous bare reference string.
 - ResearchPositionVersion pins the exact ResearchIssueVersion framing used for that scholarly position.
 - Database Spike 001 is specified as an adversarial scholarly-integrity vertical slice, not a table-creation demo.
 - `main` is live-protected by active repository ruleset `Protect main` (ID `24409248`).
@@ -185,11 +186,12 @@ Repository visibility remains public as observed state; this audit does not chan
 ## Current implementation priority
 
 1. Preserve contract/governance consistency.
-2. Database Spike 001 for real PostgreSQL/Supabase schema and constraints.
-3. Implement provider adapters and ResearchModelAdapter interfaces.
-4. Validate one end-to-end literature-discovery build against a real Hebrew-Bible ResearchIssue.
-5. Continue later application stages without weakening publication/rights/reproducibility boundaries.
+2. Synchronize and complete the pinned OSHB/BHSA corpus-source integration against current `main`.
+3. Complete the fixture-backed Phase 1 serving shell acceptance gate and open its PR.
+4. Implement scholarly provider adapters and ResearchModelAdapter interfaces.
+5. Validate one end-to-end literature-discovery build against a real Hebrew-Bible ResearchIssue.
+6. Continue later application stages without weakening publication/rights/reproducibility boundaries.
 
 ## Latest push intent
 
-A post-merge adversarial review found a publication-visibility defect in Database Spike 001: public RLS policies on release-scoped Serving tables used `USING (true)`, so a fully materialized but inactive candidate release could be queried directly before the atomic channel-pointer move. This revision closes that gap by gating public release/component/payload rows on a committed `PUBLISHED` event, using narrowly scoped SECURITY DEFINER boolean predicates, and adding negative/positive anon tests that prove release 2 is invisible before publication and visible after the publication transaction. Reference-span and channel registries remain publicly readable because they are not candidate scholarly payload.
+Post-merge adversarial review has now closed two distinct trust-boundary gaps. Main at `c9e45594c40fc04b5b0e241a82142b3897d92486` gates inactive Serving candidates behind a committed PUBLISHED event so direct public reads cannot bypass the atomic channel pointer. This revision closes the remaining machine-contract holes: required CitationLocator identities can no longer be null or empty, and `get_rule_applications` now uses PassageLocatorV1 so every human reference label carries explicit ReferenceSystem identity. Positive and negative regression fixtures cover both changes. The secret scanner now excludes dependency/build/report/cache/VCS output after a combined validation run proved those generated trees caused false alarms. No remote Supabase project has been designated or modified.
