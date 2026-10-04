@@ -4,6 +4,47 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+
+## 2026-10-05 — Implement WB-0 real OSHB/BHSA relational canary
+
+### Push intent
+
+Move from separate corpus-source smoke and synthetic PostgreSQL evidence to the first real-corpus relational ingestion canary, while preserving the whole-Bible roadmap and fail-closed publication/rights boundaries.
+
+### Why
+
+The repository could already fetch and export pinned OSHB/BHSA/bridging data and could independently prove relational constraints with synthetic fixtures, but it had not connected those two evidence paths. Real 1 Samuel 16:7 data also exposes a schema fact that the synthetic pairwise mapping fixture did not: an orthographic cross-framework claim may be 1:n, n:1 or n:m and cannot safely be flattened into pairwise node equivalence.
+
+### What changed
+
+- aligned the pairwise Authoring mapping table with the active `cross_annotation_mappings` contract;
+- added grouped cross-annotation mapping tables with ordered source/target members, layer/span integrity, review state and canonicality;
+- prohibited `CANDIDATE_AUTOMATED` grouped mappings from becoming canonical;
+- added `scripts/corpora/load_wb0_postgres.py` to validate exact source pins/manifests/counts and load the pinned real canary;
+- store separate OSHB and BHSA DigitalExpression, TextStream, CorpusRelease, AnnotationFramework and AnnotationLayer identities;
+- preserve exact provider reference labels and provider-scoped node/word IDs;
+- import 25 OSHB words and 34 BHSA words, with BHSA phrase/clause graph nodes and membership edges;
+- preserve BHSA nodes 150439 and 150445 as annotation-only AnalysisNodes with zero TextSegment memberships;
+- retain ETCBC bridging values as BHSA-node comparison features;
+- retain project BODY_PART semantic membership as project authority rather than provider taxonomy;
+- store 25 orthographic span candidates as grouped, non-canonical Authoring research data rather than false pairwise equivalence;
+- add real relational assertions for counts, graph membership, candidate state, many-to-many behavior, invalid layer membership, accidental promotion and a mixed OSHB/BHSA semantic/clause query;
+- add a second clean PostgreSQL CI job that fetches the exact pinned sources and runs the WB-0 canary independently of the existing synthetic spike;
+- keep real BHSA/bridging data out of Serving because public/commercial rights remain unresolved;
+- update the active corpus/database contract and implementation documentation to distinguish pairwise reviewed mapping from grouped n:m candidate evidence.
+
+### Intended effect
+
+WB-0 becomes executable evidence that the existing provider-scoped ontology can represent the real 1 Samuel 16:7 source data without inventing universal token identity or orthographic content. It also establishes the importer shape that WB-1 must generalize across the whole configured Hebrew Bible.
+
+### Validation
+
+The first PR execution reached the real PostgreSQL loader successfully and produced the pinned evidence: 25 OSHB words, 34 BHSA words, 32 text-bearing BHSA words, 2 annotation-only nodes, 22 phrases, 7 clauses, 90 graph-membership edges, 35 bridging feature values, 25 mapping groups, 7 non-1:1 groups, one BODY_PART target and zero unresolved references. Its SQL assertion run then exposed a test-boundary defect: the deliberately invalid wrong-layer member was correctly rejected by the mapping span/layer trigger before the expected composite FK fired. The test was narrowed to accept only those two intended rejection boundaries, and the exact real export hashes/counts were promoted into CI regression evidence.
+
+A subsequent reviewed head passed the original synthetic PostgreSQL spike and the full WB-0 real-corpus job, including real source fetch/export, candidate crosswalk, PostgreSQL load, all relational assertions and the pinned evidence-report checks. Contract validation, Project governance, Corpus source smoke and P1 fixture-shell validation also passed on that reviewed head. The closeout documentation edit itself creates a new head, so protected merge still requires the same latest-head gates rather than treating those earlier run IDs as permanently final.
+
+Merge is allowed only when Project governance, Contract validation, Corpus source smoke, the original synthetic Database Spike job, and the new `wb0-real-corpus-canary` PostgreSQL job all pass on the exact final PR head. WB-0 success does not satisfy the whole-Bible CORE-FZ-WB-002 gate.
+
 ## 2026-10-05 — Harden whole-Bible reference and corpus-adapter boundaries
 
 ### Push intent

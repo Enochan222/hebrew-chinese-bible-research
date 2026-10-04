@@ -314,7 +314,7 @@ Old releases continue to pin their old source versions.
 
 ## 10. Database Spike 001 requirement
 
-**Current evidence boundary:** the merged PostgreSQL Database Spike 001 harness uses controlled synthetic fixtures. The corpus-source smoke in this integration proves pinned acquisition, export and candidate crosswalk behavior, but real OSHB/BHSA rows have not yet been loaded into the relational spike. The requirements below remain the next real-corpus database integration gate.
+**WB-0 implementation boundary:** the Database Spike retains its independent controlled-fixture job and now adds a second clean PostgreSQL real-corpus canary. The WB-0 job fetches the exact registry pins, exports real OSHB/BHSA 1 Samuel 16:7 records, builds the conservative candidate crosswalk, loads those records into Authoring through `scripts/corpora/load_wb0_postgres.py`, and runs `database/spikes/001/04_real_corpus_tests.sql`. This proves only the bounded relational canary when the exact-head CI job is green; it does not prove whole-Bible WB-1 coverage or public Serving rights.
 
 The first real corpus vertical slice must use these pinned sources.
 
@@ -324,8 +324,8 @@ Minimum test:
 - BHSA 2021 1 Samuel 16:7 import;
 - bridging 2021 comparison features where available;
 - project BODY_PART semantic set;
-- explicit mapping;
-- a multi-layer CorpusQuery;
+- grouped explicit non-canonical mapping evidence;
+- a multi-layer OSHB morphology -> grouped mapping -> BHSA BODY_PART/clause relational query;
 - an invalid cross-layer mapping that the database rejects.
 
 The spike must record any mismatch between source tokenization/reference labels and the current contract. It must change the contract if real corpus evidence disproves an assumption.

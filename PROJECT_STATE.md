@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-05.4**
+State Revision: **2026-10-05.7**
 
 ## Mandatory governance rule
 
@@ -179,7 +179,7 @@ The first corpus-source adapter integration intended for Database Spike 001 is n
 - OSHB public serving defaults to attribution-compatible use under its upstream terms;
 - BHSA public/commercial serving requires an explicit RightsDecision;
 - bridging-derived public serving is denied until its mixed upstream rights are reviewed;
-- the source smoke has **not** yet loaded these real OSHB/BHSA exports into the merged PostgreSQL Database Spike 001 schema; that relational real-corpus ingestion remains the next integration gate.
+- WB-0 now has a dedicated clean-PostgreSQL real-corpus canary path: exact pinned 1 Samuel 16:7 OSHB/BHSA/bridging exports are loaded into Authoring, with provider identity, BHSA phrase/clause graph membership, annotation-only nodes and grouped non-canonical cross-framework candidates asserted relationally; this remains bounded canary evidence and is not whole-Bible WB-1 coverage.
 
 See `architecture/corpus-source-integration.md` and `contracts/v1.1/corpus-source-registry.json`.
 
@@ -240,15 +240,36 @@ Current bounded state:
 
 This is fixture-shell implementation evidence only. It does not satisfy real-database CORE_FREEZE gates or complete Phase 1.
 
+## WB-0 real-corpus relational canary state
+
+WB-0 is implemented as an independent PostgreSQL 17 job alongside the existing synthetic Database Spike:
+
+- fetch exact immutable OSHB/morphhb, BHSA 2021 and ETCBC bridging pins;
+- export real 1 Samuel 16:7 provider records;
+- build the conservative grouped OSHB/BHSA candidate crosswalk;
+- load the canary with `scripts/corpora/load_wb0_postgres.py`;
+- preserve 25 OSHB word nodes and 34 BHSA word nodes as provider-scoped AnalysisNodes;
+- preserve BHSA nodes `150439` and `150445` with zero invented TextSegments and with phrase/clause graph membership;
+- preserve bridging morphology as comparison features on BHSA nodes, not current OSHB provider-ID identity;
+- keep project BODY_PART SemanticSetVersion separate from provider lexical features;
+- store 25 span candidates as grouped Authoring mappings so 1:n/n:1/n:m evidence is not flattened into false pairwise equivalence;
+- enforce `CANDIDATE_AUTOMATED` plus `canonical=false` and reject accidental candidate promotion;
+- run a real multi-layer OSHB morphology -> explicit grouped mapping -> BHSA BODY_PART/clause relational query;
+- first real execution loaded successfully and observed 22 BHSA phrase nodes, 7 clause nodes, 90 graph-membership edges, 35 bridging feature values and 7 non-1:1 mapping groups in addition to the pinned 25/34 word counts;
+- the first assertion run exposed a test-boundary defect rather than a data-model failure: wrong-layer membership was correctly rejected by the earlier span/layer trigger before PostgreSQL reached the expected composite FK; the negative test now accepts only those two intended rejection boundaries;
+- write no real BHSA/bridging corpus projection into Serving because public/commercial rights remain unresolved.
+
+WB-0 implementation acceptance is now PASS on the reviewed PR head: the original synthetic `postgres-spike` regression and the independent `wb0-real-corpus-canary` job both completed successfully, alongside Contract validation, Project governance, Corpus source smoke and the P1 shell regression. The protected merge remains the repository publication action for this change. This PASS is bounded to the pinned 1 Samuel 16:7 canary and does not satisfy `CORE-FZ-WB-002`. WB-1 remains responsible for generalizing this importer and producing complete configured-corpus coverage/error evidence.
+
 ## Current implementation priority
 
 1. Preserve contract/governance consistency and the whole-Bible scope guard.
-2. Complete WB-0: import the pinned real OSHB/BHSA/ETCBC-bridging 1 Samuel 16:7 acceptance canary into the merged PostgreSQL schema without promoting unreviewed mappings.
-3. Complete WB-1/WB-2: run the same importer across the complete configured Hebrew Bible, produce auditable coverage/exception evidence, and serve it through release-pinned passage APIs.
-4. Complete WB-3: replace fixture-only Hebrew passage content with a database-backed whole-Bible reader and navigation.
+2. Complete WB-1: generalize the WB-0 provider-scoped importer across the complete configured Hebrew Bible and produce auditable book/reference/count/error/exception coverage evidence.
+3. Complete WB-2: compile the whole-corpus Authoring result into rights-safe, release-pinned passage-serving projections.
+4. Complete WB-3: replace fixture-only Hebrew passage content with a database-backed whole-Bible reader/navigation.
 5. Complete WB-4/WB-5: add selected translation witnesses, alignment/comparison, project/user translation workflow and deterministic whole-corpus analysis.
 6. Only then make Research Pro provider adapters, ResearchModelAdapter and end-to-end literature builds the primary product implementation frontier; academic enrichment may proceed in parallel where it does not block the base path.
 
 ## Latest push intent
 
-Post-merge whole-Bible boundary review found three remaining integration defects hidden by the compact `1Sam.16.7` fixture: the web shell imposed OSIS-like syntax on otherwise opaque ReferenceSystem labels/codes; the BHSA crosswalk classified generic empty lexical nodes as annotation-only rather than only the evidenced Hebrew article shape; and the Core OpenAPI omitted the error statuses/codes already returned by the implemented passage routes. This revision repairs those boundaries, adds corpus unit tests to CI, excludes local virtual environments from source/secret scanning, retains PR #13's stronger zero-record OSHB failure cleanup, and binds each implemented passage route to its exact runtime status/error-code surface without changing the generic `NOT_FOUND` contract used elsewhere. The real relational importer, whole-corpus coverage audit, release-pinned database serving and remote Supabase designation remain pending WB-0 through WB-3 work.
+Close WB-0 after real-corpus execution rather than treating a green synthetic schema as sufficient evidence. The pinned 1 Samuel 16:7 data now loads into PostgreSQL Authoring with 25 OSHB words, 34 BHSA words, 22 phrases, 7 clauses, 90 graph-membership edges, 35 bridging feature values, two preserved annotation-only nodes, 25 grouped mapping candidates of which seven are non-1:1, one project BODY_PART target and zero unresolved references. All automatic mappings remain non-canonical, no real BHSA/bridging projection is written to Serving, and the original synthetic relational/RLS/publication spike still passes. WB-0 is therefore complete as a bounded relational canary; WB-1 whole-Bible ingestion and coverage audit is now the next implementation priority.

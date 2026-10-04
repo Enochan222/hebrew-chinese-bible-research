@@ -1,6 +1,6 @@
 # Database Spike 001 executable harness
 
-Status: **POSTGRESQL 17 INTEGRATION SPIKE — CLEAN PR RUN PASS**
+Status: **POSTGRESQL 17 INTEGRATION SPIKE + WB-0 REAL-CORPUS CANARY**
 
 This directory is the executable companion to
 `architecture/database-spikes/001-scholarly-integrity-vertical-slice.md`.
@@ -29,6 +29,7 @@ project before applying migrations.
   deterministic-query, translation, and publication tests.
 - `03_query_plan.sql` records an `EXPLAIN (ANALYZE, BUFFERS)` probe for the
   representative deterministic corpus query.
+- `04_real_corpus_tests.sql` asserts the pinned real OSHB/BHSA/bridging 1 Samuel 16:7 relational canary loaded by `scripts/corpora/load_wb0_postgres.py`.
 
 ## Run contract
 
@@ -44,6 +45,20 @@ The GitHub Actions job starts PostgreSQL 17 and executes, in order:
 
 `ON_ERROR_STOP=1` is mandatory. Expected failures are caught and asserted
 inside PL/pgSQL test blocks; unexpected failures fail the job.
+
+The workflow also runs a second clean PostgreSQL job for WB-0:
+
+```text
+00_bootstrap.sql
+  -> 001_database_spike_001.sql
+  -> fetch pinned corpus sources
+  -> export OSHB/BHSA 1 Sam 16:7
+  -> build conservative grouped candidate crosswalk
+  -> load_wb0_postgres.py
+  -> 04_real_corpus_tests.sql
+```
+
+The real-corpus job deliberately does not load the synthetic seed and deliberately writes no BHSA/bridging-derived Serving projection. It is an Authoring relational-ingestion canary only.
 
 ## What this proves
 
@@ -80,15 +95,20 @@ This harness does **not** yet prove:
 - production corpus scale/latency;
 - the HTTP OpenAPI handlers;
 - the full opaque cursor contract that binds researchReleaseId + normalized query hash + execution-policy version;
-- real OSHB/MACULA/BHSA ingestion correctness;
+- whole-Bible OSHB/MACULA/BHSA ingestion correctness beyond the bounded WB-0 1 Samuel 16:7 canary;
 - full textual-apparatus richness;
 - every Core Freeze gate.
 
 Those remain explicit follow-on evidence, not implied by a green SQL spike.
 
 
-## Latest clean execution
+## Current execution evidence
 
-PR #9 exact head completed Database Spike 001 run `37195991129` successfully from a blank PostgreSQL 17 database, including migration, fixtures, adversarial tests, Authoring-offline public-serving checks, publication failure/rollback, and query-plan capture.
+The WB-0 review path has now produced two independent clean-PostgreSQL successes on the same reviewed PR head:
 
-This is not evidence of remote Supabase deployment. See the architecture spike document for the explicit proven/not-proven boundary.
+- the original controlled-fixture `postgres-spike`, covering relational constraints, RLS, Authoring-offline public serving, publication failure/rollback and representative query planning;
+- the `wb0-real-corpus-canary`, covering exact pinned source acquisition/export, grouped OSHB/BHSA crosswalk ingestion and the real relational assertions documented above.
+
+GitHub Actions on the exact merge head remains the authoritative execution record; this README does not hard-code a permanently “final” run ID because any later edit creates a new head.
+
+This is not evidence of remote Supabase deployment, whole-Bible WB-1 coverage, or permission to publicly serve BHSA/bridging-derived data. See the architecture spike document for the explicit proven/not-proven boundary.
