@@ -314,6 +314,8 @@ Old releases continue to pin their old source versions.
 
 ## 10. Database Spike 001 requirement
 
+**Current evidence boundary:** the merged PostgreSQL Database Spike 001 harness uses controlled synthetic fixtures. The corpus-source smoke in this integration proves pinned acquisition, export and candidate crosswalk behavior, but real OSHB/BHSA rows have not yet been loaded into the relational spike. The requirements below remain the next real-corpus database integration gate.
+
 The first real corpus vertical slice must use these pinned sources.
 
 Minimum test:

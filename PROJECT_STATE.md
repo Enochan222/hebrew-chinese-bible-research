@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.11**
+State Revision: **2026-10-04.14**
 
 ## Mandatory governance rule
 
@@ -148,7 +148,7 @@ Repository visibility remains public as observed state; this audit does not chan
 
 ## Current pinned Hebrew corpus integration
 
-The first real-corpus integration for Database Spike 001 is now machine-pinned and reproducible:
+The first corpus-source adapter integration intended for Database Spike 001 is now machine-pinned and reproducible:
 
 - OSHB/morphhb commit `3d15126fb1ef74867fc1434be1942e837932691f` is the initial text/word/lemma/morpheme/morphology baseline;
 - BHSA frozen dataset `2021`, fetched from repository commit `4db00e2157915495e1a4d3d57e41223df24775da`, is an independent framework-scoped phrase/clause/syntactic annotation source;
@@ -163,7 +163,8 @@ The first real-corpus integration for Database Spike 001 is now machine-pinned a
 - source pins never auto-advance and every upstream change requires reviewed PR, corpus diff, spike rerun and a new ResearchBuild/ResearchRelease;
 - OSHB public serving defaults to attribution-compatible use under its upstream terms;
 - BHSA public/commercial serving requires an explicit RightsDecision;
-- bridging-derived public serving is denied until its mixed upstream rights are reviewed.
+- bridging-derived public serving is denied until its mixed upstream rights are reviewed;
+- the source smoke has **not** yet loaded these real OSHB/BHSA exports into the merged PostgreSQL Database Spike 001 schema; that relational real-corpus ingestion remains the next integration gate.
 
 See `architecture/corpus-source-integration.md` and `contracts/v1.1/corpus-source-registry.json`.
 
@@ -197,7 +198,7 @@ See `architecture/corpus-source-integration.md` and `contracts/v1.1/corpus-sourc
 
 - exact Chinese translation witness launch list;
 - final provider for each translation witness;
-- final production/public-serving mix of OSHB/MACULA/BHSA layers after Database Spike evidence and BHSA/MACULA rights review; the initial Spike pins and OSHB/BHSA/bridging roles are now fixed in the corpus source registry;
+- final production/public-serving mix of OSHB/MACULA/BHSA layers after real-corpus relational evidence and BHSA/MACULA rights review; the initial OSHB/BHSA/bridging source pins and roles are fixed in the corpus source registry;
 - commercial provider licences/quotas for Scite/CORE/Semantic Scholar where applicable;
 - final Research Pro rollout sequence;
 - final entitlement/pricing model;
@@ -206,11 +207,11 @@ See `architecture/corpus-source-integration.md` and `contracts/v1.1/corpus-sourc
 ## Current implementation priority
 
 1. Preserve contract/governance consistency.
-2. Database Spike 001 using the pinned OSHB/BHSA/ETCBC-bridging real-corpus inputs for PostgreSQL/Supabase constraints and cross-layer query validation.
+2. Connect the pinned OSHB/BHSA/ETCBC-bridging exports to the merged Database Spike 001 relational schema and validate real-corpus cross-layer constraints/queries without promoting unreviewed candidate mappings.
 3. Implement provider adapters and ResearchModelAdapter interfaces.
 4. Validate one end-to-end literature-discovery build against a real Hebrew-Bible ResearchIssue.
 5. Continue later application stages without weakening publication/rights/reproducibility boundaries.
 
 ## Latest push intent
 
-This revision classifies the two zero-letter BHSA 1 Samuel 16:7 slots using real smoke evidence. Nodes `150439` and `150445` are Hebrew article (`art`) annotation nodes with lexeme and phrase/clause membership but no orthographic/consonantal value, qere, or bridging morphology. They are now preserved explicitly as non-canonical annotation-only BHSA nodes and excluded only from orthographic OSHB↔BHSA span alignment. The existing database contract already permits AnalysisNode objects with zero `analysis_node_segments` rows; the prose and Database Spike now state that this must not trigger an invented TextSegment or cross-framework textual identity.
+PR #8 is synchronized onto current protected `main` after the executable Database Spike 001 and the post-merge Serving-publication RLS correction. Real-corpus source-adapter evidence is now cleanly separated from relational evidence: corpus smoke run `37196120231` passed pinned OSHB/BHSA/bridging acquisition, OSHB 25-word/BHSA 34-slot export, annotation-only BHSA article-node preservation, and conservative many-to-many candidate alignment with no unresolved reference. The merged PostgreSQL spike remains a controlled-fixture integrity slice; importing these real corpus exports into its relational schema is still pending and is now the next corpus/database integration gate.
