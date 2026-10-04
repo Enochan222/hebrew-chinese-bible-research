@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-05.9**
+State Revision: **2026-10-05.10**
 
 ## Mandatory governance rule
 
@@ -15,6 +15,21 @@ Every push/PR that changes this repository must:
 6. run required validation before merge/push.
 
 `PROJECT_CHARTER.md` is the stable product constitution. This file is the current operational/architectural state and therefore changes on every push.
+
+## Current project AI execution policy
+
+GitHub Copilot is not authorized for this repository's project work.
+
+- do not request Copilot pull-request review;
+- do not use Copilot Coding Agent, Autofix, Chat/code generation, or any operation that consumes Copilot quota/premium requests;
+- do not treat Copilot output as merge or acceptance evidence;
+- AI-assisted implementation, analysis, repository orchestration and code review are performed through the project's ChatGPT workflow;
+- deterministic GitHub Actions and ordinary non-AI GitHub features remain allowed;
+- an exception requires an explicit repository-owner policy change through the governed PR path.
+
+Machine authority: `contracts/v1.1/github-ai-usage-policy.json`.
+
+The repository owner reported on 2026-10-05 that GitHub account-level automatic Copilot code review was disabled. Repository metadata does not expose that user-level toggle, so this is recorded as owner-reported rather than independently verified.
 
 ## What this project is
 
@@ -288,4 +303,4 @@ The dedicated whole-Bible workflow is the executable acceptance authority for th
 
 ## Latest push intent
 
-Repair the WB-CORPUS-001 CI validation dependency after the first full-source execution proved the corpus build itself succeeds. That run produced 23,213 expected reference spans, 306,785 OSHB words, 426,590 BHSA nodes, 287,216 candidate mappings, 1,138 explicit unresolved references, zero silent reference loss and a `gatePass=true` manifest, then failed only because the inline generated-manifest validator imported `jsonschema` without installing the pinned contract requirements. The workflow now installs both corpus and contract-validator requirements and gains a relevant-path `main` push trigger. No corpus semantics, canary output shape, PostgreSQL schema or publication boundary is changed by this correction.
+Make the repository's AI execution policy explicit and machine-enforced: GitHub Copilot is not an authorized project reviewer or coding agent, no repository workflow may depend on Copilot, and project AI-assisted implementation/review is performed through ChatGPT unless the repository owner explicitly changes the policy through the governed PR path. The owner reports that account-level Automatic Copilot code review has been disabled; because that user-level setting is not exposed by repository metadata, it is not represented as independently verified live state. This governance change does not alter the whole-Bible product architecture, WB-CORPUS-001 evidence, WB-1 implementation semantics, GitHub Actions CI, or human collaboration.
