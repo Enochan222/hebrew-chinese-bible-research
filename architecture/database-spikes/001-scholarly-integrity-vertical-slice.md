@@ -55,7 +55,7 @@ Bootstrap and provider-scoped export tooling:
 - `scripts/corpora/export_bhsa_features.py`;
 - `scripts/corpora/build_candidate_crosswalk.py`.
 
-The source-adapter smoke proves acquisition, provider-scoped export and conservative OSHB/BHSA crosswalk behavior against the pinned data. The merged PostgreSQL Database Spike 001 harness still loads controlled synthetic fixtures and has **not** yet imported these real-corpus exports into the relational schema. Therefore this section is the next real-corpus relational integration requirement, not evidence that real-corpus database ingestion is already complete.
+The source-adapter smoke proves acquisition, provider-scoped export and conservative OSHB/BHSA crosswalk behavior against the pinned data. WB-0 adds a second, independent clean-PostgreSQL job that imports the bounded real 1 Samuel 16:7 exports into Authoring while the original synthetic adversarial job remains intact. The WB-0 job is accepted only when exact-head CI proves the real relational assertions. It remains a canary, not whole-Bible ingestion evidence.
 
 The spike must preserve the source roles defined in `architecture/corpus-source-integration.md`: OSHB is the initial morphology/morpheme baseline; BHSA phrase/clause/syntax stays framework-scoped; ETCBC bridging is derived comparison/mapping evidence; project SemanticSetVersion remains the authority for project-curated semantic classes.
 
@@ -244,6 +244,8 @@ Success means:
 
 Any load-bearing contract contradicted by PostgreSQL or real corpus data must be corrected before CORE_FREEZE_V1_1.
 
+WB-0 specifically succeeds only if the real canary preserves the exact pinned provider counts/identity, the two evidenced BHSA annotation-only nodes, phrase/clause graph membership, project BODY_PART authority, bridging comparison features, and grouped non-canonical OSHB/BHSA mapping evidence. A successful WB-0 does **not** satisfy `CORE-FZ-WB-002`; WB-1 still requires the same importer design to be generalized and audited across the complete configured corpus.
+
 
 ## 11. Executable implementation boundary
 
@@ -262,7 +264,11 @@ Executable files:
 - `database/spikes/001/01_seed.sql`;
 - `database/spikes/001/02_tests.sql`;
 - `database/spikes/001/03_query_plan.sql`;
+- `database/spikes/001/04_real_corpus_tests.sql`;
+- `scripts/corpora/load_wb0_postgres.py`;
 - `.github/workflows/database-spike-001.yml`.
+
+The workflow has two independent PostgreSQL jobs. The controlled-fixture job protects the broad adversarial integrity surface. The WB-0 job starts from another blank database, fetches the pinned real corpus sources, loads only the 1 Samuel 16:7 relational canary, and proves the real-provider invariants without writing a public Serving corpus projection.
 
 The CI bootstrap creates only the Supabase-compatible roles and `auth.uid()` shim needed by plain PostgreSQL. Those are not production schema objects to recreate in a real Supabase project.
 
