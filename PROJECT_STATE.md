@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-05.9**
+State Revision: **2026-10-05.10**
 
 ## Mandatory governance rule
 
@@ -277,15 +277,41 @@ This revision introduces the whole-corpus source/build boundary that WB-1 must c
 
 The dedicated whole-Bible workflow is the executable acceptance authority for this source foundation. Its first exact-head execution completed the full corpus build successfully and observed 23,213 selected-reference spans, 306,785 OSHB word records, 426,590 BHSA word nodes, 287,216 candidate span mappings, 1,138 explicitly unresolved references and zero silent reference loss. The generated manifest returned `gatePass=true` and `COMPLETE_WITH_EXPLICIT_EXCEPTIONS`. That run then failed only in the separate schema-validation step because the workflow had installed corpus dependencies but not the repository's pinned `jsonschema` validator. The workflow now installs both `requirements-corpus.txt` and `requirements-contracts.txt` and also runs on relevant pushes to `main`, so validation is repeated after merge. WB-0's exact 1 Samuel 16:7 export shape/hashes remain regression evidence; the new BHSA `--all` mode does not change the canary record shape.
 
+## WB-1 relational whole-corpus implementation state
+
+WB-1 is now implemented as a relational consumer of WB-CORPUS-001 rather than a competing second whole-source build.
+
+Current review-branch implementation:
+
+- selected navigation/relational CanonSystem `TANAKH_OSIS_39` is machine-declared and contract-validated;
+- source completeness remains anchored to the independent WB-CORPUS-001 `OSHB_OSIS` ReferenceSystem inventory, not to the CanonSystem's book count;
+- accepted WB-CORPUS-001 OSHB/BHSA/crosswalk artifacts are hash-verified and partitioned per configured book only to bound memory and database transactions;
+- exact source provider-book codes are reconciled to the selected CanonSystem before import;
+- PostgreSQL now implements `canon_systems` / `canon_books`;
+- AnalysisNode/TextSegment integrity is generalized from WB-0 exact-span equality to same-expression, same-book span containment;
+- synthetic SQL regression proves a multi-atom AnalysisNode accepts contained verse-local members and rejects an out-of-span segment;
+- each book imports transactionally with PostgreSQL COPY;
+- all OSHB and BHSA provider word records must remain represented as provider-scoped AnalysisNodes;
+- BHSA TextSegments are created only where source text is present; reviewed annotation-only and other empty-source states remain explicit in the audit;
+- BHSA phrase/clause provider nodes, features, range spans, direct segment memberships and graph edges are retained;
+- grouped cross-framework candidates remain `CANDIDATE_AUTOMATED` and non-canonical;
+- unresolved cross-framework references are carried as explicit research exceptions and are not counted as silent source-ingestion loss;
+- relational counts are reconciled per book/framework/node type back to the source-foundation artifacts and selected reference inventory;
+- any missing configured source division, duplicate provider identity, OSHB source-surface loss, importer failure or database/source parity drift fails the WB-1 gate;
+- real BHSA/bridging-derived rows remain absent from Serving in WB-1;
+- `.github/workflows/wb1-relational-whole-corpus.yml` rebuilds WB-CORPUS-001, imports the relational corpus and uploads the machine-auditable WB-1 report.
+
+WB-1 acceptance remains **PENDING** until the exact PR head completes the full pinned corpus workflow and its observed exception/count profile is independently reviewed. `CORE-FZ-WB-002` must not be marked complete before that evidence exists.
+
 ## Current implementation priority
 
 1. Preserve contract/governance consistency and the whole-Bible scope guard.
-2. Use WB-CORPUS-001 as the required complete-source input boundary for WB-1, then generalize the WB-0 provider-scoped importer across it and produce auditable relational book/reference/count/error/exception evidence.
-3. Complete WB-2: compile the whole-corpus Authoring result into rights-safe, release-pinned passage-serving projections.
+2. Execute and repair WB-1 against the complete accepted WB-CORPUS-001 foundation until the relational source/database parity gate passes without silent record loss.
+3. After WB-1 acceptance, complete WB-2: compile the whole-corpus Authoring result into rights-safe, release-pinned passage-serving projections.
 4. Complete WB-3: replace fixture-only Hebrew passage content with a database-backed whole-Bible reader/navigation.
 5. Complete WB-4/WB-5: add selected translation witnesses, alignment/comparison, project/user translation workflow and deterministic whole-corpus analysis.
 6. Only then make Research Pro provider adapters, ResearchModelAdapter and end-to-end literature builds the primary product implementation frontier; academic enrichment may proceed in parallel where it does not block the base path.
 
 ## Latest push intent
 
-Repair the WB-CORPUS-001 CI validation dependency after the first full-source execution proved the corpus build itself succeeds. That run produced 23,213 expected reference spans, 306,785 OSHB words, 426,590 BHSA nodes, 287,216 candidate mappings, 1,138 explicit unresolved references, zero silent reference loss and a `gatePass=true` manifest, then failed only because the inline generated-manifest validator imported `jsonschema` without installing the pinned contract requirements. The workflow now installs both corpus and contract-validator requirements and gains a relevant-path `main` push trigger. No corpus semantics, canary output shape, PostgreSQL schema or publication boundary is changed by this correction.
+Implement WB-1 as the relational consumer of the already accepted WB-CORPUS-001 source foundation. The change adds a selected CanonSystem without using its book count as the source-coverage denominator, generalizes node/segment integrity for cross-reference phrase/clause spans, partitions the accepted whole-source artifacts only for bounded execution, imports every configured book transactionally into PostgreSQL Authoring, and reconciles provider/source counts back to the independent reference inventory and source-coverage manifest. The implementation remains unaccepted until the exact PR head completes the full real-corpus relational workflow; any observed mismatch must be repaired or retained as an explicit bounded exception before `CORE-FZ-WB-002` can pass.
