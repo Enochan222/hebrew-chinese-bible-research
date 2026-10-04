@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.14**
+State Revision: **2026-10-04.15**
 
 ## Mandatory governance rule
 
@@ -183,6 +183,26 @@ Repository visibility remains public as observed state; this audit does not chan
 - final entitlement/pricing model;
 - detailed visual system within scholarly UX constraints.
 
+## Phase 1 fixture serving-shell implementation state
+
+P1-VS-001A–F introduces the first executable public-serving shell under `apps/web` as a deliberately fixture-backed implementation boundary.
+
+Current bounded state:
+
+- Next.js App Router + strict TypeScript is used for the fixture serving shell only; this does not select a cloud provider or database platform;
+- current passage navigation resolves the fixture PRODUCTION ResearchRelease once and redirects to a citation-stable pinned-release route;
+- pinned passage reads never re-resolve the current release;
+- Study and Research mode switching preserves the same ResearchRelease, human reference and ReferenceSystem;
+- the canonical v1.1 release-pointer, passage-core and experience-capabilities fixture chain is runtime-validated before rendering;
+- the UI visibly labels all data as fixture/non-production and does not claim database-backed passage content;
+- application/features depend on domain ports/services rather than fixture adapter implementations;
+- no PostgreSQL/Supabase/ORM/auth/cloud SDK, migration, publication worker, CorpusQuery, translation workbench or annotation storage is introduced;
+- scoped npm lint uses a deterministic source/import/SQL/dependency boundary scanner rather than a framework lint preset, minimizing transitive tooling surface;
+- the rich PassageExperience projection remains deliberately unfrozen;
+- DB-0 remains responsible for real relational constraints, RLS/grants, ReferenceSystem resolution against persisted data, ResearchRelease/channel persistence and publication visibility atomicity.
+
+This is fixture-shell implementation evidence only. It does not satisfy real-database CORE_FREEZE gates or complete Phase 1.
+
 ## Current implementation priority
 
 1. Preserve contract/governance consistency.
@@ -194,4 +214,4 @@ Repository visibility remains public as observed state; this audit does not chan
 
 ## Latest push intent
 
-Post-merge adversarial review has now closed two distinct trust-boundary gaps. Main at `c9e45594c40fc04b5b0e241a82142b3897d92486` gates inactive Serving candidates behind a committed PUBLISHED event so direct public reads cannot bypass the atomic channel pointer. This revision closes the remaining machine-contract holes: required CitationLocator identities can no longer be null or empty, and `get_rule_applications` now uses PassageLocatorV1 so every human reference label carries explicit ReferenceSystem identity. Positive and negative regression fixtures cover both changes. The secret scanner now excludes dependency/build/report/cache/VCS output after a combined validation run proved those generated trees caused false alarms. No remote Supabase project has been designated or modified.
+Main now includes the publication-visibility and contract-identity repairs through `a9fab9bd34c982b8ff927a0e5c5c6986d6c75cdc`. This revision synchronizes the P1 fixture shell with that protected main and closes its local acceptance blockers: the npm lockfile is tracked; Ajv receives typed schema values and pre-registers canonical `$id` schemas so PassageRequest resolves PassageLocator at runtime; contract reads are scoped to `contracts/v1.1`; Next.js TypeScript configuration is synchronized; generated paths are ignored; and secret validation skips dependency/build/report/cache/VCS trees. A regression test exercises the previously failing external-schema reference. Local contract validation, both OpenAPI validators, lockfile stability, typecheck, boundary lint, eight unit tests, HTTP integration, and production build pass. Local Playwright remains unverified because the permitted browser download returned a zero-byte archive; GitHub Actions must complete browser and visual acceptance before merge.
