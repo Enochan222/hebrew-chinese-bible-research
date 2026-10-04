@@ -4,6 +4,37 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+## 2026-10-04 — Close CitationLocator and passage-scoped MCP identity gaps
+
+### Push intent
+
+Repair two machine-contract defects found by post-merge adversarial review, and synchronize the living state with the fact that Database Spike 001 is now merged.
+
+### Why
+
+The CitationLocator schema required type-specific property names but several identity properties still accepted `null`, while printed-page labels could be empty. Separately, the Product MCP `get_rule_applications` input retained a pre-ReferenceSystem bare `reference` string even though the project now requires every human reference label to carry explicit ReferenceSystem identity. Existing fixtures did not exercise either failure mode.
+
+### What changed
+
+- made SOURCE_SPAN, PRINTED_PAGE, SOURCE_ASSET_PAGE, DOCUMENT_SECTION, LEXICON_ENTRY, BIBLICAL_REFERENCE, and CORPUS_RESULT locator identities non-null and made printed-page labels non-empty;
+- changed RuleApplicationsRequestV1 to reuse PassageLocatorV1, accepting either canonical `referenceSpanId` or `referenceSystemCode` plus `referenceLabel`;
+- added one positive rule-application request fixture and nine negative regression fixtures;
+- updated Product MCP prose, active architecture, and the machine-contract inventory;
+- corrected PROJECT_STATE implementation priorities and latest intent after PR #9 merged to protected `main`.
+- limited secret scanning to repository-controlled source and configuration, excluding dependency, build, test-report, coverage, cache, and VCS directories so generated third-party files cannot create false positives.
+
+### Intended effect
+
+Public evidence cannot carry formally present but unusable locator identities, and passage-scoped rule-application reads can no longer resolve human labels outside an explicit reference system.
+
+### Validation
+
+- regression-first contract runs failed on the new rule-application fixture and eight nullable/empty CitationLocator cases before the schema repair;
+- a combined web/contract validation run reproduced false secret alarms from `.next` and `node_modules` before the generated-directory exclusion;
+- repaired local contract validation passes with 40 positive fixtures plus all negative, semantic, vocabulary, governance, and secret checks;
+- Core and Research Pro OpenAPI validation remain required before push/merge;
+- GitHub `contracts` and `state-and-changelog` checks remain the merge authority.
+
 ## 2026-10-04 — Add P1 fixture-backed release-pinned Passage serving shell
 
 ### Push intent
@@ -46,7 +77,7 @@ The subsequent full local run exposed two real blockers that the first unit test
 - adds a regression test for PassageRequest external-reference resolution;
 - narrows dynamic contract file access to `contracts/v1.1`, removing the production-build whole-repository trace warning;
 - synchronizes Next.js 16 generated TypeScript declarations/settings and disables unwanted agent-rule file generation;
-- ignores generated web build, dependency, report and incremental-build paths.
+- ignores generated web build, dependency, report and incremental-build paths;
 - excludes dependency, build, test-report, coverage, cache and VCS trees from the repository secret scan after generated Next.js/dependency files caused false alarms in the combined validation run.
 
 After repair, local contract validation, Core/Research Pro OpenAPI validation, deterministic lockfile regeneration, `npm ci`, typecheck, boundary lint, eight unit tests, HTTP integration, and production build pass. Playwright could not install Chromium locally because the permitted download path returned a zero-byte invalid archive; the branch workflow must therefore run Playwright E2E/visual capture and the complete suite before merge. Visual QA must then be inspected for ready, invalid-mode, missing-reference and missing-release states.

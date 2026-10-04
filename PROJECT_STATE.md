@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.14**
+State Revision: **2026-10-04.15**
 
 ## Mandatory governance rule
 
@@ -138,7 +138,8 @@ Repository visibility remains public as observed state; this audit does not chan
 - Official project TranslationDecision pins an immutable TranslationSourceBasis and exact TranslationPolicyVersion.
 - Corpus query execution separates scholarly query meaning from cursor/page retrieval state and distinguishes exact from unavailable total counts.
 - RightsDecisionSnapshot is fail-closed: unresolved/unknown permission cannot surface as an UNKNOWN final outcome or ALLOW.
-- Public evidence uses typed CitationLocator semantics; excerpts require rights snapshots and immutable evidence requires content hashes.
+- Public evidence uses typed CitationLocator semantics whose required identity cannot be null or empty; excerpts require rights snapshots and immutable evidence requires content hashes.
+- Passage-scoped rule-application MCP reads use the shared ReferenceSystem-aware PassageLocator contract rather than an ambiguous bare reference string.
 - ResearchPositionVersion pins the exact ResearchIssueVersion framing used for that scholarly position.
 - Database Spike 001 is specified as an adversarial scholarly-integrity vertical slice, not a table-creation demo.
 - `main` is live-protected by active repository ruleset `Protect main` (ID `24409248`).
@@ -207,10 +208,10 @@ This is fixture-shell implementation evidence only. It does not satisfy real-dat
 1. Preserve contract/governance consistency.
 2. Synchronize and complete the pinned OSHB/BHSA corpus-source integration against current `main`.
 3. Complete the fixture-backed Phase 1 serving shell acceptance gate and open its PR.
-4. Implement provider adapters and ResearchModelAdapter interfaces.
+4. Implement scholarly provider adapters and ResearchModelAdapter interfaces.
 5. Validate one end-to-end literature-discovery build against a real Hebrew-Bible ResearchIssue.
 6. Continue later application stages without weakening publication/rights/reproducibility boundaries.
 
 ## Latest push intent
 
-Main at `c9e45594c40fc04b5b0e241a82142b3897d92486` now gates inactive Serving candidates behind a committed PUBLISHED event. This revision synchronizes the P1 fixture shell with that protected main and closes its local acceptance blockers: the npm lockfile is tracked; Ajv receives typed schema values and pre-registers canonical `$id` schemas so PassageRequest resolves PassageLocator at runtime; contract reads are scoped to `contracts/v1.1`; Next.js TypeScript configuration is synchronized; generated paths are ignored; and secret validation skips dependency/build/report/cache/VCS trees after those generated files caused false alarms. A regression test exercises the previously failing external-schema reference. Local contract validation, both OpenAPI validators, lockfile stability, typecheck, boundary lint, eight unit tests, HTTP integration, and production build pass. Local Playwright remains unverified because the permitted browser download returned a zero-byte archive; GitHub Actions must complete browser and visual acceptance before merge.
+Main now includes the publication-visibility and contract-identity repairs through `a9fab9bd34c982b8ff927a0e5c5c6986d6c75cdc`. This revision synchronizes the P1 fixture shell with that protected main and closes its local acceptance blockers: the npm lockfile is tracked; Ajv receives typed schema values and pre-registers canonical `$id` schemas so PassageRequest resolves PassageLocator at runtime; contract reads are scoped to `contracts/v1.1`; Next.js TypeScript configuration is synchronized; generated paths are ignored; and secret validation skips dependency/build/report/cache/VCS trees. A regression test exercises the previously failing external-schema reference. Local contract validation, both OpenAPI validators, lockfile stability, typecheck, boundary lint, eight unit tests, HTTP integration, and production build pass. Local Playwright remains unverified because the permitted browser download returned a zero-byte archive; GitHub Actions must complete browser and visual acceptance before merge.

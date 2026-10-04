@@ -70,6 +70,7 @@ POSITIVE = [
  ("contracts/v1.1/json-schema/translation-source-basis.schema.json","contracts/v1.1/fixtures/translation-source-basis.json"),
  ("contracts/v1.1/json-schema/translation-policy-version.schema.json","contracts/v1.1/fixtures/translation-policy-version.json"),
  ("contracts/v1.1/json-schema/rights-decision-snapshot.schema.json","contracts/v1.1/fixtures/rights-decision-conditional.json"),
+ ("contracts/v1.1/json-schema/rule-applications-request.schema.json","contracts/v1.1/fixtures/rule-applications-request.json"),
 
 ]
 
@@ -88,6 +89,15 @@ NEG_SCHEMA = [
  ("contracts/v1.1/json-schema/corpus-query-result.schema.json","contracts/v1.1/negative-fixtures/corpus-query-result-nonexact-with-total.json"),
  ("contracts/v1.1/json-schema/translation-source-basis.schema.json","contracts/v1.1/negative-fixtures/translation-source-basis-stream-with-apparatus.json"),
  ("contracts/v1.1/json-schema/published-evidence-item.schema.json","contracts/v1.1/negative-fixtures/published-evidence-excerpt-without-citation.json"),
+ ("contracts/v1.1/json-schema/citation-locator.schema.json","contracts/v1.1/negative-fixtures/citation-locator-source-span-null-id.json"),
+ ("contracts/v1.1/json-schema/citation-locator.schema.json","contracts/v1.1/negative-fixtures/citation-locator-printed-page-null-edition.json"),
+ ("contracts/v1.1/json-schema/citation-locator.schema.json","contracts/v1.1/negative-fixtures/citation-locator-printed-page-empty-label.json"),
+ ("contracts/v1.1/json-schema/citation-locator.schema.json","contracts/v1.1/negative-fixtures/citation-locator-source-asset-page-null-id.json"),
+ ("contracts/v1.1/json-schema/citation-locator.schema.json","contracts/v1.1/negative-fixtures/citation-locator-biblical-reference-null-id.json"),
+ ("contracts/v1.1/json-schema/citation-locator.schema.json","contracts/v1.1/negative-fixtures/citation-locator-corpus-result-null-id.json"),
+ ("contracts/v1.1/json-schema/citation-locator.schema.json","contracts/v1.1/negative-fixtures/citation-locator-document-section-null-edition.json"),
+ ("contracts/v1.1/json-schema/citation-locator.schema.json","contracts/v1.1/negative-fixtures/citation-locator-lexicon-entry-null-edition.json"),
+ ("contracts/v1.1/json-schema/rule-applications-request.schema.json","contracts/v1.1/negative-fixtures/rule-applications-label-without-reference-system.json"),
 
 ]
 
