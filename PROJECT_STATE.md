@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.16**
+State Revision: **2026-10-04.17**
 
 ## Mandatory governance rule
 
@@ -155,7 +155,7 @@ The first corpus-source adapter integration intended for Database Spike 001 is n
 - BHSA frozen dataset `2021`, fetched from repository commit `4db00e2157915495e1a4d3d57e41223df24775da`, is an independent framework-scoped phrase/clause/syntactic annotation source;
 - ETCBC bridging `2021`, commit `324598bb3f9cb3a36543e77ac61e4b0f77addf82`, is 2021-derived morphology-comparison evidence on BHSA word nodes and is not assumed to map the current OSHB pin's provider word IDs;
 - project SemanticSetVersion remains the authority for project-curated semantic categories such as BODY_PART;
-- upstream corpus data is downloaded on demand into gitignored `.local/corpora/`, never vendored as the repository's canonical data;
+- upstream corpus data is downloaded on demand into gitignored `.local/corpora/`, never vendored as the repository's canonical data; cache manifests bind source pin, registry schema, acquisition method/path set, exact file set, byte counts and SHA-256, and any mismatch fails closed;
 - BHSA local cache is now required to contain every feature referenced by its pinned `otext.tf` formats and section configuration; the fetcher rejects incomplete caches before Text-Fabric loading;
 - source exact Unicode is preserved; OSHB source identity is not NFC-normalized;
 - provider book-name aliases are normalized only for passage filtering/candidate comparison; emitted provider reference labels remain source-native and canonical project passage identity still resolves through ReferenceSystem/ReferenceSpan;
@@ -235,4 +235,4 @@ This is fixture-shell implementation evidence only. It does not satisfy real-dat
 
 ## Latest push intent
 
-Main now includes the publication-visibility, contract-identity, and P1 fixture-serving repairs through `21ef79f07dffddde5b87aa86f16a50d3c2f1cdc5`. PR #8 is synchronized onto that protected main. Real-corpus source-adapter evidence remains cleanly separated from relational evidence: the pinned OSHB/BHSA/bridging smoke passes with 25 OSHB words, 34 BHSA slots, two annotation-only article nodes, 25 conservative candidate mappings, and no unresolved reference. The merged PostgreSQL spike remains a controlled-fixture integrity slice; importing these real corpus exports into its relational schema is still pending and is the next corpus/database integration gate. No remote Supabase project has been designated or modified.
+Post-merge adversarial review of the corpus tooling found two fail-closed gaps not exercised by the successful 1 Samuel 16:7 smoke: an existing cache could trust a truncated self-authored manifest because verification did not require the manifest file set to equal the actual cache file set, and the OSHB exporter could return success with an empty artifact when a requested reference did not exist. The current change hardens manifest/config/path/size/hash verification, rejects path traversal and untracked cache files, makes zero-record OSHB export a hard failure, and adds adversarial CI regressions. The larger next product gate is unchanged: import the real pinned corpus exports into the PostgreSQL Database Spike schema.
