@@ -4,6 +4,41 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+## 2026-10-05 — Harden whole-Bible reference and corpus-adapter boundaries
+
+### Push intent
+
+Repair post-merge integration defects that the compact 1 Samuel 16:7 fixture did not expose, without presenting the existing source adapters or fixture web shell as a completed whole-Bible database product.
+
+### Why
+
+PassageLocatorV1 deliberately treats `referenceSystemCode` and `referenceLabel` as explicit but system-owned strings. The web shell nevertheless imposed an OSIS-like ASCII regex, rejecting valid labels such as `1 Samuel 16:7` before the declared ReferenceSystem could resolve them. The corpus crosswalk also treated any empty BHSA node with generic lexical/graph metadata as a known annotation-only node, although the real evidence only established a narrower Hebrew article shape. Separately, the Core OpenAPI did not document the implemented passage-route error surface. A repository-local Python virtual environment also reproduced another secret-scan false positive. The zero-word OSHB export defect was independently repaired on current `main` by PR #13 before this change was rebased.
+
+### What changed
+
+- made web passage labels and ReferenceSystem codes opaque after non-empty presence validation, leaving system-specific syntax to deterministic reference resolution;
+- changed unknown human labels from synthetic 400-format failures to normal 404 lookup misses;
+- narrowed automatic BHSA annotation-only classification to the evidenced unbridged Hebrew article shape with lexeme plus phrase/clause context;
+- kept every other empty BHSA node fail-closed for review;
+- retained PR #13's stronger zero-record OSHB behavior, including removal of an empty output artifact;
+- added synthetic corpus adapter unit tests and made the corpus workflow run them before downloading sources;
+- documented all implemented Core passage error statuses and codes in OpenAPI and made contract validation reject future drift;
+- bound each implemented passage route to its exact status set and each status to its exact allowed error-code schema after independent review found that a shared union still permitted invalid status/code combinations;
+- preserved the separate generic `NOT_FOUND` response used by non-passage analysis/evidence endpoints;
+- excluded repository-local virtual-environment directories from secret scanning and Git tracking.
+
+### Intended effect
+
+Adding new biblical books, versification systems, or human label conventions no longer requires weakening an OSIS-specific web regex. Whole-corpus adapter runs cannot silently promote unfamiliar empty BHSA nodes as reviewed annotation-only structures. API clients can rely on the same error surface that the fixture implementation actually returns.
+
+### Validation
+
+- regression-first web unit test failed on the previous ReferenceSystem regex;
+- regression-first corpus tests failed on generic empty-node classification and zero-word OSHB success;
+- the strengthened contract validator failed on all eight over-broad passage status/code mappings before route-specific response schemas were introduced;
+- the repaired focused web and corpus tests pass;
+- full contract, OpenAPI, web, corpus-smoke and GitHub validation remain required on the exact PR head before merge.
+
 
 ## 2026-10-05 — Make whole-Bible base coverage the explicit execution baseline
 

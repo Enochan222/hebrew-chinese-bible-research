@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-05.1**
+State Revision: **2026-10-05.4**
 
 ## Mandatory governance rule
 
@@ -229,6 +229,7 @@ Current bounded state:
 - current passage navigation resolves the fixture PRODUCTION ResearchRelease once and redirects to a citation-stable pinned-release route;
 - pinned passage reads never re-resolve the current release;
 - Study and Research mode switching preserves the same ResearchRelease, human reference and ReferenceSystem;
+- human reference labels and ReferenceSystem codes are opaque contract values; the fixture shell validates presence but does not impose OSIS-only syntax before deterministic resolution;
 - the canonical v1.1 release-pointer, passage-core and experience-capabilities fixture chain is runtime-validated before rendering;
 - the UI visibly labels all data as fixture/non-production and does not claim database-backed passage content;
 - application/features depend on domain ports/services rather than fixture adapter implementations;
@@ -250,4 +251,4 @@ This is fixture-shell implementation evidence only. It does not satisfy real-dat
 
 ## Latest push intent
 
-Realign implementation sequencing with the product's already-declared whole-Hebrew-Bible scope. The repository now has an explicit Whole-Bible Base Product authority, scope guard for agents, whole-Bible Core freeze gates and a Phase 2A corpus/reader milestone ahead of Phase 2B translation workbench and later Research Pro depth. Existing 1 Samuel 16:7 / other passage fixtures remain valuable acceptance vectors, but they no longer risk being read as the product scope. No database schema, source pin, rights rule, ResearchRelease semantic or runtime feature is changed by this architecture/roadmap correction.
+Post-merge whole-Bible boundary review found three remaining integration defects hidden by the compact `1Sam.16.7` fixture: the web shell imposed OSIS-like syntax on otherwise opaque ReferenceSystem labels/codes; the BHSA crosswalk classified generic empty lexical nodes as annotation-only rather than only the evidenced Hebrew article shape; and the Core OpenAPI omitted the error statuses/codes already returned by the implemented passage routes. This revision repairs those boundaries, adds corpus unit tests to CI, excludes local virtual environments from source/secret scanning, retains PR #13's stronger zero-record OSHB failure cleanup, and binds each implemented passage route to its exact runtime status/error-code surface without changing the generic `NOT_FOUND` contract used elsewhere. The real relational importer, whole-corpus coverage audit, release-pinned database serving and remote Supabase designation remain pending WB-0 through WB-3 work.

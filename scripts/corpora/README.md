@@ -41,6 +41,8 @@ python scripts/corpora/export_bhsa_features.py \
 
 Passage CLI filters share `reference_aliases.py`, which equates known OSHB/BHSA Latin/BHSA English book labels only for filtering and candidate comparison. Exported provider labels remain unchanged. A requested BHSA passage with zero words is an error, not a successful empty export.
 
+A requested OSHB passage with zero words is likewise an error. The unfiltered whole-source mode may still be used to export every available source record.
+
 The BHSA exporter loads ETCBC bridging features when the pinned bridging cache exists. Those fields are attached to BHSA word nodes as 2021 comparison evidence and are not represented as current OSHB provider word IDs.
 
 Build a conservative current-OSHB to BHSA candidate crosswalk:
@@ -53,6 +55,8 @@ python scripts/corpora/build_candidate_crosswalk.py \
 ```
 
 The crosswalk supports conservative contiguous many-to-many token spans. Equal token counts are not required. It first requires equal whole-verse consonantal streams, then emits the smallest prefix-compatible contiguous span groups. Any textual/prefix divergence becomes `NEEDS_REVIEW`; generated mappings are `CANDIDATE_AUTOMATED` and never canonical by themselves.
+
+Automatic `ANNOTATION_ONLY_TARGET_NODE` classification is intentionally narrow: it currently recognizes only the evidenced unbridged Biblical Hebrew article-node shape with lexeme, article POS/PDP and phrase/clause context. Other empty target nodes remain unresolved until their source semantics are reviewed.
 
 ## Updating upstream data
 

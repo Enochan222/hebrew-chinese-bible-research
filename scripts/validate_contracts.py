@@ -3,6 +3,7 @@ from __future__ import annotations
 import json, re, sys
 from pathlib import Path
 from typing import Any
+import yaml
 from jsonschema import Draft202012Validator, FormatChecker
 from referencing import Registry, Resource
 
@@ -313,6 +314,45 @@ def governance():
     for stale in ("VERIFIED_OPEN","LICENSED_FOR_INDEXING","LICENSED_PRIVATE_ONLY","USER_SUPPLIED_RESEARCH_ONLY"):
         if stale in tax: fail(f"stale source status {stale}")
 
+    core_api=yaml.safe_load((ROOT/"contracts/v1.1/openapi.yaml").read_text(encoding="utf-8"))
+    required_passage_statuses={"200","400","404","500","503"}
+    for route in ("/api/v1/passages/{reference}", "/api/v1/releases/{releaseId}/passages/{reference}"):
+        actual=set(core_api["paths"][route]["get"]["responses"])
+        if actual != required_passage_statuses:
+            fail(f"Core OpenAPI passage route status drift {sorted(actual)} != {sorted(required_passage_statuses)}: {route}")
+    def response_error_codes(route: str, status: str) -> set[str]:
+        response=core_api["paths"][route]["get"]["responses"][status]
+        response_name=response["$ref"].rsplit("/",1)[-1]
+        response_schema=core_api["components"]["responses"][response_name]["content"]["application/json"]["schema"]
+        schema_name=response_schema["$ref"].rsplit("/",1)[-1]
+        code_schema=core_api["components"]["schemas"][schema_name]["properties"]["code"]
+        if "const" in code_schema: return {code_schema["const"]}
+        return set(code_schema.get("enum",[]))
+
+    expected_route_errors={
+        "/api/v1/passages/{reference}": {
+            "400": {"REFERENCE_SYSTEM_REQUIRED", "INVALID_REFERENCE"},
+            "404": {"REFERENCE_NOT_FOUND"},
+            "500": {"CONTRACT_VIOLATION"},
+            "503": {"DATA_TEMPORARILY_UNAVAILABLE"},
+        },
+        "/api/v1/releases/{releaseId}/passages/{reference}": {
+            "400": {"REFERENCE_SYSTEM_REQUIRED", "INVALID_REFERENCE", "INVALID_RELEASE_ID"},
+            "404": {"REFERENCE_NOT_FOUND", "RELEASE_NOT_FOUND"},
+            "500": {"CONTRACT_VIOLATION"},
+            "503": {"DATA_TEMPORARILY_UNAVAILABLE"},
+        },
+    }
+    for route,statuses in expected_route_errors.items():
+        for status,expected_codes in statuses.items():
+            actual_codes=response_error_codes(route,status)
+            if actual_codes!=expected_codes:
+                fail(f"Core OpenAPI error-code drift for {route} {status}: {sorted(actual_codes)} != {sorted(expected_codes)}")
+    generic_not_found=(core_api["components"]["responses"]["NotFound"]["content"]
+                       ["application/json"]["schema"]["properties"]["code"].get("const"))
+    if generic_not_found != "NOT_FOUND":
+        fail(f"Core OpenAPI generic NotFound code drift: {generic_not_found!r} != 'NOT_FOUND'")
+
 def vocab_drift():
     v=load("contracts/v1.1/vocabulary.json")
     q=load("contracts/v1.1/json-schema/corpus-query.schema.json")
@@ -388,8 +428,13 @@ def secret_scan():
     literals=[re.compile(r"AIza[0-9A-Za-z_\-]{30,}"),re.compile(r"sk-[A-Za-z0-9_\-]{20,}"),re.compile(r"scite_[A-Za-z0-9_\-]{20,}")]
     excluded_dirs={".git", ".next", "node_modules", "playwright-report", "test-results", "dist", "build", "coverage", "__pycache__"}
     for p in ROOT.rglob("*"):
-        if not p.is_file() or excluded_dirs.intersection(p.relative_to(ROOT).parts): continue
         rel=p.relative_to(ROOT)
+        if (
+            not p.is_file()
+            or excluded_dirs.intersection(rel.parts)
+            or any(part == "venv" or part.startswith(".venv") for part in rel.parts)
+        ):
+            continue
         if rel.name in {".env",".env.local",".env.production",".env.development"}: fail(f"forbidden env file {rel}")
         if p.suffix.lower() not in {".md",".json",".yaml",".yml",".py",".ts",".tsx",".js",".jsx",".toml",".txt"}: continue
         try: t=p.read_text(encoding="utf-8")

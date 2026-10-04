@@ -59,8 +59,8 @@ try {
     "REFERENCE_SYSTEM_REQUIRED",
   );
   assert.equal(
-    (await json("/api/v1/passages/bad%20reference?referenceSystemCode=MT_FIXTURE", 400)).code,
-    "INVALID_REFERENCE",
+    (await json("/api/v1/passages/1%20Samuel%2016%3A7?referenceSystemCode=MT_FIXTURE", 404)).code,
+    "REFERENCE_NOT_FOUND",
   );
   assert.equal(
     (await json("/api/v1/passages/Gen.1.1?referenceSystemCode=MT_FIXTURE", 404)).code,

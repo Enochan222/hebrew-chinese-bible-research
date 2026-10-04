@@ -181,7 +181,7 @@ These exporters deliberately emit provider-scoped/raw fields first. Database imp
 
 CLI passage filters normalize known provider book aliases only for comparison. For example, OSHB `1Sam`, BHSA Latin `Samuel_I`, and BHSA English `1_Samuel` compare as the same temporary canonical book key. The exporter still writes the exact provider-native `referenceLabel` and `referenceSystemCode`; alias normalization does not replace the project's ReferenceSystem/ReferenceSpan resolution layer.
 
-When a requested passage yields zero BHSA words, the exporter exits with failure and reports the observed book labels at the requested chapter/verse instead of silently emitting an empty file.
+When a requested passage yields zero OSHB or BHSA words, the relevant exporter exits with failure instead of silently treating an empty file as a successful source export. The BHSA error also reports the observed provider book labels at the requested chapter/verse.
 
 Build a conservative current-OSHB to BHSA candidate crosswalk for the spike:
 
@@ -194,7 +194,7 @@ python scripts/corpora/build_candidate_crosswalk.py \
 
 The crosswalk does not require equal token counts. It aligns only contiguous text-bearing spans within the same normalized verse when the concatenated Hebrew-letter consonantal signatures are exactly equal. This allows conservative 1:1, 1:n, n:1, and n:m candidate mappings across framework-specific tokenization.
 
-A BHSA node with no orthographic/consonantal value may be preserved as `ANNOTATION_ONLY_TARGET_NODE` only when it still has explicit linguistic identity and graph context (for example lexeme/POS plus phrase and clause membership) and is not carrying Qere text. Such a node is retained in the BHSA annotation graph but is not assigned an invented orthographic TextSegment or OSHB identity. Any unclassified empty target node remains `NEEDS_REVIEW`.
+A BHSA node with no orthographic/consonantal value may be preserved as `ANNOTATION_ONLY_TARGET_NODE` only when it matches an explicitly reviewed source shape. The first implementation recognizes the observed unbridged Biblical Hebrew article shape: lexeme present, `sp=art`, `pdp=art`, `languageISO=hbo`, phrase and clause membership present, and no Qere or bridging morphology. Such a node is retained in the BHSA annotation graph but is not assigned an invented orthographic TextSegment or OSHB identity. Every other empty target node remains `NEEDS_REVIEW` until separately classified.
 
 If the full text-bearing verse consonantal streams differ, a source token has an empty signature, or the two streams cease to be prefix-compatible, the whole reference becomes `NEEDS_REVIEW`. Candidate mappings remain `CANDIDATE_AUTOMATED` and `canonical = false` until Database Spike review promotes them through the project's typed mapping workflow.
 

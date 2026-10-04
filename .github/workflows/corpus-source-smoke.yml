@@ -23,6 +23,8 @@ jobs:
           python-version: '3.12'
       - name: Install corpus tooling
         run: python -m pip install -r requirements-corpus.txt
+      - name: Run corpus adapter unit tests
+        run: python -m unittest discover -s scripts/corpora/tests -p 'test_*.py' -v
       - name: Fetch exact pinned sources
         run: python scripts/corpora/fetch_sources.py
       - name: Adversarial corpus tooling guards

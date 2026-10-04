@@ -3,18 +3,12 @@ import { InvalidReferenceError, MissingReferenceSystemError, ReferenceNotFoundEr
 import type { ReleaseReadPort } from "../release/port";
 import { resolveRelease, type ReleaseSelector } from "../release/service";
 
-const REFERENCE_LABEL = /^[1-3]?[A-Za-z][A-Za-z0-9.:-]*$/;
-const REFERENCE_SYSTEM = /^[A-Za-z][A-Za-z0-9_-]*$/;
-
 export function validatePassageLocator(locator: PassageLabelLocator): PassageLabelLocator {
   if (!locator.referenceSystemCode) {
     throw new MissingReferenceSystemError("referenceSystemCode is required for a human-readable passage label.");
   }
-  if (!REFERENCE_SYSTEM.test(locator.referenceSystemCode)) {
-    throw new InvalidReferenceError("referenceSystemCode has an invalid format.");
-  }
-  if (!REFERENCE_LABEL.test(locator.referenceLabel)) {
-    throw new InvalidReferenceError("Passage reference has an invalid format.");
+  if (!locator.referenceLabel) {
+    throw new InvalidReferenceError("Passage reference must not be empty.");
   }
   return locator;
 }
