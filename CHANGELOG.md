@@ -124,6 +124,18 @@ Added permanent fail-closed diagnostics to unresolved crosswalk records and CI o
 
 The diagnostic deliberately does not print the verse text. The next smoke run is used to classify the failure before any further mapping change.
 
+#### Fifth smoke: isolate zero-letter provider tokens
+
+Run `37193120184` classified the previous ambiguity:
+
+- OSHB whole-verse consonantal length: 92;
+- BHSA whole-verse consonantal length: 92;
+- SHA-256 of both normalized consonantal streams: `886cfe4cab6d1c1d3d032b5ed3cd201d3c12a41f82655ba04be075155f494253`;
+- first differing character: none;
+- alignment nevertheless stopped with `EMPTY_CONSONANTAL_SIGNATURE`.
+
+Therefore the failure is not a textual-version mismatch and not a whole-verse normalization mismatch. Before changing alignment semantics, the crosswalk now records only the order/provider identity and boolean source-field presence of zero-letter tokens. It still does not print source Hebrew text. The next real smoke must identify which provider records have empty Hebrew-letter signatures; only then may the alignment rule decide whether they are ignorable structural tokens, exporter defects, or separately reviewable mappings.
+
 Before creating the repository commit:
 
 - current upstream repository heads and frozen BHSA/bridging 2021 directories were inspected;

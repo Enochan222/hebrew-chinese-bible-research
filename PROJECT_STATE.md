@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.8**
+State Revision: **2026-10-04.9**
 
 ## Mandatory governance rule
 
@@ -213,4 +213,4 @@ See `architecture/corpus-source-integration.md` and `contracts/v1.1/corpus-sourc
 
 ## Latest push intent
 
-This revision keeps the many-to-many crosswalk fail-closed while adding audit diagnostics needed to distinguish a genuine OSHB/BHSA consonantal-stream difference from an alignment-algorithm defect. Unresolved references now record and log only non-textual diagnostics: reason code, provider word counts, consonantal stream lengths, SHA-256 hashes, and first differing character index. Full verse text is not dumped into CI logs. The real corpus smoke remains intentionally failing until the cause is classified and repaired or explicitly documented as a textual-version boundary.
+This revision keeps the real-corpus smoke fail-closed and adds one narrower diagnostic after run `37193120184` proved that OSHB and BHSA 1 Samuel 16:7 have identical normalized whole-verse consonantal streams (length 92 and identical SHA-256) while the span aligner still stopped on `EMPTY_CONSONANTAL_SIGNATURE`. The crosswalk now records only provider IDs/orders and boolean field-presence flags for zero-letter tokens, never Hebrew text, so the next smoke can distinguish corpus structural/empty nodes from exporter defects before the mapping algorithm is changed.

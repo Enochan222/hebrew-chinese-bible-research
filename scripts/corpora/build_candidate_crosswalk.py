@@ -87,6 +87,29 @@ def align_contiguous_spans(o_rows: list[dict], b_rows: list[dict]) -> tuple[list
         return None, "UNCONSUMED_PROVIDER_ROWS"
     return groups, None
 
+def empty_signature_diagnostics(o_rows: list[dict], b_rows: list[dict]) -> dict:
+    return {
+        "oshbEmptySignatureTokens": [
+            {
+                "wordOrderInVerse": r.get("wordOrderInVerse"),
+                "providerScopedWordId": r.get("providerScopedWordId"),
+                "hasSurfaceValue": bool(r.get("surfaceSourceExact")),
+            }
+            for r in o_rows
+            if not oshb_signature(r)
+        ],
+        "bhsaEmptySignatureTokens": [
+            {
+                "wordOrderInVerse": r.get("wordOrderInVerse"),
+                "providerScopedNodeId": r.get("providerScopedNodeId"),
+                "hasConsonantalValue": bool(r.get("consonantalSourceExact")),
+                "hasSurfaceValue": bool(r.get("surfaceSourceExact")),
+            }
+            for r in b_rows
+            if not bhsa_signature(r)
+        ],
+    }
+
 def stream_diagnostics(o_rows: list[dict], b_rows: list[dict]) -> dict:
     os = "".join(oshb_signature(r) for r in o_rows)
     bs = "".join(bhsa_signature(r) for r in b_rows)
@@ -100,6 +123,7 @@ def stream_diagnostics(o_rows: list[dict], b_rows: list[dict]) -> dict:
         "oshbStreamSha256": hashlib.sha256(os.encode("utf-8")).hexdigest(),
         "bhsaStreamSha256": hashlib.sha256(bs.encode("utf-8")).hexdigest(),
         "firstDifferenceIndex": first_difference,
+        **empty_signature_diagnostics(o_rows, b_rows),
     }
 
 def unresolved_record(ref: tuple[str, int, int], o_rows: list[dict], b_rows: list[dict], reason: str) -> dict:
@@ -168,6 +192,8 @@ def main() -> int:
                     f"oshb_words={len(o_rows)} bhsa_words={len(b_rows)} "
                     f"oshb_letters={record['oshbConsonantalLength']} bhsa_letters={record['bhsaConsonantalLength']} "
                     f"first_difference={record['firstDifferenceIndex']} "
+                    f"oshb_empty_tokens={record['oshbEmptySignatureTokens']} "
+                    f"bhsa_empty_tokens={record['bhsaEmptySignatureTokens']} "
                     f"oshb_sha256={record['oshbStreamSha256']} bhsa_sha256={record['bhsaStreamSha256']}"
                 )
                 unresolved_count += 1
