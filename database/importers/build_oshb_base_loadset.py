@@ -325,7 +325,17 @@ def main() -> int:
             f"\\copy {table} ({columns}) FROM '{path}' "
             "WITH (FORMAT csv, DELIMITER E'\\t', NULL E'\\\\N');\n"
         )
-    load_sql += "COMMIT;\n"
+    load_sql += """COMMIT;
+ANALYZE authoring.biblical_books;
+ANALYZE authoring.reference_atoms;
+ANALYZE authoring.reference_spans;
+ANALYZE authoring.reference_labels;
+ANALYZE authoring.reference_label_members;
+ANALYZE authoring.text_segments;
+ANALYZE authoring.analysis_nodes;
+ANALYZE authoring.analysis_node_features;
+ANALYZE authoring.analysis_node_segments;
+"""
     (args.output_dir / "load.sql").write_text(load_sql, encoding="utf-8")
 
     print(json.dumps({"rowCounts": counts, "outputDir": str(args.output_dir)}, sort_keys=True))
