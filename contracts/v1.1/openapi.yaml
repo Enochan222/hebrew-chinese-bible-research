@@ -19,6 +19,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReleasePointer'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/Unavailable'
   /api/v1/passages/{reference}:
     get:
       operationId: getCurrentPassage
@@ -33,7 +37,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/PassageCore'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: '#/components/responses/CurrentPassageNotFound'
+        '400':
+          $ref: '#/components/responses/CurrentPassageBadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/Unavailable'
   /api/v1/releases/{releaseId}/passages/{reference}:
     get:
       operationId: getPinnedPassage
@@ -49,7 +59,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/PassageCore'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: '#/components/responses/PinnedPassageNotFound'
+        '400':
+          $ref: '#/components/responses/PinnedPassageBadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/Unavailable'
   /api/v1/passages/{reference}/translations:
     get:
       operationId: getCurrentPassageTranslations
@@ -315,7 +331,86 @@ components:
         code: {type: string}
         message: {type: string}
         path: {type: string}
+    CurrentPassageBadRequestError:
+      type: object
+      additionalProperties: false
+      required: [code, message]
+      properties:
+        code:
+          enum:
+            - REFERENCE_SYSTEM_REQUIRED
+            - INVALID_REFERENCE
+        message: {type: string}
+    PinnedPassageBadRequestError:
+      type: object
+      additionalProperties: false
+      required: [code, message]
+      properties:
+        code:
+          enum:
+            - REFERENCE_SYSTEM_REQUIRED
+            - INVALID_REFERENCE
+            - INVALID_RELEASE_ID
+        message: {type: string}
+    CurrentPassageNotFoundError:
+      type: object
+      additionalProperties: false
+      required: [code, message]
+      properties:
+        code:
+          const: REFERENCE_NOT_FOUND
+        message: {type: string}
+    PinnedPassageNotFoundError:
+      type: object
+      additionalProperties: false
+      required: [code, message]
+      properties:
+        code:
+          enum:
+            - REFERENCE_NOT_FOUND
+            - RELEASE_NOT_FOUND
+        message: {type: string}
+    ContractViolationError:
+      type: object
+      additionalProperties: false
+      required: [code, message]
+      properties:
+        code:
+          const: CONTRACT_VIOLATION
+        message: {type: string}
+    UnavailableError:
+      type: object
+      additionalProperties: false
+      required: [code, message]
+      properties:
+        code:
+          const: DATA_TEMPORARILY_UNAVAILABLE
+        message: {type: string}
   responses:
+    CurrentPassageBadRequest:
+      description: Invalid current-release passage locator
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CurrentPassageBadRequestError'
+    PinnedPassageBadRequest:
+      description: Invalid pinned-release passage locator or release identifier
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PinnedPassageBadRequestError'
+    CurrentPassageNotFound:
+      description: Requested current-release passage not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CurrentPassageNotFoundError'
+    PinnedPassageNotFound:
+      description: Requested pinned release or passage not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PinnedPassageNotFoundError'
     NotFound:
       description: Requested release/resource not found
       content:
@@ -327,3 +422,15 @@ components:
             properties:
               code: {const: NOT_FOUND}
               message: {type: string}
+    InternalError:
+      description: Canonical serving data violated its runtime contract
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ContractViolationError'
+    Unavailable:
+      description: Serving data is temporarily unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UnavailableError'

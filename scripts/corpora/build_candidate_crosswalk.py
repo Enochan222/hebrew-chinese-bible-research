@@ -35,10 +35,14 @@ def is_bhsa_annotation_only_node(row: dict) -> bool:
         and not row.get("surfaceSourceExact")
         and not row.get("consonantalSourceExact")
         and bool(row.get("lexemeRaw"))
-        and bool(row.get("partOfSpeechRaw"))
+        and row.get("partOfSpeechRaw") == "art"
+        and row.get("phraseDependentPartOfSpeechRaw") == "art"
+        and row.get("languageIsoRaw") == "hbo"
         and row.get("phraseNodeId") is not None
         and row.get("clauseNodeId") is not None
         and not row.get("qereRaw")
+        and not row.get("bridgeOshbMorphologyPrimaryRaw")
+        and not row.get("bridgeOshbMorphologySecondaryRaw")
     )
 
 def annotation_only_record(ref: tuple[str, int, int], row: dict) -> dict:

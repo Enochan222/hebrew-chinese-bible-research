@@ -17,9 +17,16 @@ test("human passage labels require an explicit reference system", () => {
   );
 });
 
-test("malformed references fail before lookup", () => {
+test("reference labels and system codes remain opaque to the serving shell", () => {
+  assert.deepEqual(
+    validatePassageLocator({ referenceSystemCode: "MT:WLC 4.20", referenceLabel: "1 Samuel 16:7" }),
+    { referenceSystemCode: "MT:WLC 4.20", referenceLabel: "1 Samuel 16:7" },
+  );
+});
+
+test("empty references fail before lookup", () => {
   assert.throws(
-    () => validatePassageLocator({ referenceSystemCode: "MT_FIXTURE", referenceLabel: "bad reference" }),
+    () => validatePassageLocator({ referenceSystemCode: "MT_FIXTURE", referenceLabel: "" }),
     InvalidReferenceError,
   );
 });

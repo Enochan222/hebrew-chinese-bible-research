@@ -48,9 +48,9 @@ test("missing release has a distinct state", async ({ page }) => {
   await page.screenshot({ path: path.join(visualDir, "missing-release.png"), fullPage: true });
 });
 
-test("malformed reference and release fail distinctly", async ({ page }) => {
-  await page.goto(pinned("bad reference"));
-  await expect(page.getByTestId("passage-failure")).toHaveAttribute("data-error-code", "INVALID_REFERENCE");
+test("opaque unknown reference and invalid release fail distinctly", async ({ page }) => {
+  await page.goto(pinned("1 Samuel 16:7"));
+  await expect(page.getByTestId("passage-failure")).toHaveAttribute("data-error-code", "REFERENCE_NOT_FOUND");
 
   await page.goto(pinned("1Sam.16.7", "not-a-uuid"));
   await expect(page.getByTestId("passage-failure")).toHaveAttribute("data-error-code", "INVALID_RELEASE_ID");

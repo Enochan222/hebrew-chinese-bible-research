@@ -5,6 +5,8 @@
 # Python local build/cache
 __pycache__/
 *.pyc
+.venv*/
+venv/
 
 # Web dependencies and generated outputs
 apps/web/.next/
