@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-05.6**
+State Revision: **2026-10-05.7**
 
 ## Mandatory governance rule
 
@@ -259,17 +259,17 @@ WB-0 is implemented as an independent PostgreSQL 17 job alongside the existing s
 - the first assertion run exposed a test-boundary defect rather than a data-model failure: wrong-layer membership was correctly rejected by the earlier span/layer trigger before PostgreSQL reached the expected composite FK; the negative test now accepts only those two intended rejection boundaries;
 - write no real BHSA/bridging corpus projection into Serving because public/commercial rights remain unresolved.
 
-WB-0 is accepted only when both the original synthetic `postgres-spike` job and the new `wb0-real-corpus-canary` job pass on the exact PR head. WB-1 remains responsible for generalizing this importer and producing complete configured-corpus coverage/error evidence.
+WB-0 implementation acceptance is now PASS on the reviewed PR head: the original synthetic `postgres-spike` regression and the independent `wb0-real-corpus-canary` job both completed successfully, alongside Contract validation, Project governance, Corpus source smoke and the P1 shell regression. The protected merge remains the repository publication action for this change. This PASS is bounded to the pinned 1 Samuel 16:7 canary and does not satisfy `CORE-FZ-WB-002`. WB-1 remains responsible for generalizing this importer and producing complete configured-corpus coverage/error evidence.
 
 ## Current implementation priority
 
 1. Preserve contract/governance consistency and the whole-Bible scope guard.
-2. WB-0 is the current merge gate: accept the real relational canary only when synthetic Database Spike regression plus exact-pinned real-corpus relational CI both pass.
-3. After WB-0 acceptance, complete WB-1: generalize the same provider-scoped importer across the complete configured Hebrew Bible and produce auditable coverage/exception evidence.
-4. Complete WB-2/WB-3: compile release-pinned database passage serving, then replace fixture-only Hebrew passage content with a database-backed whole-Bible reader/navigation.
+2. Complete WB-1: generalize the WB-0 provider-scoped importer across the complete configured Hebrew Bible and produce auditable book/reference/count/error/exception coverage evidence.
+3. Complete WB-2: compile the whole-corpus Authoring result into rights-safe, release-pinned passage-serving projections.
+4. Complete WB-3: replace fixture-only Hebrew passage content with a database-backed whole-Bible reader/navigation.
 5. Complete WB-4/WB-5: add selected translation witnesses, alignment/comparison, project/user translation workflow and deterministic whole-corpus analysis.
 6. Only then make Research Pro provider adapters, ResearchModelAdapter and end-to-end literature builds the primary product implementation frontier; academic enrichment may proceed in parallel where it does not block the base path.
 
 ## Latest push intent
 
-Implement WB-0 as the first real relational corpus canary rather than another fixture-only architecture step. This revision extends the Database Spike with grouped cross-annotation mapping support forced by real OSHB/BHSA n:m evidence, adds a fail-closed real 1 Samuel 16:7 PostgreSQL loader and relational assertions, preserves the two evidenced BHSA annotation-only article nodes without invented text, retains phrase/clause graph membership and bridging comparison features, and keeps all automatic mappings non-canonical in Authoring. The original synthetic adversarial Database Spike remains a separate regression path. No BHSA/bridging-derived real corpus data is written to public Serving, and WB-1 whole-Bible ingestion remains pending.
+Close WB-0 after real-corpus execution rather than treating a green synthetic schema as sufficient evidence. The pinned 1 Samuel 16:7 data now loads into PostgreSQL Authoring with 25 OSHB words, 34 BHSA words, 22 phrases, 7 clauses, 90 graph-membership edges, 35 bridging feature values, two preserved annotation-only nodes, 25 grouped mapping candidates of which seven are non-1:1, one project BODY_PART target and zero unresolved references. All automatic mappings remain non-canonical, no real BHSA/bridging projection is written to Serving, and the original synthetic relational/RLS/publication spike still passes. WB-0 is therefore complete as a bounded relational canary; WB-1 whole-Bible ingestion and coverage audit is now the next implementation priority.
