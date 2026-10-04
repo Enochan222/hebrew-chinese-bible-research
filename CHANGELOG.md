@@ -4,6 +4,36 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+
+## 2026-10-04 — Harden corpus cache provenance and empty-export failure semantics
+
+### Push intent
+
+Close two post-merge fail-closed gaps in the pinned Hebrew-corpus tooling before using its outputs as input to real relational ingestion.
+
+### Why
+
+The successful 1 Samuel 16:7 smoke proved the normal acquisition/export/crosswalk path, but independent adversarial review found two cases the workflow did not test. First, cache verification trusted whatever file list appeared in a local `source-manifest.json`; a truncated or incomplete manifest could therefore omit files from verification while retaining the correct source pin metadata. Second, `export_oshb_words.py` returned success and left an empty NDJSON file when a syntactically valid requested reference did not exist.
+
+### What changed
+
+- bind source manifests to registry schema version, acquisition method and exact configured acquisition paths;
+- require a non-empty manifest file array;
+- reject unsafe/traversal paths and duplicate manifest paths;
+- validate manifest SHA-256 syntax, byte counts, on-disk byte size and content hash;
+- require the manifest file set to equal the actual cached file set, rejecting both missing and untracked files;
+- reject unsafe configured archive/raw-file paths before filesystem writes;
+- make zero-record OSHB export a non-zero failure and remove the empty output artifact;
+- add adversarial CI checks for truncated manifests, manifest traversal, untracked cache files, configured path traversal and a nonexistent OSHB reference.
+
+### Intended effect
+
+A locally cached corpus can no longer be accepted merely because a self-authored manifest carries the right commit SHA, and downstream jobs cannot mistake an empty OSHB export for a successful passage extraction. These controls strengthen provenance/integrity only; they do not promote candidate crosswalks or change corpus licensing.
+
+### Validation
+
+The new PR must pass Contract validation, Project governance and Corpus source smoke. The adversarial smoke cases are expected to fail against the previously merged tooling and pass only with these guards.
+
 ## 2026-10-04 — Close CitationLocator and passage-scoped MCP identity gaps
 
 ### Push intent

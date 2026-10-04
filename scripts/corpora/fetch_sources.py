@@ -33,8 +33,10 @@ def source_by_key(registry: dict, key: str) -> dict:
     raise SystemExit(f"Unknown sourceKey: {key}")
 
 def safe_member_path(name: str) -> PurePosixPath:
+    if not isinstance(name, str) or not name or "\\" in name:
+        raise ValueError(f"Unsafe archive path: {name!r}")
     p = PurePosixPath(name)
-    if p.is_absolute() or ".." in p.parts:
+    if p.is_absolute() or p == PurePosixPath(".") or ".." in p.parts:
         raise ValueError(f"Unsafe archive path: {name}")
     return p
 
@@ -50,6 +52,8 @@ def fetch_archive_subset(source: dict, stage: Path) -> None:
     repo = source["repository"]
     commit = source["pin"]["commitSha"]
     patterns = source["acquisition"]["paths"]
+    for pattern in patterns:
+        safe_member_path(pattern)
     archive_url = f"https://codeload.github.com/{repo}/tar.gz/{commit}"
     archive_path = stage / "upstream.tar.gz"
     fetch_url(archive_url, archive_path)
@@ -82,6 +86,7 @@ def fetch_raw_files(source: dict, stage: Path) -> None:
     for rel in source["acquisition"]["paths"]:
         if "*" in rel or "?" in rel or "[" in rel:
             raise RuntimeError(f"{source['sourceKey']}: RAW_FILES does not allow glob path {rel}")
+        rel = safe_member_path(rel).as_posix()
         target = stage / rel
         target.parent.mkdir(parents=True, exist_ok=True)
         url = f"https://raw.githubusercontent.com/{repo}/{commit}/{rel}"
@@ -125,6 +130,8 @@ def write_manifest(source: dict, dest: Path) -> None:
         "commitSha": source["pin"]["commitSha"],
         "datasetVersion": source["pin"].get("datasetVersion"),
         "registrySchemaVersion": load_registry()["schemaVersion"],
+        "acquisitionMethod": source["acquisition"]["method"],
+        "acquisitionPaths": source["acquisition"]["paths"],
         "files": files,
     }
     (dest / "source-manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -138,21 +145,70 @@ def verify_cache(source: dict, dest: Path) -> tuple[bool, list[str]]:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     except Exception as exc:
         return False, [f"invalid manifest: {exc}"]
+
+    registry_schema_version = load_registry()["schemaVersion"]
     for field, expected in (
+        ("schemaVersion", "1.0"),
         ("sourceKey", source["sourceKey"]),
         ("repository", source["repository"]),
         ("commitSha", source["pin"]["commitSha"]),
         ("datasetVersion", source["pin"].get("datasetVersion")),
+        ("registrySchemaVersion", registry_schema_version),
+        ("acquisitionMethod", source["acquisition"]["method"]),
+        ("acquisitionPaths", source["acquisition"]["paths"]),
     ):
         if manifest.get(field) != expected:
             errors.append(f"{field} mismatch: {manifest.get(field)!r} != {expected!r}")
-    for item in manifest.get("files", []):
-        path = dest / item["path"]
-        if not path.is_file():
-            errors.append(f"missing cached file: {item['path']}")
+
+    items = manifest.get("files")
+    if not isinstance(items, list) or not items:
+        return False, errors + ["manifest files must be a non-empty array"]
+
+    manifest_paths: set[str] = set()
+    for index, item in enumerate(items):
+        if not isinstance(item, dict):
+            errors.append(f"manifest file entry {index} is not an object")
             continue
-        if sha256_file(path) != item["sha256"]:
-            errors.append(f"sha256 mismatch: {item['path']}")
+        raw_path = item.get("path")
+        try:
+            rel = safe_member_path(raw_path).as_posix()
+        except (TypeError, ValueError) as exc:
+            errors.append(f"unsafe manifest path at entry {index}: {exc}")
+            continue
+        if rel in manifest_paths:
+            errors.append(f"duplicate manifest path: {rel}")
+            continue
+        manifest_paths.add(rel)
+
+        expected_hash = item.get("sha256")
+        expected_bytes = item.get("bytes")
+        if not isinstance(expected_hash, str) or not re.fullmatch(r"[0-9a-f]{64}", expected_hash):
+            errors.append(f"invalid sha256 in manifest: {rel}")
+            continue
+        if not isinstance(expected_bytes, int) or isinstance(expected_bytes, bool) or expected_bytes < 0:
+            errors.append(f"invalid byte count in manifest: {rel}")
+            continue
+
+        path = dest.joinpath(*PurePosixPath(rel).parts)
+        if not path.is_file():
+            errors.append(f"missing cached file: {rel}")
+            continue
+        if path.stat().st_size != expected_bytes:
+            errors.append(f"byte-count mismatch: {rel}")
+        if sha256_file(path) != expected_hash:
+            errors.append(f"sha256 mismatch: {rel}")
+
+    actual_paths = {
+        p.relative_to(dest).as_posix()
+        for p in dest.rglob("*")
+        if p.is_file() and p.name != "source-manifest.json"
+    }
+    for rel in sorted(actual_paths - manifest_paths):
+        errors.append(f"untracked cached file: {rel}")
+    for rel in sorted(manifest_paths - actual_paths):
+        if f"missing cached file: {rel}" not in errors:
+            errors.append(f"missing cached file: {rel}")
+
     return not errors, errors
 
 def fetch_source(source: dict, root: Path, force: bool) -> None:

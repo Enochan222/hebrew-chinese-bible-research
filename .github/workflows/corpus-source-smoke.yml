@@ -25,6 +25,76 @@ jobs:
         run: python -m pip install -r requirements-corpus.txt
       - name: Fetch exact pinned sources
         run: python scripts/corpora/fetch_sources.py
+      - name: Adversarial corpus tooling guards
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import subprocess
+          import tempfile
+          from pathlib import Path
+          from scripts.corpora.fetch_sources import load_registry, safe_member_path, verify_cache
+
+          source = {
+              "sourceKey": "TEST_SOURCE",
+              "repository": "example/repo",
+              "pin": {"commitSha": "a" * 40, "datasetVersion": None},
+              "acquisition": {"method": "RAW_FILES", "paths": ["data.txt"], "localSubdir": "test-source"},
+          }
+          with tempfile.TemporaryDirectory() as tmp:
+              dest = Path(tmp)
+              data = dest / "data.txt"
+              data.write_text("fixture", encoding="utf-8")
+              digest = hashlib.sha256(data.read_bytes()).hexdigest()
+              manifest = {
+                  "schemaVersion": "1.0",
+                  "sourceKey": source["sourceKey"],
+                  "repository": source["repository"],
+                  "commitSha": source["pin"]["commitSha"],
+                  "datasetVersion": None,
+                  "registrySchemaVersion": load_registry()["schemaVersion"],
+                  "acquisitionMethod": "RAW_FILES",
+                  "acquisitionPaths": ["data.txt"],
+                  "files": [{"path": "data.txt", "sha256": digest, "bytes": data.stat().st_size}],
+              }
+              manifest_path = dest / "source-manifest.json"
+              manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+              assert verify_cache(source, dest)[0], verify_cache(source, dest)
+
+              truncated = dict(manifest)
+              truncated["files"] = []
+              manifest_path.write_text(json.dumps(truncated), encoding="utf-8")
+              assert not verify_cache(source, dest)[0], "truncated manifest must fail closed"
+
+              escaped = dict(manifest)
+              escaped["files"] = [{"path": "../escape", "sha256": digest, "bytes": data.stat().st_size}]
+              manifest_path.write_text(json.dumps(escaped), encoding="utf-8")
+              assert not verify_cache(source, dest)[0], "manifest traversal path must fail closed"
+
+              manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+              extra = dest / "extra.txt"
+              extra.write_text("unexpected", encoding="utf-8")
+              assert not verify_cache(source, dest)[0], "untracked cache file must fail closed"
+
+          try:
+              safe_member_path("../escape")
+          except ValueError:
+              pass
+          else:
+              raise AssertionError("configured path traversal must be rejected")
+
+          missing = Path(".local/exports/missing-oshb.ndjson")
+          result = subprocess.run(
+              [
+                  "python", "scripts/corpora/export_oshb_words.py",
+                  "--reference", "1Sam.16.999",
+                  "--output", str(missing),
+              ],
+              check=False,
+          )
+          assert result.returncode != 0, "missing OSHB reference must exit non-zero"
+          assert not missing.exists(), "missing OSHB reference must not leave an empty output artifact"
+          PY
       - name: Export 1 Samuel 16:7 source layers
         run: |
           mkdir -p .local/exports

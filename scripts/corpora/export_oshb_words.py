@@ -77,6 +77,11 @@ def main() -> int:
                 if args.limit and count >= args.limit:
                     print(f"exported {count} OSHB words to {args.output}")
                     return 0
+    if count == 0:
+        args.output.unlink(missing_ok=True)
+        if args.reference:
+            raise SystemExit(f"OSHB reference {args.reference!r} resolved to no words")
+        raise SystemExit("OSHB export produced no word records")
     print(f"exported {count} OSHB words to {args.output}")
     return 0
 
