@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.18**
+State Revision: **2026-10-04.19**
 
 ## Mandatory governance rule
 
@@ -249,4 +249,4 @@ This is fixture-shell implementation evidence only. It does not satisfy real-dat
 
 ## Latest push intent
 
-Reframe implementation around the actual product: a whole-Hebrew-Bible base reader with Research Pro layered on top. This change adds a product-scale whole-Bible OSHB foundation harness: exact pinned source coverage indexing, deterministic UUID-based PostgreSQL COPY loadset generation for every OSHB provider book/verse/word, canonical ReferenceSystem/TextSegment/Morphology AnalysisNode import, and CI reconciliation between source coverage, generated import manifest and database row counts. Passage fixtures remain adversarial canaries rather than scope. No remote Supabase or Vercel deployment is performed.
+Reframe implementation around the actual product: a whole-Hebrew-Bible base reader with Research Pro layered on top. This change adds a product-scale whole-Bible OSHB foundation harness: exact pinned source coverage indexing, deterministic UUID-based PostgreSQL COPY loadset generation for every OSHB provider book/verse/word, canonical ReferenceSystem/TextSegment/Morphology AnalysisNode import, and CI reconciliation between source coverage, generated import manifest and database row counts. Passage fixtures remain adversarial canaries rather than scope. The first whole-Bible CI run also identified `wlc/VerseMap.xml` as a pinned OSHB auxiliary mapping file rather than a biblical book; the coverage validator now explicitly permits that exact auxiliary filename while continuing to reject every unknown extra XML file. No remote Supabase or Vercel deployment is performed.
