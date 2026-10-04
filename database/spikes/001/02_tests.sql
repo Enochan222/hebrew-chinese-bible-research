@@ -84,6 +84,65 @@ BEGIN
   IF NOT failed THEN RAISE EXCEPTION 'cross-expression node/segment membership must fail'; END IF;
 END $$;
 
+-- WB-1 span containment: a phrase/clause-like node may span multiple reference atoms,
+-- while each member TextSegment remains verse-local inside that wider node span.
+DO $node_segment_span_containment$
+DECLARE invalid_failed boolean := false;
+BEGIN
+  INSERT INTO authoring.reference_atoms(reference_atom_id,book_id,sequence,atom_kind)
+  VALUES ('12000000-0000-4000-8000-000000000098','10000000-0000-4000-8000-000000000001',16008,'VERSE');
+
+  INSERT INTO authoring.reference_spans(
+    reference_span_id,book_id,start_atom_id,start_sequence,end_atom_id,end_sequence,span_kind
+  ) VALUES
+  ('13000000-0000-4000-8000-000000000098','10000000-0000-4000-8000-000000000001',
+   '12000000-0000-4000-8000-000000000098',16008,'12000000-0000-4000-8000-000000000098',16008,'VERSE'),
+  ('13000000-0000-4000-8000-000000000097','10000000-0000-4000-8000-000000000001',
+   '12000000-0000-4000-8000-000000000001',16007,'12000000-0000-4000-8000-000000000098',16008,'MULTI_ATOM_TEST');
+
+  INSERT INTO authoring.text_segments(
+    text_segment_id,text_stream_id,reference_span_id,segment_order,segment_storage_mode,surface_original,segment_kind
+  ) VALUES (
+    '24000000-0000-4000-8000-000000000098','23000000-0000-4000-8000-000000000001',
+    '13000000-0000-4000-8000-000000000098',98,'PERSISTED_CONTENT','בדיקה','WORD'
+  );
+
+  INSERT INTO authoring.analysis_nodes(
+    analysis_node_id,annotation_layer_id,node_type,reference_span_id,node_order
+  ) VALUES (
+    '33000000-0000-4000-8000-000000000098','32000000-0000-4000-8000-000000000001',
+    'CLAUSE','13000000-0000-4000-8000-000000000097',98
+  );
+
+  INSERT INTO authoring.analysis_node_segments(analysis_node_id,text_segment_id,member_order)
+  VALUES
+    ('33000000-0000-4000-8000-000000000098','24000000-0000-4000-8000-000000000001',0),
+    ('33000000-0000-4000-8000-000000000098','24000000-0000-4000-8000-000000000098',1);
+
+  BEGIN
+    INSERT INTO authoring.analysis_node_segments(analysis_node_id,text_segment_id,member_order)
+    VALUES ('33000000-0000-4000-8000-000000000001','24000000-0000-4000-8000-000000000098',99);
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM <> 'analysis-node reference span must contain every member text-segment span' THEN
+      RAISE;
+    END IF;
+    invalid_failed := true;
+  END;
+
+  IF NOT invalid_failed THEN
+    RAISE EXCEPTION 'verse-local node must reject a later-verse segment even within the same expression';
+  END IF;
+
+  DELETE FROM authoring.analysis_node_segments WHERE analysis_node_id='33000000-0000-4000-8000-000000000098';
+  DELETE FROM authoring.analysis_nodes WHERE analysis_node_id='33000000-0000-4000-8000-000000000098';
+  DELETE FROM authoring.text_segments WHERE text_segment_id='24000000-0000-4000-8000-000000000098';
+  DELETE FROM authoring.reference_spans WHERE reference_span_id IN (
+    '13000000-0000-4000-8000-000000000097','13000000-0000-4000-8000-000000000098'
+  );
+  DELETE FROM authoring.reference_atoms WHERE reference_atom_id='12000000-0000-4000-8000-000000000098';
+END
+$node_segment_span_containment$;
+
 -- Alignment stream pinning (WRITTEN vs READ).
 DO $$
 DECLARE failed boolean := false;
