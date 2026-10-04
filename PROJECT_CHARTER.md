@@ -59,6 +59,10 @@ The long-term canonical scope is the **whole Hebrew Bible**, not a permanently s
 Development may use pilot books/passages, fixtures and staged corpus coverage, but staged implementation must not be mistaken for the final scholarly scope.
 
 
+Where the project publishes its own Chinese rendering, that rendering is a reviewed, versioned scholarly product object linked to its translation decision and evidence. It is distinct from both existing Chinese translation witnesses and a user's private draft.
+
+It is **not** a disposable single-page AI app.
+
 Passage-specific fixtures are verification assets only. They must never define product coverage, navigation, importer scope, serving scope or launch scope.
 
 ## 1.2 Base product and academic overlay
@@ -72,10 +76,6 @@ Research Pro / Scholarly Intelligence is a progressive overlay on canonical pass
 Academic coverage may therefore deepen incrementally across ResearchReleases. Missing academic coverage must be represented as unavailable/not-yet-compiled rather than generated from model memory.
 
 The authoritative implementation ordering and whole-corpus acceptance requirements are defined in `architecture/whole-bible-base-product.md`.
-
-Where the project publishes its own Chinese rendering, that rendering is a reviewed, versioned scholarly product object linked to its translation decision and evidence. It is distinct from both existing Chinese translation witnesses and a user's private draft.
-
-It is **not** a disposable single-page AI app.
 
 ---
 
