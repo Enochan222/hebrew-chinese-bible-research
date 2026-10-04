@@ -31,6 +31,7 @@ OSIS_BOOK_NAMES = {
     "Hab":"Habakkuk","Zeph":"Zephaniah","Hag":"Haggai","Zech":"Zechariah","Mal":"Malachi",
 }
 REFERENCE_RE = re.compile(r"^(?P<book>[^.]+)\.(?P<chapter>\d+)\.(?P<verse>\d+)$")
+AUXILIARY_XML_FILENAMES = {"VerseMap.xml"}
 
 
 def local_name(tag: str) -> str:
@@ -46,13 +47,13 @@ def source_pin() -> str:
 
 
 def discover_book_files(input_dir: Path) -> list[tuple[str, Path]]:
-    actual = {p.stem: p for p in input_dir.glob("*.xml") if p.is_file()}
-    expected = set(OSIS_BOOK_ORDER)
-    missing = sorted(expected - set(actual))
-    unexpected = sorted(set(actual) - expected)
+    xml_files = {p.name: p for p in input_dir.glob("*.xml") if p.is_file()}
+    expected_book_files = {f"{book}.xml" for book in OSIS_BOOK_ORDER}
+    missing = sorted(expected_book_files - set(xml_files))
+    unexpected = sorted(set(xml_files) - expected_book_files - AUXILIARY_XML_FILENAMES)
     if missing or unexpected:
         raise RuntimeError(f"OSHB book-file set mismatch: missing={missing}; unexpected={unexpected}")
-    return [(book, actual[book]) for book in OSIS_BOOK_ORDER]
+    return [(book, xml_files[f"{book}.xml"]) for book in OSIS_BOOK_ORDER]
 
 
 def iter_verse_counts(xml_path: Path, expected_book: str):
@@ -146,6 +147,9 @@ def build_index(input_dir: Path) -> dict:
         "sourceCommitSha": source_pin(),
         "referenceSystemCode": "OSHB_OSIS",
         "coverageKind": "WHOLE_PINNED_PROVIDER_CORPUS",
+        "providerAuxiliaryXmlFiles": sorted(
+            name for name in AUXILIARY_XML_FILENAMES if (input_dir / name).is_file()
+        ),
         "referenceWordCountSha256": ref_hash.hexdigest(),
         "totals": {
             "books": len(books),
