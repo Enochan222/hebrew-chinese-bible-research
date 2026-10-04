@@ -102,8 +102,13 @@ This harness does **not** yet prove:
 Those remain explicit follow-on evidence, not implied by a green SQL spike.
 
 
-## Latest clean execution
+## Current execution evidence
 
-PR #9 exact head completed Database Spike 001 run `37195991129` successfully from a blank PostgreSQL 17 database, including migration, fixtures, adversarial tests, Authoring-offline public-serving checks, publication failure/rollback, and query-plan capture.
+The WB-0 review path has now produced two independent clean-PostgreSQL successes on the same reviewed PR head:
 
-This is not evidence of remote Supabase deployment. See the architecture spike document for the explicit proven/not-proven boundary.
+- the original controlled-fixture `postgres-spike`, covering relational constraints, RLS, Authoring-offline public serving, publication failure/rollback and representative query planning;
+- the `wb0-real-corpus-canary`, covering exact pinned source acquisition/export, grouped OSHB/BHSA crosswalk ingestion and the real relational assertions documented above.
+
+GitHub Actions on the exact merge head remains the authoritative execution record; this README does not hard-code a permanently “final” run ID because any later edit creates a new head.
+
+This is not evidence of remote Supabase deployment, whole-Bible WB-1 coverage, or permission to publicly serve BHSA/bridging-derived data. See the architecture spike document for the explicit proven/not-proven boundary.
