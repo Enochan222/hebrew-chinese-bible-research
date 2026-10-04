@@ -14,6 +14,17 @@ Read, in order:
 
 Do not implement from a superseded document.
 
+
+## Product-scope guard
+
+The canonical product baseline is the **whole Hebrew Bible**.
+
+- 1 Samuel 16:7, Psalm/superscription cases, Ketiv/Qere cases and other named passages are acceptance/edge-case fixtures, never the product scope.
+- Do not hard-code importer, API, navigation, release or UI scope to fixture passages.
+- Prioritize whole-Bible base-product coverage before Research Pro depth.
+- Research Pro is a progressive overlay and must not block base passage availability.
+- Read `architecture/whole-bible-base-product.md` before corpus, serving, passage-UI or Research Pro implementation work.
+
 ## During research/database work
 
 For external scholarly discovery, follow:

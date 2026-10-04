@@ -5,6 +5,44 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
 
+## 2026-10-05 — Make whole-Bible base coverage the explicit execution baseline
+
+### Push intent
+
+Realign the repository's implementation ordering with the product's existing canonical whole-Hebrew-Bible scope: build a complete database-backed Bible research base first, then layer progressively deeper academic/Research Pro intelligence onto the same canonical targets.
+
+### Why
+
+The Charter already stated that the long-term scope is the whole Hebrew Bible, but the active staging/state documents could still be read as moving from a passage fixture shell directly into translation and then scholarly-provider work. Repeated 1 Samuel 16:7 validation also created a practical risk that future agents would mistake an acceptance canary for the product/content scope.
+
+The intended product is a whole-Bible Hebrew/translation research edition as the base, with scholarly issues, literature review, commentary and recent discovery as top-up modules. A passage lacking a compiled academic dossier must still be a valid base-product passage.
+
+### What changed
+
+- added `architecture/whole-bible-base-product.md` as an active product-execution authority;
+- made passage-specific fixtures explicit acceptance vectors rather than product scope;
+- clarified in the Charter that the base whole-Bible product precedes and survives without Research Pro coverage;
+- added a repository-agent scope guard to `AGENTS.md`;
+- inserted Phase 2A for real whole-Bible corpus ingestion, coverage QA, release-pinned passage serving and database-backed reader before the existing translation workbench, now Phase 2B;
+- aligned Study/Research and Research Pro phase ownership with Phase 2A/2B;
+- added CORE-FZ-WB-001/002/003 whole-Bible coverage/import/serving gates;
+- added validator checks requiring the new authority and whole-Bible gates;
+- reordered PROJECT_STATE implementation priorities so whole-corpus database/reader work precedes scholarly-provider implementation;
+- updated README/manifest so future contributors discover the same execution model.
+
+### Intended effect
+
+The existing v1.1 ontology, rights model, release model, Database Spike and Research Pro design remain intact, but implementation now has one unambiguous dependency path:
+
+`real corpus -> whole-Bible database -> passage API/reader -> translation/comparison -> deterministic corpus analysis -> academic overlay`.
+
+This prevents passage-fixture depth or Research Pro architecture from displacing whole-Bible base-product coverage.
+
+### Validation
+
+This PR must pass Contract validation and Project governance. The validator now fails if the Whole-Bible Base Product authority is removed from the active manifest or if any of CORE-FZ-WB-001/002/003 disappears. No runtime/database migration is introduced, so existing Database Spike, corpus-source and P1 fixture-shell workflows are regression evidence rather than new semantic acceptance gates.
+
+
 ## 2026-10-04 — Harden corpus cache provenance and empty-export failure semantics
 
 ### Push intent

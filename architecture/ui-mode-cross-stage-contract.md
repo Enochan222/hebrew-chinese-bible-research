@@ -11,6 +11,17 @@ The modes are projections over the same product, same data model and same active
 
 They are not separate applications, separate databases or separate scholarly truth systems.
 
+
+## Whole-Bible base invariant
+
+Study/Research mode design sits on top of the whole-Bible base product defined in `architecture/whole-bible-base-product.md`.
+
+A canonical passage must not require a compiled ResearchIssue, LiteratureSnapshot, CommentaryEntry or live scholarly-provider result in order to exist or render.
+
+Research mode adds depth. It does not create passage coverage.
+
+If academic enrichment is not yet available for a passage, the UI must preserve the base Hebrew/translation/corpus experience and show an explicit unavailable/not-yet-compiled state for the missing scholarly module.
+
 This contract must be read with:
 
 - `architecture/research-pro-scholarly-intelligence.md`
@@ -398,18 +409,31 @@ Lock:
 
 UI may use fixtures.
 
-## Phase 2
+## Phase 2A
 
-Implement Study mode passage experience:
+Implement the whole-Bible database-backed passage core:
+
+- ReferenceSystem-aware whole-Bible navigation;
+- Hebrew textual witness;
+- word/morpheme/morphology inspection;
+- framework-scoped syntax where available;
+- release-pinned real passage serving;
+- explicit availability state for not-yet-compiled higher layers.
+
+Research Pro content is not required for passage availability.
+
+## Phase 2B
+
+Add the translation workbench:
 
 - witnesses;
 - translations;
 - user draft;
-- translation note;
-- commentary summary;
-- key evidence.
+- project translation decision/note where published;
+- alignment/comparison;
+- key evidence available from the base release.
 
-Research mode may initially expose the same core with placeholders for deeper modules.
+Research mode may initially expose the same core with explicit unavailable states for deeper academic modules.
 
 ## Phase 3
 

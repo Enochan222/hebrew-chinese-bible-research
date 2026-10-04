@@ -44,6 +44,25 @@ Optional Natural-Language Query Adapter
 
 Core public research must remain usable without an LLM provider.
 
+
+### Product layering
+
+The implementation baseline is a **whole-Hebrew-Bible reader and deterministic research base**, with academic intelligence layered on top:
+
+```text
+Whole Hebrew Bible
+  -> Hebrew text + linguistic layers
+  -> release-pinned passage API / reader
+  -> translation witnesses + comparison
+  -> project/user translation
+  -> deterministic corpus analysis
+  -> Research Pro academic overlay
+```
+
+Named passages such as 1 Samuel 16:7 are acceptance fixtures, not content scope.
+
+See `architecture/whole-bible-base-product.md`.
+
 ## Four logical product planes
 
 1. **Authoring / Research**
@@ -113,6 +132,7 @@ Read in this order:
 Other active specialised architecture:
 
 - `architecture/integration-boundaries-mcp-api-database.md`
+- `architecture/whole-bible-base-product.md`
 - `architecture/corpus-source-integration.md`
 - `architecture/academic-evidence-policy.md`
 - `architecture/academic-storage-and-rag.md`
@@ -214,13 +234,14 @@ See:
 
 ## Product build phases
 
-1. Product foundation + release model + serving shell
-2. Passage translations + alignment + workspace
-3. Hebrew corpus + semantic sets + construction/query engine
-4. Private academic knowledge compiler + Scholarly Intelligence + publication pipeline
-5. Rules + published commentary/literature review + Research serving + optional NL-to-DSL + product operations
+1. Product foundation + release model + fixture serving shell
+2A. Whole-Bible Hebrew corpus foundation + relational import + release-pinned reader
+2B. Translation witnesses + alignment/comparison + project/user translation workspace
+3. Whole-corpus semantic sets + constructions + deterministic query engine
+4. Private academic knowledge compiler + Scholarly Intelligence authoring/publication
+5. Research Pro published analyses + literature/commentary serving + product operations
 
-The Research Compiler remains a permanent subsystem after Phase 5.
+Research Pro is an overlay, not a prerequisite for whole-Bible passage availability. The Research Compiler remains a permanent subsystem after Phase 5.
 
 ## Hebrew corpus source bootstrap
 
@@ -236,7 +257,7 @@ Download into the gitignored local cache:
 python scripts/corpora/fetch_sources.py
 ```
 
-Export the 1 Samuel 16:7 spike inputs:
+Export the 1 Samuel 16:7 acceptance-canary inputs (this passage tests the importer/crosswalk; it does not define product scope):
 
 ```bash
 python scripts/corpora/export_oshb_words.py --reference 1Sam.16.7 --output .local/exports/oshb-1sam16-7.ndjson

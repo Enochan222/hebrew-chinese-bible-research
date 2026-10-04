@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.17**
+State Revision: **2026-10-05.1**
 
 ## Mandatory governance rule
 
@@ -147,6 +147,20 @@ Repository visibility remains public as observed state; this audit does not chan
 - Normal changes require PR + latest-main synchronization + `contracts` PASS + `state-and-changelog` PASS + resolved conversations + squash merge.
 - Panel contract-closure adjudication is recorded in `architecture/reviews/2026-10-03-panel-contract-closure.md` and registered as current validation authority.
 
+## Current product execution boundary
+
+The product baseline is now explicitly the **whole Hebrew Bible**, with academic intelligence layered on top.
+
+- 1 Samuel 16:7 and other named passages are acceptance/edge-case fixtures, not content scope;
+- the next corpus milestone is real relational ingestion followed by a whole-corpus load and coverage audit, not manual passage-by-passage expansion;
+- the whole-Bible reader must become database-backed before Research Pro depth is treated as the primary implementation frontier;
+- selected translation witnesses, comparison/alignment and project/user translation form the next base-product layer after Hebrew corpus serving;
+- deterministic Corpus Lab capability belongs to the base scholarly product;
+- Research Pro literature/debate/commentary enrichment may be progressive by target and must not block base passage availability;
+- missing academic coverage is an explicit availability state, never an invitation to synthesize unreviewed scholarship from model memory.
+
+Authority: `architecture/whole-bible-base-product.md`.
+
 ## Current pinned Hebrew corpus integration
 
 The first corpus-source adapter integration intended for Database Spike 001 is now machine-pinned and reproducible:
@@ -227,12 +241,13 @@ This is fixture-shell implementation evidence only. It does not satisfy real-dat
 
 ## Current implementation priority
 
-1. Preserve contract/governance consistency.
-2. Connect the pinned OSHB/BHSA/ETCBC-bridging exports to the merged Database Spike 001 relational schema and validate real-corpus cross-layer constraints/queries without promoting unreviewed candidate mappings.
-3. Implement scholarly provider adapters and ResearchModelAdapter interfaces.
-4. Validate one end-to-end literature-discovery build against a real Hebrew-Bible ResearchIssue.
-5. Continue later application stages without weakening publication/rights/reproducibility boundaries.
+1. Preserve contract/governance consistency and the whole-Bible scope guard.
+2. Complete WB-0: import the pinned real OSHB/BHSA/ETCBC-bridging 1 Samuel 16:7 acceptance canary into the merged PostgreSQL schema without promoting unreviewed mappings.
+3. Complete WB-1/WB-2: run the same importer across the complete configured Hebrew Bible, produce auditable coverage/exception evidence, and serve it through release-pinned passage APIs.
+4. Complete WB-3: replace fixture-only Hebrew passage content with a database-backed whole-Bible reader and navigation.
+5. Complete WB-4/WB-5: add selected translation witnesses, alignment/comparison, project/user translation workflow and deterministic whole-corpus analysis.
+6. Only then make Research Pro provider adapters, ResearchModelAdapter and end-to-end literature builds the primary product implementation frontier; academic enrichment may proceed in parallel where it does not block the base path.
 
 ## Latest push intent
 
-Post-merge adversarial review of the corpus tooling found two fail-closed gaps not exercised by the successful 1 Samuel 16:7 smoke: an existing cache could trust a truncated self-authored manifest because verification did not require the manifest file set to equal the actual cache file set, and the OSHB exporter could return success with an empty artifact when a requested reference did not exist. The current change hardens manifest/config/path/size/hash verification, rejects path traversal and untracked cache files, makes zero-record OSHB export a hard failure, and adds adversarial CI regressions. The larger next product gate is unchanged: import the real pinned corpus exports into the PostgreSQL Database Spike schema.
+Realign implementation sequencing with the product's already-declared whole-Hebrew-Bible scope. The repository now has an explicit Whole-Bible Base Product authority, scope guard for agents, whole-Bible Core freeze gates and a Phase 2A corpus/reader milestone ahead of Phase 2B translation workbench and later Research Pro depth. Existing 1 Samuel 16:7 / other passage fixtures remain valuable acceptance vectors, but they no longer risk being read as the product scope. No database schema, source pin, rights rule, ResearchRelease semantic or runtime feature is changed by this architecture/roadmap correction.

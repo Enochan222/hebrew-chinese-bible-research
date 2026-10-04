@@ -67,6 +67,9 @@ Database Spike 001 may begin when all CORE-SPIKE gates are PASS. This does not d
 |---|---|
 | CORE-FZ-REF-001 | ReferenceAtom identity and PassageLocator resolution are tested against superscription/split-merge/alternate-versification edge cases |
 | CORE-FZ-TEXT-001 | Ketiv/Qere fixture uses WRITTEN/READ streams and alignment stream pinning |
+| CORE-FZ-WB-001 | Whole-Hebrew-Bible ReferenceSystem/ReferenceSpan coverage and navigation are verified for the configured CanonSystem; fixture passages do not define product coverage |
+| CORE-FZ-WB-002 | Pinned real OSHB/BHSA corpus data is imported across the complete configured corpus with auditable counts, source pins, explicit exclusions/errors and no silent record drops |
+| CORE-FZ-WB-003 | Release-pinned public passage API/reader traverses database-backed whole-corpus content without fixture-specific hard-coding and remains usable with Research Pro/BYOK unavailable |
 | CORE-FZ-CORPUS-001 | OSHB plus structurally different MACULA/BHSA layer coexist without forced phrase/clause identity |
 | CORE-FZ-TRANS-001 | FHL/provider distribution is distinct from work/edition/expression identity |
 | CORE-FZ-ALIGN-001 | Hebrew-Chinese many-to-many alignment fixture passes |

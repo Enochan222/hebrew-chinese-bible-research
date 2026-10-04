@@ -30,6 +30,15 @@ Study mode preserves minimum academic transparency.
 
 No Research Pro feature may create a parallel ontology or duplicate canonical source data.
 
+
+Research Pro is also **not a prerequisite for whole-Bible base coverage**.
+
+The base product may serve a passage with Hebrew text, deterministic linguistic/corpus data, permitted translation witnesses and project/user translation workflows even when no ResearchIssue, LiteratureSnapshot, CommentaryEntry or live-discovery result has yet been compiled for that target.
+
+Academic coverage is therefore progressive. Missing Research Pro coverage must be represented explicitly and must not be backfilled from model memory at request time.
+
+The execution boundary is defined in `architecture/whole-bible-base-product.md`.
+
 ---
 
 # 2. Three scholarly knowledge states
@@ -312,13 +321,21 @@ Reserve:
 
 No full scholarly-intelligence implementation required.
 
-## Phase 2
+## Phase 2A
 
-Use:
+No Research Pro implementation is required to establish whole-Bible Hebrew passage coverage.
+
+The UI may expose explicit scholarly-module availability states while the base passage remains usable.
+
+## Phase 2B
+
+Use reviewed material where already available:
 
 - key scholarship summary;
 - translation-note/public commentary placeholders;
 - minimum evidence transparency.
+
+Absence of those objects does not remove the passage from the base product.
 
 ## Phase 3
 
