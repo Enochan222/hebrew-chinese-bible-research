@@ -56,6 +56,32 @@ python scripts/corpora/build_candidate_crosswalk.py \
 
 The crosswalk supports conservative contiguous many-to-many token spans. Equal token counts are not required. It first requires equal whole-verse consonantal streams, then emits the smallest prefix-compatible contiguous span groups. Any textual/prefix divergence becomes `NEEDS_REVIEW`; generated mappings are `CANDIDATE_AUTOMATED` and never canonical by themselves.
 
+## WB-0 relational canary loader
+
+After the pinned exports and candidate crosswalk exist, load the real 1 Samuel 16:7 canary into a clean Database Spike schema:
+
+```bash
+python scripts/corpora/load_wb0_postgres.py \
+  --oshb .local/exports/oshb-1sam16-7.ndjson \
+  --bhsa .local/exports/bhsa-1sam16-7.ndjson \
+  --crosswalk .local/exports/crosswalk-1sam16-7.ndjson \
+  --report .local/exports/wb0-relational-report.json
+```
+
+The loader is intentionally narrow:
+
+- it refuses source-pin/count drift for the immutable WB-0 canary;
+- it preserves provider-native reference labels and IDs;
+- it creates separate OSHB and BHSA DigitalExpression/CorpusRelease identities;
+- it keeps BHSA phrase/clause graph membership framework-scoped;
+- BHSA nodes `150439` and `150445` remain real AnalysisNodes with zero TextSegment memberships;
+- many-to-many crosswalk candidates are stored as grouped Authoring research data rather than false pairwise equivalence;
+- every automatic candidate remains `canonical=false`, `CANDIDATE_AUTOMATED`;
+- bridging values are retained as BHSA-node comparison features, not current OSHB provider-ID equivalence;
+- the loader writes no Serving corpus projection.
+
+WB-0 is a relational canary. After it passes, WB-1 must generalize the importer and produce a whole-corpus coverage/error audit rather than extending the product passage by passage.
+
 Automatic `ANNOTATION_ONLY_TARGET_NODE` classification is intentionally narrow: it currently recognizes only the evidenced unbridged Biblical Hebrew article-node shape with lexeme, article POS/PDP and phrase/clause context. Other empty target nodes remain unresolved until their source semantics are reviewed.
 
 ## Updating upstream data
