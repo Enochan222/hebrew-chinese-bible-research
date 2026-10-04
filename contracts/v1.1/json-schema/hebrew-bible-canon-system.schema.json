@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/contracts/v1.1/hebrew-bible-canon-system.schema.json",
+  "title": "Hebrew Bible Canon System",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "canonSystem",
+    "books"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "canonSystem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "name",
+        "tradition",
+        "description"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tradition": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "books": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "osisCode",
+          "englishName",
+          "bookOrder",
+          "included"
+        ],
+        "properties": {
+          "osisCode": {
+            "type": "string",
+            "minLength": 1
+          },
+          "englishName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "bookOrder": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "included": {
+            "const": true
+          }
+        }
+      }
+    }
+  }
+}
