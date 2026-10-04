@@ -82,6 +82,68 @@ The loader is intentionally narrow:
 
 WB-0 is a relational canary. After it passes, WB-1 must generalize the importer and produce a whole-corpus coverage/error audit rather than extending the product passage by passage.
 
+## WB-1 whole-corpus import
+
+WB-1 is book-bounded rather than one giant in-memory export.
+
+Configured canon authority:
+
+`contracts/v1.1/hebrew-bible-canon-system.json`
+
+Current configured system:
+
+`TANAKH_OSIS_39`
+
+It contains the complete Hebrew-Bible content in Tanakh order while retaining the split OSIS book identities used by the pinned corpora.
+
+Execution sequence:
+
+```bash
+python scripts/corpora/export_oshb_books.py \
+  --output-dir .local/wb1/oshb \
+  --report .local/wb1/reports/oshb-export.json
+
+python scripts/corpora/export_bhsa_books.py \
+  --output-dir .local/wb1/bhsa \
+  --report .local/wb1/reports/bhsa-export.json
+
+python scripts/corpora/build_wb1_crosswalks.py \
+  --oshb-dir .local/wb1/oshb \
+  --bhsa-dir .local/wb1/bhsa \
+  --output-dir .local/wb1/crosswalk \
+  --report .local/wb1/reports/crosswalk.json
+
+python scripts/corpora/load_wb1_postgres.py \
+  --oshb-dir .local/wb1/oshb \
+  --bhsa-dir .local/wb1/bhsa \
+  --crosswalk-dir .local/wb1/crosswalk \
+  --report .local/wb1/reports/wb1-coverage.json
+
+python scripts/corpora/verify_wb1_report.py \
+  --report .local/wb1/reports/wb1-coverage.json \
+  --canon contracts/v1.1/hebrew-bible-canon-system.json \
+  --oshb-export-report .local/wb1/reports/oshb-export.json \
+  --bhsa-export-report .local/wb1/reports/bhsa-export.json \
+  --crosswalk-report .local/wb1/reports/crosswalk.json
+```
+
+WB-1 invariants:
+
+- every configured book must be present in both pinned source exports;
+- all provider word records remain represented as provider-scoped AnalysisNodes;
+- OSHB source-surface omissions fail the source-integrity gate;
+- reviewed BHSA annotation-only nodes remain nodes with zero invented TextSegments;
+- other empty BHSA source-surface states remain explicit exceptions rather than automatic annotation-only classification;
+- phrase/clause nodes preserve their provider identity, features, reference range and graph membership;
+- phrase/clause nodes may span multiple reference atoms;
+- candidate mappings stay grouped, `CANDIDATE_AUTOMATED` and non-canonical;
+- unresolved cross-framework mappings are reported separately from source-ingestion failures;
+- per-book source/export/import counts must reconcile with PostgreSQL;
+- duplicate provider identities and missing books fail the gate;
+- real BHSA/bridging data still does not enter Serving in WB-1.
+
+The generated `wb1-coverage.json` is the machine-auditable evidence for `CORE-FZ-WB-002`. A green implementation is not inferred from a small passage sample.
+
 Automatic `ANNOTATION_ONLY_TARGET_NODE` classification is intentionally narrow: it currently recognizes only the evidenced unbridged Biblical Hebrew article-node shape with lexeme, article POS/PDP and phrase/clause context. Other empty target nodes remain unresolved until their source semantics are reviewed.
 
 ## Updating upstream data
