@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-05.5**
+State Revision: **2026-10-05.6**
 
 ## Mandatory governance rule
 
@@ -255,6 +255,8 @@ WB-0 is implemented as an independent PostgreSQL 17 job alongside the existing s
 - store 25 span candidates as grouped Authoring mappings so 1:n/n:1/n:m evidence is not flattened into false pairwise equivalence;
 - enforce `CANDIDATE_AUTOMATED` plus `canonical=false` and reject accidental candidate promotion;
 - run a real multi-layer OSHB morphology -> explicit grouped mapping -> BHSA BODY_PART/clause relational query;
+- first real execution loaded successfully and observed 22 BHSA phrase nodes, 7 clause nodes, 90 graph-membership edges, 35 bridging feature values and 7 non-1:1 mapping groups in addition to the pinned 25/34 word counts;
+- the first assertion run exposed a test-boundary defect rather than a data-model failure: wrong-layer membership was correctly rejected by the earlier span/layer trigger before PostgreSQL reached the expected composite FK; the negative test now accepts only those two intended rejection boundaries;
 - write no real BHSA/bridging corpus projection into Serving because public/commercial rights remain unresolved.
 
 WB-0 is accepted only when both the original synthetic `postgres-spike` job and the new `wb0-real-corpus-canary` job pass on the exact PR head. WB-1 remains responsible for generalizing this importer and producing complete configured-corpus coverage/error evidence.
