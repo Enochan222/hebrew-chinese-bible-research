@@ -246,19 +246,114 @@ CREATE TABLE authoring.analysis_edges (
     REFERENCES authoring.analysis_nodes(analysis_node_id, annotation_layer_id)
 );
 
-CREATE TABLE authoring.analysis_node_mappings (
-  mapping_id uuid PRIMARY KEY,
-  source_layer_id uuid NOT NULL REFERENCES authoring.annotation_layers(annotation_layer_id),
-  source_node_id uuid NOT NULL,
-  target_layer_id uuid NOT NULL REFERENCES authoring.annotation_layers(annotation_layer_id),
-  target_node_id uuid NOT NULL,
+CREATE TABLE authoring.cross_annotation_mappings (
+  cross_annotation_mapping_id uuid PRIMARY KEY,
+  from_annotation_layer_id uuid NOT NULL REFERENCES authoring.annotation_layers(annotation_layer_id),
+  from_node_id uuid NOT NULL,
+  to_annotation_layer_id uuid NOT NULL REFERENCES authoring.annotation_layers(annotation_layer_id),
+  to_node_id uuid NOT NULL,
   mapping_type text NOT NULL,
-  CHECK (source_layer_id <> target_layer_id),
-  FOREIGN KEY (source_node_id, source_layer_id)
+  confidence numeric CHECK (confidence IS NULL OR (confidence >= 0 AND confidence <= 1)),
+  mapping_method text NOT NULL,
+  review_status text NOT NULL,
+  properties jsonb NOT NULL DEFAULT '{}'::jsonb,
+  CHECK (from_annotation_layer_id <> to_annotation_layer_id),
+  FOREIGN KEY (from_node_id, from_annotation_layer_id)
     REFERENCES authoring.analysis_nodes(analysis_node_id, annotation_layer_id),
-  FOREIGN KEY (target_node_id, target_layer_id)
+  FOREIGN KEY (to_node_id, to_annotation_layer_id)
     REFERENCES authoring.analysis_nodes(analysis_node_id, annotation_layer_id)
 );
+
+-- Real OSHB/BHSA evidence requires preserving n:m candidate span boundaries.
+-- A grouped candidate is research data in Authoring only; it is not a canonical
+-- identity and must not be projected to Serving until reviewed.
+CREATE TABLE authoring.cross_annotation_mapping_groups (
+  mapping_group_id uuid PRIMARY KEY,
+  from_annotation_layer_id uuid NOT NULL REFERENCES authoring.annotation_layers(annotation_layer_id),
+  to_annotation_layer_id uuid NOT NULL REFERENCES authoring.annotation_layers(annotation_layer_id),
+  reference_span_id uuid NOT NULL REFERENCES authoring.reference_spans(reference_span_id),
+  mapping_type text NOT NULL,
+  mapping_method text NOT NULL,
+  review_status text NOT NULL,
+  canonical boolean NOT NULL DEFAULT false,
+  confidence numeric CHECK (confidence IS NULL OR (confidence >= 0 AND confidence <= 1)),
+  properties jsonb NOT NULL DEFAULT '{}'::jsonb,
+  CHECK (from_annotation_layer_id <> to_annotation_layer_id),
+  CHECK (NOT (canonical AND review_status = 'CANDIDATE_AUTOMATED')),
+  UNIQUE (mapping_group_id, from_annotation_layer_id),
+  UNIQUE (mapping_group_id, to_annotation_layer_id)
+);
+
+CREATE TABLE authoring.cross_annotation_mapping_from_members (
+  mapping_group_id uuid NOT NULL,
+  from_annotation_layer_id uuid NOT NULL,
+  from_node_id uuid NOT NULL,
+  member_order integer NOT NULL CHECK (member_order >= 0),
+  PRIMARY KEY (mapping_group_id, member_order),
+  UNIQUE (mapping_group_id, from_node_id),
+  FOREIGN KEY (mapping_group_id, from_annotation_layer_id)
+    REFERENCES authoring.cross_annotation_mapping_groups(mapping_group_id, from_annotation_layer_id)
+    ON DELETE CASCADE,
+  FOREIGN KEY (from_node_id, from_annotation_layer_id)
+    REFERENCES authoring.analysis_nodes(analysis_node_id, annotation_layer_id)
+);
+
+CREATE TABLE authoring.cross_annotation_mapping_to_members (
+  mapping_group_id uuid NOT NULL,
+  to_annotation_layer_id uuid NOT NULL,
+  to_node_id uuid NOT NULL,
+  member_order integer NOT NULL CHECK (member_order >= 0),
+  PRIMARY KEY (mapping_group_id, member_order),
+  UNIQUE (mapping_group_id, to_node_id),
+  FOREIGN KEY (mapping_group_id, to_annotation_layer_id)
+    REFERENCES authoring.cross_annotation_mapping_groups(mapping_group_id, to_annotation_layer_id)
+    ON DELETE CASCADE,
+  FOREIGN KEY (to_node_id, to_annotation_layer_id)
+    REFERENCES authoring.analysis_nodes(analysis_node_id, annotation_layer_id)
+);
+
+CREATE OR REPLACE FUNCTION authoring.validate_cross_annotation_mapping_member_span()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $
+DECLARE
+  group_span uuid;
+  node_span uuid;
+BEGIN
+  IF TG_TABLE_NAME = 'cross_annotation_mapping_from_members' THEN
+    SELECT g.reference_span_id, n.reference_span_id
+      INTO group_span, node_span
+    FROM authoring.cross_annotation_mapping_groups g
+    JOIN authoring.analysis_nodes n
+      ON n.analysis_node_id = NEW.from_node_id
+     AND n.annotation_layer_id = NEW.from_annotation_layer_id
+    WHERE g.mapping_group_id = NEW.mapping_group_id
+      AND g.from_annotation_layer_id = NEW.from_annotation_layer_id;
+  ELSE
+    SELECT g.reference_span_id, n.reference_span_id
+      INTO group_span, node_span
+    FROM authoring.cross_annotation_mapping_groups g
+    JOIN authoring.analysis_nodes n
+      ON n.analysis_node_id = NEW.to_node_id
+     AND n.annotation_layer_id = NEW.to_annotation_layer_id
+    WHERE g.mapping_group_id = NEW.mapping_group_id
+      AND g.to_annotation_layer_id = NEW.to_annotation_layer_id;
+  END IF;
+
+  IF group_span IS NULL OR node_span IS NULL OR group_span <> node_span THEN
+    RAISE EXCEPTION 'cross-annotation mapping member must share the mapping-group reference span';
+  END IF;
+  RETURN NEW;
+END
+$;
+
+CREATE TRIGGER cross_annotation_mapping_from_member_span
+BEFORE INSERT OR UPDATE ON authoring.cross_annotation_mapping_from_members
+FOR EACH ROW EXECUTE FUNCTION authoring.validate_cross_annotation_mapping_member_span();
+
+CREATE TRIGGER cross_annotation_mapping_to_member_span
+BEFORE INSERT OR UPDATE ON authoring.cross_annotation_mapping_to_members
+FOR EACH ROW EXECUTE FUNCTION authoring.validate_cross_annotation_mapping_member_span();
 
 CREATE TABLE authoring.alignment_groups (
   alignment_group_id uuid PRIMARY KEY,
