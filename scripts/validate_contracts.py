@@ -34,6 +34,7 @@ def schema_errors(schema_path: str, fixture_path: str) -> list[str]:
 
 POSITIVE = [
  ("contracts/v1.1/json-schema/corpus-source-registry.schema.json","contracts/v1.1/corpus-source-registry.json"),
+ ("contracts/v1.1/json-schema/hebrew-bible-canon-system.schema.json","contracts/v1.1/hebrew-bible-canon-system.json"),
  ("contracts/v1.1/json-schema/corpus-query.schema.json","contracts/v1.1/fixtures/corpus-query-1sam16-7.json"),
  ("contracts/v1.1/json-schema/corpus-query-normalized.schema.json","contracts/v1.1/fixtures/corpus-query-1sam16-7.json"),
  ("contracts/v1.1/json-schema/release-manifest.schema.json","contracts/v1.1/fixtures/release-manifest.json"),
@@ -134,6 +135,24 @@ def query_semantic(q: dict) -> list[str]:
         if x.get("operator") in {"EXISTS","NOT_EXISTS","MIN_COUNT","MAX_COUNT","EXACT_COUNT"}:
             if not x.get("bind"): out.append("empty quantifier bind")
             if any(b not in nodes for b in x.get("bind",[])): out.append("unknown quantifier bind")
+    return out
+
+def hebrew_bible_canon_semantic(d: dict) -> list[str]:
+    out=[]
+    books=d.get("books",[])
+    codes=[b.get("osisCode") for b in books]
+    orders=[b.get("bookOrder") for b in books]
+    if len(codes)!=len(set(codes)): out.append("duplicate canon osisCode")
+    if len(orders)!=len(set(orders)): out.append("duplicate canon bookOrder")
+    if sorted(orders)!=list(range(1,len(books)+1)): out.append("canon bookOrder must be contiguous from 1")
+    expected=[
+        "Gen","Exod","Lev","Num","Deut","Josh","Judg","1Sam","2Sam","1Kgs","2Kgs",
+        "Isa","Jer","Ezek","Hos","Joel","Amos","Obad","Jonah","Mic","Nah","Hab","Zeph","Hag","Zech","Mal",
+        "Ps","Job","Prov","Ruth","Song","Eccl","Lam","Esth","Dan","Ezra","Neh","1Chr","2Chr"
+    ]
+    if codes!=expected: out.append("configured TANAKH_OSIS_39 book/order drift")
+    if d.get("canonSystem",{}).get("code")!="TANAKH_OSIS_39": out.append("configured canon code drift")
+    if any(b.get("included") is not True for b in books): out.append("configured canon contains excluded book")
     return out
 
 def corpus_source_registry_semantic(d: dict) -> list[str]:
@@ -248,6 +267,7 @@ def validate_fixtures():
         if errs: continue
         d=load(f)
         if f.endswith("corpus-source-registry.json"): ERRORS.extend(f"{f}: {e}" for e in corpus_source_registry_semantic(d))
+        if f.endswith("hebrew-bible-canon-system.json"): ERRORS.extend(f"{f}: {e}" for e in hebrew_bible_canon_semantic(d))
         if "corpus-query-1sam16-7" in f: ERRORS.extend(f"{f}: {e}" for e in query_semantic(d))
         if f.endswith("translation-decision.json"): ERRORS.extend(f"{f}: {e}" for e in translation_semantic(d))
         if f.endswith("translation-policy-version.json"): ERRORS.extend(f"{f}: {e}" for e in translation_policy_semantic(d))
