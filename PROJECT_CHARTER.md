@@ -1,8 +1,8 @@
 # Hebrew-Chinese Bible Research Project Charter
 
 Status: **CANONICAL PRODUCT INTENT AND REQUIREMENTS**
-Version: 1.0
-Date: 2026-10-03
+Version: 1.1
+Date: 2026-10-05
 
 ## 0. Authority and reading order
 
@@ -57,6 +57,21 @@ The long-term product is therefore both:
 The long-term canonical scope is the **whole Hebrew Bible**, not a permanently selected set of demonstration passages.
 
 Development may use pilot books/passages, fixtures and staged corpus coverage, but staged implementation must not be mistaken for the final scholarly scope.
+
+
+Passage-specific fixtures are verification assets only. They must never define product coverage, navigation, importer scope, serving scope or launch scope.
+
+## 1.2 Base product and academic overlay
+
+The implementation order must preserve a complete **whole-Bible base product** beneath the academic-intelligence layer.
+
+The base product consists of release-pinned passage/reference coverage, Hebrew textual and linguistic data, passage navigation, permitted translation witnesses, translation comparison/alignment, project/user translation workflows and deterministic corpus analysis as those capabilities mature.
+
+Research Pro / Scholarly Intelligence is a progressive overlay on canonical passage/book/lexeme/construction targets. A passage must remain a valid base-product passage when no LiteratureSnapshot, ResearchIssue, CommentaryEntry or live-discovery result has yet been compiled for it.
+
+Academic coverage may therefore deepen incrementally across ResearchReleases. Missing academic coverage must be represented as unavailable/not-yet-compiled rather than generated from model memory.
+
+The authoritative implementation ordering and whole-corpus acceptance requirements are defined in `architecture/whole-bible-base-product.md`.
 
 Where the project publishes its own Chinese rendering, that rendering is a reviewed, versioned scholarly product object linked to its translation decision and evidence. It is distinct from both existing Chinese translation witnesses and a user's private draft.
 
