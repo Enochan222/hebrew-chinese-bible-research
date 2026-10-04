@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.5**
+State Revision: **2026-10-04.6**
 
 ## Mandatory governance rule
 
@@ -157,6 +157,7 @@ The first real-corpus integration for Database Spike 001 is now machine-pinned a
 - upstream corpus data is downloaded on demand into gitignored `.local/corpora/`, never vendored as the repository's canonical data;
 - BHSA local cache is now required to contain every feature referenced by its pinned `otext.tf` formats and section configuration; the fetcher rejects incomplete caches before Text-Fabric loading;
 - source exact Unicode is preserved; OSHB source identity is not NFC-normalized;
+- provider book-name aliases are normalized only for passage filtering/candidate comparison; emitted provider reference labels remain source-native and canonical project passage identity still resolves through ReferenceSystem/ReferenceSpan;
 - a conservative candidate crosswalk compiler may propose current-OSHB to BHSA word mappings only when reference/order/consonantal signatures agree; mismatch is `NEEDS_REVIEW`, and automatic canonical promotion is forbidden;
 - source pins never auto-advance and every upstream change requires reviewed PR, corpus diff, spike rerun and a new ResearchBuild/ResearchRelease;
 - OSHB public serving defaults to attribution-compatible use under its upstream terms;
@@ -211,4 +212,4 @@ See `architecture/corpus-source-integration.md` and `contracts/v1.1/corpus-sourc
 
 ## Latest push intent
 
-This revision continues the real-corpus integration after the first GitHub `Corpus source smoke` run. The smoke successfully fetched all three exact pins and exported 25 OSHB words for 1 Samuel 16:7, but exposed a real BHSA partial-cache defect: Text-Fabric 13.1.0 initializes the formats declared by `otext.tf` and therefore requires transliterated/plain companion features such as `g_cons`, `g_word`, `qere`, `trailer`, `lex` and related lexical format features even when the exporter reads UTF-8 fields. The registry now includes the complete pinned `otext.tf` dependency set, the fetcher validates that set before writing a cache manifest, and contract validation prevents future regression. The smoke remains the acceptance test and is not weakened.
+This revision continues PR #8 after the second real-corpus smoke. The corrected BHSA Text-Fabric cache loaded successfully, but the exporter returned zero rows because the runtime section book label did not match the hard-coded Latin label used by the CLI filter. The corpus tools now share a complete OSHB/BHSA Latin/BHSA English book-alias normalizer for filtering only, while preserving raw provider reference labels in exported records. The BHSA exporter now fails explicitly on zero-row requested passages, the smoke uses the common `1Sam.16.7` input for both providers, and the crosswalk normalizes both provider labels through the same comparison function. This keeps provider identity separate from project canonical ReferenceSystem identity.

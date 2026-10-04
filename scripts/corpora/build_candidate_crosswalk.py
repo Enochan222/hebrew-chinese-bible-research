@@ -7,27 +7,10 @@ import unicodedata
 from collections import defaultdict
 from pathlib import Path
 
-BOOK_EQUIV = {
-    "Gen": "Genesis", "Exod": "Exodus", "Lev": "Leviticus", "Num": "Numeri",
-    "Deut": "Deuteronomium", "Josh": "Josua", "Judg": "Judices",
-    "1Sam": "Samuel_I", "2Sam": "Samuel_II", "1Kgs": "Reges_I", "2Kgs": "Reges_II",
-    "Isa": "Jesaia", "Jer": "Jeremia", "Ezek": "Ezechiel", "Hos": "Hosea",
-    "Obad": "Obadia", "Jonah": "Jona", "Mic": "Micha", "Hab": "Habakuk",
-    "Zeph": "Zephania", "Hag": "Haggai", "Zech": "Sacharia", "Mal": "Maleachi",
-    "Ps": "Psalmi", "Job": "Iob", "Prov": "Proverbia", "Song": "Canticum",
-    "Eccl": "Ecclesiastes", "Lam": "Threni", "Esth": "Esther", "Ezra": "Esra",
-    "1Chr": "Chronica_I", "2Chr": "Chronica_II",
-}
-
+from reference_aliases import parse_reference_label
 def load_ndjson(path: Path) -> list[dict]:
     with path.open(encoding="utf-8") as fh:
         return [json.loads(line) for line in fh if line.strip()]
-
-def normalize_ref(source_key: str, label: str) -> tuple[str, int, int]:
-    book, chapter, verse = label.rsplit(".", 2)
-    if source_key == "OSHB_MORPHHB":
-        book = BOOK_EQUIV.get(book, book)
-    return book, int(chapter), int(verse)
 
 def hebrew_letters_only(value: str | None) -> str:
     if not value:
@@ -48,9 +31,9 @@ def main() -> int:
     groups_o = defaultdict(list)
     groups_b = defaultdict(list)
     for row in load_ndjson(args.oshb):
-        groups_o[normalize_ref("OSHB_MORPHHB", row["referenceLabel"])].append(row)
+        groups_o[parse_reference_label(row["referenceLabel"])].append(row)
     for row in load_ndjson(args.bhsa):
-        groups_b[normalize_ref("BHSA_2021", row["referenceLabel"])].append(row)
+        groups_b[parse_reference_label(row["referenceLabel"])].append(row)
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     mapping_count = 0

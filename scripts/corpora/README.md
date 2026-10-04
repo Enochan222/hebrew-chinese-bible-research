@@ -35,9 +35,11 @@ BHSA example:
 
 ```bash
 python scripts/corpora/export_bhsa_features.py \
-  --reference Samuel_I.16.7 \
+  --reference 1Sam.16.7 \
   --output .local/exports/bhsa-1sam16-7.ndjson
 ```
+
+Passage CLI filters share `reference_aliases.py`, which equates known OSHB/BHSA Latin/BHSA English book labels only for filtering and candidate comparison. Exported provider labels remain unchanged. A requested BHSA passage with zero words is an error, not a successful empty export.
 
 The BHSA exporter loads ETCBC bridging features when the pinned bridging cache exists. Those fields are attached to BHSA word nodes as 2021 comparison evidence and are not represented as current OSHB provider word IDs.
 

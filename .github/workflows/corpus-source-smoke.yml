@@ -29,7 +29,7 @@ jobs:
         run: |
           mkdir -p .local/exports
           python scripts/corpora/export_oshb_words.py --reference 1Sam.16.7 --output .local/exports/oshb.ndjson
-          python scripts/corpora/export_bhsa_features.py --reference Samuel_I.16.7 --output .local/exports/bhsa.ndjson
+          python scripts/corpora/export_bhsa_features.py --reference 1Sam.16.7 --output .local/exports/bhsa.ndjson
       - name: Build conservative candidate crosswalk
         run: |
           python scripts/corpora/build_candidate_crosswalk.py \
@@ -41,9 +41,16 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
+          counts = {}
           for name in ("oshb.ndjson", "bhsa.ndjson", "crosswalk.ndjson"):
               path = Path(".local/exports") / name
               rows = [json.loads(x) for x in path.read_text(encoding="utf-8").splitlines() if x.strip()]
               assert rows, f"{name} is empty"
+              counts[name] = len(rows)
               print(name, len(rows))
+          assert counts["oshb.ndjson"] == 25, counts
+          assert counts["bhsa.ndjson"] > 0, counts
+          crosswalk = [json.loads(x) for x in (Path(".local/exports") / "crosswalk.ndjson").read_text(encoding="utf-8").splitlines() if x.strip()]
+          assert all(r.get("recordType") in {"CANDIDATE_WORD_MAPPING", "UNRESOLVED_REFERENCE"} for r in crosswalk)
+          print("crosswalk record types", sorted({r["recordType"] for r in crosswalk}))
           PY

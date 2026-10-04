@@ -173,11 +173,15 @@ Export BHSA 2021 plus available bridging features:
 
 ```bash
 python scripts/corpora/export_bhsa_features.py \
-  --reference Samuel_I.16.7 \
+  --reference 1Sam.16.7 \
   --output .local/exports/bhsa-1sam16-7.ndjson
 ```
 
 These exporters deliberately emit provider-scoped/raw fields first. Database import/adjudication may derive normalized project fields only after the raw identities and provenance have been stored.
+
+CLI passage filters normalize known provider book aliases only for comparison. For example, OSHB `1Sam`, BHSA Latin `Samuel_I`, and BHSA English `1_Samuel` compare as the same temporary canonical book key. The exporter still writes the exact provider-native `referenceLabel` and `referenceSystemCode`; alias normalization does not replace the project's ReferenceSystem/ReferenceSpan resolution layer.
+
+When a requested passage yields zero BHSA words, the exporter exits with failure and reports the observed book labels at the requested chapter/verse instead of silently emitting an empty file.
 
 Build a conservative current-OSHB to BHSA candidate crosswalk for the spike:
 

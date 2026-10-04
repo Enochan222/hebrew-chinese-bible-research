@@ -67,6 +67,28 @@ Repair:
 - make contract validation assert the minimum BHSA Text-Fabric dependency set;
 - rerun the unchanged real-corpus smoke until export and candidate crosswalk complete successfully.
 
+#### Second real smoke result and repair
+
+Run `37192323018` advanced materially further:
+
+- all exact pinned source downloads passed;
+- OSHB export passed with 25 words for 1 Samuel 16:7;
+- BHSA Text-Fabric initialization and export process itself passed, proving the dependency-closure repair;
+- the requested BHSA filter still produced zero rows;
+- crosswalk compilation then correctly emitted one unresolved reference rather than inventing mappings;
+- final smoke verification failed because `bhsa.ndjson` was empty.
+
+The zero-row result exposed a provider-label assumption, not a corpus absence. BHSA ships both Latin `book` labels such as `Samuel_I` and English `book@en` labels such as `1_Samuel`; Text-Fabric section presentation must not be assumed to equal the CLI's hard-coded spelling.
+
+Repair:
+
+- add shared `scripts/corpora/reference_aliases.py` covering OSHB, BHSA Latin, and BHSA English book labels;
+- use alias normalization only to compare/filter references;
+- preserve provider-native labels in exported records;
+- make BHSA requested-reference zero-row output a hard error with diagnostics;
+- make current-OSHB/BHSA crosswalk normalize both provider labels through the same shared function;
+- use `1Sam.16.7` as the common smoke input and rerun the real workflow.
+
 Before creating the repository commit:
 
 - current upstream repository heads and frozen BHSA/bridging 2021 directories were inspected;

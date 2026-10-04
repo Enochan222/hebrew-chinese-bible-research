@@ -5,6 +5,8 @@ import argparse
 import json
 from pathlib import Path
 
+from reference_aliases import normalize_section_tuple, parse_reference_label
+
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_BHSA = ROOT / ".local/corpora/bhsa-2021/tf/2021"
 DEFAULT_BRIDGE = ROOT / ".local/corpora/etcbc-bridging-2021/tf/2021"
@@ -14,18 +16,12 @@ REQUESTED_FEATURES = [
     "mother", "language", "languageISO", "qere_utf8", "osm", "osm_sf",
 ]
 
-def parse_reference(value: str) -> tuple[str, int, int]:
-    parts = value.rsplit(".", 2)
-    if len(parts) != 3:
-        raise ValueError("reference must look like Samuel_I.16.7")
-    return parts[0], int(parts[1]), int(parts[2])
-
 def main() -> int:
     parser = argparse.ArgumentParser(description="Export provider-scoped BHSA word/phrase/clause features as NDJSON.")
     parser.add_argument("--bhsa-dir", type=Path, default=DEFAULT_BHSA)
     parser.add_argument("--bridging-dir", type=Path, default=DEFAULT_BRIDGE)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--reference", help="BHSA section label such as Samuel_I.16.7")
+    parser.add_argument("--reference", help="passage label such as 1Sam.16.7; BHSA aliases are normalized only for filtering")
     parser.add_argument("--limit", type=int, default=0)
     args = parser.parse_args()
     try:
@@ -45,7 +41,7 @@ def main() -> int:
     if not api:
         raise SystemExit("Text-Fabric could not load the configured BHSA feature subset")
     F, L, T = api.F, api.L, api.T
-    target = parse_reference(args.reference) if args.reference else None
+    target = parse_reference_label(args.reference) if args.reference else None
     args.output.parent.mkdir(parents=True, exist_ok=True)
 
     def feature(name: str, node: int):
@@ -55,14 +51,18 @@ def main() -> int:
     count = 0
     last_section = None
     word_order = 0
+    observed_books_at_target_cv: set[str] = set()
     with args.output.open("w", encoding="utf-8") as out:
         for word in F.otype.s("word"):
-            section = T.sectionFromNode(word)
-            if tuple(section) != last_section:
-                last_section = tuple(section)
+            section = tuple(T.sectionFromNode(word))
+            canonical_section = normalize_section_tuple(section)
+            if section != last_section:
+                last_section = section
                 word_order = 0
             word_order += 1
-            if target and tuple(section) != target:
+            if target and canonical_section[1:] == target[1:]:
+                observed_books_at_target_cv.add(str(section[0]))
+            if target and canonical_section != target:
                 continue
             phrase_nodes = L.u(word, otype="phrase")
             clause_nodes = L.u(word, otype="clause")
@@ -103,6 +103,12 @@ def main() -> int:
             count += 1
             if args.limit and count >= args.limit:
                 break
+    if target and count == 0:
+        observed = ", ".join(sorted(observed_books_at_target_cv)) or "none"
+        raise SystemExit(
+            f"BHSA reference {args.reference!r} resolved to no words. "
+            f"Books observed at chapter/verse {target[1]}.{target[2]}: {observed}"
+        )
     print(f"exported {count} BHSA words to {args.output}")
     return 0
 
