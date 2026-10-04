@@ -5,6 +5,46 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
 
+## 2026-10-05 — Implement WB-1 whole-corpus ingestion and coverage audit candidate
+
+### Push intent
+
+Generalize the accepted WB-0 relational canary into a bounded whole-Hebrew-Bible source-ingestion path and generate the machine-auditable evidence required by `CORE-FZ-WB-002`.
+
+### Why
+
+WB-0 proved that one real passage can be represented without inventing cross-framework identity, but it did not prove whole-corpus coverage. Whole-Bible execution exposes additional load-bearing constraints: explicit CanonSystem ordering, global stream segment order, phrase/clause ranges that may span more than one reference atom, bounded memory use, per-book failure isolation, duplicate provider-ID detection and source/database count reconciliation.
+
+### What changed
+
+- added `hebrew-bible-canon-system.json` plus JSON Schema and semantic validation;
+- configured `TANAKH_OSIS_39` as the explicit 39-book split-OSIS Tanakh-order source coverage;
+- implemented relational `canon_systems` and `canon_books` tables already required by the active v1.1 architecture contract;
+- generalized AnalysisNode/TextSegment compatibility from exact ReferenceSpan equality to same-expression, same-book containment;
+- added a SQL regression for a multi-atom node with contained verse-local members plus an out-of-span negative case;
+- added one-file-per-book OSHB export;
+- added one-pass Text-Fabric BHSA/bridging export partitioned into configured books;
+- added per-book crosswalk orchestration so the whole corpus is never loaded into one crosswalk process;
+- added `load_wb1_postgres.py` for per-book transactional PostgreSQL COPY import;
+- preserve every source word as a provider-scoped AnalysisNode, while creating TextSegments only when source text exists;
+- preserve reviewed annotation-only BHSA nodes separately from unclassified empty-source states;
+- preserve BHSA word/phrase/clause graph identity, provider features, reference ranges and membership edges;
+- preserve grouped automatic crosswalk candidates as non-canonical and retain unresolved references as explicit research exceptions;
+- reconcile per-book source counts against imported AnalysisNodes, TextSegments, ReferenceAtoms and mapping groups;
+- fail WB-1 on missing configured books, duplicate provider IDs, OSHB source-surface loss, importer errors or database/source parity drift;
+- keep unresolved cross-framework mappings separate from source-ingestion failure;
+- keep all real BHSA/bridging rows out of Serving pending WB-2 rights-safe projection;
+- added a dedicated `WB-1 Whole Corpus` GitHub Actions workflow and 30-day coverage-report artifact.
+
+### Intended effect
+
+The repository now has an executable path capable of testing the whole configured Hebrew Bible rather than extrapolating from 1 Samuel 16:7. A successful run can support `CORE-FZ-WB-002`; a failed run must expose the affected book/reference/provider records instead of silently reducing coverage.
+
+### Validation
+
+Implementation validation is intentionally pending at this commit. The PR must run the complete pinned OSHB/BHSA/bridging corpus through the new workflow. Any source-ingestion or parity failure requires repair before merge. Unresolved cross-framework mappings may remain only when they are explicitly enumerated and no source record is dropped.
+
+
 ## 2026-10-05 — Implement WB-0 real OSHB/BHSA relational canary
 
 ### Push intent
