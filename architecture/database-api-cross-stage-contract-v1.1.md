@@ -782,6 +782,16 @@ Fields:
 - `member_order integer`
 - `membership_role text nullable`
 
+Required integrity:
+
+- the AnalysisNode and TextSegment belong to the same DigitalExpression / corpus context;
+- every member TextSegment ReferenceSpan must be contained within the AnalysisNode ReferenceSpan;
+- equality is valid for word-level nodes, while phrase/clause nodes may span multiple reference atoms;
+- a cross-book membership is invalid;
+- annotation-only nodes may legitimately have zero segment memberships.
+
+WB-0 used only verse-local nodes, so equality was sufficient for that canary. WB-1 generalizes the invariant to containment because real phrase/clause nodes may span more than one reference atom.
+
 ## 7.6 `analysis_edges`
 
 Fields:
