@@ -17,3 +17,12 @@ test("canonical passage fixture validates and a corrupted copy fails closed", ()
     ContractViolationError,
   );
 });
+
+test("passage request validation resolves the canonical passage-locator schema", () => {
+  const root = path.resolve(process.cwd(), "../..");
+  const fixture = JSON.parse(
+    fs.readFileSync(path.join(root, "contracts/v1.1/fixtures/passage-request.json"), "utf8"),
+  ) as Record<string, unknown>;
+
+  assert.doesNotThrow(() => assertContract("passageRequest", fixture));
+});

@@ -7,12 +7,12 @@ import type { PassageCoreV1, PassageLabelLocator } from "@/domain/passage/port";
 import type { ExperienceCapabilitiesV1 } from "@/domain/experience/port";
 
 const fixturePaths = {
-  releaseChannel: "contracts/v1.1/fixtures/release-channel-production.json",
-  releaseManifest: "contracts/v1.1/fixtures/release-manifest.json",
-  passageCore: "contracts/v1.1/fixtures/passage-core.json",
-  passageRequest: "contracts/v1.1/fixtures/passage-request.json",
-  passageLocator: "contracts/v1.1/fixtures/passage-locator-label.json",
-  capabilities: "contracts/v1.1/fixtures/experience-capabilities.json",
+  releaseChannel: "fixtures/release-channel-production.json",
+  releaseManifest: "fixtures/release-manifest.json",
+  passageCore: "fixtures/passage-core.json",
+  passageRequest: "fixtures/passage-request.json",
+  passageLocator: "fixtures/passage-locator-label.json",
+  capabilities: "fixtures/experience-capabilities.json",
 } as const;
 
 type ReleaseChannelFixture = {

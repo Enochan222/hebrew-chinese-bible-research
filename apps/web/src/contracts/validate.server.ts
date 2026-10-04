@@ -7,12 +7,26 @@ const ajv = new Ajv2020({ allErrors: true, strict: true });
 addFormats(ajv);
 
 const validators = new Map<ContractSchemaKey, ValidateFunction>();
+const schemas = new Map(
+  (Object.keys(contractPaths) as ContractSchemaKey[]).map((key) => [
+    key,
+    readContractJson(contractPaths[key]),
+  ]),
+);
+
+for (const schema of schemas.values()) {
+  if (typeof schema === "object" && schema !== null && "$id" in schema && typeof schema.$id === "string") {
+    ajv.addSchema(schema);
+  }
+}
 
 function validatorFor(key: ContractSchemaKey): ValidateFunction {
   const existing = validators.get(key);
   if (existing) return existing;
-  const schema = readContractJson(contractPaths[key]);
-  const validator = ajv.compile(schema);
+  const schema = schemas.get(key);
+  if (schema === undefined) throw new Error(`Canonical contract schema is not registered: ${key}`);
+  const schemaId = typeof schema === "object" && schema !== null && "$id" in schema ? schema.$id : undefined;
+  const validator = typeof schemaId === "string" ? (ajv.getSchema(schemaId) ?? ajv.compile(schema)) : ajv.compile(schema);
   validators.set(key, validator);
   return validator;
 }

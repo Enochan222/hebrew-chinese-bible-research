@@ -36,7 +36,126 @@ Provide a verifiable release/reference-aware serving shell whose fixture adapter
 
 ### Validation
 
-Feature-branch workflow run `37180410353` succeeded and produced the initial npm lockfile artifact. Dependency review then found that the framework lint preset introduced unnecessary transitive tooling for this narrowly scoped shell. This follow-up removes that preset from the dependency graph and regenerates the lockfile while retaining strict TypeScript as a separate gate and the deterministic source/import/SQL/SDK boundary scanner as the scoped lint gate. No pull request may be opened until the regenerated lockfile is tracked and all required checks pass: existing Python contract validation, Core/Research Pro OpenAPI validation, `npm ci`, typecheck, lint/boundary scan, unit tests, integration tests, Playwright E2E/visual capture and production build. Visual QA must then be inspected for ready, invalid-mode, missing-reference and missing-release states.
+Feature-branch workflow run `37180410353` succeeded and produced the initial npm lockfile artifact. Dependency review then found that the framework lint preset introduced unnecessary transitive tooling for this narrowly scoped shell. The preset was removed while strict TypeScript and the deterministic source/import/SQL/SDK boundary scanner were retained.
+
+The subsequent full local run exposed two real blockers that the first unit test did not cover: Ajv schema compilation received an `unknown` TypeScript value, and PassageRequest compilation could not resolve its external PassageLocator `$ref`, causing the current-release endpoint to return 503 throughout the HTTP integration test. The repair:
+
+- tracks the regenerated npm lockfile;
+- types parsed contract JSON as an Ajv schema;
+- pre-registers canonical `$id` schemas before validator lookup/compilation;
+- adds a regression test for PassageRequest external-reference resolution;
+- narrows dynamic contract file access to `contracts/v1.1`, removing the production-build whole-repository trace warning;
+- synchronizes Next.js 16 generated TypeScript declarations/settings and disables unwanted agent-rule file generation;
+- ignores generated web build, dependency, report and incremental-build paths.
+- excludes dependency, build, test-report, coverage, cache and VCS trees from the repository secret scan after generated Next.js/dependency files caused false alarms in the combined validation run.
+
+After repair, local contract validation, Core/Research Pro OpenAPI validation, deterministic lockfile regeneration, `npm ci`, typecheck, boundary lint, eight unit tests, HTTP integration, and production build pass. Playwright could not install Chromium locally because the permitted download path returned a zero-byte invalid archive; the branch workflow must therefore run Playwright E2E/visual capture and the complete suite before merge. Visual QA must then be inspected for ready, invalid-mode, missing-reference and missing-release states.
+## 2026-10-04 — Close inactive Serving candidate visibility leak
+
+### Push intent
+
+Repair a post-merge Database Spike 001 publication-boundary defect discovered by adversarial review of the actual RLS policies rather than accepting the earlier green CI result as sufficient.
+
+### Why
+
+The architecture requires publication visibility to be atomic: a candidate ResearchRelease may be fully materialized in Serving while inactive, but public clients must observe only the complete old release or the complete new release. The merged migration enabled RLS yet used `USING (true)` on release-scoped Serving tables. Because anon/authenticated also had direct SELECT grants, a caller who knew a candidate release or payload identifier could read materialized unpublished rows even though the PRODUCTION pointer had not moved.
+
+### What changed
+
+- changed `serving.release_is_published()` and `serving.component_is_published()` into narrowly scoped SECURITY DEFINER predicates with a fixed `pg_catalog, serving` search path;
+- granted anon/authenticated EXECUTE only on those boolean publication predicates;
+- kept canonical reference spans and channel definitions publicly readable;
+- gated public corpus projections and semantic-set members on participation in at least one published release;
+- gated ResearchRelease rows, release components, channel pointers, passage analyses, evidence packets/items, assertions and assertion/evidence links on a committed `PUBLISHED` event;
+- added adversarial anon tests proving that fully materialized release 2, its components, its candidate evidence packet and its release-pinned corpus query are invisible before publication;
+- added positive regression tests proving those release-scoped rows become visible after the publication transaction succeeds.
+
+### Intended effect
+
+Inactive candidate materialization remains possible, but it is no longer equivalent to public visibility. The database now enforces the architecture's old-release/new-release atomic visibility boundary even for direct table/API access, not only for clients that voluntarily use `current_release`.
+
+### Validation
+
+This change must pass the blank PostgreSQL 17 Database Spike workflow, Contract validation, and Project governance on the new PR head. The negative pre-publication tests are expected to fail against the previously merged migration and pass only with the publication-gated RLS policies.
+
+
+## 2026-10-04 — Database Spike 001 executable PostgreSQL vertical slice
+
+### Push intent
+
+Move the project from contract-only database design into a reproducible PostgreSQL implementation spike that rejects invalid scholarly states at relational, rights, RLS, publication, and release-serving trust boundaries.
+
+### Why
+
+CORE_SPIKE_V1_1 permits Database Spike 001, but earlier evidence was synthetic contract validation. The next gate requires real DDL, FK/check/trigger behavior, RLS/grants, deterministic corpus execution, publication failure injection, and independent review against the four-plane architecture.
+
+No remote Supabase project is modified. The connected account exposes only one inactive generically named project, while the repository contains no project ref proving that it is this product's target.
+
+### What changed
+
+- added `database/migrations/001_database_spike_001.sql` and a clean PostgreSQL 17 CI harness;
+- implemented Authoring, Serving, Workspace, and Publication Control schemas;
+- enforced framework/layer and text-stream integrity, semantic-set/construction/rule/translation dependencies, ResearchIssue/ResearchPosition versioning, rights snapshots, public evidence, release/channel objects, and Workspace RLS;
+- materialized Serving-owned research-object, reference, corpus, semantic-set, release, and evidence projections so public runtime does not depend on Authoring;
+- added PostgreSQL catalog assertions rejecting any Serving FK/function dependency on Authoring;
+- added exact rights-subject binding for public excerpts;
+- added shared-PK subtype/object-type enforcement;
+- added composite Workspace project-owner FKs so a user cannot attach owned child rows to another user's project;
+- added typed CitationLocator validation compatible with the v1.1 locator contract;
+- added release/component projection immutability after PUBLISHED;
+- made first publication append the PUBLISHED event and move the channel pointer in the same transaction;
+- changed corpus pagination to use a publication-projected canonical reference sort key rather than UUID order;
+- added an Authoring-offline test that temporarily renames the Authoring schema and requires anonymous current-release/corpus-query reads to continue from Serving projections;
+- kept public runtime AI/BYOK architecture untouched and introduced no model-provider credential.
+
+### Executable findings and corrections
+
+1. Run `37142212945`: migration PASS; seed exposed stable/current-version insertion ordering. Stable rows now insert with null current pointer, version rows follow, then the pointer is set.
+2. Run `37142329963`: migration/seed PASS; test used unsupported `min(uuid)`. Assertion changed to deterministic ordered selection.
+3. Run `37142397559`: suite reached RLS; disposable test helper lacked role permission. Only the temporary helper grant was added.
+4. Run `37142489342`: disposable PL/pgSQL delimiter malformed. Named dollar delimiters adopted.
+5. Run `37142607945`: first full harness PASS, but independent architecture review rejected the green result because Serving still depended on Authoring. This was treated as a failed architecture gate, not accepted because CI was green.
+6. Run `37143183450`: first Serving-isolation migration exposed delimiter serialization in new Serving rights validators. Named delimiters fixed it.
+7. Run `37143277018`: restricted SECURITY DEFINER search path could not resolve hashing; hashing moved to PostgreSQL 17 core SHA-256 without widening search_path.
+8. Run `37143374434`: final Authoring-RLS anonymous block had the same delimiter defect. Independent review also found that public evidence could borrow an ALLOW snapshot for another subject; the trigger now requires exact subject identity.
+9. Run `37143497384`: Serving-isolation migration and seed PASS; wrong-subject test block delimiter failed and was corrected.
+10. Run `37143591152`: no-Serving-FK-to-Authoring catalog assertion PASS; function scan accidentally called `pg_get_functiondef()` on aggregate rows. The scan now targets ordinary functions only.
+11. Run `37143685280`: pre-final-review Database Spike harness PASS, with required Contract validation `37143685279` and Project governance `37143685263` also PASS.
+12. Run `37192756787`: later replacement-token editing corrupted SQL dollar/regex text. This was classified as serialization corruption rather than a domain-rule failure.
+13. Run `37192890177`: migration failed because a duplicate/partial 26K SQL tail had been appended after a complete first `COMMIT;`. Structural comparison proved all 58 tail CREATE objects already existed before the commit; the tail was removed and CI now statically requires exactly one `COMMIT;` with no trailing SQL.
+14. Run `37195521246`: migration/seed PASS; the cross-issue ResearchPositionVersion negative test was rejected by shared-PK registration before reaching the intended composite FK. The test now registers the synthetic version object inside the expected-failure subtransaction.
+15. Run `37195662708`: migration/seed PASS; the editorial-emendation negative test was likewise rejected by missing shared-PK registration before reaching the intended adopted-reading CHECK. The test now registers the synthetic TranslationSourceBasis first so the basis-kind CHECK is the required rejecting boundary.
+16. Run `37195807481`: migration/seed PASS; the CitationLocator negative case was rejected by the already-PUBLISHED release-1 evidence immutability guard before the locator CHECK. Review showed the same isolation risk in wrong-operation rights, wrong-subject rights, and immutable-hash cases. All four now use a candidate evidence packet on unpublished release 2 so each test must reach its intended invariant.
+17. Run `37195991129`: full Database Spike 001 PASS from a blank PostgreSQL 17 database, including static transaction-boundary guard, migration, seed, adversarial relational/RLS/rights/publication suite, Authoring-offline anonymous Serving reads, and query-plan probe. Required Contract validation `37195991128` and Project governance `37195991176` also PASS on the same head.
+
+### Independent critical review
+
+A green SQL harness is not sufficient by itself. Independent review identified and corrected load-bearing gaps that ordinary happy-path execution did not prove:
+
+- Workspace child ownership is tied relationally to project ownership;
+- shared-PK subtype rows enforce expected research-object type;
+- CitationLocator is locator-specific rather than generic JSON;
+- PUBLISHED releases cannot accept late payload/projection inserts;
+- initial PUBLISHED event and channel-pointer move are one publication transaction;
+- pagination uses release-pinned canonical reference order;
+- public Serving has no FK/function dependency on Authoring;
+- anonymous serving reads are tested while Authoring is unavailable by schema name;
+- CHANGELOG corruption/duplication from automated replacement-token editing is removed rather than retained as false history.
+
+### Intended effect
+
+A green final head means the PostgreSQL implementation rejects the tested invalid states and the public Serving/Workspace runtime can be separated from Authoring at the relational/function boundary. It still does not prove remote Supabase deployment, Data API exposure, production corpus scale, the full CorpusQuery compiler, real OSHB/MACULA/BHSA ingestion, or every CORE_FREEZE gate.
+
+### Validation
+
+The reviewed PR head passed all three workflows:
+
+- `Database Spike 001 / postgres-spike`: run `37195991129` PASS;
+- `Contract validation / contracts`: run `37195991128` PASS;
+- `Project governance / state-and-changelog`: run `37195991176` PASS.
+
+Because this evidence summary itself creates a newer head, the latest exact head must pass the same three workflows again before merge. The merge gate is the current GitHub check state, not a permanently hard-coded “final run” identifier.
+
 
 ## 2026-10-04 — Re-verify live repository protection and PR enforcement
 

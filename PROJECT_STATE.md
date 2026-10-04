@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.4**
+State Revision: **2026-10-04.14**
 
 ## Mandatory governance rule
 
@@ -205,11 +205,12 @@ This is fixture-shell implementation evidence only. It does not satisfy real-dat
 ## Current implementation priority
 
 1. Preserve contract/governance consistency.
-2. Database Spike 001 for real PostgreSQL/Supabase schema and constraints.
-3. Implement provider adapters and ResearchModelAdapter interfaces.
-4. Validate one end-to-end literature-discovery build against a real Hebrew-Bible ResearchIssue.
-5. Continue later application stages without weakening publication/rights/reproducibility boundaries.
+2. Synchronize and complete the pinned OSHB/BHSA corpus-source integration against current `main`.
+3. Complete the fixture-backed Phase 1 serving shell acceptance gate and open its PR.
+4. Implement provider adapters and ResearchModelAdapter interfaces.
+5. Validate one end-to-end literature-discovery build against a real Hebrew-Bible ResearchIssue.
+6. Continue later application stages without weakening publication/rights/reproducibility boundaries.
 
 ## Latest push intent
 
-This revision continues P1-VS-001A–F on the feature branch by narrowing the fixture-shell lint dependency surface after the first branch-only lockfile-generation run. The scoped lint gate is the deterministic import/SQL/forbidden-SDK scanner, while strict TypeScript remains a separate acceptance gate. No product semantics, database choices, cloud choices or canonical contracts are changed. A regenerated tracked npm lockfile is still required before the full acceptance suite and pull request.
+Main at `c9e45594c40fc04b5b0e241a82142b3897d92486` now gates inactive Serving candidates behind a committed PUBLISHED event. This revision synchronizes the P1 fixture shell with that protected main and closes its local acceptance blockers: the npm lockfile is tracked; Ajv receives typed schema values and pre-registers canonical `$id` schemas so PassageRequest resolves PassageLocator at runtime; contract reads are scoped to `contracts/v1.1`; Next.js TypeScript configuration is synchronized; generated paths are ignored; and secret validation skips dependency/build/report/cache/VCS trees after those generated files caused false alarms. A regression test exercises the previously failing external-schema reference. Local contract validation, both OpenAPI validators, lockfile stability, typecheck, boundary lint, eight unit tests, HTTP integration, and production build pass. Local Playwright remains unverified because the permitted browser download returned a zero-byte archive; GitHub Actions must complete browser and visual acceptance before merge.
