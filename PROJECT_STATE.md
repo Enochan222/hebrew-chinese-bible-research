@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.10**
+State Revision: **2026-10-04.11**
 
 ## Mandatory governance rule
 
@@ -192,4 +192,4 @@ Repository visibility remains public as observed state; this audit does not chan
 
 ## Latest push intent
 
-Database Spike 001 continues from a migration/seed-clean state. The latest negative test exposed another test-isolation problem: an invalid editorial-emendation TranslationSourceBasis was rejected by shared-PK registration before reaching the intended adopted-reading CHECK. The synthetic subtype is now registered inside the same expected-failure subtransaction, so the test proves the basis-kind constraint rather than a different earlier guard. The Database Spike CHANGELOG entry has also been rebuilt as one chronological record after independent review found an embedded duplicate changelog caused by an earlier replacement-token serialization accident. Historical entries after the spike entry are preserved unchanged.
+Database Spike 001 migration and seed are clean. Independent test-boundary review found that four public-evidence negative cases reused an already-PUBLISHED release-1 packet, so release immutability could reject the insert before the intended rights-operation, rights-subject, CitationLocator, or immutable-content-hash invariant was exercised. The tests now create a candidate evidence packet on not-yet-published release 2 and route all four negative cases through it. Release 2 is published only later by the publication-control transaction, after which separate late-mutation tests exercise immutability.

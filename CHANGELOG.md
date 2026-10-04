@@ -51,6 +51,7 @@ No remote Supabase project is modified. The connected account exposes only one i
 13. Run `37192890177`: migration failed because a duplicate/partial 26K SQL tail had been appended after a complete first `COMMIT;`. Structural comparison proved all 58 tail CREATE objects already existed before the commit; the tail was removed and CI now statically requires exactly one `COMMIT;` with no trailing SQL.
 14. Run `37195521246`: migration/seed PASS; the cross-issue ResearchPositionVersion negative test was rejected by shared-PK registration before reaching the intended composite FK. The test now registers the synthetic version object inside the expected-failure subtransaction.
 15. Run `37195662708`: migration/seed PASS; the editorial-emendation negative test was likewise rejected by missing shared-PK registration before reaching the intended adopted-reading CHECK. The test now registers the synthetic TranslationSourceBasis first so the basis-kind CHECK is the required rejecting boundary.
+16. Run `37195807481`: migration/seed PASS; the CitationLocator negative case was rejected by the already-PUBLISHED release-1 evidence immutability guard before the locator CHECK. Review showed the same isolation risk in wrong-operation rights, wrong-subject rights, and immutable-hash cases. All four now use a candidate evidence packet on unpublished release 2 so each test must reach its intended invariant.
 
 ### Independent critical review
 

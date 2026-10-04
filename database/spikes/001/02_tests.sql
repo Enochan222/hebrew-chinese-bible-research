@@ -216,6 +216,16 @@ BEGIN
   IF NOT failed THEN RAISE EXCEPTION 'winning rights rule outside applicable set must fail'; END IF;
 END $$;
 
+-- Candidate evidence packet belongs to unpublished release 2 so negative evidence
+-- tests hit rights/citation/hash validation before any release-immutability guard.
+INSERT INTO serving.published_evidence_packets(
+  published_evidence_packet_id,research_release_id,packet_type
+) VALUES (
+  '50100000-0000-4000-8000-000000000002',
+  '47000000-0000-4000-8000-000000000002',
+  'PASSAGE_ANALYSIS_CANDIDATE'
+);
+
 -- Public excerpt cannot reuse wrong-operation / DENY snapshot.
 DO $$
 DECLARE failed boolean := false;
@@ -225,7 +235,7 @@ BEGIN
       published_evidence_item_id,published_evidence_packet_id,research_object_id,evidence_content_hash,
       evidence_class,citation_locator,permitted_excerpt,rights_decision_snapshot_id,evidence_stability_class,sort_order
     ) VALUES (
-      '50200000-0000-4000-8000-000000000099','50100000-0000-4000-8000-000000000001',
+      '50200000-0000-4000-8000-000000000099','50100000-0000-4000-8000-000000000002',
       '51000000-0000-4000-8000-000000000001',
       'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
       'SCHOLARLY_SOURCE_TEXT','{"locatorType":"BIBLICAL_REFERENCE","referenceSpanId":"13000000-0000-4000-8000-000000000001"}',
@@ -258,7 +268,7 @@ BEGIN
       published_evidence_item_id,published_evidence_packet_id,research_object_id,evidence_content_hash,
       evidence_class,citation_locator,permitted_excerpt,rights_decision_snapshot_id,evidence_stability_class,sort_order
     ) VALUES (
-      '50200000-0000-4000-8000-000000000097','50100000-0000-4000-8000-000000000001',
+      '50200000-0000-4000-8000-000000000097','50100000-0000-4000-8000-000000000002',
       '51000000-0000-4000-8000-000000000001',
       'edededededededededededededededededededededededededededededededed',
       'SCHOLARLY_SOURCE_TEXT','{"locatorType":"BIBLICAL_REFERENCE","referenceSpanId":"13000000-0000-4000-8000-000000000001"}',
@@ -279,7 +289,7 @@ BEGIN
       evidence_class,citation_locator,evidence_stability_class,sort_order
     ) VALUES (
       '50200000-0000-4000-8000-000000000096',
-      '50100000-0000-4000-8000-000000000001',
+      '50100000-0000-4000-8000-000000000002',
       '51000000-0000-4000-8000-000000000001',
       'cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd',
       'SCHOLARLY_SOURCE_TEXT',
@@ -301,7 +311,7 @@ BEGIN
       published_evidence_item_id,published_evidence_packet_id,research_object_id,
       evidence_class,citation_locator,evidence_stability_class,sort_order
     ) VALUES (
-      '50200000-0000-4000-8000-000000000098','50100000-0000-4000-8000-000000000001',
+      '50200000-0000-4000-8000-000000000098','50100000-0000-4000-8000-000000000002',
       '51000000-0000-4000-8000-000000000001','SCHOLARLY_SOURCE_TEXT',
       '{"locatorType":"BIBLICAL_REFERENCE","referenceSpanId":"13000000-0000-4000-8000-000000000001"}',
       'IMMUTABLE_SNAPSHOT',8
