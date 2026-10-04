@@ -5,6 +5,44 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
 
+## 2026-10-05 — Implement WB-1 relational whole-corpus candidate
+
+### Push intent
+
+Consume the accepted WB-CORPUS-001 whole-source foundation in PostgreSQL Authoring and produce the relational coverage evidence required for `CORE-FZ-WB-002`.
+
+### Why
+
+WB-CORPUS-001 already proves complete pinned source export/reconciliation with 23,213 selected references, 306,785 OSHB words, 426,590 BHSA word nodes, 287,216 candidate mappings, 1,138 explicit unresolved references and zero silent reference loss. WB-1 therefore must not create a second competing source denominator. Its task is to prove that the relational model can preserve that accepted source foundation at whole-corpus scale.
+
+Whole-corpus relational execution also invalidates the WB-0-only assumption that every AnalysisNode and member TextSegment have exactly the same ReferenceSpan: real phrase/clause structures can cover multiple reference atoms.
+
+### What changed
+
+- added a machine-validated selected `TANAKH_OSIS_39` CanonSystem for relational/navigation order while retaining WB-CORPUS-001 ReferenceSystem inventory as source-coverage authority;
+- implemented `authoring.canon_systems` and `authoring.canon_books`;
+- generalized AnalysisNode/TextSegment integrity to same-expression, same-book span containment;
+- added an adversarial SQL regression for valid multi-atom containment and invalid out-of-span membership;
+- added a streaming partitioner that hash-verifies the accepted WB-CORPUS-001 artifacts and reconciles exact provider-book codes before producing bounded per-book inputs;
+- added a per-book transactional PostgreSQL COPY importer bound to the WB-CORPUS-001 build ID, source pins, reference-set hash and partition hashes;
+- require all OSHB/BHSA provider word records to remain provider-scoped AnalysisNodes;
+- preserve BHSA phrase/clause nodes, features, range spans, text-bearing memberships and graph edges;
+- keep reviewed annotation-only and other empty-source BHSA states explicit rather than inventing orthographic text;
+- keep grouped automatic cross-framework mappings non-canonical and preserve unresolved mappings as explicit research exceptions;
+- reconcile PostgreSQL word-node, text-segment, phrase/clause, mapping and ReferenceAtom counts to source evidence by book;
+- fail on missing configured source divisions, duplicate provider identities, OSHB source-surface loss, importer errors or source/database parity drift;
+- keep real BHSA/bridging rows out of Serving;
+- added a dedicated 60-minute WB-1 relational CI gate and machine-auditable artifact upload.
+
+### Intended effect
+
+A successful exact-head run will demonstrate that the accepted whole-source corpus survives relational ingestion without silent provider-record loss and without weakening framework identity or rights boundaries. Only then can `CORE-FZ-WB-002` be treated as satisfied.
+
+### Validation
+
+Pending full real-corpus execution on the exact PR head. The first plausible implementation is provisional: CI/source-database evidence, not code review alone, determines acceptance.
+
+
 ## 2026-10-05 — Add WB-CORPUS-001 whole-Bible source foundation
 
 ### Push intent
