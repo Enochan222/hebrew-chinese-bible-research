@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-05.10**
+State Revision: **2026-10-05.12**
 
 ## Mandatory governance rule
 
@@ -30,6 +30,7 @@ GitHub Copilot is not authorized for this repository's project work.
 Machine authority: `contracts/v1.1/github-ai-usage-policy.json`.
 
 The repository owner reported on 2026-10-05 that GitHub account-level automatic Copilot code review was disabled. Repository metadata does not expose that user-level toggle, so this is recorded as owner-reported rather than independently verified.
+
 
 ## What this project is
 
@@ -292,15 +293,40 @@ This revision introduces the whole-corpus source/build boundary that WB-1 must c
 
 The dedicated whole-Bible workflow is the executable acceptance authority for this source foundation. Its first exact-head execution completed the full corpus build successfully and observed 23,213 selected-reference spans, 306,785 OSHB word records, 426,590 BHSA word nodes, 287,216 candidate span mappings, 1,138 explicitly unresolved references and zero silent reference loss. The generated manifest returned `gatePass=true` and `COMPLETE_WITH_EXPLICIT_EXCEPTIONS`. That run then failed only in the separate schema-validation step because the workflow had installed corpus dependencies but not the repository's pinned `jsonschema` validator. The workflow now installs both `requirements-corpus.txt` and `requirements-contracts.txt` and also runs on relevant pushes to `main`, so validation is repeated after merge. WB-0's exact 1 Samuel 16:7 export shape/hashes remain regression evidence; the new BHSA `--all` mode does not change the canary record shape.
 
+## WB-1 relational whole-corpus implementation state
+
+WB-1 is now implemented as a relational consumer of WB-CORPUS-001 rather than a competing second whole-source build.
+
+Current review-branch implementation:
+
+- selected navigation/relational CanonSystem `TANAKH_OSIS_39` is machine-declared and contract-validated;
+- source completeness remains anchored to the independent WB-CORPUS-001 `OSHB_OSIS` ReferenceSystem inventory, not to the CanonSystem's book count;
+- accepted WB-CORPUS-001 OSHB/BHSA/crosswalk artifacts are hash-verified and partitioned per configured book only to bound memory and database transactions;
+- exact source provider-book codes are reconciled to the selected CanonSystem before import;
+- PostgreSQL now implements `canon_systems` / `canon_books`;
+- AnalysisNode/TextSegment integrity is generalized from WB-0 exact-span equality to same-expression, same-book span containment;
+- synthetic SQL regression proves a multi-atom AnalysisNode accepts contained verse-local members and rejects an out-of-span segment;
+- each book imports transactionally with PostgreSQL COPY;
+- all OSHB and BHSA provider word records must remain represented as provider-scoped AnalysisNodes;
+- BHSA TextSegments are created only where source text is present; reviewed annotation-only and other empty-source states remain explicit in the audit;
+- BHSA phrase/clause provider nodes, features, range spans, direct segment memberships and graph edges are retained;
+- grouped cross-framework candidates remain `CANDIDATE_AUTOMATED` and non-canonical;
+- unresolved cross-framework references are carried as explicit research exceptions and are not counted as silent source-ingestion loss;
+- relational counts are reconciled per book/framework/node type back to the source-foundation artifacts and selected reference inventory;
+- any missing configured source division, duplicate provider identity, OSHB source-surface loss, importer failure or database/source parity drift fails the WB-1 gate;
+- real BHSA/bridging-derived rows remain absent from Serving in WB-1;
+- `.github/workflows/wb1-relational-whole-corpus.yml` rebuilds WB-CORPUS-001, imports the relational corpus and uploads the machine-auditable WB-1 report.
+
+WB-1 acceptance is **PASS** for `CORE-FZ-WB-002`. The synchronized implementation head `6ec515067f05a901667e4d1f783329f0ee46a53a` passed the complete pinned-source relational workflow and every independent regression gate. Machine evidence reconciles 39/39 configured books, 23,213 selected/reference atoms, 306,785 OSHB words, 426,590 BHSA words, 253,203 BHSA phrases, 88,131 BHSA clauses, 1,106,383 graph-membership edges, 469,484 bridging feature values, 287,216 grouped candidate mappings, 6,409 reviewed annotation-only BHSA nodes and 79 explicit unclassified empty-source BHSA nodes. It reports zero missing configured books, provider-ID duplicates, importer errors, source/database parity failures, OSHB missing-surface records or real-corpus Serving rows. The 1,138 unresolved cross-framework references exactly match WB-CORPUS-001 and remain explicit research/mapping exceptions rather than silent source-record drops.
+
 ## Current implementation priority
 
-1. Preserve contract/governance consistency and the whole-Bible scope guard.
-2. Use WB-CORPUS-001 as the required complete-source input boundary for WB-1, then generalize the WB-0 provider-scoped importer across it and produce auditable relational book/reference/count/error/exception evidence.
-3. Complete WB-2: compile the whole-corpus Authoring result into rights-safe, release-pinned passage-serving projections.
-4. Complete WB-3: replace fixture-only Hebrew passage content with a database-backed whole-Bible reader/navigation.
-5. Complete WB-4/WB-5: add selected translation witnesses, alignment/comparison, project/user translation workflow and deterministic whole-corpus analysis.
-6. Only then make Research Pro provider adapters, ResearchModelAdapter and end-to-end literature builds the primary product implementation frontier; academic enrichment may proceed in parallel where it does not block the base path.
+1. Preserve contract/governance consistency, the ChatGPT-only project AI policy and the whole-Bible scope guard.
+2. Complete WB-2: compile the accepted WB-1 whole-corpus Authoring result into rights-safe, release-pinned passage-serving projections without leaking BHSA/bridging-derived data that lacks an ALLOW RightsDecision.
+3. Complete WB-3: replace fixture-only Hebrew passage content with a database-backed whole-Bible reader/navigation and verify `CORE-FZ-WB-001` / `CORE-FZ-WB-003` behavior.
+4. Complete WB-4/WB-5: add selected translation witnesses, alignment/comparison, project/user translation workflow and deterministic whole-corpus analysis.
+5. Only then make Research Pro provider adapters, ResearchModelAdapter and end-to-end literature builds the primary product implementation frontier; academic enrichment may proceed in parallel where it does not block the base path.
 
 ## Latest push intent
 
-Make the repository's AI execution policy explicit and machine-enforced: GitHub Copilot is not an authorized project reviewer or coding agent, no repository workflow may depend on Copilot, and project AI-assisted implementation/review is performed through ChatGPT unless the repository owner explicitly changes the policy through the governed PR path. The owner reports that account-level Automatic Copilot code review has been disabled; because that user-level setting is not exposed by repository metadata, it is not represented as independently verified live state. This governance change does not alter the whole-Bible product architecture, WB-CORPUS-001 evidence, WB-1 implementation semantics, GitHub Actions CI, or human collaboration.
+Close WB-1 on machine-auditable whole-corpus evidence and advance the implementation frontier to WB-2. The accepted relational import preserves the complete configured WB-CORPUS-001 provider record set in Authoring, keeps 1,138 unresolved cross-framework references explicit rather than guessed, preserves empty-source BHSA nodes without invented text, keeps every automatic mapping non-canonical, preserves WB-0 stable identities, and writes no real BHSA/bridging corpus rows to Serving. `CORE-FZ-WB-002` is now PASS; `CORE-FZ-WB-001` remains pending end-user navigation verification and `CORE-FZ-WB-003` remains pending rights-safe release-pinned Serving/reader implementation. The closeout head must rerun all required deterministic GitHub Actions before merge.

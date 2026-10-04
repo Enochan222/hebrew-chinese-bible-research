@@ -5,6 +5,48 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
 
+## 2026-10-05 — Implement WB-1 relational whole-corpus candidate
+
+### Push intent
+
+Consume the accepted WB-CORPUS-001 whole-source foundation in PostgreSQL Authoring and produce the relational coverage evidence required for `CORE-FZ-WB-002`.
+
+### Why
+
+WB-CORPUS-001 already proves complete pinned source export/reconciliation with 23,213 selected references, 306,785 OSHB words, 426,590 BHSA word nodes, 287,216 candidate mappings, 1,138 explicit unresolved references and zero silent reference loss. WB-1 therefore must not create a second competing source denominator. Its task is to prove that the relational model can preserve that accepted source foundation at whole-corpus scale.
+
+Whole-corpus relational execution also invalidates the WB-0-only assumption that every AnalysisNode and member TextSegment have exactly the same ReferenceSpan: real phrase/clause structures can cover multiple reference atoms.
+
+### What changed
+
+- added a machine-validated selected `TANAKH_OSIS_39` CanonSystem for relational/navigation order while retaining WB-CORPUS-001 ReferenceSystem inventory as source-coverage authority;
+- implemented `authoring.canon_systems` and `authoring.canon_books`;
+- generalized AnalysisNode/TextSegment integrity to same-expression, same-book span containment;
+- added an adversarial SQL regression for valid multi-atom containment and invalid out-of-span membership;
+- added a streaming partitioner that hash-verifies the accepted WB-CORPUS-001 artifacts and reconciles exact provider-book codes before producing bounded per-book inputs;
+- added a per-book transactional PostgreSQL COPY importer bound to the WB-CORPUS-001 build ID, source pins, reference-set hash and partition hashes;
+- require all OSHB/BHSA provider word records to remain provider-scoped AnalysisNodes;
+- preserve BHSA phrase/clause nodes, features, range spans, text-bearing memberships and graph edges;
+- keep reviewed annotation-only and other empty-source BHSA states explicit rather than inventing orthographic text;
+- keep grouped automatic cross-framework mappings non-canonical and preserve unresolved mappings as explicit research exceptions;
+- reconcile PostgreSQL word-node, text-segment, phrase/clause, mapping and ReferenceAtom counts to source evidence by book;
+- fail on missing configured source divisions, duplicate provider identities, OSHB source-surface loss, importer errors or source/database parity drift;
+- keep real BHSA/bridging rows out of Serving;
+- added a dedicated 60-minute WB-1 relational CI gate and machine-auditable artifact upload.
+
+### Intended effect
+
+A successful exact-head run will demonstrate that the accepted whole-source corpus survives relational ingestion without silent provider-record loss and without weakening framework identity or rights boundaries. Only then can `CORE-FZ-WB-002` be treated as satisfied.
+
+### Validation
+
+The first complete exact-head execution on PR #20 passed the whole-corpus relational workflow and all independent repository regressions. It observed 39/39 configured books, 23,213 selected/reference atoms, 306,785 OSHB word nodes, 426,590 BHSA word nodes, 253,203 BHSA phrase nodes, 88,131 BHSA clause nodes, 1,106,383 BHSA graph-membership edges, 469,484 bridging feature values, 287,216 grouped candidate mappings of which 103,987 are non-1:1, 6,409 reviewed annotation-only BHSA nodes, 79 explicit unclassified empty-source BHSA nodes, 1,138 unresolved cross-framework references, zero provider-ID duplicates, zero importer/parity failures, zero OSHB missing-surface records, and zero real-corpus Serving rows.
+
+Independent review recomputed the 39-book totals and source/database arithmetic, confirmed the 1,138 unresolved references match WB-CORPUS-001 and remain mapping exceptions rather than silently dropped provider records, and confirmed WB-0 UUID identity compatibility. The synchronized hardening head `6ec515067f05a901667e4d1f783329f0ee46a53a` then reran every required gate successfully: WB-1 Relational Whole Corpus `37230153202`, Whole-Bible corpus foundation `37230153211`, Database Spike 001 `37230153245`, Corpus source smoke `37230153207`, P1 fixture shell validation `37230153208`, Contract validation `37230153210` and Project governance `37230153217`.
+
+On that evidence, `CORE-FZ-WB-002` is accepted as PASS. This does not claim public whole-Bible Serving or reader completion: `CORE-FZ-WB-001` still requires navigation verification and `CORE-FZ-WB-003` remains WB-2/WB-3 work. The closeout documentation head must still pass latest-head CI before merge.
+
+
 ## 2026-10-05 — Prohibit GitHub Copilot consumption for project AI work
 
 ### Push intent
@@ -34,7 +76,6 @@ Opening or updating repository work must not deliberately trigger or rely on Git
 ### Validation
 
 Contract validation must pass with the new policy fixture and semantic checks. Project governance/state-and-changelog must pass. After the owner disabled Automatic Copilot code review, the governance PR is opened normally and its review list is checked to confirm no new `copilot-pull-request-reviewer` review appears; absence on that PR is operational evidence, not a general API-level proof of the user setting.
-
 
 ## 2026-10-05 — Add WB-CORPUS-001 whole-Bible source foundation
 

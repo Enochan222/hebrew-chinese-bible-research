@@ -376,6 +376,25 @@ Minimum test:
 
 The spike must record any mismatch between source tokenization/reference labels and the current contract. It must change the contract if real corpus evidence disproves an assumption.
 
+## 10.1 WB-1 relational whole-corpus execution
+
+WB-CORPUS-001 is the only complete-source input authority for WB-1. WB-1 does not run an independent second coverage model.
+
+Execution:
+
+1. rebuild and validate WB-CORPUS-001 from exact pins;
+2. bind the relational run to its build ID, ReferenceSystem hash and artifact hashes;
+3. partition the accepted artifacts by the selected `TANAKH_OSIS_39` CanonSystem only to bound memory/transaction size;
+4. import each configured book transactionally into PostgreSQL Authoring;
+5. reconcile PostgreSQL counts back to the source-foundation records and selected ReferenceSystem inventory;
+6. retain unresolved cross-framework references as explicit non-canonical research exceptions;
+7. fail on silent source-record loss, missing configured source divisions, duplicate provider identities, OSHB source-surface loss, importer failure or database/source parity drift;
+8. keep real BHSA/bridging corpus data out of Serving until WB-2 rights-safe compilation.
+
+Whole-corpus data also disproves the WB-0-only equality assumption for direct node/segment spans. A phrase or clause may cover multiple ReferenceAtoms. The relational invariant is therefore same-expression, same-book containment of each member TextSegment span within its AnalysisNode span.
+
+Provider-only BHSA reference addresses may be represented relationally with explicit source-coverage metadata; they do not silently expand the selected OSHB_OSIS source inventory.
+
 ## 11. What this integration does not decide
 
 This integration does not yet declare:

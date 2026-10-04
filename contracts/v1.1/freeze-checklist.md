@@ -83,6 +83,12 @@ Database Spike 001 may begin when all CORE-SPIKE gates are PASS. This does not d
 | CORE-FZ-EVIDENCE-001 | CitationLocator is typed; public excerpts require rights snapshots; immutable evidence requires content hash |
 | CORE-FZ-HASH-001 | Publishable subtype content-hash canonical projections have versioned golden vectors |
 
+### Current whole-Bible gate status
+
+- `CORE-FZ-WB-001`: **PENDING**. WB-CORPUS-001 and WB-1 prove configured source/reference and relational coverage, but end-user whole-Bible navigation has not yet been verified.
+- `CORE-FZ-WB-002`: **PASS**. PR #20 synchronized implementation head `6ec515067f05a901667e4d1f783329f0ee46a53a` passed WB-1 Relational Whole Corpus run `37230153202`: 39/39 configured books, 23,213 selected/reference atoms, 306,785 OSHB words and 426,590 BHSA words reconciled into PostgreSQL Authoring with zero importer/parity failures and zero silent source-record loss. The same head also passed Whole-Bible corpus foundation `37230153211`, Database Spike 001 `37230153245`, Corpus source smoke `37230153207`, Contract validation `37230153210`, Project governance `37230153217` and P1 fixture-shell validation `37230153208`. The 1,138 unresolved cross-framework references remain explicit mapping exceptions, not ingestion loss.
+- `CORE-FZ-WB-003`: **PENDING**. Rights-safe Serving projection and database-backed whole-Bible reader remain WB-2/WB-3 work.
+
 ## RESEARCH_PRO_EXTENSION_V1_1
 
 | Gate ID | Requirement |

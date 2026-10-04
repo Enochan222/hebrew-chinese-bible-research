@@ -109,6 +109,30 @@ The loader is intentionally narrow:
 
 WB-0 is a relational canary. After it passes, WB-1 must generalize the importer and produce a whole-corpus coverage/error audit rather than extending the product passage by passage.
 
+## WB-1 relational whole-corpus load
+
+WB-1 consumes the already accepted WB-CORPUS-001 artifacts. It does not build another independent whole-source denominator.
+
+```bash
+python scripts/corpora/partition_wb_corpus_for_relational.py \
+  --foundation-dir .local/whole-bible-corpus \
+  --output-dir .local/wb1/partitions \
+  --report .local/wb1/reports/partition.json
+
+python scripts/corpora/load_wb1_postgres.py \
+  --oshb-dir .local/wb1/partitions/oshb \
+  --bhsa-dir .local/wb1/partitions/bhsa \
+  --crosswalk-dir .local/wb1/partitions/crosswalk \
+  --source-foundation-manifest .local/whole-bible-corpus/coverage-manifest.json \
+  --reference-inventory .local/whole-bible-corpus/reference-inventory.json \
+  --partition-report .local/wb1/reports/partition.json \
+  --report .local/wb1/reports/wb1-relational-coverage.json
+```
+
+The selected CanonSystem is `TANAKH_OSIS_39`, but source completeness is still measured against the independently derived WB-CORPUS-001 ReferenceSystem inventory. Exact provider-book code reconciliation is checked before partitioning; a book count by itself is not accepted as coverage evidence.
+
+The relational gate requires all source word records to remain represented as provider-scoped AnalysisNodes, reconciles per-book PostgreSQL counts to the accepted source artifacts, records annotation-only/unclassified empty BHSA states separately, and keeps unresolved OSHB/BHSA mappings non-canonical. No real BHSA/bridging projection is written to Serving in WB-1.
+
 Automatic `ANNOTATION_ONLY_TARGET_NODE` classification is intentionally narrow: it currently recognizes only the evidenced unbridged Biblical Hebrew article-node shape with lexeme, article POS/PDP and phrase/clause context. Other empty target nodes remain unresolved until their source semantics are reviewed.
 
 ## Updating upstream data
