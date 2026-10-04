@@ -34,6 +34,7 @@ def schema_errors(schema_path: str, fixture_path: str) -> list[str]:
 
 POSITIVE = [
  ("contracts/v1.1/json-schema/corpus-source-registry.schema.json","contracts/v1.1/corpus-source-registry.json"),
+ ("contracts/v1.1/json-schema/github-ai-usage-policy.schema.json","contracts/v1.1/github-ai-usage-policy.json"),
  ("contracts/v1.1/json-schema/whole-bible-corpus-build-manifest.schema.json","contracts/v1.1/fixtures/whole-bible-corpus-build-manifest.json"),
  ("contracts/v1.1/json-schema/hebrew-bible-canon-system.schema.json","contracts/v1.1/hebrew-bible-canon-system.json"),
  ("contracts/v1.1/json-schema/corpus-query.schema.json","contracts/v1.1/fixtures/corpus-query-1sam16-7.json"),
@@ -156,6 +157,25 @@ def hebrew_bible_canon_semantic(d: dict) -> list[str]:
     if d.get("canonSystem",{}).get("code")!="TANAKH_OSIS_39": out.append("selected CanonSystem code drift")
     return out
 
+def github_ai_usage_policy_semantic(d: dict) -> list[str]:
+    out=[]
+    copilot=d.get("githubCopilot",{})
+    if copilot.get("authorized") is not False: out.append("GitHub Copilot must remain unauthorized")
+    if copilot.get("automaticCodeReview") is not False: out.append("automatic Copilot code review must remain disabled")
+    prohibited=set(copilot.get("prohibitedOperations",[]))
+    required={
+        "PULL_REQUEST_CODE_REVIEW","CODING_AGENT","AUTOFIX","CHAT_OR_CODE_GENERATION",
+        "ANY_OPERATION_CONSUMING_COPILOT_QUOTA_OR_PREMIUM_REQUESTS"
+    }
+    if not required.issubset(prohibited): out.append("Copilot prohibited-operation set drift")
+    ai=d.get("aiExecution",{})
+    if ai.get("authorizedProjectAI")!="CHATGPT": out.append("project AI execution authority must remain ChatGPT")
+    if ai.get("exceptions")!="REPOSITORY_OWNER_EXPLICIT_POLICY_CHANGE_REQUIRED": out.append("AI policy exception boundary drift")
+    infra=d.get("nonAIInfrastructure",{})
+    if infra.get("githubActionsAllowed") is not True or infra.get("deterministicCIAllowed") is not True:
+        out.append("non-AI deterministic GitHub CI must remain allowed")
+    return out
+
 def corpus_source_registry_semantic(d: dict) -> list[str]:
     out=[]
     sources=d.get("sources",[])
@@ -268,6 +288,7 @@ def validate_fixtures():
         if errs: continue
         d=load(f)
         if f.endswith("corpus-source-registry.json"): ERRORS.extend(f"{f}: {e}" for e in corpus_source_registry_semantic(d))
+        if f.endswith("github-ai-usage-policy.json"): ERRORS.extend(f"{f}: {e}" for e in github_ai_usage_policy_semantic(d))
         if f.endswith("hebrew-bible-canon-system.json"): ERRORS.extend(f"{f}: {e}" for e in hebrew_bible_canon_semantic(d))
         if "corpus-query-1sam16-7" in f: ERRORS.extend(f"{f}: {e}" for e in query_semantic(d))
         if f.endswith("translation-decision.json"): ERRORS.extend(f"{f}: {e}" for e in translation_semantic(d))
@@ -321,6 +342,27 @@ def governance():
     if not (ROOT/"CHANGELOG.md").exists(): fail("CHANGELOG.md missing")
     if "PROJECT_STATE.md" not in m.get("active",[]): fail("PROJECT_STATE.md must be active living authority")
     if "PROJECT_CHARTER.md" not in m.get("active",[]): fail("PROJECT_CHARTER.md must be active architecture authority")
+    ai_policy=load("contracts/v1.1/github-ai-usage-policy.json")
+    ERRORS.extend(f"github-ai-usage-policy.json: {e}" for e in github_ai_usage_policy_semantic(ai_policy))
+    agent_protocol=(ROOT/"AGENTS.md").read_text(encoding="utf-8")
+    governance_contract=(ROOT/"architecture/repository-governance.md").read_text(encoding="utf-8")
+    for required in (
+        "GitHub Copilot is not an authorized project agent or reviewer",
+        "AI-assisted implementation, analysis, repository orchestration and code review are performed through the project's ChatGPT workflow",
+    ):
+        if required not in agent_protocol:
+            fail(f"AGENTS.md missing AI execution invariant: {required}")
+    for required in (
+        "GitHub Copilot is not authorized for project work",
+        "ChatGPT as the authorized AI execution/review channel",
+    ):
+        if required not in governance_contract:
+            fail(f"repository governance missing AI execution invariant: {required}")
+    for workflow in (ROOT/".github/workflows").glob("*"):
+        if workflow.is_file() and workflow.suffix in {".yml",".yaml"}:
+            workflow_text=workflow.read_text(encoding="utf-8").lower()
+            if "copilot" in workflow_text:
+                fail(f"GitHub Actions workflow may not invoke or depend on Copilot: {workflow.relative_to(ROOT)}")
     charter=(ROOT/"PROJECT_CHARTER.md").read_text(encoding="utf-8")
     for required in ("# 1. Product mission","# 13. Explicit non-goals","# 15. Fixed requirements versus open decisions"):
         if required not in charter: fail(f"project charter missing canonical section {required}")
