@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.20**
+State Revision: **2026-10-04.21**
 
 ## Mandatory governance rule
 
@@ -249,4 +249,4 @@ This is fixture-shell implementation evidence only. It does not satisfy real-dat
 
 ## Latest push intent
 
-Reframe implementation around the actual product: a whole-Hebrew-Bible base reader with Research Pro layered on top. This change adds a product-scale whole-Bible OSHB foundation harness: exact pinned source coverage indexing, deterministic UUID-based PostgreSQL COPY loadset generation for every OSHB provider book/verse/word, canonical ReferenceSystem/TextSegment/Morphology AnalysisNode import, and CI reconciliation between source coverage, generated import manifest and database row counts. Passage fixtures remain adversarial canaries rather than scope. The first whole-Bible CI run also identified `wlc/VerseMap.xml` as a pinned OSHB auxiliary mapping file rather than a biblical book; the coverage validator now explicitly permits that exact auxiliary filename while continuing to reject every unknown extra XML file. The whole-corpus end canary also uses the source-native MT/OSHB label `Mal.3.24`; upstream `Mal.xml` explicitly records `KJV:Mal.4.6`, confirming why the ReferenceSystem boundary must not collapse Hebrew and English versification. No remote Supabase or Vercel deployment is performed.
+Reframe implementation around the actual product: a whole-Hebrew-Bible base reader with Research Pro layered on top. This change adds a product-scale whole-Bible OSHB foundation harness: exact pinned source coverage indexing, deterministic UUID-based PostgreSQL COPY loadset generation for every OSHB provider book/verse/word, canonical ReferenceSystem/TextSegment/Morphology AnalysisNode import, and CI reconciliation between source coverage, generated import manifest and database row counts. Passage fixtures remain adversarial canaries rather than scope. The first whole-Bible CI run also identified `wlc/VerseMap.xml` as a pinned OSHB auxiliary mapping file rather than a biblical book; the coverage validator now explicitly permits that exact auxiliary filename while continuing to reject every unknown extra XML file. The whole-corpus end canary also uses the source-native MT/OSHB label `Mal.3.24`; upstream `Mal.xml` explicitly records `KJV:Mal.4.6`, confirming why the ReferenceSystem boundary must not collapse Hebrew and English versification. The product-scale run proved the complete OSHB bulk load itself succeeds. Post-load validation exposed a scale-dependent planning concern, so the generated loadset now refreshes PostgreSQL statistics and whole-corpus membership checks use set-based invariants rather than unnecessary per-node grouping. No remote Supabase or Vercel deployment is performed.
