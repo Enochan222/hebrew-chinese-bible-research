@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/contracts/v1.1/github-ai-usage-policy.schema.json",
+  "title": "Project AI Execution Policy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "policyKey",
+    "githubCopilot",
+    "aiExecution",
+    "nonAIInfrastructure"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "policyKey": {
+      "const": "PROJECT_AI_EXECUTION_POLICY"
+    },
+    "githubCopilot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authorized",
+        "automaticCodeReview",
+        "prohibitedOperations"
+      ],
+      "properties": {
+        "authorized": {
+          "const": false
+        },
+        "automaticCodeReview": {
+          "const": false
+        },
+        "prohibitedOperations": {
+          "type": "array",
+          "minItems": 5,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "aiExecution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authorizedProjectAI",
+        "scope",
+        "exceptions"
+      ],
+      "properties": {
+        "authorizedProjectAI": {
+          "const": "CHATGPT"
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "exceptions": {
+          "const": "REPOSITORY_OWNER_EXPLICIT_POLICY_CHANGE_REQUIRED"
+        }
+      }
+    },
+    "nonAIInfrastructure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "githubActionsAllowed",
+        "deterministicCIAllowed",
+        "humanContributorsAllowed"
+      ],
+      "properties": {
+        "githubActionsAllowed": {
+          "const": true
+        },
+        "deterministicCIAllowed": {
+          "const": true
+        },
+        "humanContributorsAllowed": {
+          "const": true
+        }
+      }
+    }
+  }
+}

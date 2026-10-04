@@ -80,6 +80,29 @@ Live repository metadata also verifies:
 - update branch enabled;
 - auto merge enabled.
 
+## Project AI execution policy
+
+The repository owner has selected **ChatGPT as the authorized AI execution/review channel for this project**.
+
+GitHub Copilot is not authorized for project work. The project must not intentionally consume Copilot quota, premium requests or equivalent Copilot AI credits for:
+
+- pull-request code review;
+- coding-agent execution;
+- Autofix;
+- Copilot Chat or code generation;
+- repository orchestration;
+- any other Copilot-backed AI operation.
+
+A Copilot review/comment is not acceptance evidence and must never be required for merge.
+
+This restriction does not prohibit deterministic GitHub Actions, ordinary non-AI GitHub features, or human contributors.
+
+Canonical machine policy:
+
+- `contracts/v1.1/github-ai-usage-policy.json`.
+
+Repository CI validates the machine policy and rejects Copilot references in GitHub Actions workflow files. User/account-level GitHub Copilot settings are outside repository-file enforcement; the repository owner reported on 2026-10-05 that automatic Copilot code review was disabled at account level. That account-level state is recorded as owner-reported, not independently verified by repository metadata.
+
 ## Required contribution path
 
 The enforced normal contribution path is:

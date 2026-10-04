@@ -5,6 +5,37 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
 
+## 2026-10-05 — Prohibit GitHub Copilot consumption for project AI work
+
+### Push intent
+
+Make the repository-owner requirement explicit: this project must not intentionally consume GitHub Copilot quota, premium requests or equivalent Copilot AI credits. AI-assisted implementation, analysis, orchestration and code review are assigned to the project's ChatGPT workflow.
+
+### Why
+
+Recent WB-1 pull requests received automatic comments from `copilot-pull-request-reviewer`, including quota-limit notices. Live repository ruleset inspection showed no repository rule requiring Copilot review, while draft pull requests did not receive the automatic review. The owner has now disabled account-level Automatic Copilot code review and requires a repository-level policy so future project agents do not request or depend on Copilot.
+
+The GitHub connector cannot independently read the user's account-level Copilot toggle, so the disabled account setting is recorded as owner-reported, not as verified repository metadata.
+
+### What changed
+
+- added `contracts/v1.1/github-ai-usage-policy.json` and its JSON Schema;
+- set GitHub Copilot `authorized=false` and automatic code review `false`;
+- prohibit Copilot PR review, Coding Agent, Autofix, Chat/code generation and any project operation consuming Copilot quota/premium requests;
+- designate ChatGPT as the authorized project AI execution/review channel;
+- preserve deterministic GitHub Actions, ordinary non-AI GitHub features and human collaboration;
+- added the policy to `AGENTS.md` and `architecture/repository-governance.md`;
+- extended contract validation to enforce the machine policy, required governance wording and absence of Copilot dependencies in `.github/workflows`.
+
+### Intended effect
+
+Opening or updating repository work must not deliberately trigger or rely on GitHub Copilot. Copilot output cannot become acceptance evidence. Existing GitHub Actions CI continues unchanged because it is deterministic infrastructure rather than Copilot AI usage.
+
+### Validation
+
+Contract validation must pass with the new policy fixture and semantic checks. Project governance/state-and-changelog must pass. After the owner disabled Automatic Copilot code review, the governance PR is opened normally and its review list is checked to confirm no new `copilot-pull-request-reviewer` review appears; absence on that PR is operational evidence, not a general API-level proof of the user setting.
+
+
 ## 2026-10-05 — Add WB-CORPUS-001 whole-Bible source foundation
 
 ### Push intent
