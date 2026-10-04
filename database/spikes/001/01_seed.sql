@@ -109,8 +109,13 @@ INSERT INTO authoring.analysis_node_segments(analysis_node_id,text_segment_id,me
 INSERT INTO authoring.analysis_edges(analysis_edge_id,annotation_layer_id,from_node_id,to_node_id,relation_type,relation_ontology) VALUES
 ('33100000-0000-4000-8000-000000000001','32000000-0000-4000-8000-000000000002','33000000-0000-4000-8000-000000000003','33000000-0000-4000-8000-000000000004','PREFIX_MORPHEME_OF','SPIKE_RELATION_V1');
 
-INSERT INTO authoring.analysis_node_mappings(mapping_id,source_layer_id,source_node_id,target_layer_id,target_node_id,mapping_type) VALUES
-('33200000-0000-4000-8000-000000000001','32000000-0000-4000-8000-000000000001','33000000-0000-4000-8000-000000000002','32000000-0000-4000-8000-000000000002','33000000-0000-4000-8000-000000000004','EXPLICIT_NODE_EQUIVALENCE');
+INSERT INTO authoring.cross_annotation_mappings(
+  cross_annotation_mapping_id,from_annotation_layer_id,from_node_id,to_annotation_layer_id,to_node_id,
+  mapping_type,confidence,mapping_method,review_status
+) VALUES
+('33200000-0000-4000-8000-000000000001','32000000-0000-4000-8000-000000000001','33000000-0000-4000-8000-000000000002',
+ '32000000-0000-4000-8000-000000000002','33000000-0000-4000-8000-000000000004',
+ 'EXPLICIT_NODE_EQUIVALENCE',1.0,'SYNTHETIC_SPIKE','HUMAN_REVIEWED');
 
 INSERT INTO authoring.alignment_groups(alignment_group_id,source_expression_id,target_expression_id,source_text_stream_id,target_text_stream_id,reference_span_id,relation_type,method,review_status) VALUES
 ('25000000-0000-4000-8000-000000000001','22000000-0000-4000-8000-000000000001','22000000-0000-4000-8000-000000000002','23000000-0000-4000-8000-000000000001','23000000-0000-4000-8000-000000000003','13000000-0000-4000-8000-000000000001','MANY_TO_MANY','HUMAN_TEST','HUMAN_REVIEWED');
