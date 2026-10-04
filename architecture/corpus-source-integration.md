@@ -330,6 +330,26 @@ Minimum test:
 
 The spike must record any mismatch between source tokenization/reference labels and the current contract. It must change the contract if real corpus evidence disproves an assumption.
 
+## 10.1 WB-1 whole-corpus execution
+
+After WB-0 passed, the next acceptance target is the complete configured corpus, not a second hand-picked passage.
+
+WB-1 uses:
+
+- `export_oshb_books.py` to partition the pinned OSHB source into configured-book exports;
+- `export_bhsa_books.py` to load Text-Fabric once and partition the pinned BHSA/bridging features by canonical book alias;
+- `build_wb1_crosswalks.py` to keep crosswalk memory bounded to one book at a time;
+- `load_wb1_postgres.py` to import each book transactionally into the Authoring schema;
+- `verify_wb1_report.py` to reject missing books, provider-ID duplication, OSHB source-text loss, database/source count mismatch and silent record drops.
+
+The configured CanonSystem is `TANAKH_OSIS_39`, defined by `contracts/v1.1/hebrew-bible-canon-system.json`.
+
+BHSA phrase/clause reference ranges are allowed to span multiple ReferenceAtoms. Direct AnalysisNode/TextSegment membership therefore uses span containment, not the WB-0 canary's stricter verse-equality assumption.
+
+Unresolved OSHB/BHSA cross-framework mappings remain explicit research exceptions. They do not authorize guessed identity and do not by themselves mean source ingestion failed.
+
+WB-1 remains Authoring-only for BHSA/bridging-derived real corpus data. Serving compilation belongs to WB-2 and still requires rights-safe projection decisions.
+
 ## 11. What this integration does not decide
 
 This integration does not yet declare:
