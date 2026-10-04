@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-05.7**
+State Revision: **2026-10-05.8**
 
 ## Mandatory governance rule
 
@@ -261,15 +261,41 @@ WB-0 is implemented as an independent PostgreSQL 17 job alongside the existing s
 
 WB-0 implementation acceptance is now PASS on the reviewed PR head: the original synthetic `postgres-spike` regression and the independent `wb0-real-corpus-canary` job both completed successfully, alongside Contract validation, Project governance, Corpus source smoke and the P1 shell regression. The protected merge remains the repository publication action for this change. This PASS is bounded to the pinned 1 Samuel 16:7 canary and does not satisfy `CORE-FZ-WB-002`. WB-1 remains responsible for generalizing this importer and producing complete configured-corpus coverage/error evidence.
 
+## WB-1 whole-corpus load implementation state
+
+WB-1 implementation is now present on the active review branch and awaits full real-corpus execution evidence before `CORE-FZ-WB-002` may be declared PASS.
+
+Implemented boundaries:
+
+- machine-configured CanonSystem `TANAKH_OSIS_39` with 39 split OSIS book identities in Tanakh order;
+- relational `canon_systems` / `canon_books` implementation aligned with the active v1.1 contract;
+- AnalysisNode/TextSegment integrity generalized from WB-0 same-span equality to same-expression, same-book span containment;
+- a synthetic regression proves a multi-atom node accepts contained verse-local segments and rejects an out-of-span segment;
+- whole-corpus OSHB export partitioned by configured book;
+- whole-corpus BHSA/bridging export loads Text-Fabric once and partitions by normalized configured book;
+- crosswalk compilation is bounded per book rather than loading the whole Bible into one Python crosswalk process;
+- relational import is transactional per book and uses PostgreSQL COPY text input;
+- all provider word records remain AnalysisNodes even when no orthographic TextSegment can be defensibly created;
+- reviewed BHSA annotation-only nodes and other unclassified empty-source states are reported separately;
+- BHSA phrase/clause nodes preserve provider identity, framework-scoped features, reference ranges and graph membership;
+- grouped mapping candidates remain non-canonical and unresolved mappings remain explicit rather than guessed;
+- source/export counts are reconciled against PostgreSQL by book/framework/node type;
+- missing configured books, duplicate provider identities, OSHB source-surface loss, importer errors and source/database count mismatches fail the WB-1 gate;
+- unresolved cross-framework mappings are not misclassified as source-ingestion drops;
+- no real BHSA/bridging corpus projection is written to Serving in WB-1;
+- `.github/workflows/wb1-whole-corpus.yml` executes the complete real-corpus path and uploads the generated coverage evidence.
+
+Acceptance is pending an exact-head CI run over the full pinned OSHB/BHSA/bridging corpus. Until that run passes and the generated report is independently reviewed, the repository must not claim `CORE-FZ-WB-002` PASS.
+
 ## Current implementation priority
 
 1. Preserve contract/governance consistency and the whole-Bible scope guard.
-2. Complete WB-1: generalize the WB-0 provider-scoped importer across the complete configured Hebrew Bible and produce auditable book/reference/count/error/exception coverage evidence.
-3. Complete WB-2: compile the whole-corpus Authoring result into rights-safe, release-pinned passage-serving projections.
+2. Validate and repair WB-1 against the complete pinned corpus until the machine-auditable coverage report passes without silent source-record drops.
+3. After WB-1 acceptance, complete WB-2: compile the whole-corpus Authoring result into rights-safe, release-pinned passage-serving projections.
 4. Complete WB-3: replace fixture-only Hebrew passage content with a database-backed whole-Bible reader/navigation.
 5. Complete WB-4/WB-5: add selected translation witnesses, alignment/comparison, project/user translation workflow and deterministic whole-corpus analysis.
 6. Only then make Research Pro provider adapters, ResearchModelAdapter and end-to-end literature builds the primary product implementation frontier; academic enrichment may proceed in parallel where it does not block the base path.
 
 ## Latest push intent
 
-Close WB-0 after real-corpus execution rather than treating a green synthetic schema as sufficient evidence. The pinned 1 Samuel 16:7 data now loads into PostgreSQL Authoring with 25 OSHB words, 34 BHSA words, 22 phrases, 7 clauses, 90 graph-membership edges, 35 bridging feature values, two preserved annotation-only nodes, 25 grouped mapping candidates of which seven are non-1:1, one project BODY_PART target and zero unresolved references. All automatic mappings remain non-canonical, no real BHSA/bridging projection is written to Serving, and the original synthetic relational/RLS/publication spike still passes. WB-0 is therefore complete as a bounded relational canary; WB-1 whole-Bible ingestion and coverage audit is now the next implementation priority.
+Execute WB-1 as a real whole-corpus ingestion/audit milestone, not as another passage smoke. The current review branch introduces an explicit 39-book CanonSystem, book-bounded OSHB and BHSA/bridging exports, bounded crosswalk compilation, per-book transactional PostgreSQL import, source/database parity checks and a machine-auditable coverage/error report. It also removes the WB-0-only assumption that every AnalysisNode member segment must have exactly the same ReferenceSpan, replacing it with same-expression/same-book span containment so cross-reference phrase/clause nodes are representable. WB-1 remains unaccepted until the exact branch head completes the full pinned corpus workflow and the resulting exception profile is reviewed.
