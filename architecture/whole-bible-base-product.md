@@ -168,7 +168,25 @@ This is source/build evidence only. Provider book-division counts are not a cano
 
 Run the same corpus-wide importer architecture proven by WB-0 across the complete WB-CORPUS-001 source foundation.
 
-Produce a machine-auditable relational coverage/error report.
+The source denominator is the accepted WB-CORPUS-001 ReferenceSystem inventory and coverage manifest, not a provider book-count convention. The selected navigation/relational CanonSystem is separately machine-declared in `contracts/v1.1/hebrew-bible-canon-system.json`.
+
+WB-1 partitions the accepted whole-source artifacts only for bounded relational execution. It must not regenerate a competing source-coverage truth.
+
+Produce a machine-auditable relational coverage/error report that reconciles:
+
+- the accepted source-foundation build ID and artifact hashes;
+- every selected ReferenceSystem member;
+- all OSHB provider word records;
+- all BHSA provider word nodes;
+- relational TextSegments / AnalysisNodes / phrase and clause graph objects;
+- grouped candidate mappings and explicit unresolved mappings;
+- source-only/provider-only reference addresses;
+- annotation-only and other empty-source BHSA states;
+- database counts back to the source foundation.
+
+Unresolved cross-framework mappings may remain explicit research exceptions. They are not equivalent to source-ingestion loss.
+
+Real BHSA/bridging-derived rows remain Authoring-only in WB-1. Rights-safe Serving projection starts in WB-2.
 
 ### WB-2: whole-Bible release-pinned passage serving
 
