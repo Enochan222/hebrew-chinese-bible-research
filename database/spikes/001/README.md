@@ -1,6 +1,6 @@
 # Database Spike 001 executable harness
 
-Status: **POSTGRESQL 17 INTEGRATION SPIKE**
+Status: **POSTGRESQL 17 INTEGRATION SPIKE — CLEAN PR RUN PASS**
 
 This directory is the executable companion to
 `architecture/database-spikes/001-scholarly-integrity-vertical-slice.md`.
@@ -85,3 +85,10 @@ This harness does **not** yet prove:
 - every Core Freeze gate.
 
 Those remain explicit follow-on evidence, not implied by a green SQL spike.
+
+
+## Latest clean execution
+
+PR #9 exact head completed Database Spike 001 run `37195991129` successfully from a blank PostgreSQL 17 database, including migration, fixtures, adversarial tests, Authoring-offline public-serving checks, publication failure/rollback, and query-plan capture.
+
+This is not evidence of remote Supabase deployment. See the architecture spike document for the explicit proven/not-proven boundary.

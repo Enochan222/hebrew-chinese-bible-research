@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.11**
+State Revision: **2026-10-04.12**
 
 ## Mandatory governance rule
 
@@ -192,4 +192,4 @@ Repository visibility remains public as observed state; this audit does not chan
 
 ## Latest push intent
 
-Database Spike 001 migration and seed are clean. Independent test-boundary review found that four public-evidence negative cases reused an already-PUBLISHED release-1 packet, so release immutability could reject the insert before the intended rights-operation, rights-subject, CitationLocator, or immutable-content-hash invariant was exercised. The tests now create a candidate evidence packet on not-yet-published release 2 and route all four negative cases through it. Release 2 is published only later by the publication-control transaction, after which separate late-mutation tests exercise immutability.
+Database Spike 001 has reached a clean PostgreSQL 17 executable vertical-slice result on PR #9: Database Spike run `37195991129`, Contract validation `37195991128`, and Project governance `37195991176` all PASS. The result includes blank migration, controlled fixtures, adversarial relational/RLS/rights/publication tests, Serving-with-Authoring-offline public reads, and query-plan execution. This closes only the local PostgreSQL/Supabase-compatible implementation slice. No remote Supabase project has been designated or modified, and remote Data API/Auth/advisor/production-scale evidence remains pending.

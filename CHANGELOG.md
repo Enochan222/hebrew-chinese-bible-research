@@ -52,6 +52,7 @@ No remote Supabase project is modified. The connected account exposes only one i
 14. Run `37195521246`: migration/seed PASS; the cross-issue ResearchPositionVersion negative test was rejected by shared-PK registration before reaching the intended composite FK. The test now registers the synthetic version object inside the expected-failure subtransaction.
 15. Run `37195662708`: migration/seed PASS; the editorial-emendation negative test was likewise rejected by missing shared-PK registration before reaching the intended adopted-reading CHECK. The test now registers the synthetic TranslationSourceBasis first so the basis-kind CHECK is the required rejecting boundary.
 16. Run `37195807481`: migration/seed PASS; the CitationLocator negative case was rejected by the already-PUBLISHED release-1 evidence immutability guard before the locator CHECK. Review showed the same isolation risk in wrong-operation rights, wrong-subject rights, and immutable-hash cases. All four now use a candidate evidence packet on unpublished release 2 so each test must reach its intended invariant.
+17. Run `37195991129`: full Database Spike 001 PASS from a blank PostgreSQL 17 database, including static transaction-boundary guard, migration, seed, adversarial relational/RLS/rights/publication suite, Authoring-offline anonymous Serving reads, and query-plan probe. Required Contract validation `37195991128` and Project governance `37195991176` also PASS on the same head.
 
 ### Independent critical review
 
@@ -73,13 +74,13 @@ A green final head means the PostgreSQL implementation rejects the tested invali
 
 ### Validation
 
-The latest head must still pass all three PR workflows from a blank database:
+The reviewed PR head passed all three workflows:
 
-- `Database Spike 001 / postgres-spike`;
-- `Contract validation / contracts`;
-- `Project governance / state-and-changelog`.
+- `Database Spike 001 / postgres-spike`: run `37195991129` PASS;
+- `Contract validation / contracts`: run `37195991128` PASS;
+- `Project governance / state-and-changelog`: run `37195991176` PASS.
 
-Any additional SQL or architecture failure remains a spike finding and must be corrected before merge.
+Because this evidence summary itself creates a newer head, the latest exact head must pass the same three workflows again before merge. The merge gate is the current GitHub check state, not a permanently hard-coded “final run” identifier.
 
 
 ## 2026-10-04 — Re-verify live repository protection and PR enforcement

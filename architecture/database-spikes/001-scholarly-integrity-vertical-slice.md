@@ -1,6 +1,6 @@
 # Database Spike 001: Scholarly Integrity Vertical Slice
 
-Status: **IMPLEMENTATION IN PROGRESS — POSTGRESQL 17 EXECUTABLE HARNESS ADDED; REMOTE SUPABASE TARGET NOT YET DESIGNATED**
+Status: **POSTGRESQL 17 EXECUTABLE HARNESS PASS; REMOTE SUPABASE TARGET NOT YET DESIGNATED**
 
 ## 1. Purpose
 
@@ -279,3 +279,69 @@ The implementation now:
 - consolidates the Database Spike history into one chronological CHANGELOG entry.
 
 These corrections must pass a new blank PostgreSQL 17 run before this review is considered closed.
+
+
+## 13. PostgreSQL 17 verification result
+
+Database Spike 001 reached a clean end-to-end PostgreSQL 17 run on PR #9.
+
+Exact-head evidence:
+
+- Database Spike 001 run `37195991129`: PASS;
+- Project governance run `37195991176`: PASS;
+- Contract validation run `37195991128`: PASS.
+
+The database job passed, in order:
+
+1. PostgreSQL client/runtime check;
+2. migration transaction-boundary static guard;
+3. Supabase-compatible test-role/bootstrap shim;
+4. blank-database migration;
+5. controlled fixture load;
+6. adversarial SQL tests;
+7. representative `EXPLAIN (ANALYZE, BUFFERS)` query-plan probe.
+
+### 13.1 Proven by this executable spike
+
+Within the PostgreSQL 17 / Supabase-compatible relational boundary, the spike now demonstrates:
+
+- reference atom/span order and alternate multi-atom label integrity;
+- shared-PK subtype registration/type enforcement;
+- independent annotation layers and rejection of cross-layer AnalysisEdge misuse;
+- analysis-node/text-segment corpus-expression compatibility;
+- explicit cross-layer mapping;
+- WRITTEN/READ stream separation and stream-pinned many-to-many alignment;
+- exact ResearchPositionVersion -> ResearchIssueVersion compatibility;
+- TranslationSourceBasis stream/locus integrity;
+- TranslationDecision source-basis coverage and target-language/policy consistency;
+- fail-closed default rights evaluation and same-specificity DENY precedence;
+- rights winning-rule subset integrity;
+- public evidence rejection for wrong operation, wrong subject, invalid CitationLocator, and missing immutable content hash;
+- Workspace cross-user RLS isolation plus relational project/owner integrity;
+- public/authenticated denial of Authoring and publication-only operations;
+- no Serving foreign key or Serving runtime function dependency on Authoring;
+- anonymous current-release and corpus-query reads while the Authoring schema is temporarily unavailable by name;
+- immutable published release/component/payload projections;
+- publication failure before pointer movement leaves PRODUCTION unchanged;
+- successful first publication appends PUBLISHED and moves the channel pointer atomically;
+- rollback is a later channel-pointer move rather than mutation of historical release payload;
+- deterministic release-pinned corpus-query membership and stable canonical-reference cursor behavior;
+- representative PostgreSQL query-plan execution.
+
+### 13.2 Not proven by this result
+
+A green PostgreSQL run does not prove:
+
+- that the inactive connected Supabase project is the intended deployment target;
+- remote Supabase migration history or schema parity;
+- Supabase Auth/JWT behavior beyond the compatible `auth.uid()` contract;
+- Supabase Data API exposure/grants;
+- Supabase security/performance advisor cleanliness;
+- production-scale whole-Bible corpus latency;
+- full CorpusQuery AST/compiler coverage or exact-total API semantics;
+- real OSHB/MACULA/BHSA ingestion and mapping correctness;
+- complete Ketiv/Qere/textual-apparatus modelling;
+- FHL/provider production identity/rights behavior;
+- every CORE_FREEZE_V1_1 or RESEARCH_PRO_EXTENSION_V1_1 gate.
+
+Therefore this result closes the **local executable PostgreSQL vertical slice**, not the entire v1.1 freeze and not remote Supabase deployment.
