@@ -153,10 +153,13 @@ BEGIN
 END $$;
 
 -- Editorial/composite basis requires actual adopted reading text.
-DO $$
+DO $missing_adopted_reading$
 DECLARE failed boolean := false;
 BEGIN
   BEGIN
+    INSERT INTO authoring.research_objects(research_object_id,object_type)
+    VALUES ('40000000-0000-4000-8000-000000000099','TRANSLATION_SOURCE_BASIS');
+
     INSERT INTO authoring.translation_source_bases(
       translation_source_basis_id,reference_span_id,source_digital_expression_id,source_text_stream_id,
       basis_kind,review_status,content_hash
@@ -166,10 +169,14 @@ BEGIN
       'EDITORIAL_EMENDATION','HUMAN_REVIEWED',
       'abababababababababababababababababababababababababababababababab'
     );
-  EXCEPTION WHEN check_violation THEN failed := true;
+  EXCEPTION WHEN check_violation THEN
+    failed := true;
   END;
-  IF NOT failed THEN RAISE EXCEPTION 'editorial emendation without adopted reading text must fail'; END IF;
-END $$;
+  IF NOT failed THEN
+    RAISE EXCEPTION 'editorial emendation without adopted reading text must fail on basis-kind CHECK';
+  END IF;
+END
+$missing_adopted_reading$;
 
 -- Rights: no applicable rule defaults DENY; same-specificity DENY beats ALLOW.
 SELECT spike_test.assert_true(

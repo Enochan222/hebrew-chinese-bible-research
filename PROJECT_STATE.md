@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.9**
+State Revision: **2026-10-04.10**
 
 ## Mandatory governance rule
 
@@ -192,4 +192,4 @@ Repository visibility remains public as observed state; this audit does not chan
 
 ## Latest push intent
 
-Database Spike 001 now applies the migration and loads fixtures cleanly after removing the duplicated SQL tail. The latest adversarial run exposed a test-isolation defect: the negative ResearchPositionVersion case was rejected by shared-PK research-object registration before it reached the intended cross-issue composite FK. The test now registers the synthetic version object inside the expected-failure subtransaction so the exact issue/version compatibility constraint is what must fail. Independent review also strengthens public-plane evidence by temporarily renaming the Authoring schema offline and requiring anonymous current-release and corpus-query reads to continue entirely from Serving projections.
+Database Spike 001 continues from a migration/seed-clean state. The latest negative test exposed another test-isolation problem: an invalid editorial-emendation TranslationSourceBasis was rejected by shared-PK registration before reaching the intended adopted-reading CHECK. The synthetic subtype is now registered inside the same expected-failure subtransaction, so the test proves the basis-kind constraint rather than a different earlier guard. The Database Spike CHANGELOG entry has also been rebuilt as one chronological record after independent review found an embedded duplicate changelog caused by an earlier replacement-token serialization accident. Historical entries after the spike entry are preserved unchanged.
