@@ -18,6 +18,12 @@ on:
     branches: [main]
     paths:
       - 'database/**'
+      - 'scripts/corpora/**'
+      - 'requirements-corpus.txt'
+      - 'contracts/v1.1/corpus-source-registry.json'
+      - 'contracts/v1.1/json-schema/corpus-source-registry.schema.json'
+      - 'architecture/corpus-source-integration.md'
+      - 'architecture/database-api-cross-stage-contract-v1.1.md'
       - 'architecture/database-spikes/001-scholarly-integrity-vertical-slice.md'
       - '.github/workflows/database-spike-001.yml'
 
