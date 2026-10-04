@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-05.12**
+State Revision: **2026-10-05.13**
 
 ## Mandatory governance rule
 
@@ -326,6 +326,12 @@ WB-1 acceptance is **PASS** for `CORE-FZ-WB-002`. The synchronized implementatio
 3. Complete WB-3: replace fixture-only Hebrew passage content with a database-backed whole-Bible reader/navigation and verify `CORE-FZ-WB-001` / `CORE-FZ-WB-003` behavior.
 4. Complete WB-4/WB-5: add selected translation witnesses, alignment/comparison, project/user translation workflow and deterministic whole-corpus analysis.
 5. Only then make Research Pro provider adapters, ResearchModelAdapter and end-to-end literature builds the primary product implementation frontier; academic enrichment may proceed in parallel where it does not block the base path.
+
+## WB-2 / WB-3 implementation state
+
+WB-2/WB-3 has started with a contract-first rights regression. The canonical RightsDecisionSnapshot schema uses `obligationType`, while the PostgreSQL obligation validator still reads the older `type` key. A RED database regression now requires an ATTRIBUTION obligation in canonical contract shape to persist before any real OSHB public release is compiled.
+
+No Serving corpus projection or reader adapter is claimed by this RED step. The expected first failure is the existing SQL/schema semantic mismatch; implementation follows only after that failure is observed.
 
 ## Latest push intent
 

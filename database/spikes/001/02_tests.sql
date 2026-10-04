@@ -700,3 +700,35 @@ RESET ROLE;
 ALTER SCHEMA authoring_offline RENAME TO authoring;
 
 DROP SCHEMA spike_test CASCADE;
+
+
+-- WB-2 RED: database rights obligation JSON must use the canonical contract key obligationType.
+DO $wb2_obligation_type_contract$
+DECLARE
+  inserted boolean := false;
+BEGIN
+  BEGIN
+    INSERT INTO serving.rights_decision_snapshots(
+      rights_decision_snapshot_id,subject_type,subject_identifier,operation,purpose_scope,
+      audience_scope,commercial_context,applicable_rule_ids,winning_rule_ids,
+      decision,decision_basis,conditions_json,obligations_json,resolver_version,evaluated_at,decision_hash
+    ) VALUES (
+      '45200000-0000-4000-8000-0000000000a1','CORPUS_RELEASE',
+      '30000000-0000-4000-8000-000000000001','DISPLAY_FULLTEXT','PUBLIC_DISPLAY',
+      'PUBLIC','MIXED',ARRAY['45100000-0000-4000-8000-000000000001'::uuid],
+      ARRAY['45100000-0000-4000-8000-000000000001'::uuid],
+      'CONDITIONAL','RULE',NULL,
+      '[{"obligationType":"ATTRIBUTION","value":"Open Scriptures Hebrew Bible attribution fixture"}]'::jsonb,
+      'wb2-red-contract',now(),'abababababababababababababababababababababababababababababababab'
+    );
+    inserted := true;
+  EXCEPTION WHEN check_violation THEN
+    inserted := false;
+  END;
+  IF NOT inserted THEN
+    RAISE EXCEPTION 'canonical RightsDecisionSnapshot obligationType payload must be accepted by PostgreSQL';
+  END IF;
+  DELETE FROM serving.rights_decision_snapshots
+  WHERE rights_decision_snapshot_id='45200000-0000-4000-8000-0000000000a1';
+END
+$wb2_obligation_type_contract$;

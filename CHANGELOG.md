@@ -4,6 +4,26 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+## 2026-10-05 — Start WB-2/WB-3 with rights obligation contract regression
+
+### Push intent
+
+Begin the database-backed whole-Bible Serving/reader milestone by proving the current PostgreSQL rights validator is out of sync with the canonical machine contract before changing production logic.
+
+### Why
+
+The canonical RightsDecisionSnapshot schema uses `obligationType`, including `ATTRIBUTION`, but `authoring.valid_rights_obligations` / `serving.valid_rights_obligations` still inspect the legacy key `type`. OSHB public serving requires attribution, so WB-2 must not publish a release while this contract/database mismatch exists.
+
+### What changed
+
+- added a RED Database Spike regression that inserts a CONDITIONAL corpus DISPLAY_FULLTEXT rights snapshot using canonical `obligationType: ATTRIBUTION`;
+- deliberately made no Serving projection or reader implementation in this commit;
+- recorded WB-2/WB-3 as started but not accepted.
+
+### Validation
+
+Expected RED: Database Spike 001 must reject the canonical obligation payload until the validator is corrected. Other independent gates should remain unaffected.
+
 
 ## 2026-10-05 — Implement WB-1 relational whole-corpus candidate
 
