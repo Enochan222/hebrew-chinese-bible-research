@@ -5,6 +5,35 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
 
+## 2026-10-04 — Close inactive Serving candidate visibility leak
+
+### Push intent
+
+Repair a post-merge Database Spike 001 publication-boundary defect discovered by adversarial review of the actual RLS policies rather than accepting the earlier green CI result as sufficient.
+
+### Why
+
+The architecture requires publication visibility to be atomic: a candidate ResearchRelease may be fully materialized in Serving while inactive, but public clients must observe only the complete old release or the complete new release. The merged migration enabled RLS yet used `USING (true)` on release-scoped Serving tables. Because anon/authenticated also had direct SELECT grants, a caller who knew a candidate release or payload identifier could read materialized unpublished rows even though the PRODUCTION pointer had not moved.
+
+### What changed
+
+- changed `serving.release_is_published()` and `serving.component_is_published()` into narrowly scoped SECURITY DEFINER predicates with a fixed `pg_catalog, serving` search path;
+- granted anon/authenticated EXECUTE only on those boolean publication predicates;
+- kept canonical reference spans and channel definitions publicly readable;
+- gated public corpus projections and semantic-set members on participation in at least one published release;
+- gated ResearchRelease rows, release components, channel pointers, passage analyses, evidence packets/items, assertions and assertion/evidence links on a committed `PUBLISHED` event;
+- added adversarial anon tests proving that fully materialized release 2, its components, its candidate evidence packet and its release-pinned corpus query are invisible before publication;
+- added positive regression tests proving those release-scoped rows become visible after the publication transaction succeeds.
+
+### Intended effect
+
+Inactive candidate materialization remains possible, but it is no longer equivalent to public visibility. The database now enforces the architecture's old-release/new-release atomic visibility boundary even for direct table/API access, not only for clients that voluntarily use `current_release`.
+
+### Validation
+
+This change must pass the blank PostgreSQL 17 Database Spike workflow, Contract validation, and Project governance on the new PR head. The negative pre-publication tests are expected to fail against the previously merged migration and pass only with the publication-gated RLS policies.
+
+
 ## 2026-10-04 — Database Spike 001 executable PostgreSQL vertical slice
 
 ### Push intent
