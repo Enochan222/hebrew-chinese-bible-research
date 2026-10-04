@@ -104,6 +104,15 @@ def empty_signature_diagnostics(o_rows: list[dict], b_rows: list[dict]) -> dict:
                 "providerScopedNodeId": r.get("providerScopedNodeId"),
                 "hasConsonantalValue": bool(r.get("consonantalSourceExact")),
                 "hasSurfaceValue": bool(r.get("surfaceSourceExact")),
+                "hasLexemeValue": bool(r.get("lexemeRaw")),
+                "partOfSpeechRaw": r.get("partOfSpeechRaw"),
+                "phraseDependentPartOfSpeechRaw": r.get("phraseDependentPartOfSpeechRaw"),
+                "languageIsoRaw": r.get("languageIsoRaw"),
+                "hasQereValue": bool(r.get("qereRaw")),
+                "hasBridgePrimaryMorphology": bool(r.get("bridgeOshbMorphologyPrimaryRaw")),
+                "hasBridgeSecondaryMorphology": bool(r.get("bridgeOshbMorphologySecondaryRaw")),
+                "phraseNodeId": r.get("phraseNodeId"),
+                "clauseNodeId": r.get("clauseNodeId"),
             }
             for r in b_rows
             if not bhsa_signature(r)

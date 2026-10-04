@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.9**
+State Revision: **2026-10-04.10**
 
 ## Mandatory governance rule
 
@@ -213,4 +213,4 @@ See `architecture/corpus-source-integration.md` and `contracts/v1.1/corpus-sourc
 
 ## Latest push intent
 
-This revision keeps the real-corpus smoke fail-closed and adds one narrower diagnostic after run `37193120184` proved that OSHB and BHSA 1 Samuel 16:7 have identical normalized whole-verse consonantal streams (length 92 and identical SHA-256) while the span aligner still stopped on `EMPTY_CONSONANTAL_SIGNATURE`. The crosswalk now records only provider IDs/orders and boolean field-presence flags for zero-letter tokens, never Hebrew text, so the next smoke can distinguish corpus structural/empty nodes from exporter defects before the mapping algorithm is changed.
+This revision continues the fail-closed diagnosis of two BHSA 1 Samuel 16:7 word slots (node IDs `150439` and `150445`) that contribute no Hebrew-letter signature even though the complete OSHB and BHSA consonantal verse streams are identical. The next smoke records only non-textual classification metadata for those nodes: POS/PDP codes, language code, presence/absence of lexeme, qere and bridging morphology, and phrase/clause node IDs. No Hebrew source text is logged. Mapping semantics remain unchanged until the node role is classified.

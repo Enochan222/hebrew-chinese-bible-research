@@ -136,6 +136,8 @@ Run `37193120184` classified the previous ambiguity:
 
 Therefore the failure is not a textual-version mismatch and not a whole-verse normalization mismatch. Before changing alignment semantics, the crosswalk now records only the order/provider identity and boolean source-field presence of zero-letter tokens. It still does not print source Hebrew text. The next real smoke must identify which provider records have empty Hebrew-letter signatures; only then may the alignment rule decide whether they are ignorable structural tokens, exporter defects, or separately reviewable mappings.
 
+The next diagnostic run identified the zero-letter side precisely: OSHB has no empty-signature word records, while BHSA word-order positions 27 and 33 are nodes `150439` and `150445`; both have neither `g_cons_utf8` nor `g_word_utf8`. Because BHSA documentation describes those features as the normal word-occurrence representations, the integration does not yet classify the nodes as ignorable. A narrower metadata-only probe now records POS/PDP, language, presence of lexeme/qere/bridging morphology, and phrase/clause membership for those two nodes. Mapping behavior remains fail-closed until that probe classifies them.
+
 Before creating the repository commit:
 
 - current upstream repository heads and frozen BHSA/bridging 2021 directories were inspected;
