@@ -2620,7 +2620,7 @@ Optional:
 
 The optional interpreter returns a candidate constrained CorpusQuery AST. It never executes generated SQL.
 
-Human-readable passage routes require an explicit `referenceSystemCode` and resolve to a canonical ReferenceSpan before domain execution. Product MCP PassageRequestV1 may alternatively supply `referenceSpanId` directly.
+Human-readable passage routes and passage-scoped Product MCP tools require an explicit `referenceSystemCode` and resolve to a canonical ReferenceSpan before domain execution. Product MCP request contracts may alternatively supply `referenceSpanId` directly through PassageLocatorV1.
 
 Corpus query execution uses `CorpusQueryExecutionRequestV1`, which separates the normalized scholarly query from retrieval state (`cursor`, `pageSize`). Query results distinguish page match count from total match count and whether the total is exact.
 

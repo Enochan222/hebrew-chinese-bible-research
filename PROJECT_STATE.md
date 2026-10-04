@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.12**
+State Revision: **2026-10-04.13**
 
 ## Mandatory governance rule
 
@@ -138,7 +138,8 @@ Repository visibility remains public as observed state; this audit does not chan
 - Official project TranslationDecision pins an immutable TranslationSourceBasis and exact TranslationPolicyVersion.
 - Corpus query execution separates scholarly query meaning from cursor/page retrieval state and distinguishes exact from unavailable total counts.
 - RightsDecisionSnapshot is fail-closed: unresolved/unknown permission cannot surface as an UNKNOWN final outcome or ALLOW.
-- Public evidence uses typed CitationLocator semantics; excerpts require rights snapshots and immutable evidence requires content hashes.
+- Public evidence uses typed CitationLocator semantics whose required identity cannot be null or empty; excerpts require rights snapshots and immutable evidence requires content hashes.
+- Passage-scoped rule-application MCP reads use the shared ReferenceSystem-aware PassageLocator contract rather than an ambiguous bare reference string.
 - ResearchPositionVersion pins the exact ResearchIssueVersion framing used for that scholarly position.
 - Database Spike 001 is specified as an adversarial scholarly-integrity vertical slice, not a table-creation demo.
 - `main` is live-protected by active repository ruleset `Protect main` (ID `24409248`).
@@ -185,11 +186,12 @@ Repository visibility remains public as observed state; this audit does not chan
 ## Current implementation priority
 
 1. Preserve contract/governance consistency.
-2. Database Spike 001 for real PostgreSQL/Supabase schema and constraints.
-3. Implement provider adapters and ResearchModelAdapter interfaces.
-4. Validate one end-to-end literature-discovery build against a real Hebrew-Bible ResearchIssue.
-5. Continue later application stages without weakening publication/rights/reproducibility boundaries.
+2. Synchronize and complete the pinned OSHB/BHSA corpus-source integration against current `main`.
+3. Complete the fixture-backed Phase 1 serving shell acceptance gate and open its PR.
+4. Implement scholarly provider adapters and ResearchModelAdapter interfaces.
+5. Validate one end-to-end literature-discovery build against a real Hebrew-Bible ResearchIssue.
+6. Continue later application stages without weakening publication/rights/reproducibility boundaries.
 
 ## Latest push intent
 
-Database Spike 001 has reached a clean PostgreSQL 17 executable vertical-slice result on PR #9: Database Spike run `37195991129`, Contract validation `37195991128`, and Project governance `37195991176` all PASS. The result includes blank migration, controlled fixtures, adversarial relational/RLS/rights/publication tests, Serving-with-Authoring-offline public reads, and query-plan execution. This closes only the local PostgreSQL/Supabase-compatible implementation slice. No remote Supabase project has been designated or modified, and remote Data API/Auth/advisor/production-scale evidence remains pending.
+Post-merge review of Database Spike 001 and the still-unmerged Product MCP surface found two contract holes that existing green validation did not exercise: required CitationLocator identities accepted null/empty values, and `get_rule_applications` accepted an ambiguous bare human reference without ReferenceSystem identity. This revision makes locator identities non-null, moves rule-application reads to PassageLocatorV1, and adds positive/negative regression fixtures. Database Spike 001 is now merged on `main` at `be0c66086371f2e318ec1616482d4ceaceddca6b`; its post-merge PostgreSQL, contract, and governance checks all passed. No remote Supabase project has been designated or modified.

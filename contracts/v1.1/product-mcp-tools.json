@@ -72,7 +72,7 @@
     "transport": "STREAMABLE_HTTP_OR_SUPPORTED_STATELESS_HTTP",
     "notes": "Server implementation targets the final 2026-07-28 revision. Client integrations should use protocol auto-negotiation where supported, probing the modern era and falling back to supported 2025-era behavior rather than relying on SDK defaults or silently pinning a legacy handshake."
   },
-  "releaseResolution": "For passage reads, a human reference label is valid only with an explicit referenceSystemCode; direct referenceSpanId locators are also accepted through PassageRequestV1. Omitted/null researchReleaseId resolves current PRODUCTION exactly once. run_corpus_query accepts CorpusQueryExecutionRequestV1 containing an already normalized release-pinned query plus optional pagination state.",
+  "releaseResolution": "For passage and passage-scoped rule-application reads, a human reference label is valid only with an explicit referenceSystemCode; direct referenceSpanId locators are also accepted through the shared PassageLocatorV1 contract. Omitted/null researchReleaseId resolves current PRODUCTION exactly once. run_corpus_query accepts CorpusQueryExecutionRequestV1 containing an already normalized release-pinned query plus optional pagination state.",
   "securityRequirements": [
     "rate limit per principal and tool",
     "validate authorization audience/scopes if authenticated Research tools are later added",
