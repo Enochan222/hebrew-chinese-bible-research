@@ -323,7 +323,7 @@ def main() -> int:
         path = (args.output_dir / files[key]).as_posix()
         load_sql += (
             f"\\copy {table} ({columns}) FROM '{path}' "
-            "WITH (FORMAT csv, DELIMITER E'\\t', NULL '\\N', QUOTE '"', ESCAPE '"');\n"
+            "WITH (FORMAT csv, DELIMITER E'\\t', NULL E'\\\\N');\n"
         )
     load_sql += "COMMIT;\n"
     (args.output_dir / "load.sql").write_text(load_sql, encoding="utf-8")
