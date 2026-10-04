@@ -138,6 +138,25 @@ Therefore the failure is not a textual-version mismatch and not a whole-verse no
 
 The next diagnostic run identified the zero-letter side precisely: OSHB has no empty-signature word records, while BHSA word-order positions 27 and 33 are nodes `150439` and `150445`; both have neither `g_cons_utf8` nor `g_word_utf8`. Because BHSA documentation describes those features as the normal word-occurrence representations, the integration does not yet classify the nodes as ignorable. A narrower metadata-only probe now records POS/PDP, language, presence of lexeme/qere/bridging morphology, and phrase/clause membership for those two nodes. Mapping behavior remains fail-closed until that probe classifies them.
 
+#### Sixth smoke: classify BHSA annotation-only nodes
+
+Run `37195737087` showed that both zero-letter BHSA slots are genuine annotation-bearing nodes rather than exporter omissions:
+
+- node `150439`, verse order 27: lexeme present, `sp=art`, `pdp=art`, `languageISO=hbo`, phrase `737331`, clause `455846`, no qere, no bridging morphology, no orthographic/consonantal value;
+- node `150445`, verse order 33: lexeme present, `sp=art`, `pdp=art`, `languageISO=hbo`, phrase `737335`, clause `455847`, no qere, no bridging morphology, no orthographic/consonantal value;
+- OSHB still has no empty-signature records;
+- the complete normalized OSHB/BHSA consonantal verse streams remain identical.
+
+Resolution:
+
+- preserve those BHSA nodes as `ANNOTATION_ONLY_TARGET_NODE` records;
+- do not delete them from the BHSA annotation graph;
+- do not fabricate an orthographic TextSegment or attach them automatically to a neighbouring OSHB token;
+- exclude them only from the orthographic span alignment;
+- allow only text-bearing BHSA nodes into the conservative consonantal crosswalk;
+- keep any unclassified empty node fail-closed as `NEEDS_REVIEW`;
+- make Database Spike 001 explicitly test that an AnalysisNode may have zero segment memberships while retaining framework features and graph relations.
+
 Before creating the repository commit:
 
 - current upstream repository heads and frozen BHSA/bridging 2021 directories were inspected;

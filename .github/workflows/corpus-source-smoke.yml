@@ -51,11 +51,15 @@ jobs:
           assert counts["oshb.ndjson"] == 25, counts
           assert counts["bhsa.ndjson"] > 0, counts
           crosswalk = [json.loads(x) for x in (Path(".local/exports") / "crosswalk.ndjson").read_text(encoding="utf-8").splitlines() if x.strip()]
-          assert all(r.get("recordType") in {"CANDIDATE_SPAN_MAPPING", "UNRESOLVED_REFERENCE"} for r in crosswalk)
+          assert all(r.get("recordType") in {"CANDIDATE_SPAN_MAPPING", "ANNOTATION_ONLY_TARGET_NODE", "UNRESOLVED_REFERENCE"} for r in crosswalk)
           print("crosswalk record types", sorted({r["recordType"] for r in crosswalk}))
           candidate = [r for r in crosswalk if r["recordType"] == "CANDIDATE_SPAN_MAPPING"]
+          annotation_only = [r for r in crosswalk if r["recordType"] == "ANNOTATION_ONLY_TARGET_NODE"]
           unresolved = [r for r in crosswalk if r["recordType"] == "UNRESOLVED_REFERENCE"]
           assert candidate, "real 1 Sam 16:7 integration produced no candidate span mappings"
           assert not unresolved, unresolved
+          assert {r["targetProviderScopedNodeId"] for r in annotation_only} == {150439, 150445}, annotation_only
+          assert all(r["partOfSpeechRaw"] == "art" for r in annotation_only), annotation_only
+          assert all(r["orthographicMappingEligible"] is False for r in annotation_only), annotation_only
           assert any(r["sourceCount"] != r["targetCount"] for r in candidate), "smoke did not exercise many-to-many segmentation"
           PY

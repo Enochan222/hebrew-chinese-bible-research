@@ -192,7 +192,11 @@ python scripts/corpora/build_candidate_crosswalk.py \
   --output .local/exports/crosswalk-1sam16-7.ndjson
 ```
 
-The crosswalk does not require equal token counts. It aligns only contiguous spans within the same normalized verse when the concatenated Hebrew-letter consonantal signatures are exactly equal. This allows conservative 1:1, 1:n, n:1, and n:m candidate mappings across framework-specific tokenization. If the full verse consonantal streams differ, an empty signature appears, or the two token streams cease to be prefix-compatible, the whole reference becomes `NEEDS_REVIEW`. Its mappings remain `CANDIDATE_AUTOMATED` and `canonical = false` until Database Spike review promotes them through the project's typed mapping workflow.
+The crosswalk does not require equal token counts. It aligns only contiguous text-bearing spans within the same normalized verse when the concatenated Hebrew-letter consonantal signatures are exactly equal. This allows conservative 1:1, 1:n, n:1, and n:m candidate mappings across framework-specific tokenization.
+
+A BHSA node with no orthographic/consonantal value may be preserved as `ANNOTATION_ONLY_TARGET_NODE` only when it still has explicit linguistic identity and graph context (for example lexeme/POS plus phrase and clause membership) and is not carrying Qere text. Such a node is retained in the BHSA annotation graph but is not assigned an invented orthographic TextSegment or OSHB identity. Any unclassified empty target node remains `NEEDS_REVIEW`.
+
+If the full text-bearing verse consonantal streams differ, a source token has an empty signature, or the two streams cease to be prefix-compatible, the whole reference becomes `NEEDS_REVIEW`. Candidate mappings remain `CANDIDATE_AUTOMATED` and `canonical = false` until Database Spike review promotes them through the project's typed mapping workflow.
 
 ## 5. Decision table: when to use which source
 
@@ -212,7 +216,9 @@ The crosswalk does not require equal token counts. It aligns only contiguous spa
 
 ## 6. Example: 1 Samuel 16:7
 
-The live PR smoke observed 25 OSHB word records and 34 BHSA word records for this verse. That is direct implementation evidence that the two providers cannot be connected through a universal 1:1 word identity. The project therefore treats segmentation divergence as normal framework-scoped data and uses explicit many-to-many cross-annotation mappings where the textual evidence supports them.
+The live PR smoke observed 25 OSHB word records and 34 BHSA word records for this verse. Two BHSA slots, nodes `150439` and `150445`, carry article (`art`) lexical/syntactic annotation and phrase/clause membership but no `g_word_utf8` or `g_cons_utf8` orthographic content. The normalized full-verse consonantal streams remain identical after excluding no characters from either provider. These nodes are therefore preserved as annotation-only BHSA nodes and excluded only from the orthographic crosswalk; they are not deleted and are not attached arbitrarily to neighbouring OSHB tokens.
+
+That is direct implementation evidence that the two providers cannot be connected through a universal 1:1 word identity. The project therefore treats segmentation divergence as normal framework-scoped data and uses explicit many-to-many cross-annotation mappings where the textual evidence supports them.
 
 For a query such as:
 

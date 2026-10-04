@@ -91,6 +91,8 @@ Apply the same principle to cross-annotation mappings where the mapping contract
 
 An AnalysisNode mapped to TextSegment must be compatible with the corpus release / digital expression / text stream being analysed.
 
+The spike must also prove the complementary case exposed by real BHSA 2021 data: an annotation-only BHSA node may exist with provider identity, lexeme/POS/features and phrase/clause graph membership while having zero orthographic segment memberships. The database must allow that state without inventing a TextSegment, and orthographic cross-layer mapping must not treat that node as text-bearing.
+
 Attack:
 
 - node belongs CorpusRelease A;

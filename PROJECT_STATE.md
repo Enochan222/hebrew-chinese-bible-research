@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.10**
+State Revision: **2026-10-04.11**
 
 ## Mandatory governance rule
 
@@ -213,4 +213,4 @@ See `architecture/corpus-source-integration.md` and `contracts/v1.1/corpus-sourc
 
 ## Latest push intent
 
-This revision continues the fail-closed diagnosis of two BHSA 1 Samuel 16:7 word slots (node IDs `150439` and `150445`) that contribute no Hebrew-letter signature even though the complete OSHB and BHSA consonantal verse streams are identical. The next smoke records only non-textual classification metadata for those nodes: POS/PDP codes, language code, presence/absence of lexeme, qere and bridging morphology, and phrase/clause node IDs. No Hebrew source text is logged. Mapping semantics remain unchanged until the node role is classified.
+This revision classifies the two zero-letter BHSA 1 Samuel 16:7 slots using real smoke evidence. Nodes `150439` and `150445` are Hebrew article (`art`) annotation nodes with lexeme and phrase/clause membership but no orthographic/consonantal value, qere, or bridging morphology. They are now preserved explicitly as non-canonical annotation-only BHSA nodes and excluded only from orthographic OSHB↔BHSA span alignment. The existing database contract already permits AnalysisNode objects with zero `analysis_node_segments` rows; the prose and Database Spike now state that this must not trigger an invented TextSegment or cross-framework textual identity.

@@ -29,14 +29,48 @@ def oshb_signature(row: dict) -> str:
 def bhsa_signature(row: dict) -> str:
     return hebrew_letters_only(row.get("consonantalSourceExact") or row.get("surfaceSourceExact"))
 
+def is_bhsa_annotation_only_node(row: dict) -> bool:
+    return (
+        not bhsa_signature(row)
+        and not row.get("surfaceSourceExact")
+        and not row.get("consonantalSourceExact")
+        and bool(row.get("lexemeRaw"))
+        and bool(row.get("partOfSpeechRaw"))
+        and row.get("phraseNodeId") is not None
+        and row.get("clauseNodeId") is not None
+        and not row.get("qereRaw")
+    )
+
+def annotation_only_record(ref: tuple[str, int, int], row: dict) -> dict:
+    return {
+        "recordType": "ANNOTATION_ONLY_TARGET_NODE",
+        "targetKey": "BHSA_2021",
+        "targetProviderScopedNodeId": row.get("providerScopedNodeId"),
+        "targetWordOrder": row.get("wordOrderInVerse"),
+        "reference": {"book": ref[0], "chapter": ref[1], "verse": ref[2]},
+        "reason": "NO_ORTHOGRAPHIC_CONTENT_WITH_LINGUISTIC_ANNOTATION",
+        "partOfSpeechRaw": row.get("partOfSpeechRaw"),
+        "phraseDependentPartOfSpeechRaw": row.get("phraseDependentPartOfSpeechRaw"),
+        "languageIsoRaw": row.get("languageIsoRaw"),
+        "phraseNodeId": row.get("phraseNodeId"),
+        "clauseNodeId": row.get("clauseNodeId"),
+        "hasLexemeValue": bool(row.get("lexemeRaw")),
+        "hasQereValue": bool(row.get("qereRaw")),
+        "reviewStatus": "SOURCE_PRESERVED",
+        "canonical": False,
+        "orthographicMappingEligible": False,
+    }
+
 def align_contiguous_spans(o_rows: list[dict], b_rows: list[dict]) -> tuple[list[tuple[list[dict], list[dict], str]] | None, str | None]:
     if not o_rows or not b_rows:
         return None, "MISSING_PROVIDER_ROWS"
 
     osigs = [oshb_signature(r) for r in o_rows]
     bsigs = [bhsa_signature(r) for r in b_rows]
-    if any(not s for s in osigs) or any(not s for s in bsigs):
-        return None, "EMPTY_CONSONANTAL_SIGNATURE"
+    if any(not s for s in osigs):
+        return None, "EMPTY_SOURCE_CONSONANTAL_SIGNATURE"
+    if any(not s for s in bsigs):
+        return None, "UNCLASSIFIED_EMPTY_TARGET_SIGNATURE"
 
     if "".join(osigs) != "".join(bsigs):
         return None, "VERSE_CONSONANTAL_STREAM_MISMATCH"
@@ -190,11 +224,24 @@ def main() -> int:
     with args.output.open("w", encoding="utf-8") as out:
         for ref in sorted(set(groups_o) | set(groups_b)):
             o_rows = sorted(groups_o.get(ref, []), key=lambda r: r["wordOrderInVerse"])
-            b_rows = sorted(groups_b.get(ref, []), key=lambda r: r["wordOrderInVerse"])
+            all_b_rows = sorted(groups_b.get(ref, []), key=lambda r: r["wordOrderInVerse"])
+            annotation_only = [r for r in all_b_rows if is_bhsa_annotation_only_node(r)]
+            b_rows = [r for r in all_b_rows if r not in annotation_only]
+
+            unclassified_empty = [r for r in all_b_rows if not bhsa_signature(r) and r not in annotation_only]
+            if unclassified_empty:
+                record = unresolved_record(ref, o_rows, all_b_rows, "UNCLASSIFIED_EMPTY_TARGET_SIGNATURE")
+                out.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
+                unresolved_count += 1
+                continue
+
+            for row in annotation_only:
+                out.write(json.dumps(annotation_only_record(ref, row), ensure_ascii=False, sort_keys=True) + "\n")
+
             groups, reason = align_contiguous_spans(o_rows, b_rows)
 
             if groups is None:
-                record = unresolved_record(ref, o_rows, b_rows, reason or "UNKNOWN_ALIGNMENT_FAILURE")
+                record = unresolved_record(ref, o_rows, all_b_rows, reason or "UNKNOWN_ALIGNMENT_FAILURE")
                 out.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
                 print(
                     f"unresolved {ref[0]}.{ref[1]}.{ref[2]}: {record['reason']}; "
