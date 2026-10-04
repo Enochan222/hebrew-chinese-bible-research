@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.17**
+State Revision: **2026-10-04.18**
 
 ## Mandatory governance rule
 
@@ -147,6 +147,19 @@ Repository visibility remains public as observed state; this audit does not chan
 - Normal changes require PR + latest-main synchronization + `contracts` PASS + `state-and-changelog` PASS + resolved conversations + squash merge.
 - Panel contract-closure adjudication is recorded in `architecture/reviews/2026-10-03-panel-contract-closure.md` and registered as current validation authority.
 
+## Whole-Bible base-product direction
+
+Whole-Bible coverage is now an explicit implementation baseline rather than a late outcome of passage-specific research work.
+
+- 1 Samuel 16:7, Psalm 3:1 and similar passages are acceptance vectors only;
+- the first product-scale corpus target is the complete pinned OSHB baseline, imported through one deterministic path into the canonical ReferenceSystem/TextSegment/AnalysisNode model;
+- OSHB provides the initial whole-Bible text/word/lemma/morphology baseline under the existing source-role decision;
+- BHSA/ETCBC remains a separate framework-scoped syntax/phrase/clause and mapping overlay and does not block baseline passage coverage;
+- Research Pro is a scholarly enrichment overlay over the same canonical passage/release identities and may be NOT_COMPILED for a passage while the base passage remains available;
+- the next public-serving milestone is a release-scoped whole-Bible passage projection/navigation API backed by the imported corpus rather than hand-written fixture coverage.
+
+The active implementation authority is `architecture/whole-bible-base-product.md`.
+
 ## Current pinned Hebrew corpus integration
 
 The first corpus-source adapter integration intended for Database Spike 001 is now machine-pinned and reproducible:
@@ -228,11 +241,12 @@ This is fixture-shell implementation evidence only. It does not satisfy real-dat
 ## Current implementation priority
 
 1. Preserve contract/governance consistency.
-2. Connect the pinned OSHB/BHSA/ETCBC-bridging exports to the merged Database Spike 001 relational schema and validate real-corpus cross-layer constraints/queries without promoting unreviewed candidate mappings.
-3. Implement scholarly provider adapters and ResearchModelAdapter interfaces.
-4. Validate one end-to-end literature-discovery build against a real Hebrew-Bible ResearchIssue.
-5. Continue later application stages without weakening publication/rights/reproducibility boundaries.
+2. Prove complete pinned OSHB whole-Bible coverage and deterministic relational Authoring import.
+3. Materialize a release-scoped Serving passage/navigation projection and replace the single-passage fixture dependency in the base reader.
+4. Add translation-witness adapters/comparison and project TranslationDecision rendering.
+5. Add BHSA/framework-scoped deterministic syntax/corpus overlays without flattening identities.
+6. Implement scholarly provider adapters/ResearchModelAdapter and progressively compile Research Pro dossiers over the same whole-Bible base.
 
 ## Latest push intent
 
-Post-merge adversarial review of the corpus tooling found two fail-closed gaps not exercised by the successful 1 Samuel 16:7 smoke: an existing cache could trust a truncated self-authored manifest because verification did not require the manifest file set to equal the actual cache file set, and the OSHB exporter could return success with an empty artifact when a requested reference did not exist. The current change hardens manifest/config/path/size/hash verification, rejects path traversal and untracked cache files, makes zero-record OSHB export a hard failure, and adds adversarial CI regressions. The larger next product gate is unchanged: import the real pinned corpus exports into the PostgreSQL Database Spike schema.
+Reframe implementation around the actual product: a whole-Hebrew-Bible base reader with Research Pro layered on top. This change adds a product-scale whole-Bible OSHB foundation harness: exact pinned source coverage indexing, deterministic UUID-based PostgreSQL COPY loadset generation for every OSHB provider book/verse/word, canonical ReferenceSystem/TextSegment/Morphology AnalysisNode import, and CI reconciliation between source coverage, generated import manifest and database row counts. Passage fixtures remain adversarial canaries rather than scope. No remote Supabase or Vercel deployment is performed.
