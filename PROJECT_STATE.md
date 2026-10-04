@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-05.10**
+State Revision: **2026-10-05.11**
 
 ## Mandatory governance rule
 
@@ -15,6 +15,22 @@ Every push/PR that changes this repository must:
 6. run required validation before merge/push.
 
 `PROJECT_CHARTER.md` is the stable product constitution. This file is the current operational/architectural state and therefore changes on every push.
+
+## Current project AI execution policy
+
+GitHub Copilot is not authorized for this repository's project work.
+
+- do not request Copilot pull-request review;
+- do not use Copilot Coding Agent, Autofix, Chat/code generation, or any operation that consumes Copilot quota/premium requests;
+- do not treat Copilot output as merge or acceptance evidence;
+- AI-assisted implementation, analysis, repository orchestration and code review are performed through the project's ChatGPT workflow;
+- deterministic GitHub Actions and ordinary non-AI GitHub features remain allowed;
+- an exception requires an explicit repository-owner policy change through the governed PR path.
+
+Machine authority: `contracts/v1.1/github-ai-usage-policy.json`.
+
+The repository owner reported on 2026-10-05 that GitHub account-level automatic Copilot code review was disabled. Repository metadata does not expose that user-level toggle, so this is recorded as owner-reported rather than independently verified.
+
 
 ## What this project is
 
@@ -314,4 +330,4 @@ WB-1 acceptance remains **PENDING** until the exact PR head completes the full p
 
 ## Latest push intent
 
-Implement WB-1 as the relational consumer of the already accepted WB-CORPUS-001 source foundation. The change adds a selected CanonSystem without using its book count as the source-coverage denominator, generalizes node/segment integrity for cross-reference phrase/clause spans, partitions the accepted whole-source artifacts only for bounded execution, imports every configured book transactionally into PostgreSQL Authoring, and reconciles provider/source counts back to the independent reference inventory and source-coverage manifest. The implementation remains unaccepted until the exact PR head completes the full real-corpus relational workflow; any observed mismatch must be repaired or retained as an explicit bounded exception before `CORE-FZ-WB-002` can pass.
+Synchronize WB-1 with the repository's ChatGPT-only AI execution policy and harden the already-green whole-corpus relational candidate before acceptance. The first WB-1 exact-head execution showed 39/39 configured books, 23,213 selected/reference atoms, 306,785 OSHB words, 426,590 BHSA words, 287,216 grouped candidate mappings, 1,138 explicit unresolved cross-framework references, zero importer/parity failures, zero OSHB missing-surface records and zero real-corpus Serving rows. This revision additionally rejects any orthographic mapping candidate that targets either a reviewed annotation-only or an unclassified empty-source BHSA node, strengthens independent report verification, and adds a stable-UUID regression proving WB-1 preserves accepted WB-0 identities. CORE-FZ-WB-002 remains pending until this synchronized candidate reruns exact-head validation and the evidence is formally closed out.
