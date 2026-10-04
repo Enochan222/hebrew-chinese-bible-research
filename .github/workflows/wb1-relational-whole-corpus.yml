@@ -73,6 +73,8 @@ jobs:
             scripts/corpora/partition_wb_corpus_for_relational.py \
             scripts/corpora/load_wb1_postgres.py \
             scripts/corpora/verify_wb1_report.py
+      - name: Run corpus/WB-1 unit regressions
+        run: python -m unittest discover -s scripts/corpora/tests -p 'test_*.py' -v
       - name: Bootstrap clean PostgreSQL 17
         run: |
           psql --version
