@@ -1,8 +1,8 @@
 # Hebrew-Chinese Bible Research Project Charter
 
 Status: **CANONICAL PRODUCT INTENT AND REQUIREMENTS**
-Version: 1.0
-Date: 2026-10-03
+Version: 1.1
+Date: 2026-10-04
 
 ## 0. Authority and reading order
 
@@ -54,9 +54,21 @@ The long-term product is therefore both:
 
 ## 1.1 Canonical coverage target
 
-The long-term canonical scope is the **whole Hebrew Bible**, not a permanently selected set of demonstration passages.
+The canonical product baseline is the **whole Hebrew Bible**, not a permanently selected set of demonstration passages and not an academic dossier for a handful of verses.
 
-Development may use pilot books/passages, fixtures and staged corpus coverage, but staged implementation must not be mistaken for the final scholarly scope.
+The base product must be useful before Research Pro enrichment is complete. Whole-Bible passage navigation, pinned Hebrew text, baseline linguistic data, translation-witness comparison where licensed/available, and release-pinned serving form the product foundation. Research Pro adds scholarly depth on top of the same passage/reference/release identities; it does not define whether a passage exists in the product.
+
+Development may use pilot books/passages, fixtures and staged corpus coverage, but those are verification instruments only. In particular, passages such as 1 Samuel 16:7 or Psalm 3:1 are acceptance vectors for difficult segmentation/reference cases and must never become the implied product scope.
+
+Implementation therefore follows a coverage-first rule:
+
+1. prove the import/model on adversarial passage fixtures;
+2. run the same deterministic importer across the complete pinned Hebrew source corpus;
+3. verify whole-corpus coverage and relational integrity;
+4. expose release-pinned whole-Bible passage serving/navigation;
+5. progressively enrich passages with translation comparison, syntax, project translation and scholarly Research Pro material.
+
+Academic enrichment may legitimately be uneven during development. Missing scholarly enrichment must be labelled as such; it must not block baseline whole-Bible coverage or be filled from model memory.
 
 Where the project publishes its own Chinese rendering, that rendering is a reviewed, versioned scholarly product object linked to its translation decision and evidence. It is distinct from both existing Chinese translation witnesses and a user's private draft.
 
