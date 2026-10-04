@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.7**
+State Revision: **2026-10-04.8**
 
 ## Mandatory governance rule
 
@@ -213,4 +213,4 @@ See `architecture/corpus-source-integration.md` and `contracts/v1.1/corpus-sourc
 
 ## Latest push intent
 
-This revision treats the successful real-corpus smoke as evidence rather than merely a green check. The smoke showed 25 OSHB and 34 BHSA word records for 1 Samuel 16:7, proving that a 1:1 provider-word crosswalk is structurally wrong for the very passage used by Database Spike 001. The candidate crosswalk is therefore upgraded to conservative contiguous many-to-many span alignment: it requires the same normalized verse and identical concatenated Hebrew-letter consonantal streams, then emits the smallest prefix-compatible source/target span groups. Any textual divergence remains `NEEDS_REVIEW`. The smoke is tightened to require at least one real many-to-many candidate and zero unresolved references for this fixture before the integration is considered complete.
+This revision keeps the many-to-many crosswalk fail-closed while adding audit diagnostics needed to distinguish a genuine OSHB/BHSA consonantal-stream difference from an alignment-algorithm defect. Unresolved references now record and log only non-textual diagnostics: reason code, provider word counts, consonantal stream lengths, SHA-256 hashes, and first differing character index. Full verse text is not dumped into CI logs. The real corpus smoke remains intentionally failing until the cause is classified and repaired or explicitly documented as a textual-version boundary.

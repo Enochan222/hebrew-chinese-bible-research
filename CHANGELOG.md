@@ -110,6 +110,20 @@ Repair/extension:
 - fail closed to `NEEDS_REVIEW` for textual stream mismatch, empty signatures, exhaustion, or non-prefix divergence;
 - tighten the 1 Samuel 16:7 smoke so it must produce at least one actual many-to-many candidate and no unresolved reference.
 
+#### Fourth smoke diagnostic hardening
+
+The stricter many-to-many smoke still produced one unresolved reference and no candidate spans. The existing job output did not expose the unresolved reason, so changing the mapping algorithm again would be guesswork.
+
+Added permanent fail-closed diagnostics to unresolved crosswalk records and CI output:
+
+- machine reason code;
+- OSHB/BHSA word counts;
+- consonantal stream lengths;
+- SHA-256 of each consonantal stream;
+- first differing character index.
+
+The diagnostic deliberately does not print the verse text. The next smoke run is used to classify the failure before any further mapping change.
+
 Before creating the repository commit:
 
 - current upstream repository heads and frozen BHSA/bridging 2021 directories were inspected;

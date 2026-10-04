@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import unicodedata
 from collections import defaultdict
@@ -86,6 +87,21 @@ def align_contiguous_spans(o_rows: list[dict], b_rows: list[dict]) -> tuple[list
         return None, "UNCONSUMED_PROVIDER_ROWS"
     return groups, None
 
+def stream_diagnostics(o_rows: list[dict], b_rows: list[dict]) -> dict:
+    os = "".join(oshb_signature(r) for r in o_rows)
+    bs = "".join(bhsa_signature(r) for r in b_rows)
+    limit = min(len(os), len(bs))
+    first_difference = next((i for i in range(limit) if os[i] != bs[i]), None)
+    if first_difference is None and len(os) != len(bs):
+        first_difference = limit
+    return {
+        "oshbConsonantalLength": len(os),
+        "bhsaConsonantalLength": len(bs),
+        "oshbStreamSha256": hashlib.sha256(os.encode("utf-8")).hexdigest(),
+        "bhsaStreamSha256": hashlib.sha256(bs.encode("utf-8")).hexdigest(),
+        "firstDifferenceIndex": first_difference,
+    }
+
 def unresolved_record(ref: tuple[str, int, int], o_rows: list[dict], b_rows: list[dict], reason: str) -> dict:
     return {
         "recordType": "UNRESOLVED_REFERENCE",
@@ -96,6 +112,7 @@ def unresolved_record(ref: tuple[str, int, int], o_rows: list[dict], b_rows: lis
         "signatureAlgorithm": "HEBREW_LETTERS_ONLY_NFD_V1",
         "reviewStatus": "NEEDS_REVIEW",
         "canonical": False,
+        **stream_diagnostics(o_rows, b_rows),
     }
 
 def mapping_record(ref: tuple[str, int, int], o_group: list[dict], b_group: list[dict], signature: str) -> dict:
@@ -144,7 +161,15 @@ def main() -> int:
             groups, reason = align_contiguous_spans(o_rows, b_rows)
 
             if groups is None:
-                out.write(json.dumps(unresolved_record(ref, o_rows, b_rows, reason or "UNKNOWN_ALIGNMENT_FAILURE"), ensure_ascii=False, sort_keys=True) + "\n")
+                record = unresolved_record(ref, o_rows, b_rows, reason or "UNKNOWN_ALIGNMENT_FAILURE")
+                out.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
+                print(
+                    f"unresolved {ref[0]}.{ref[1]}.{ref[2]}: {record['reason']}; "
+                    f"oshb_words={len(o_rows)} bhsa_words={len(b_rows)} "
+                    f"oshb_letters={record['oshbConsonantalLength']} bhsa_letters={record['bhsaConsonantalLength']} "
+                    f"first_difference={record['firstDifferenceIndex']} "
+                    f"oshb_sha256={record['oshbStreamSha256']} bhsa_sha256={record['bhsaStreamSha256']}"
+                )
                 unresolved_count += 1
                 continue
 
