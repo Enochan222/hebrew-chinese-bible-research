@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.2**
+State Revision: **2026-10-04.12**
 
 ## Mandatory governance rule
 
@@ -192,4 +192,4 @@ Repository visibility remains public as observed state; this audit does not chan
 
 ## Latest push intent
 
-This revision refreshes repository-governance evidence after live re-verification of the active `Protect main` ruleset, latest required checks, repository merge settings, and recent protected-main PR history. It changes governance evidence only and does not change product architecture, scholarly method, repository visibility, approval-count policy, or merge semantics.
+Database Spike 001 has reached a clean PostgreSQL 17 executable vertical-slice result on PR #9: Database Spike run `37195991129`, Contract validation `37195991128`, and Project governance `37195991176` all PASS. The result includes blank migration, controlled fixtures, adversarial relational/RLS/rights/publication tests, Serving-with-Authoring-offline public reads, and query-plan execution. This closes only the local PostgreSQL/Supabase-compatible implementation slice. No remote Supabase project has been designated or modified, and remote Data API/Auth/advisor/production-scale evidence remains pending.

@@ -2053,7 +2053,7 @@ Fields:
 
 - `research_release_id uuid PK`
 - `release_label text unique`
-- `source_build_id uuid FK`
+- `source_build_id uuid` (FK when Authoring and Serving share one database; copied immutable provenance identity when Serving is physically separate)
 - `published_at timestamptz`
 - `manifest_schema_version text`
 - `manifest_hash text`
@@ -2065,6 +2065,16 @@ Fields:
 
 After creation/publication, release payload and manifest are immutable.
 
+Physical Serving independence is a required deployment invariant. When Authoring and Serving are separate databases:
+
+- Serving owns a publication-time copy/projection of release-visible research-object identity;
+- Serving owns the reference-span projection needed by public passage objects;
+- release components and published evidence point to that Serving registry, not across a database boundary to Authoring;
+- `source_build_id` remains provenance identity validated by the Publication Worker before copy, not a cross-database FK;
+- deterministic public corpus queries execute over release-pinned Serving/compiled-search projections and must not query Authoring tables;
+- publication-time hash construction may read Authoring inside the Publication Control plane, but public runtime hash/query functions must not.
+
+
 Lifecycle availability is not stored as a mutable status on this row.
 
 ## 29.3 `research_release_components`
@@ -2073,7 +2083,7 @@ Fields:
 
 - `research_release_id uuid FK`
 - `component_kind text`
-- `component_research_object_id uuid FK -> research_objects`
+- `component_research_object_id uuid FK -> serving/publication research-object registry`
 - `component_version text`
 - `content_hash text`
 - `component_order integer NOT NULL`

@@ -194,6 +194,8 @@ Publication validation must check at least:
 
 When Authoring and Public Serving are physically separate databases, the product does **not** claim one distributed PostgreSQL ACID transaction across both systems.
 
+The same boundary also forbids public runtime referential dependence on Authoring. Publication therefore materializes a **Serving-owned projection registry** containing the release-visible research-object identities, reference spans, compiled corpus/search rows, and other public dependencies required by that ResearchRelease. Public APIs and deterministic corpus queries resolve only against Serving-owned data. Cross-database provenance is checked before publication and copied as immutable identity/hash metadata; it is not implemented as a runtime FK to the Authoring database.
+
 Required publication sequence:
 
 1. compile an immutable candidate package in Authoring;

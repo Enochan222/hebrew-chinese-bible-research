@@ -4,6 +4,85 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+
+## 2026-10-04 — Database Spike 001 executable PostgreSQL vertical slice
+
+### Push intent
+
+Move the project from contract-only database design into a reproducible PostgreSQL implementation spike that rejects invalid scholarly states at relational, rights, RLS, publication, and release-serving trust boundaries.
+
+### Why
+
+CORE_SPIKE_V1_1 permits Database Spike 001, but earlier evidence was synthetic contract validation. The next gate requires real DDL, FK/check/trigger behavior, RLS/grants, deterministic corpus execution, publication failure injection, and independent review against the four-plane architecture.
+
+No remote Supabase project is modified. The connected account exposes only one inactive generically named project, while the repository contains no project ref proving that it is this product's target.
+
+### What changed
+
+- added `database/migrations/001_database_spike_001.sql` and a clean PostgreSQL 17 CI harness;
+- implemented Authoring, Serving, Workspace, and Publication Control schemas;
+- enforced framework/layer and text-stream integrity, semantic-set/construction/rule/translation dependencies, ResearchIssue/ResearchPosition versioning, rights snapshots, public evidence, release/channel objects, and Workspace RLS;
+- materialized Serving-owned research-object, reference, corpus, semantic-set, release, and evidence projections so public runtime does not depend on Authoring;
+- added PostgreSQL catalog assertions rejecting any Serving FK/function dependency on Authoring;
+- added exact rights-subject binding for public excerpts;
+- added shared-PK subtype/object-type enforcement;
+- added composite Workspace project-owner FKs so a user cannot attach owned child rows to another user's project;
+- added typed CitationLocator validation compatible with the v1.1 locator contract;
+- added release/component projection immutability after PUBLISHED;
+- made first publication append the PUBLISHED event and move the channel pointer in the same transaction;
+- changed corpus pagination to use a publication-projected canonical reference sort key rather than UUID order;
+- added an Authoring-offline test that temporarily renames the Authoring schema and requires anonymous current-release/corpus-query reads to continue from Serving projections;
+- kept public runtime AI/BYOK architecture untouched and introduced no model-provider credential.
+
+### Executable findings and corrections
+
+1. Run `37142212945`: migration PASS; seed exposed stable/current-version insertion ordering. Stable rows now insert with null current pointer, version rows follow, then the pointer is set.
+2. Run `37142329963`: migration/seed PASS; test used unsupported `min(uuid)`. Assertion changed to deterministic ordered selection.
+3. Run `37142397559`: suite reached RLS; disposable test helper lacked role permission. Only the temporary helper grant was added.
+4. Run `37142489342`: disposable PL/pgSQL delimiter malformed. Named dollar delimiters adopted.
+5. Run `37142607945`: first full harness PASS, but independent architecture review rejected the green result because Serving still depended on Authoring. This was treated as a failed architecture gate, not accepted because CI was green.
+6. Run `37143183450`: first Serving-isolation migration exposed delimiter serialization in new Serving rights validators. Named delimiters fixed it.
+7. Run `37143277018`: restricted SECURITY DEFINER search path could not resolve hashing; hashing moved to PostgreSQL 17 core SHA-256 without widening search_path.
+8. Run `37143374434`: final Authoring-RLS anonymous block had the same delimiter defect. Independent review also found that public evidence could borrow an ALLOW snapshot for another subject; the trigger now requires exact subject identity.
+9. Run `37143497384`: Serving-isolation migration and seed PASS; wrong-subject test block delimiter failed and was corrected.
+10. Run `37143591152`: no-Serving-FK-to-Authoring catalog assertion PASS; function scan accidentally called `pg_get_functiondef()` on aggregate rows. The scan now targets ordinary functions only.
+11. Run `37143685280`: pre-final-review Database Spike harness PASS, with required Contract validation `37143685279` and Project governance `37143685263` also PASS.
+12. Run `37192756787`: later replacement-token editing corrupted SQL dollar/regex text. This was classified as serialization corruption rather than a domain-rule failure.
+13. Run `37192890177`: migration failed because a duplicate/partial 26K SQL tail had been appended after a complete first `COMMIT;`. Structural comparison proved all 58 tail CREATE objects already existed before the commit; the tail was removed and CI now statically requires exactly one `COMMIT;` with no trailing SQL.
+14. Run `37195521246`: migration/seed PASS; the cross-issue ResearchPositionVersion negative test was rejected by shared-PK registration before reaching the intended composite FK. The test now registers the synthetic version object inside the expected-failure subtransaction.
+15. Run `37195662708`: migration/seed PASS; the editorial-emendation negative test was likewise rejected by missing shared-PK registration before reaching the intended adopted-reading CHECK. The test now registers the synthetic TranslationSourceBasis first so the basis-kind CHECK is the required rejecting boundary.
+16. Run `37195807481`: migration/seed PASS; the CitationLocator negative case was rejected by the already-PUBLISHED release-1 evidence immutability guard before the locator CHECK. Review showed the same isolation risk in wrong-operation rights, wrong-subject rights, and immutable-hash cases. All four now use a candidate evidence packet on unpublished release 2 so each test must reach its intended invariant.
+17. Run `37195991129`: full Database Spike 001 PASS from a blank PostgreSQL 17 database, including static transaction-boundary guard, migration, seed, adversarial relational/RLS/rights/publication suite, Authoring-offline anonymous Serving reads, and query-plan probe. Required Contract validation `37195991128` and Project governance `37195991176` also PASS on the same head.
+
+### Independent critical review
+
+A green SQL harness is not sufficient by itself. Independent review identified and corrected load-bearing gaps that ordinary happy-path execution did not prove:
+
+- Workspace child ownership is tied relationally to project ownership;
+- shared-PK subtype rows enforce expected research-object type;
+- CitationLocator is locator-specific rather than generic JSON;
+- PUBLISHED releases cannot accept late payload/projection inserts;
+- initial PUBLISHED event and channel-pointer move are one publication transaction;
+- pagination uses release-pinned canonical reference order;
+- public Serving has no FK/function dependency on Authoring;
+- anonymous serving reads are tested while Authoring is unavailable by schema name;
+- CHANGELOG corruption/duplication from automated replacement-token editing is removed rather than retained as false history.
+
+### Intended effect
+
+A green final head means the PostgreSQL implementation rejects the tested invalid states and the public Serving/Workspace runtime can be separated from Authoring at the relational/function boundary. It still does not prove remote Supabase deployment, Data API exposure, production corpus scale, the full CorpusQuery compiler, real OSHB/MACULA/BHSA ingestion, or every CORE_FREEZE gate.
+
+### Validation
+
+The reviewed PR head passed all three workflows:
+
+- `Database Spike 001 / postgres-spike`: run `37195991129` PASS;
+- `Contract validation / contracts`: run `37195991128` PASS;
+- `Project governance / state-and-changelog`: run `37195991176` PASS.
+
+Because this evidence summary itself creates a newer head, the latest exact head must pass the same three workflows again before merge. The merge gate is the current GitHub check state, not a permanently hard-coded “final run” identifier.
+
+
 ## 2026-10-04 — Re-verify live repository protection and PR enforcement
 
 ### Push intent
