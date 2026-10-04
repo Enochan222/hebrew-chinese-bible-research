@@ -39,6 +39,8 @@ WB-0 becomes executable evidence that the existing provider-scoped ontology can 
 
 ### Validation
 
+The first PR execution reached the real PostgreSQL loader successfully and produced the pinned evidence: 25 OSHB words, 34 BHSA words, 32 text-bearing BHSA words, 2 annotation-only nodes, 22 phrases, 7 clauses, 90 graph-membership edges, 35 bridging feature values, 25 mapping groups, 7 non-1:1 groups, one BODY_PART target and zero unresolved references. Its SQL assertion run then exposed a test-boundary defect: the deliberately invalid wrong-layer member was correctly rejected by the mapping span/layer trigger before the expected composite FK fired. The test was narrowed to accept only those two intended rejection boundaries, and the exact real export hashes/counts were promoted into CI regression evidence.
+
 Merge is allowed only when Project governance, Contract validation, Corpus source smoke, the original synthetic Database Spike job, and the new `wb0-real-corpus-canary` PostgreSQL job all pass on the exact final PR head. WB-0 success does not satisfy the whole-Bible CORE-FZ-WB-002 gate.
 
 ## 2026-10-05 — Harden whole-Bible reference and corpus-adapter boundaries
