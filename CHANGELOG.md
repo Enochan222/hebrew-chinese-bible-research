@@ -43,7 +43,9 @@ The existing ReferenceSpan/TextSegment/AnalysisNode/AnnotationLayer ontology, gr
 
 - corpus unit tests cover explicit export scope, whole-source OSHB export, source-derived inventory, dynamic provider division counts, annotation-only preservation and silent-reference-loss rejection;
 - the WB-CORPUS-001 manifest schema is registered in normal contract validation;
-- the dedicated whole-Bible workflow performs the real exact-pinned full-source build and validates the generated coverage manifest;
+- the first exact-head full-source run completed the corpus build and generated `wb-corpus-8d40ce30066d83c2922a03b7`: 23,213 expected reference spans, 306,785 OSHB words, 426,590 BHSA nodes, 287,216 candidate mappings, 1,138 explicit unresolved references, zero silent reference loss, `gatePass=true`, status `COMPLETE_WITH_EXPLICIT_EXCEPTIONS`;
+- that first run then exposed a CI dependency defect rather than a corpus defect: the generated-manifest validation step imported `jsonschema` although the workflow had installed only `requirements-corpus.txt`;
+- the workflow now installs the repository-pinned contract validators through `requirements-contracts.txt` as well as corpus tooling, and it also runs on relevant pushes to `main` so the same full-source gate is repeated post-merge;
 - WB-0's existing database workflow remains a regression gate and must continue to pass with the unchanged canary export shape;
 - Project governance and Contract validation remain protected-merge requirements.
 

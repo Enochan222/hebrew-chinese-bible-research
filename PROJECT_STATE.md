@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-05.8**
+State Revision: **2026-10-05.9**
 
 ## Mandatory governance rule
 
@@ -275,7 +275,7 @@ This revision introduces the whole-corpus source/build boundary that WB-1 must c
 - provider book-division counts are diagnostic provenance only, not a fixed 39/24 completeness criterion;
 - no PostgreSQL, Serving projection or ResearchRelease is written by WB-CORPUS-001.
 
-The dedicated whole-Bible workflow is the executable acceptance authority for this source foundation. WB-0's exact 1 Samuel 16:7 export shape/hashes remain regression evidence; the new BHSA `--all` mode does not change the canary record shape.
+The dedicated whole-Bible workflow is the executable acceptance authority for this source foundation. Its first exact-head execution completed the full corpus build successfully and observed 23,213 selected-reference spans, 306,785 OSHB word records, 426,590 BHSA word nodes, 287,216 candidate span mappings, 1,138 explicitly unresolved references and zero silent reference loss. The generated manifest returned `gatePass=true` and `COMPLETE_WITH_EXPLICIT_EXCEPTIONS`. That run then failed only in the separate schema-validation step because the workflow had installed corpus dependencies but not the repository's pinned `jsonschema` validator. The workflow now installs both `requirements-corpus.txt` and `requirements-contracts.txt` and also runs on relevant pushes to `main`, so validation is repeated after merge. WB-0's exact 1 Samuel 16:7 export shape/hashes remain regression evidence; the new BHSA `--all` mode does not change the canary record shape.
 
 ## Current implementation priority
 
@@ -288,4 +288,4 @@ The dedicated whole-Bible workflow is the executable acceptance authority for th
 
 ## Latest push intent
 
-Add WB-CORPUS-001 between the accepted WB-0 canary and WB-1 whole-corpus relational ingestion. The new source foundation builds complete pinned OSHB/BHSA exports, derives an independent OSHB_OSIS reference inventory directly from the source XML, reconciles both providers through the existing fail-closed candidate crosswalk, and emits a deterministic machine-auditable coverage manifest. Coverage is judged by the selected reference inventory rather than provider book-count conventions; provider/mapping exceptions stay explicit and silent reference loss fails the build. This revision deliberately stops before PostgreSQL so the next PR can generalize the already-proven WB-0 importer against a stable whole-corpus input rather than mixing source coverage and relational loading in one change.
+Repair the WB-CORPUS-001 CI validation dependency after the first full-source execution proved the corpus build itself succeeds. That run produced 23,213 expected reference spans, 306,785 OSHB words, 426,590 BHSA nodes, 287,216 candidate mappings, 1,138 explicit unresolved references, zero silent reference loss and a `gatePass=true` manifest, then failed only because the inline generated-manifest validator imported `jsonschema` without installing the pinned contract requirements. The workflow now installs both corpus and contract-validator requirements and gains a relevant-path `main` push trigger. No corpus semantics, canary output shape, PostgreSQL schema or publication boundary is changed by this correction.
