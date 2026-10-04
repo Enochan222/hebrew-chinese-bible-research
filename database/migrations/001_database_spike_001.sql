@@ -315,7 +315,7 @@ CREATE TABLE authoring.cross_annotation_mapping_to_members (
 CREATE OR REPLACE FUNCTION authoring.validate_cross_annotation_mapping_member_span()
 RETURNS trigger
 LANGUAGE plpgsql
-AS $
+AS $wb0_mapping_member_span$
 DECLARE
   group_span uuid;
   node_span uuid;
@@ -345,7 +345,7 @@ BEGIN
   END IF;
   RETURN NEW;
 END
-$;
+$wb0_mapping_member_span$;
 
 CREATE TRIGGER cross_annotation_mapping_from_member_span
 BEFORE INSERT OR UPDATE ON authoring.cross_annotation_mapping_from_members
