@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.3**
+State Revision: **2026-10-04.4**
 
 ## Mandatory governance rule
 
@@ -196,6 +196,7 @@ Current bounded state:
 - the UI visibly labels all data as fixture/non-production and does not claim database-backed passage content;
 - application/features depend on domain ports/services rather than fixture adapter implementations;
 - no PostgreSQL/Supabase/ORM/auth/cloud SDK, migration, publication worker, CorpusQuery, translation workbench or annotation storage is introduced;
+- scoped npm lint uses a deterministic source/import/SQL/dependency boundary scanner rather than a framework lint preset, minimizing transitive tooling surface;
 - the rich PassageExperience projection remains deliberately unfrozen;
 - DB-0 remains responsible for real relational constraints, RLS/grants, ReferenceSystem resolution against persisted data, ResearchRelease/channel persistence and publication visibility atomicity.
 
@@ -211,4 +212,4 @@ This is fixture-shell implementation evidence only. It does not satisfy real-dat
 
 ## Latest push intent
 
-This revision adds P1-VS-001A–F, the fixture-backed, release-pinned Passage serving shell. The implementation is intentionally isolated behind server-side fixture adapters and canonical v1.1 runtime validation, with no database, cloud, auth, ORM or later-phase scholarly functionality. A feature-branch validation workflow generates the npm lockfile and then runs the required contract, type, lint, unit, integration, E2E, visual-state and production-build checks before any pull request is opened.
+This revision continues P1-VS-001A–F on the feature branch by narrowing the fixture-shell lint dependency surface after the first branch-only lockfile-generation run. The scoped lint gate is the deterministic import/SQL/forbidden-SDK scanner, while strict TypeScript remains a separate acceptance gate. No product semantics, database choices, cloud choices or canonical contracts are changed. A regenerated tracked npm lockfile is still required before the full acceptance suite and pull request.

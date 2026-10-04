@@ -25,6 +25,7 @@ The Core contract gates permit implementation work, while DB-0 and real publicat
 - added visible fixture/non-production labelling, ResearchRelease and ReferenceSpan display, and explicit later-phase placeholders;
 - added distinct invalid-reference, missing-reference-system, invalid-release, missing-release, invalid-mode, contract-violation and temporary-unavailability states;
 - added boundary checks prohibiting app/feature imports from adapters, DB/ORM/auth/cloud SDK dependencies, and SQL statement text in the scoped web implementation;
+- after the first branch-only lockfile generation, narrowed lint tooling to that deterministic boundary scanner rather than carrying an unnecessary framework lint preset and its transitive dependency surface;
 - added unit, HTTP integration and Playwright E2E/visual-state tests;
 - added a feature-branch-only validation workflow to generate the npm lockfile artifact and, once tracked, run full acceptance;
 - did not add database migrations, Supabase/PostgreSQL integration, ORM, auth, cloud credentials, publication worker, CorpusQuery, translation workbench, annotation storage, rich PassageExperience DTO or A1–A4 semantic changes.
@@ -35,7 +36,7 @@ Provide a verifiable release/reference-aware serving shell whose fixture adapter
 
 ### Validation
 
-Initial feature-branch push stages the validation workflow and intentionally has no tracked `package-lock.json` yet. The workflow must generate the lockfile artifact first. No pull request may be opened until a follow-up branch commit tracks that lockfile and all required checks pass: existing Python contract validation, Core/Research Pro OpenAPI validation, `npm ci`, typecheck, lint/boundary scan, unit tests, integration tests, Playwright E2E/visual capture and production build. Visual QA must then be inspected for ready, invalid-mode, missing-reference and missing-release states.
+Feature-branch workflow run `37180410353` succeeded and produced the initial npm lockfile artifact. Dependency review then found that the framework lint preset introduced unnecessary transitive tooling for this narrowly scoped shell. This follow-up removes that preset from the dependency graph and regenerates the lockfile while retaining strict TypeScript as a separate gate and the deterministic source/import/SQL/SDK boundary scanner as the scoped lint gate. No pull request may be opened until the regenerated lockfile is tracked and all required checks pass: existing Python contract validation, Core/Research Pro OpenAPI validation, `npm ci`, typecheck, lint/boundary scan, unit tests, integration tests, Playwright E2E/visual capture and production build. Visual QA must then be inspected for ready, invalid-mode, missing-reference and missing-release states.
 
 ## 2026-10-04 — Re-verify live repository protection and PR enforcement
 
