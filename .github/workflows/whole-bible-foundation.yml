@@ -1,0 +1,94 @@
+name: Whole-Bible corpus foundation
+
+on:
+  pull_request:
+    paths:
+      - 'PROJECT_CHARTER.md'
+      - 'architecture/whole-bible-base-product.md'
+      - 'architecture/site-build-staging-plan.md'
+      - 'architecture/manifest.json'
+      - 'contracts/v1.1/corpus-source-registry.json'
+      - 'scripts/corpora/build_oshb_coverage_index.py'
+      - 'database/importers/**'
+      - 'database/spikes/002/**'
+      - 'database/migrations/001_database_spike_001.sql'
+      - '.github/workflows/whole-bible-foundation.yml'
+      - 'PROJECT_STATE.md'
+      - 'CHANGELOG.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  whole-bible-oshb:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: hcb_whole_bible
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d hcb_whole_bible"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: hcb_whole_bible
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - name: Fetch exact pinned OSHB source
+        run: python scripts/corpora/fetch_sources.py --source OSHB_MORPHHB
+      - name: Build whole-Bible source coverage index
+        run: python scripts/corpora/build_oshb_coverage_index.py
+      - name: Bootstrap PostgreSQL compatibility roles
+        run: psql -v ON_ERROR_STOP=1 -f database/spikes/001/00_bootstrap.sql
+      - name: Apply canonical relational migration
+        run: psql -v ON_ERROR_STOP=1 -f database/migrations/001_database_spike_001.sql
+      - name: Build deterministic whole-Bible OSHB loadset
+        run: python database/importers/build_oshb_base_loadset.py
+      - name: Import complete pinned OSHB baseline
+        run: psql -v ON_ERROR_STOP=1 -f .local/db-import/oshb/load.sql
+      - name: Run whole-Bible relational checks
+        run: psql -v ON_ERROR_STOP=1 -f database/spikes/002/02_tests.sql
+      - name: Reconcile source/import/database counts
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+          from pathlib import Path
+
+          coverage = json.loads(Path(".local/exports/oshb-whole-bible-coverage.json").read_text(encoding="utf-8"))
+          imported = json.loads(Path(".local/db-import/oshb/import-manifest.json").read_text(encoding="utf-8"))
+
+          def q(sql):
+              return int(subprocess.check_output(["psql","-Atqc",sql], env=os.environ.copy(), text=True).strip())
+
+          observed = {
+              "books": q("select count(*) from authoring.biblical_books"),
+              "verses": q("select count(*) from authoring.reference_labels"),
+              "words": q("select count(*) from authoring.text_segments"),
+              "nodes": q("select count(*) from authoring.analysis_nodes"),
+              "memberships": q("select count(*) from authoring.analysis_node_segments"),
+          }
+          expected = coverage["totals"]
+          rows = imported["rowCounts"]
+          assert observed["books"] == expected["books"] == rows["biblical_books"], (observed, expected, rows)
+          assert observed["verses"] == expected["verses"] == rows["reference_labels"], (observed, expected, rows)
+          assert observed["words"] == expected["words"] == rows["text_segments"], (observed, expected, rows)
+          assert observed["nodes"] == rows["analysis_nodes"] == observed["words"], (observed, rows)
+          assert observed["memberships"] == rows["analysis_node_segments"] == observed["words"], (observed, rows)
+          print(json.dumps({"coverage": expected, "database": observed}, sort_keys=True))
+          PY
