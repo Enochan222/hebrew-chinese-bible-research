@@ -5,6 +5,36 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
 
+## 2026-10-04 — Make whole-Bible coverage the base product and add full OSHB relational import
+
+### Push intent
+
+Correct the implementation emphasis after product clarification: the project is a whole-Hebrew-Bible reader/research platform first, with academic Research Pro enrichment layered on top. Passage fixtures remain adversarial verification vectors rather than product scope.
+
+### Why
+
+The charter already named the whole Hebrew Bible as the long-term scope, but the staging plan and executable evidence could still be read as though a handful of deeply analysed passages were the primary build target and real corpus ingestion belonged only to a later advanced-search phase. That risks over-investing in Research Pro architecture while the base reader still lacks a product-scale corpus path.
+
+### What changed
+
+- strengthened the canonical charter so whole-Bible base coverage is an implementation baseline and Research Pro can be progressively enriched without blocking passage existence;
+- added `architecture/whole-bible-base-product.md` as active authority separating base reader, deterministic-analysis overlay and Research Pro overlay;
+- moved baseline whole-corpus ingestion into Phase 1 while retaining advanced multi-framework CorpusQuery work in Phase 3;
+- added a deterministic OSHB whole-Bible coverage index that fails on missing/unexpected provider book files, duplicate/non-monotonic references or zero-word verses;
+- added a deterministic PostgreSQL COPY loadset generator for all pinned OSHB books/verses/words using stable UUIDv5 project IDs;
+- import the OSHB baseline into canonical ReferenceSystem, ReferenceAtom/Span/Label, TextualWork/Edition/Expression, TextStream/TextSegment, CorpusRelease, AnnotationLayer and AnalysisNode structures;
+- preserve exact OSHB source Unicode and provider word IDs without promoting provider identity to universal canonical identity;
+- added a PostgreSQL 17 whole-Bible integration harness that reconciles source coverage, import-manifest and database counts and retains 1 Samuel 16:7 as a 25-word canary.
+
+### Intended effect
+
+The repository now has an executable path from the exact pinned OSHB source to product-scale canonical Authoring data for the complete provider corpus. The next implementation dependency becomes Serving publication/navigation and the whole-Bible reader, not another passage-specific architecture exercise.
+
+### Validation
+
+The new PR must pass the existing contract/governance/database/web regressions plus the new `Whole-Bible corpus foundation` workflow from a blank PostgreSQL 17 database. No remote Supabase or Vercel target is modified.
+
+
 ## 2026-10-04 — Harden corpus cache provenance and empty-export failure semantics
 
 ### Push intent
