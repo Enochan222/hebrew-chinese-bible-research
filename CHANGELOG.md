@@ -32,7 +32,7 @@ The repository now has an executable path from the exact pinned OSHB source to p
 
 ### Validation
 
-The first `Whole-Bible corpus foundation` run reached the real pinned OSHB source and correctly failed before database work because `wlc/VerseMap.xml` was initially classified as an unexpected book XML. Upstream inspection showed that this is an auxiliary verse-mapping file, not a biblical book. The validator now permits only that exact known auxiliary XML while retaining hard failure for any other unexpected XML. The corrected PR head must pass the existing contract/governance/database/web regressions plus the whole-Bible workflow from a blank PostgreSQL 17 database. No remote Supabase or Vercel target is modified.
+The first `Whole-Bible corpus foundation` run reached the real pinned OSHB source and correctly failed before database work because `wlc/VerseMap.xml` was initially classified as an unexpected book XML. Upstream inspection showed that this is an auxiliary verse-mapping file, not a biblical book. The validator now permits only that exact known auxiliary XML while retaining hard failure for any other unexpected XML. A second source-level check confirmed the pinned OSHB/MT end reference is `Mal.3.24`, while the source note maps it to `KJV:Mal.4.6`; the end-of-corpus canary therefore uses the source-native ReferenceSystem label instead of importing English versification assumptions. The corrected PR head must pass the existing contract/governance/database/web regressions plus the whole-Bible workflow from a blank PostgreSQL 17 database. No remote Supabase or Vercel target is modified.
 
 
 ## 2026-10-04 — Harden corpus cache provenance and empty-export failure semantics
