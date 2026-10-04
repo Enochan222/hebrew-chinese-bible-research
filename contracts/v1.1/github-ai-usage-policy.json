@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "1.0",
+  "policyKey": "PROJECT_AI_EXECUTION_POLICY",
+  "githubCopilot": {
+    "authorized": false,
+    "automaticCodeReview": false,
+    "prohibitedOperations": [
+      "PULL_REQUEST_CODE_REVIEW",
+      "CODING_AGENT",
+      "AUTOFIX",
+      "CHAT_OR_CODE_GENERATION",
+      "ANY_OPERATION_CONSUMING_COPILOT_QUOTA_OR_PREMIUM_REQUESTS"
+    ]
+  },
+  "aiExecution": {
+    "authorizedProjectAI": "CHATGPT",
+    "scope": "AI-assisted implementation, analysis, code review, repository orchestration, and project work",
+    "exceptions": "REPOSITORY_OWNER_EXPLICIT_POLICY_CHANGE_REQUIRED"
+  },
+  "nonAIInfrastructure": {
+    "githubActionsAllowed": true,
+    "deterministicCIAllowed": true,
+    "humanContributorsAllowed": true
+  }
+}
