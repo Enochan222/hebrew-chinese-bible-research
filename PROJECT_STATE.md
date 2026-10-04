@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.2**
+State Revision: **2026-10-04.3**
 
 ## Mandatory governance rule
 
@@ -182,6 +182,25 @@ Repository visibility remains public as observed state; this audit does not chan
 - final entitlement/pricing model;
 - detailed visual system within scholarly UX constraints.
 
+## Phase 1 fixture serving-shell implementation state
+
+P1-VS-001A–F introduces the first executable public-serving shell under `apps/web` as a deliberately fixture-backed implementation boundary.
+
+Current bounded state:
+
+- Next.js App Router + strict TypeScript is used for the fixture serving shell only; this does not select a cloud provider or database platform;
+- current passage navigation resolves the fixture PRODUCTION ResearchRelease once and redirects to a citation-stable pinned-release route;
+- pinned passage reads never re-resolve the current release;
+- Study and Research mode switching preserves the same ResearchRelease, human reference and ReferenceSystem;
+- the canonical v1.1 release-pointer, passage-core and experience-capabilities fixture chain is runtime-validated before rendering;
+- the UI visibly labels all data as fixture/non-production and does not claim database-backed passage content;
+- application/features depend on domain ports/services rather than fixture adapter implementations;
+- no PostgreSQL/Supabase/ORM/auth/cloud SDK, migration, publication worker, CorpusQuery, translation workbench or annotation storage is introduced;
+- the rich PassageExperience projection remains deliberately unfrozen;
+- DB-0 remains responsible for real relational constraints, RLS/grants, ReferenceSystem resolution against persisted data, ResearchRelease/channel persistence and publication visibility atomicity.
+
+This is fixture-shell implementation evidence only. It does not satisfy real-database CORE_FREEZE gates or complete Phase 1.
+
 ## Current implementation priority
 
 1. Preserve contract/governance consistency.
@@ -192,4 +211,4 @@ Repository visibility remains public as observed state; this audit does not chan
 
 ## Latest push intent
 
-This revision refreshes repository-governance evidence after live re-verification of the active `Protect main` ruleset, latest required checks, repository merge settings, and recent protected-main PR history. It changes governance evidence only and does not change product architecture, scholarly method, repository visibility, approval-count policy, or merge semantics.
+This revision adds P1-VS-001A–F, the fixture-backed, release-pinned Passage serving shell. The implementation is intentionally isolated behind server-side fixture adapters and canonical v1.1 runtime validation, with no database, cloud, auth, ORM or later-phase scholarly functionality. A feature-branch validation workflow generates the npm lockfile and then runs the required contract, type, lint, unit, integration, E2E, visual-state and production-build checks before any pull request is opened.

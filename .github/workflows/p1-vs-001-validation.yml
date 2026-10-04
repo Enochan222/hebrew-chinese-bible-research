@@ -1,0 +1,117 @@
+name: P1 fixture shell validation
+
+on:
+  push:
+    branches: [feat/p1-vs-001-fixture-serving-shell]
+  pull_request:
+    paths:
+      - 'apps/web/**'
+      - '.github/workflows/p1-vs-001-validation.yml'
+      - 'PROJECT_STATE.md'
+      - 'CHANGELOG.md'
+
+permissions:
+  contents: read
+
+jobs:
+  lockfile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - name: Generate deterministic npm lockfile
+        working-directory: apps/web
+        run: npm install --package-lock-only --ignore-scripts
+      - name: Verify tracked lockfile is stable
+        working-directory: apps/web
+        shell: bash
+        run: |
+          if git ls-files --error-unmatch package-lock.json >/dev/null 2>&1; then
+            git diff --exit-code -- package-lock.json
+          else
+            echo 'package-lock.json not tracked yet; artifact will be used to add it before PR.'
+          fi
+      - name: Upload generated lockfile
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: p1-package-lock
+          path: apps/web/package-lock.json
+          if-no-files-found: error
+
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Require tracked package lock for full acceptance
+        id: lock
+        shell: bash
+        run: |
+          if [ -f apps/web/package-lock.json ]; then
+            echo 'present=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'present=false' >> "$GITHUB_OUTPUT"
+            echo 'Lockfile is not tracked yet; full acceptance intentionally waits for the lockfile artifact to be committed.'
+          fi
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        if: steps.lock.outputs.present == 'true'
+        with:
+          python-version: '3.12'
+      - name: Install contract validators
+        if: steps.lock.outputs.present == 'true'
+        run: pip install -r requirements-contracts.txt
+      - name: Validate canonical contracts
+        if: steps.lock.outputs.present == 'true'
+        run: python scripts/validate_contracts.py
+      - name: Validate Core OpenAPI
+        if: steps.lock.outputs.present == 'true'
+        run: openapi-spec-validator contracts/v1.1/openapi.yaml
+      - name: Validate Research Pro OpenAPI
+        if: steps.lock.outputs.present == 'true'
+        run: openapi-spec-validator contracts/v1.1/research-pro-openapi.yaml
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        if: steps.lock.outputs.present == 'true'
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - name: Install web dependencies
+        if: steps.lock.outputs.present == 'true'
+        working-directory: apps/web
+        run: npm ci
+      - name: Typecheck
+        if: steps.lock.outputs.present == 'true'
+        working-directory: apps/web
+        run: npm run typecheck
+      - name: Lint and enforce import/runtime boundaries
+        if: steps.lock.outputs.present == 'true'
+        working-directory: apps/web
+        run: npm run lint
+      - name: Unit tests
+        if: steps.lock.outputs.present == 'true'
+        working-directory: apps/web
+        run: npm run test:unit
+      - name: Integration tests
+        if: steps.lock.outputs.present == 'true'
+        working-directory: apps/web
+        run: npm run test:integration
+      - name: Install Playwright Chromium
+        if: steps.lock.outputs.present == 'true'
+        working-directory: apps/web
+        run: npx playwright install --with-deps chromium
+      - name: E2E and visual-state capture
+        if: steps.lock.outputs.present == 'true'
+        working-directory: apps/web
+        run: npm run test:e2e
+      - name: Production build
+        if: steps.lock.outputs.present == 'true'
+        working-directory: apps/web
+        run: npm run build
+      - name: Upload visual QA screenshots
+        if: steps.lock.outputs.present == 'true'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: p1-visual-qa
+          path: apps/web/test-results/visual
+          if-no-files-found: error

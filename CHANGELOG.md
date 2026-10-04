@@ -4,6 +4,39 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+## 2026-10-04 — Add P1 fixture-backed release-pinned Passage serving shell
+
+### Push intent
+
+Implement P1-VS-001A–F as the first executable Product Serving shell without binding the UI to physical database tables or freezing the rich PassageExperience DTO.
+
+### Why
+
+The Core contract gates permit implementation work, while DB-0 and real publication/storage evidence remain pending. Phase 1 explicitly permits fixture releases, requires public fixture responses to be release-pinned, and requires Study/Research to share the same ResearchRelease. A server-side adapter boundary lets the serving shell be exercised now without creating a second data contract or pre-empting database decisions.
+
+### What changed
+
+- added `apps/web` with Next.js App Router and strict TypeScript;
+- added domain ports/services for release resolution, passage reads and experience capabilities;
+- added server-only fixture adapters that read and runtime-validate the existing canonical v1.1 fixture chain;
+- added current and pinned passage APIs plus the current-release endpoint and capability endpoint;
+- added current passage navigation that resolves the current fixture release once and redirects to the pinned release route;
+- added a minimal Study/Research switch that retains the same release/reference/reference-system identity;
+- added visible fixture/non-production labelling, ResearchRelease and ReferenceSpan display, and explicit later-phase placeholders;
+- added distinct invalid-reference, missing-reference-system, invalid-release, missing-release, invalid-mode, contract-violation and temporary-unavailability states;
+- added boundary checks prohibiting app/feature imports from adapters, DB/ORM/auth/cloud SDK dependencies, and SQL statement text in the scoped web implementation;
+- added unit, HTTP integration and Playwright E2E/visual-state tests;
+- added a feature-branch-only validation workflow to generate the npm lockfile artifact and, once tracked, run full acceptance;
+- did not add database migrations, Supabase/PostgreSQL integration, ORM, auth, cloud credentials, publication worker, CorpusQuery, translation workbench, annotation storage, rich PassageExperience DTO or A1–A4 semantic changes.
+
+### Intended effect
+
+Provide a verifiable release/reference-aware serving shell whose fixture adapter can later be replaced by a DB-0-backed Serving adapter without changing page/business logic or treating provider identifiers as canonical reference identity.
+
+### Validation
+
+Initial feature-branch push stages the validation workflow and intentionally has no tracked `package-lock.json` yet. The workflow must generate the lockfile artifact first. No pull request may be opened until a follow-up branch commit tracks that lockfile and all required checks pass: existing Python contract validation, Core/Research Pro OpenAPI validation, `npm ci`, typecheck, lint/boundary scan, unit tests, integration tests, Playwright E2E/visual capture and production build. Visual QA must then be inspected for ready, invalid-mode, missing-reference and missing-release states.
+
 ## 2026-10-04 — Re-verify live repository protection and PR enforcement
 
 ### Push intent
