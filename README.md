@@ -114,6 +114,7 @@ Other active specialised architecture:
 
 - `architecture/integration-boundaries-mcp-api-database.md`
 - `architecture/corpus-source-integration.md`
+- `architecture/whole-bible-base-product.md`
 - `architecture/academic-evidence-policy.md`
 - `architecture/academic-storage-and-rag.md`
 - `architecture/research-pro-scholarly-intelligence.md`
@@ -214,9 +215,11 @@ See:
 
 ## Product build phases
 
-1. Product foundation + release model + serving shell
+Whole-Bible baseline corpus ingestion is part of Product Foundation, not deferred until the advanced corpus-search phase.
+
+1. Whole-Bible product foundation + release model + baseline OSHB import + serving shell/navigation
 2. Passage translations + alignment + workspace
-3. Hebrew corpus + semantic sets + construction/query engine
+3. Advanced multi-framework Hebrew corpus + semantic sets + construction/query engine
 4. Private academic knowledge compiler + Scholarly Intelligence + publication pipeline
 5. Rules + published commentary/literature review + Research serving + optional NL-to-DSL + product operations
 
@@ -246,6 +249,16 @@ python scripts/corpora/build_candidate_crosswalk.py --oshb .local/exports/oshb-1
 ```
 
 Source pins and rights defaults are machine-readable in `contracts/v1.1/corpus-source-registry.json`.
+
+Build the complete pinned OSHB coverage index and relational loadset:
+
+```bash
+python scripts/corpora/fetch_sources.py --source OSHB_MORPHHB
+python scripts/corpora/build_oshb_coverage_index.py
+python database/importers/build_oshb_base_loadset.py
+```
+
+The `Whole-Bible corpus foundation` workflow applies the canonical PostgreSQL migration to a blank PostgreSQL 17 database, imports the complete pinned OSHB baseline and reconciles source/import/database counts. It does not modify a remote Supabase project.
 
 Do not auto-update upstream versions and do not flatten OSHB/BHSA disagreement into a single canonical analysis.
 
