@@ -522,18 +522,19 @@ The project is not:
 
 The project has reached its intended product direction only when a user can do the following without relying on uninspectable model assertions:
 
-1. open a passage and inspect the relevant Hebrew textual and linguistic evidence;
-2. compare permitted Chinese translation witnesses with stable provenance;
-3. click a Hebrew form/construction and search meaningful whole-corpus parallels/counterexamples;
-4. see exactly why corpus examples matched;
-5. retrieve relevant grammar/lexicon/commentary/specialist evidence with source location;
-6. distinguish the scholar's source text from system paraphrase/AI representation;
-7. inspect competing scholarly analyses rather than only one generated answer;
-8. draft a Chinese translation and test it against corpus and scholarship;
-9. see a reviewed translation note/commentary with assertion-level citations;
-10. reproduce/cite the ResearchRelease and versions that supported the conclusion;
-11. continue using the core research system when no model provider/BYOK credential is present;
-12. trust that restricted private source material is not leaked through public serving or model context.
+1. navigate the configured whole Hebrew Bible and open database-backed, release-pinned passages without hand-picked fixture scope;
+2. inspect the relevant Hebrew textual and linguistic evidence for a passage;
+3. compare permitted Chinese translation witnesses with stable provenance;
+4. click a Hebrew form/construction and search meaningful whole-corpus parallels/counterexamples;
+5. see exactly why corpus examples matched;
+6. retrieve relevant grammar/lexicon/commentary/specialist evidence with source location where that academic coverage has been compiled;
+7. distinguish the scholar's source text from system paraphrase/AI representation;
+8. inspect competing scholarly analyses rather than only one generated answer where reviewed academic coverage exists;
+9. draft a Chinese translation and test it against corpus and available scholarship;
+10. see a reviewed translation note/commentary with assertion-level citations where published;
+11. reproduce/cite the ResearchRelease and versions that supported the conclusion;
+12. continue using the whole-Bible core research system when Research Pro, live scholarly providers or model/BYOK access is unavailable;
+13. trust that restricted private source material is not leaked through public serving or model context.
 
 ---
 
