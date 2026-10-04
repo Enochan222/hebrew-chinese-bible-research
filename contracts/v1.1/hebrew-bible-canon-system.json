@@ -1,0 +1,245 @@
+{
+  "schemaVersion": "1.0",
+  "canonSystem": {
+    "code": "TANAKH_OSIS_39",
+    "name": "Tanakh order with split OSIS book identities",
+    "tradition": "JEWISH_TANAKH_ORDER",
+    "description": "Selected project CanonSystem for whole-Bible navigation and relational book order. Composite traditional books retain the split OSIS identities supplied by the pinned corpora."
+  },
+  "books": [
+    {
+      "osisCode": "Gen",
+      "englishName": "Genesis",
+      "bookOrder": 1,
+      "included": true
+    },
+    {
+      "osisCode": "Exod",
+      "englishName": "Exodus",
+      "bookOrder": 2,
+      "included": true
+    },
+    {
+      "osisCode": "Lev",
+      "englishName": "Leviticus",
+      "bookOrder": 3,
+      "included": true
+    },
+    {
+      "osisCode": "Num",
+      "englishName": "Numbers",
+      "bookOrder": 4,
+      "included": true
+    },
+    {
+      "osisCode": "Deut",
+      "englishName": "Deuteronomy",
+      "bookOrder": 5,
+      "included": true
+    },
+    {
+      "osisCode": "Josh",
+      "englishName": "Joshua",
+      "bookOrder": 6,
+      "included": true
+    },
+    {
+      "osisCode": "Judg",
+      "englishName": "Judges",
+      "bookOrder": 7,
+      "included": true
+    },
+    {
+      "osisCode": "1Sam",
+      "englishName": "1 Samuel",
+      "bookOrder": 8,
+      "included": true
+    },
+    {
+      "osisCode": "2Sam",
+      "englishName": "2 Samuel",
+      "bookOrder": 9,
+      "included": true
+    },
+    {
+      "osisCode": "1Kgs",
+      "englishName": "1 Kings",
+      "bookOrder": 10,
+      "included": true
+    },
+    {
+      "osisCode": "2Kgs",
+      "englishName": "2 Kings",
+      "bookOrder": 11,
+      "included": true
+    },
+    {
+      "osisCode": "Isa",
+      "englishName": "Isaiah",
+      "bookOrder": 12,
+      "included": true
+    },
+    {
+      "osisCode": "Jer",
+      "englishName": "Jeremiah",
+      "bookOrder": 13,
+      "included": true
+    },
+    {
+      "osisCode": "Ezek",
+      "englishName": "Ezekiel",
+      "bookOrder": 14,
+      "included": true
+    },
+    {
+      "osisCode": "Hos",
+      "englishName": "Hosea",
+      "bookOrder": 15,
+      "included": true
+    },
+    {
+      "osisCode": "Joel",
+      "englishName": "Joel",
+      "bookOrder": 16,
+      "included": true
+    },
+    {
+      "osisCode": "Amos",
+      "englishName": "Amos",
+      "bookOrder": 17,
+      "included": true
+    },
+    {
+      "osisCode": "Obad",
+      "englishName": "Obadiah",
+      "bookOrder": 18,
+      "included": true
+    },
+    {
+      "osisCode": "Jonah",
+      "englishName": "Jonah",
+      "bookOrder": 19,
+      "included": true
+    },
+    {
+      "osisCode": "Mic",
+      "englishName": "Micah",
+      "bookOrder": 20,
+      "included": true
+    },
+    {
+      "osisCode": "Nah",
+      "englishName": "Nahum",
+      "bookOrder": 21,
+      "included": true
+    },
+    {
+      "osisCode": "Hab",
+      "englishName": "Habakkuk",
+      "bookOrder": 22,
+      "included": true
+    },
+    {
+      "osisCode": "Zeph",
+      "englishName": "Zephaniah",
+      "bookOrder": 23,
+      "included": true
+    },
+    {
+      "osisCode": "Hag",
+      "englishName": "Haggai",
+      "bookOrder": 24,
+      "included": true
+    },
+    {
+      "osisCode": "Zech",
+      "englishName": "Zechariah",
+      "bookOrder": 25,
+      "included": true
+    },
+    {
+      "osisCode": "Mal",
+      "englishName": "Malachi",
+      "bookOrder": 26,
+      "included": true
+    },
+    {
+      "osisCode": "Ps",
+      "englishName": "Psalms",
+      "bookOrder": 27,
+      "included": true
+    },
+    {
+      "osisCode": "Job",
+      "englishName": "Job",
+      "bookOrder": 28,
+      "included": true
+    },
+    {
+      "osisCode": "Prov",
+      "englishName": "Proverbs",
+      "bookOrder": 29,
+      "included": true
+    },
+    {
+      "osisCode": "Ruth",
+      "englishName": "Ruth",
+      "bookOrder": 30,
+      "included": true
+    },
+    {
+      "osisCode": "Song",
+      "englishName": "Song of Songs",
+      "bookOrder": 31,
+      "included": true
+    },
+    {
+      "osisCode": "Eccl",
+      "englishName": "Ecclesiastes",
+      "bookOrder": 32,
+      "included": true
+    },
+    {
+      "osisCode": "Lam",
+      "englishName": "Lamentations",
+      "bookOrder": 33,
+      "included": true
+    },
+    {
+      "osisCode": "Esth",
+      "englishName": "Esther",
+      "bookOrder": 34,
+      "included": true
+    },
+    {
+      "osisCode": "Dan",
+      "englishName": "Daniel",
+      "bookOrder": 35,
+      "included": true
+    },
+    {
+      "osisCode": "Ezra",
+      "englishName": "Ezra",
+      "bookOrder": 36,
+      "included": true
+    },
+    {
+      "osisCode": "Neh",
+      "englishName": "Nehemiah",
+      "bookOrder": 37,
+      "included": true
+    },
+    {
+      "osisCode": "1Chr",
+      "englishName": "1 Chronicles",
+      "bookOrder": 38,
+      "included": true
+    },
+    {
+      "osisCode": "2Chr",
+      "englishName": "2 Chronicles",
+      "bookOrder": 39,
+      "included": true
+    }
+  ]
+}
