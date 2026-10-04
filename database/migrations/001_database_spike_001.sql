@@ -214,7 +214,7 @@ CREATE TABLE authoring.analysis_node_segments (
 CREATE OR REPLACE FUNCTION authoring.validate_node_segment_compatibility()
 RETURNS trigger
 LANGUAGE plpgsql
-AS $
+AS $wb1_node_segment_compat$
 DECLARE
   node_expression uuid;
   segment_expression uuid;
@@ -252,7 +252,7 @@ BEGIN
   END IF;
   RETURN NEW;
 END
-$;
+$wb1_node_segment_compat$;
 
 CREATE TRIGGER analysis_node_segments_compatibility
 BEFORE INSERT OR UPDATE ON authoring.analysis_node_segments
