@@ -70,6 +70,8 @@ jobs:
               raise SystemExit("Unexpected SQL exists after the Database Spike migration COMMIT;")
           if "BEGIN;" not in before:
               raise SystemExit("Database Spike migration must begin an explicit transaction")
+          if "\nAS $\n" in text or "\n$;\n" in text:
+              raise SystemExit("Database Spike migration contains an invalid single-dollar PL/pgSQL delimiter")
           PY
       - name: Bootstrap Supabase-compatible test roles
         run: psql -v ON_ERROR_STOP=1 -f database/spikes/001/00_bootstrap.sql
