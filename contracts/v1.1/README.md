@@ -32,6 +32,8 @@ Core OpenAPI does not override Research Pro extension endpoints merely because t
 
 - `json-schema/corpus-source-registry.schema.json`
 - `corpus-source-registry.json`
+- `json-schema/github-ai-usage-policy.schema.json`
+- `github-ai-usage-policy.json`
 - `json-schema/whole-bible-corpus-build-manifest.schema.json`
 - `fixtures/whole-bible-corpus-build-manifest.json`
 - `json-schema/corpus-query.schema.json`
