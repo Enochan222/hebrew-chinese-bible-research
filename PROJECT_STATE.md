@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.14**
+State Revision: **2026-10-04.15**
 
 ## Mandatory governance rule
 
@@ -192,4 +192,4 @@ Repository visibility remains public as observed state; this audit does not chan
 
 ## Latest push intent
 
-Database Spike 001 has reached a second independent critical-review round after the Serving-isolation head passed all three workflows. That review found six remaining implementation-quality defects that a green harness did not prove: Workspace cross-tenant child/project consistency, shared-PK subtype/object_type consistency, locator-specific CitationLocator validation, post-PUBLISHED payload/projection immutability, atomic creation of the first PUBLISHED event with the channel-pointer move, and canonical reference ordering rather than UUID ordering for the spike cursor. The migration/tests now enforce those invariants, and the duplicated/corrupted Database Spike CHANGELOG history has been consolidated into one auditable chronology. No remote Supabase project is modified. A new blank PostgreSQL 17 run is required before merge.
+Database Spike 001 run `37192756787` failed during migration because a JavaScript string-replacement operation interpreted PostgreSQL/regex dollar tokens (`$'` and `$$`) as replacement directives, corrupting the newly added CitationLocator function and one disposable test block. The SQL logic is rebuilt using direct slicing/named delimiters rather than replacement-string semantics. A repository scan found no other obvious single-dollar corruption in the migration/tests. The new relational/security invariants remain unchanged and require a fresh blank PostgreSQL 17 run.

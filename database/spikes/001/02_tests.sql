@@ -279,7 +279,7 @@ END
 $bad_locator$;
 
 -- Immutable evidence requires a content hash.
-DO $
+DO $immutable_evidence$
 DECLARE failed boolean := false;
 BEGIN
   BEGIN
@@ -295,7 +295,8 @@ BEGIN
   EXCEPTION WHEN check_violation THEN failed := true;
   END;
   IF NOT failed THEN RAISE EXCEPTION 'immutable evidence without hash must fail'; END IF;
-END $$;
+END
+$immutable_evidence$;
 
 -- Deterministic release-pinned CorpusQuery analogue.
 SELECT spike_test.assert_true(

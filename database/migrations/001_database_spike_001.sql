@@ -921,7 +921,79 @@ DECLARE
   locator_type text;
   key_name text;
   uuid_pattern constant text :=
-    '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}CREATE TABLE serving.research_objects (
+    '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$';
+BEGIN
+  IF value IS NULL THEN
+    RETURN true;
+  END IF;
+
+  IF jsonb_typeof(value) <> 'object' THEN
+    RETURN false;
+  END IF;
+
+  locator_type := value->>'locatorType';
+  IF locator_type IS NULL OR locator_type NOT IN (
+    'SOURCE_SPAN','PRINTED_PAGE','SOURCE_ASSET_PAGE','DOCUMENT_SECTION',
+    'LEXICON_ENTRY','BIBLICAL_REFERENCE','CORPUS_RESULT'
+  ) THEN
+    RETURN false;
+  END IF;
+
+  FOR key_name IN SELECT jsonb_object_keys(value)
+  LOOP
+    IF key_name NOT IN (
+      'locatorType','editionId','sourceAssetId','sourceSpanId','sourceAssetPageId',
+      'printedPageLabel','sectionPath','entryLabel','referenceSpanId',
+      'corpusQueryRunId','boundingBox'
+    ) THEN
+      RETURN false;
+    END IF;
+  END LOOP;
+
+  IF value ? 'editionId' AND value->>'editionId' IS NOT NULL
+     AND NOT ((value->>'editionId') ~* uuid_pattern) THEN RETURN false; END IF;
+  IF value ? 'sourceAssetId' AND value->>'sourceAssetId' IS NOT NULL
+     AND NOT ((value->>'sourceAssetId') ~* uuid_pattern) THEN RETURN false; END IF;
+  IF value ? 'sourceSpanId' AND value->>'sourceSpanId' IS NOT NULL
+     AND NOT ((value->>'sourceSpanId') ~* uuid_pattern) THEN RETURN false; END IF;
+  IF value ? 'sourceAssetPageId' AND value->>'sourceAssetPageId' IS NOT NULL
+     AND NOT ((value->>'sourceAssetPageId') ~* uuid_pattern) THEN RETURN false; END IF;
+  IF value ? 'referenceSpanId' AND value->>'referenceSpanId' IS NOT NULL
+     AND NOT ((value->>'referenceSpanId') ~* uuid_pattern) THEN RETURN false; END IF;
+  IF value ? 'corpusQueryRunId' AND value->>'corpusQueryRunId' IS NOT NULL
+     AND NOT ((value->>'corpusQueryRunId') ~* uuid_pattern) THEN RETURN false; END IF;
+
+  CASE locator_type
+    WHEN 'SOURCE_SPAN' THEN
+      RETURN COALESCE(value->>'sourceSpanId','') ~* uuid_pattern;
+    WHEN 'PRINTED_PAGE' THEN
+      RETURN COALESCE(value->>'editionId','') ~* uuid_pattern
+         AND length(COALESCE(value->>'printedPageLabel','')) > 0;
+    WHEN 'SOURCE_ASSET_PAGE' THEN
+      RETURN COALESCE(value->>'sourceAssetPageId','') ~* uuid_pattern;
+    WHEN 'DOCUMENT_SECTION' THEN
+      RETURN COALESCE(value->>'editionId','') ~* uuid_pattern
+         AND jsonb_typeof(value->'sectionPath') = 'array'
+         AND jsonb_array_length(value->'sectionPath') > 0
+         AND NOT EXISTS (
+           SELECT 1
+           FROM jsonb_array_elements_text(value->'sectionPath') AS section_name
+           WHERE length(section_name) = 0
+         );
+    WHEN 'LEXICON_ENTRY' THEN
+      RETURN COALESCE(value->>'editionId','') ~* uuid_pattern
+         AND length(COALESCE(value->>'entryLabel','')) > 0;
+    WHEN 'BIBLICAL_REFERENCE' THEN
+      RETURN COALESCE(value->>'referenceSpanId','') ~* uuid_pattern;
+    WHEN 'CORPUS_RESULT' THEN
+      RETURN COALESCE(value->>'corpusQueryRunId','') ~* uuid_pattern;
+  END CASE;
+
+  RETURN false;
+END
+$citation_locator$;
+
+CREATE TABLE serving.research_objects (
   research_object_id uuid PRIMARY KEY,
   object_type text NOT NULL,
   source_content_hash text,
