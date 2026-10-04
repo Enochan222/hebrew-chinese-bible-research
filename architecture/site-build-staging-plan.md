@@ -59,13 +59,26 @@ The core product must still work when no LLM provider is available.
 
 The current Vercel application remains a reference implementation for useful interaction patterns, not an ontology or data-model authority.
 
+## Whole-Bible base-product rule
+
+Whole-Bible coverage is a product-baseline requirement, not a late Research Pro feature.
+
+The implementation sequence distinguishes:
+
+- **baseline corpus ingestion**, required in Phase 1, which imports the complete pinned Hebrew source needed to render/navigate the whole Bible and expose baseline word/lemma/morphology data;
+- **advanced corpus research**, retained in Phase 3, which adds multi-framework mappings, semantic sets, construction compilation, relation-aware CorpusQuery and deterministic research search.
+
+Passage fixtures such as 1 Samuel 16:7 and Psalm 3:1 are adversarial acceptance vectors only. Once a fixture proves an importer/invariant, the next acceptance gate is the complete pinned corpus using the same code path.
+
+Research Pro and academic literature compilation are overlays on the same canonical passage/release identities. They must not block a whole-Bible base reader.
+
 ---
 
 # Phase 1: Product Foundation, Identity, Release Model, and Serving Shell
 
 ## Goal
 
-Create the stable product shell and database contracts without introducing false canonical Hebrew segmentation.
+Create the stable product shell and database contracts, import the complete pinned baseline Hebrew corpus, and establish whole-Bible navigation/coverage without introducing false canonical Hebrew segmentation.
 
 ## Product surfaces reserved from the beginning
 
@@ -129,6 +142,21 @@ TextStream/TextSegment must exist before Phase 2 because translation alignment r
 
 Phase 1 still must **not** create universal application-owned Hebrew word/phrase/clause identity.
 
+## Whole-Bible baseline corpus
+
+Phase 1 must implement one reproducible full-corpus baseline before the richer Phase 3 query engine:
+
+- fetch the exact pinned OSHB source declared in the corpus registry;
+- verify cache provenance and source pin;
+- derive a deterministic whole-Bible coverage index;
+- import every provider book/verse/word into the canonical reference/text/annotation model using stable deterministic internal IDs;
+- preserve OSHB source Unicode exactly;
+- retain provider word identity as provider-scoped metadata rather than canonical identity;
+- verify relational counts against the source-derived coverage/import manifest;
+- keep BHSA/ETCBC framework-scoped enrichment separate and non-blocking for the base reader.
+
+The initial full-corpus importer may use OSHB as the baseline text/lemma/morphology source because that role is already declared in the source registry. This does not make OSHB phrase/clause identity canonical and does not remove later BHSA/Clear multi-framework work.
+
 ## Publication boundary
 
 Implement the conceptual distinction:
@@ -172,6 +200,8 @@ Fixture data must be labelled.
 Pass only when:
 
 - release-pinned passage rendering works;
+- the complete pinned baseline Hebrew corpus can be imported by one deterministic pipeline and its database row counts reconcile to a source-derived coverage manifest;
+- whole-Bible book/chapter/passage navigation has a canonical data source rather than a hand-written demonstration list;
 - text-expression identity is independent of provider code;
 - stable text segments exist for later alignment;
 - user workspace data is not mixed with published research;
