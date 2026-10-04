@@ -155,6 +155,7 @@ The first real-corpus integration for Database Spike 001 is now machine-pinned a
 - ETCBC bridging `2021`, commit `324598bb3f9cb3a36543e77ac61e4b0f77addf82`, is 2021-derived morphology-comparison evidence on BHSA word nodes and is not assumed to map the current OSHB pin's provider word IDs;
 - project SemanticSetVersion remains the authority for project-curated semantic categories such as BODY_PART;
 - upstream corpus data is downloaded on demand into gitignored `.local/corpora/`, never vendored as the repository's canonical data;
+- BHSA local cache is now required to contain every feature referenced by its pinned `otext.tf` formats and section configuration; the fetcher rejects incomplete caches before Text-Fabric loading;
 - source exact Unicode is preserved; OSHB source identity is not NFC-normalized;
 - a conservative candidate crosswalk compiler may propose current-OSHB to BHSA word mappings only when reference/order/consonantal signatures agree; mismatch is `NEEDS_REVIEW`, and automatic canonical promotion is forbidden;
 - source pins never auto-advance and every upstream change requires reviewed PR, corpus diff, spike rerun and a new ResearchBuild/ResearchRelease;
@@ -210,4 +211,4 @@ See `architecture/corpus-source-integration.md` and `contracts/v1.1/corpus-sourc
 
 ## Latest push intent
 
-This revision continues the real-corpus integration review after the first `Corpus source smoke` run. The runner successfully installed Text-Fabric, fetched and SHA-verified all three pinned upstream sources, and exported 25 real OSHB words for 1 Samuel 16:7. The BHSA export then failed because BHSA `otext.tf` format initialization depends on transliterated and UTF-8 text/lexeme/trailer/qere features beyond the direct query subset. The source registry is therefore expanded only to the exact Text-Fabric format dependency closure, not to the whole BHSA repository. The smoke workflow remains mandatory for this PR and will be rerun rather than bypassed.
+This revision continues the real-corpus integration after the first GitHub `Corpus source smoke` run. The smoke successfully fetched all three exact pins and exported 25 OSHB words for 1 Samuel 16:7, but exposed a real BHSA partial-cache defect: Text-Fabric 13.1.0 initializes the formats declared by `otext.tf` and therefore requires transliterated/plain companion features such as `g_cons`, `g_word`, `qere`, `trailer`, `lex` and related lexical format features even when the exporter reads UTF-8 fields. The registry now includes the complete pinned `otext.tf` dependency set, the fetcher validates that set before writing a cache manifest, and contract validation prevents future regression. The smoke remains the acceptance test and is not weakened.

@@ -51,6 +51,22 @@ A developer can now reproducibly fetch and inspect the exact upstream Hebrew dat
 
 ### Validation
 
+#### First real smoke result and repair
+
+The first `Corpus source smoke` run on PR #8 provided useful negative evidence rather than being bypassed:
+
+- exact OSHB, BHSA 2021 and ETCBC bridging downloads all completed and verified;
+- OSHB 1 Samuel 16:7 export succeeded with 25 provider-scoped word records;
+- BHSA export failed during Text-Fabric initialization with `KeyError: 'g_cons'`;
+- inspection of pinned BHSA `tf/2021/otext.tf` showed that its declared text/lexical formats reference both UTF-8 and transliterated/plain features, so the original curated subset was incomplete even though the exporter itself did not request `g_cons`.
+
+Repair:
+
+- add every pinned feature referenced by `otext.tf` format expressions plus section features to the BHSA acquisition set;
+- make `fetch_sources.py` parse pinned `otext.tf` and fail early if any referenced local feature file is missing;
+- make contract validation assert the minimum BHSA Text-Fabric dependency set;
+- rerun the unchanged real-corpus smoke until export and candidate crosswalk complete successfully.
+
 Before creating the repository commit:
 
 - current upstream repository heads and frozen BHSA/bridging 2021 directories were inspected;

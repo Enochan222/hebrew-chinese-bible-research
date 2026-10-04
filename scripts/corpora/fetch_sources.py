@@ -5,6 +5,7 @@ import argparse
 import fnmatch
 import hashlib
 import json
+import re
 import shutil
 import tarfile
 import tempfile
@@ -86,6 +87,32 @@ def fetch_raw_files(source: dict, stage: Path) -> None:
         url = f"https://raw.githubusercontent.com/{repo}/{commit}/{rel}"
         fetch_url(url, target)
 
+
+def verify_text_fabric_config_dependencies(source: dict, stage: Path) -> None:
+    if source["sourceKey"] != "BHSA_2021":
+        return
+    version = source["pin"].get("datasetVersion")
+    tf_dir = stage / "tf" / str(version)
+    config = tf_dir / "otext.tf"
+    if not config.is_file():
+        raise RuntimeError("BHSA_2021: otext.tf missing from fetched cache")
+    text = config.read_text(encoding="utf-8")
+    required: set[str] = set()
+    for expression in re.findall(r"\{([^}]+)\}", text):
+        for token in expression.split("/"):
+            token = token.strip()
+            if token:
+                required.add(token)
+    section = re.search(r"^@sectionFeatures=([^\n]+)$", text, re.M)
+    if section:
+        required.update(x.strip() for x in section.group(1).split(",") if x.strip())
+    missing = sorted(name for name in required if not (tf_dir / f"{name}.tf").is_file())
+    if missing:
+        raise RuntimeError(
+            "BHSA_2021: fetched Text-Fabric subset is incomplete for otext.tf; "
+            f"missing feature files: {', '.join(missing)}"
+        )
+
 def write_manifest(source: dict, dest: Path) -> None:
     files = []
     for path in sorted(p for p in dest.rglob("*") if p.is_file() and p.name != "source-manifest.json"):
@@ -150,6 +177,7 @@ def fetch_source(source: dict, root: Path, force: bool) -> None:
             fetch_raw_files(source, stage)
         else:
             raise RuntimeError(f"Unsupported acquisition method: {method}")
+        verify_text_fabric_config_dependencies(source, stage)
         write_manifest(source, stage)
         if final.exists():
             shutil.rmtree(final)

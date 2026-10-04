@@ -1,6 +1,6 @@
 # Corpus source tools
 
-These tools connect the project to version-pinned OSHB/morphhb, BHSA 2021 and ETCBC bridging inputs.
+These tools connect the project to version-pinned OSHB/morphhb, BHSA 2021 and ETCBC bridging inputs. The fetcher also validates that every Text-Fabric feature referenced by BHSA `otext.tf` is present locally, so an apparently valid partial cache cannot fail later during Text-Fabric initialization.
 
 ## Rules
 

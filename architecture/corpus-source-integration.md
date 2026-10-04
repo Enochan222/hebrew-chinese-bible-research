@@ -105,6 +105,7 @@ OSHB:
 BHSA 2021:
 
 - Text-Fabric structural features needed to load the graph;
+- all features referenced by `otext.tf` text/lexical formats so Text-Fabric can initialize the pinned dataset without hidden upstream downloads;
 - reference features;
 - source Hebrew/text features;
 - selected lexical and morphology features;

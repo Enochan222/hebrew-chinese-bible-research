@@ -135,6 +135,16 @@ def corpus_source_registry_semantic(d: dict) -> list[str]:
     if by_key.get("OSHB_MORPHHB",{}).get("licensing",{}).get("publicServingDefault")!="ALLOW_WITH_ATTRIBUTION": out.append("OSHB serving-right default drift")
     if by_key.get("BHSA_2021",{}).get("pin",{}).get("datasetVersion")!="2021": out.append("BHSA dataset pin drift")
     if by_key.get("BHSA_2021",{}).get("licensing",{}).get("publicServingDefault")!="CONDITIONAL_RIGHTS_REVIEW": out.append("BHSA rights boundary drift")
+    bhsa_paths=set(by_key.get("BHSA_2021",{}).get("acquisition",{}).get("paths",[]))
+    required_bhsa_tf={
+        "tf/2021/otext.tf","tf/2021/otype.tf","tf/2021/oslots.tf",
+        "tf/2021/book.tf","tf/2021/chapter.tf","tf/2021/verse.tf",
+        "tf/2021/g_cons.tf","tf/2021/g_cons_utf8.tf","tf/2021/g_word.tf","tf/2021/g_word_utf8.tf",
+        "tf/2021/qere.tf","tf/2021/qere_utf8.tf","tf/2021/qere_trailer.tf","tf/2021/qere_trailer_utf8.tf",
+        "tf/2021/trailer.tf","tf/2021/trailer_utf8.tf",
+        "tf/2021/g_lex.tf","tf/2021/g_lex_utf8.tf","tf/2021/lex.tf","tf/2021/lex_utf8.tf","tf/2021/voc_lex_utf8.tf"
+    }
+    if not required_bhsa_tf.issubset(bhsa_paths): out.append("BHSA otext dependency set drift")
     if by_key.get("ETCBC_BRIDGING_2021",{}).get("integration",{}).get("canonicality")!="DERIVED_MAPPING_EVIDENCE": out.append("bridging canonicality drift")
     if by_key.get("ETCBC_BRIDGING_2021",{}).get("licensing",{}).get("publicServingDefault")!="DENY_UNTIL_RIGHTS_REVIEW": out.append("bridging rights boundary drift")
     if d.get("usagePolicy",{}).get("upstreamUpdatePolicy")!="NEVER_AUTO_ADVANCE": out.append("corpus pins may not auto-advance")
