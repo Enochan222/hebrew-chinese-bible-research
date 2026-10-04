@@ -1,6 +1,6 @@
 # Corpus Source Integration: OSHB, BHSA, and ETCBC Bridging
 
-Status: **ACTIVE SOURCE-INTEGRATION CONTRACT FOR DATABASE SPIKE 001**
+Status: **ACTIVE WHOLE-BIBLE SOURCE-INTEGRATION CONTRACT**
 
 This document defines how Open Scriptures Hebrew Bible morphology, ETCBC BHSA linguistic annotations, and ETCBC bridging data enter the Hebrew-Chinese Bible Research product.
 
@@ -177,7 +177,7 @@ python scripts/corpora/export_bhsa_features.py \
   --output .local/exports/bhsa-1sam16-7.ndjson
 ```
 
-These exporters deliberately emit provider-scoped/raw fields first. Database import/adjudication may derive normalized project fields only after the raw identities and provenance have been stored.
+These exporters deliberately emit provider-scoped/raw fields first. Export scope is explicit: `--reference` is for canary/debug execution and `--all` is for complete pinned-provider execution. Database import/adjudication may derive normalized project fields only after the raw identities and provenance have been stored.
 
 CLI passage filters normalize known provider book aliases only for comparison. For example, OSHB `1Sam`, BHSA Latin `Samuel_I`, and BHSA English `1_Samuel` compare as the same temporary canonical book key. The exporter still writes the exact provider-native `referenceLabel` and `referenceSystemCode`; alias normalization does not replace the project's ReferenceSystem/ReferenceSpan resolution layer.
 
@@ -236,6 +236,52 @@ the first implementation should resolve it as a multi-layer query:
 The query result must disclose the annotation layers used.
 
 If the OSHB/BHSA mapping is absent or disputed, the engine must not invent a cross-layer match.
+
+## 6A. WB-CORPUS-001 whole-Bible source foundation
+
+WB-0 has already proved that the relational model can preserve the difficult 1 Samuel 16:7 canary. Before WB-1 scales that importer to the complete configured corpus, the source/build layer must establish a deterministic whole-Bible input boundary:
+
+```text
+pinned OSHB source XML
+  -> independent OSHB_OSIS reference inventory
+  -> complete OSHB provider export
+
+pinned BHSA + ETCBC bridging
+  -> complete BHSA provider export
+
+provider exports
+  -> reference reconciliation
+  -> conservative candidate crosswalk
+  -> deterministic WB-CORPUS-001 coverage manifest
+```
+
+Run:
+
+```bash
+python scripts/corpora/build_whole_bible_corpus.py
+```
+
+The expected-reference inventory is generated directly from the exact pinned OSHB XML and source manifest, independently of `export_oshb_words.py`. This prevents a source exporter omission from shrinking the denominator used to judge its own completeness.
+
+At this stage `OSHB_OSIS` is explicitly a **bootstrap source-derived ReferenceSystem snapshot**. It does not replace project-owned CanonSystem/ReferenceSystem/ReferenceSpan adjudication in PostgreSQL.
+
+Whole-Bible coverage is reference-set based. A fixed provider division count such as 39 or 24 is not a canonical completeness gate. Provider book divisions remain useful provenance/diagnostics only.
+
+The machine-readable manifest records:
+
+- exact OSHB/BHSA/bridging pins;
+- selected ReferenceSystem reference-set hash and expected spans;
+- OSHB/BHSA record and reference counts;
+- candidate mapping and annotation-only counts;
+- unresolved mapping reasons;
+- missing/provider-only references by source;
+- per-book diagnostics;
+- artifact hashes;
+- explicit silent-reference-loss status.
+
+Known provider/reference mismatches may remain explicit exceptions. A reference that disappears without an explicit crosswalk/provider record is a gate failure.
+
+WB-CORPUS-001 stops before PostgreSQL. WB-1 must consume this source foundation through the same corpus-wide importer architecture proven by WB-0.
 
 ## 7. Database mapping contract
 

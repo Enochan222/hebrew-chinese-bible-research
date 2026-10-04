@@ -34,6 +34,7 @@ def schema_errors(schema_path: str, fixture_path: str) -> list[str]:
 
 POSITIVE = [
  ("contracts/v1.1/json-schema/corpus-source-registry.schema.json","contracts/v1.1/corpus-source-registry.json"),
+ ("contracts/v1.1/json-schema/whole-bible-corpus-build-manifest.schema.json","contracts/v1.1/fixtures/whole-bible-corpus-build-manifest.json"),
  ("contracts/v1.1/json-schema/corpus-query.schema.json","contracts/v1.1/fixtures/corpus-query-1sam16-7.json"),
  ("contracts/v1.1/json-schema/corpus-query-normalized.schema.json","contracts/v1.1/fixtures/corpus-query-1sam16-7.json"),
  ("contracts/v1.1/json-schema/release-manifest.schema.json","contracts/v1.1/fixtures/release-manifest.json"),

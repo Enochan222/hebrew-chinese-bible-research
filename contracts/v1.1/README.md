@@ -32,6 +32,8 @@ Core OpenAPI does not override Research Pro extension endpoints merely because t
 
 - `json-schema/corpus-source-registry.schema.json`
 - `corpus-source-registry.json`
+- `json-schema/whole-bible-corpus-build-manifest.schema.json`
+- `fixtures/whole-bible-corpus-build-manifest.json`
 - `json-schema/corpus-query.schema.json`
 - `json-schema/corpus-query-normalized.schema.json`
 - `json-schema/corpus-query-result.schema.json`
@@ -91,6 +93,7 @@ Core OpenAPI does not override Research Pro extension endpoints merely because t
 Important invariants:
 
 - Pinned corpus sources never auto-advance; provider/framework identities remain explicit.
+- WB-CORPUS-001 coverage is measured against a selected ReferenceSystem inventory; provider book-division counts are provenance metadata, not a hard-coded whole-Bible gate.
 - OSHB morphology/morpheme data and BHSA structural annotations remain separate AnnotationLayers.
 - ETCBC bridging is mapping/comparison evidence, not universal canonical word identity.
 

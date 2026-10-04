@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-05.7**
+State Revision: **2026-10-05.8**
 
 ## Mandatory governance rule
 
@@ -261,10 +261,26 @@ WB-0 is implemented as an independent PostgreSQL 17 job alongside the existing s
 
 WB-0 implementation acceptance is now PASS on the reviewed PR head: the original synthetic `postgres-spike` regression and the independent `wb0-real-corpus-canary` job both completed successfully, alongside Contract validation, Project governance, Corpus source smoke and the P1 shell regression. The protected merge remains the repository publication action for this change. This PASS is bounded to the pinned 1 Samuel 16:7 canary and does not satisfy `CORE-FZ-WB-002`. WB-1 remains responsible for generalizing this importer and producing complete configured-corpus coverage/error evidence.
 
+## WB-CORPUS-001 source-foundation state
+
+This revision introduces the whole-corpus source/build boundary that WB-1 must consume:
+
+- full OSHB and BHSA export modes are explicit through `--all`; canary/debug execution remains `--reference`;
+- an independent `OSHB_OSIS` reference inventory is scanned directly from the exact pinned OSHB source XML/source manifest rather than inferred from exporter success;
+- the inventory is labelled as a source-derived bootstrap ReferenceSystem snapshot, not final CanonSystem adjudication;
+- the conservative OSHB/BHSA crosswalk runs across the complete provider exports and keeps candidate mappings non-canonical;
+- recognized annotation-only BHSA nodes remain explicit even when another node in the same reference forces that reference into unresolved review;
+- the deterministic coverage manifest records pins, reference-set hash, provider/reference counts, annotation-only/mapping counts, unresolved reasons, per-book diagnostics, explicit provider gaps and artifact hashes;
+- silent reference loss is a build failure;
+- provider book-division counts are diagnostic provenance only, not a fixed 39/24 completeness criterion;
+- no PostgreSQL, Serving projection or ResearchRelease is written by WB-CORPUS-001.
+
+The dedicated whole-Bible workflow is the executable acceptance authority for this source foundation. WB-0's exact 1 Samuel 16:7 export shape/hashes remain regression evidence; the new BHSA `--all` mode does not change the canary record shape.
+
 ## Current implementation priority
 
 1. Preserve contract/governance consistency and the whole-Bible scope guard.
-2. Complete WB-1: generalize the WB-0 provider-scoped importer across the complete configured Hebrew Bible and produce auditable book/reference/count/error/exception coverage evidence.
+2. Use WB-CORPUS-001 as the required complete-source input boundary for WB-1, then generalize the WB-0 provider-scoped importer across it and produce auditable relational book/reference/count/error/exception evidence.
 3. Complete WB-2: compile the whole-corpus Authoring result into rights-safe, release-pinned passage-serving projections.
 4. Complete WB-3: replace fixture-only Hebrew passage content with a database-backed whole-Bible reader/navigation.
 5. Complete WB-4/WB-5: add selected translation witnesses, alignment/comparison, project/user translation workflow and deterministic whole-corpus analysis.
@@ -272,4 +288,4 @@ WB-0 implementation acceptance is now PASS on the reviewed PR head: the original
 
 ## Latest push intent
 
-Close WB-0 after real-corpus execution rather than treating a green synthetic schema as sufficient evidence. The pinned 1 Samuel 16:7 data now loads into PostgreSQL Authoring with 25 OSHB words, 34 BHSA words, 22 phrases, 7 clauses, 90 graph-membership edges, 35 bridging feature values, two preserved annotation-only nodes, 25 grouped mapping candidates of which seven are non-1:1, one project BODY_PART target and zero unresolved references. All automatic mappings remain non-canonical, no real BHSA/bridging projection is written to Serving, and the original synthetic relational/RLS/publication spike still passes. WB-0 is therefore complete as a bounded relational canary; WB-1 whole-Bible ingestion and coverage audit is now the next implementation priority.
+Add WB-CORPUS-001 between the accepted WB-0 canary and WB-1 whole-corpus relational ingestion. The new source foundation builds complete pinned OSHB/BHSA exports, derives an independent OSHB_OSIS reference inventory directly from the source XML, reconciles both providers through the existing fail-closed candidate crosswalk, and emits a deterministic machine-auditable coverage manifest. Coverage is judged by the selected reference inventory rather than provider book-count conventions; provider/mapping exceptions stay explicit and silent reference loss fails the build. This revision deliberately stops before PostgreSQL so the next PR can generalize the already-proven WB-0 importer against a stable whole-corpus input rather than mixing source coverage and relational loading in one change.

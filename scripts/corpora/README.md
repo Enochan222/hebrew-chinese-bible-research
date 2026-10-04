@@ -41,7 +41,7 @@ python scripts/corpora/export_bhsa_features.py \
 
 Passage CLI filters share `reference_aliases.py`, which equates known OSHB/BHSA Latin/BHSA English book labels only for filtering and candidate comparison. Exported provider labels remain unchanged. A requested BHSA passage with zero words is an error, not a successful empty export.
 
-A requested OSHB passage with zero words is likewise an error. The unfiltered whole-source mode may still be used to export every available source record.
+A requested OSHB passage with zero words is likewise an error. Export scope is explicit: use `--reference` for a canary/debug passage or `--all` for a complete pinned-provider export. Omitting both is an error.
 
 The BHSA exporter loads ETCBC bridging features when the pinned bridging cache exists. Those fields are attached to BHSA word nodes as 2021 comparison evidence and are not represented as current OSHB provider word IDs.
 
@@ -55,6 +55,33 @@ python scripts/corpora/build_candidate_crosswalk.py \
 ```
 
 The crosswalk supports conservative contiguous many-to-many token spans. Equal token counts are not required. It first requires equal whole-verse consonantal streams, then emits the smallest prefix-compatible contiguous span groups. Any textual/prefix divergence becomes `NEEDS_REVIEW`; generated mappings are `CANDIDATE_AUTOMATED` and never canonical by themselves.
+
+## WB-CORPUS-001 whole-Bible source foundation
+
+After fetching the exact pins, build the complete source foundation in one command:
+
+```bash
+python scripts/corpora/build_whole_bible_corpus.py
+```
+
+The build performs:
+
+```text
+pinned OSHB source XML
+  -> independent OSHB_OSIS reference inventory
+  -> explicit OSHB --all export
+
+pinned BHSA + bridging
+  -> explicit BHSA --all export
+
+provider exports
+  -> conservative whole-corpus candidate crosswalk
+  -> deterministic coverage-manifest.json
+```
+
+The expected reference inventory is generated directly from the exact pinned OSHB source XML and source manifest, independently of exporter output. An exporter omission therefore cannot silently shrink its own denominator. At this stage `OSHB_OSIS` is explicitly a source-derived bootstrap ReferenceSystem snapshot, not final project CanonSystem adjudication.
+
+Provider book-division counts are retained as provenance metadata only. The WB-CORPUS-001 gate compares reference sets and records missing/provider-only references, unresolved mappings, annotation-only nodes and silent reference loss explicitly. It does not load PostgreSQL and does not by itself satisfy WB-1.
 
 ## WB-0 relational canary loader
 

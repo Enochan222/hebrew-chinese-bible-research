@@ -1,0 +1,409 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/whole-bible-corpus-build-manifest.schema.json",
+  "title": "WholeBibleCorpusBuildManifestV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "buildType",
+    "buildId",
+    "status",
+    "gatePass",
+    "referenceSystem",
+    "sourcePins",
+    "coverage",
+    "exceptions",
+    "perBook",
+    "artifacts"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "buildType": {
+      "const": "WB-CORPUS-001"
+    },
+    "buildId": {
+      "type": "string",
+      "pattern": "^wb-corpus-[0-9a-f]{24}$"
+    },
+    "status": {
+      "enum": [
+        "COMPLETE",
+        "COMPLETE_WITH_EXPLICIT_EXCEPTIONS",
+        "INVALID_SILENT_REFERENCE_LOSS"
+      ]
+    },
+    "gatePass": {
+      "type": "boolean"
+    },
+    "referenceSystem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "authorityStatus",
+        "derivation",
+        "referenceSetSha256",
+        "expectedReferenceSpans",
+        "providerBookDivisionCount",
+        "note"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authorityStatus": {
+          "type": "string",
+          "minLength": 1
+        },
+        "derivation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "referenceSetSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "expectedReferenceSpans": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "providerBookDivisionCount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "sourcePins": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "OSHB_MORPHHB",
+        "BHSA_2021",
+        "ETCBC_BRIDGING_2021"
+      ],
+      "properties": {
+        "OSHB_MORPHHB": {
+          "$ref": "#/$defs/sourcePin"
+        },
+        "BHSA_2021": {
+          "$ref": "#/$defs/sourcePin"
+        },
+        "ETCBC_BRIDGING_2021": {
+          "$ref": "#/$defs/sourcePin"
+        }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "oshb",
+        "bhsa",
+        "crosswalk",
+        "silentReferenceLoss"
+      ],
+      "properties": {
+        "oshb": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "wordRecords",
+            "referenceSpans"
+          ],
+          "properties": {
+            "wordRecords": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "referenceSpans": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "bhsa": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "wordNodes",
+            "referenceSpans"
+          ],
+          "properties": {
+            "wordNodes": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "referenceSpans": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "crosswalk": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "observedReferenceSpans",
+            "candidateMappings",
+            "annotationOnlyNodes",
+            "mappedSourceNodes",
+            "mappedTargetNodes",
+            "unresolvedReferenceSpans",
+            "unresolvedReasons",
+            "recordTypes"
+          ],
+          "properties": {
+            "observedReferenceSpans": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "candidateMappings": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "annotationOnlyNodes": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "mappedSourceNodes": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "mappedTargetNodes": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "unresolvedReferenceSpans": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "unresolvedReasons": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "recordTypes": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "silentReferenceLoss": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "exceptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "oshbMissingExpectedReferences",
+        "oshbProviderOnlyReferences",
+        "bhsaMissingExpectedReferences",
+        "bhsaProviderOnlyReferences",
+        "crosswalkMissingProviderReferences",
+        "crosswalkProviderOnlyReferences",
+        "silentReferenceLossReferences",
+        "unresolvedCrosswalkReferences"
+      ],
+      "properties": {
+        "oshbMissingExpectedReferences": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "oshbProviderOnlyReferences": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "bhsaMissingExpectedReferences": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "bhsaProviderOnlyReferences": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "crosswalkMissingProviderReferences": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "crosswalkProviderOnlyReferences": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "silentReferenceLossReferences": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "unresolvedCrosswalkReferences": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "perBook": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/bookCoverage"
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "referenceInventory",
+        "oshbExport",
+        "bhsaExport",
+        "crosswalk"
+      ],
+      "properties": {
+        "referenceInventory": {
+          "$ref": "#/$defs/artifact"
+        },
+        "oshbExport": {
+          "$ref": "#/$defs/artifact"
+        },
+        "bhsaExport": {
+          "$ref": "#/$defs/artifact"
+        },
+        "crosswalk": {
+          "$ref": "#/$defs/artifact"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sourcePin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commitSha",
+        "datasetVersion"
+      ],
+      "properties": {
+        "commitSha": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "datasetVersion": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "bookCoverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bookCode",
+        "expectedReferences",
+        "oshbReferences",
+        "oshbWords",
+        "bhsaReferences",
+        "bhsaWordNodes",
+        "crosswalkObservedReferences",
+        "unresolvedReferences"
+      ],
+      "properties": {
+        "bookCode": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expectedReferences": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "oshbReferences": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "oshbWords": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "bhsaReferences": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "bhsaWordNodes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "crosswalkObservedReferences": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unresolvedReferences": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fileName",
+        "bytes",
+        "sha256"
+      ],
+      "properties": {
+        "fileName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    }
+  }
+}

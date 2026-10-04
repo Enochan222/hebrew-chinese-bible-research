@@ -5,6 +5,48 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
 
+## 2026-10-05 — Add WB-CORPUS-001 whole-Bible source foundation
+
+### Push intent
+
+Separate complete-source coverage/reconciliation from WB-1 relational ingestion so the next database change starts from a deterministic, machine-auditable whole-corpus input rather than another passage fixture or a provider book-count convention.
+
+### Why
+
+WB-0 now proves that the existing ontology and PostgreSQL schema can ingest the difficult 1 Samuel 16:7 OSHB/BHSA canary without inventing universal token identity. The remaining risk is scale: the repository still lacked one explicit full-provider build that establishes the expected reference set independently of exporter success, reconciles OSHB and BHSA across the complete pinned sources, and distinguishes explicit provider/mapping exceptions from silent reference loss.
+
+Using successful exporter output as its own denominator would be circular validation. Likewise, treating a fixed 39-book or 24-book provider division count as a canonical coverage gate would collapse CanonSystem/ReferenceSystem distinctions the architecture already preserves.
+
+### What changed
+
+- added WB-CORPUS-001 as the source/build milestone between the accepted WB-0 canary and WB-1 relational whole-corpus ingestion;
+- made OSHB/BHSA export scope explicit through mutually exclusive `--reference` and `--all` modes;
+- kept the existing canary output shape intact so WB-0 pinned export/hash regression evidence remains valid;
+- added an independent source-derived `OSHB_OSIS` reference inventory generated directly from the exact pinned OSHB XML/source manifest;
+- labelled that inventory as a bootstrap ReferenceSystem snapshot rather than final project CanonSystem adjudication;
+- added a one-command whole-corpus build that exports both providers, runs the conservative candidate crosswalk and creates a deterministic coverage manifest;
+- made recognized annotation-only BHSA rows survive even when another empty node makes the same reference unresolved;
+- added quiet whole-corpus unresolved logging without suppressing unresolved records;
+- added a JSON Schema and positive contract fixture for the WB-CORPUS-001 manifest;
+- added unit regressions for explicit whole-source export, dynamic provider division counts, silent-reference-loss failure and annotation-only preservation;
+- added a dedicated full-source GitHub Actions workflow that fetches exact pins, builds the whole corpus, validates the manifest and rechecks the 1 Samuel 16:7 canary;
+- documented that provider book-division counts are provenance metadata only and cannot substitute for selected ReferenceSystem coverage;
+- kept PostgreSQL import, Serving projection and ResearchRelease publication out of this change.
+
+### Intended effect
+
+WB-1 can now generalize the already-proven WB-0 importer against one explicit source foundation. A provider/reference mismatch can remain a reviewable exception, but a reference cannot disappear silently between the selected reference inventory, provider exports and crosswalk while still being reported as complete.
+
+The existing ReferenceSpan/TextSegment/AnalysisNode/AnnotationLayer ontology, grouped candidate mapping model, rights boundary and ResearchRelease publication model remain unchanged.
+
+### Validation
+
+- corpus unit tests cover explicit export scope, whole-source OSHB export, source-derived inventory, dynamic provider division counts, annotation-only preservation and silent-reference-loss rejection;
+- the WB-CORPUS-001 manifest schema is registered in normal contract validation;
+- the dedicated whole-Bible workflow performs the real exact-pinned full-source build and validates the generated coverage manifest;
+- WB-0's existing database workflow remains a regression gate and must continue to pass with the unchanged canary export shape;
+- Project governance and Contract validation remain protected-merge requirements.
+
 ## 2026-10-05 — Implement WB-0 real OSHB/BHSA relational canary
 
 ### Push intent

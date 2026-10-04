@@ -199,10 +199,21 @@ Pass only when:
 
 Turn the validated corpus adapters and Database Spike into the first real whole-Bible base-product data path.
 
-The established 1 Samuel 16:7 fixture is the relational-import acceptance canary. Passing it authorizes a whole-corpus run; it does not authorize a passage-by-passage manual build.
+The established 1 Samuel 16:7 fixture is the relational-import acceptance canary. WB-0 has passed that bounded canary; it does not authorize a passage-by-passage manual build.
+
+## Current execution program inside Phase 2A
+
+1. **WB-0 relational canary**: complete and bounded to the pinned 1 Samuel 16:7 evidence.
+2. **WB-CORPUS-001 source foundation**: complete-provider exports, independent selected-ReferenceSystem inventory, whole-corpus candidate crosswalk and deterministic source coverage manifest.
+3. **WB-1 relational whole-corpus import**: generalize the same provider-scoped importer architecture across WB-CORPUS-001 without a fixture-specific second importer.
+4. **WB-2 serving**: compile rights-safe, release-pinned passage projections.
+5. **WB-3 reader**: replace fixture passage reads and add whole-Bible ReferenceSystem-aware navigation.
+
+Source coverage and relational ingestion are separate acceptance gates. A successful whole-source export is not a completed database product.
 
 ## Required implementation
 
+- build and validate WB-CORPUS-001 before claiming WB-1 whole-corpus relational coverage;
 - import pinned OSHB provider-scoped words/morphemes into the relational model;
 - import pinned BHSA framework-scoped word/phrase/clause/syntax nodes;
 - preserve annotation-only BHSA nodes without invented TextSegments;

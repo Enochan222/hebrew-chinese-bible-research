@@ -21,7 +21,9 @@ def main() -> int:
     parser.add_argument("--bhsa-dir", type=Path, default=DEFAULT_BHSA)
     parser.add_argument("--bridging-dir", type=Path, default=DEFAULT_BRIDGE)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--reference", help="passage label such as 1Sam.16.7; BHSA aliases are normalized only for filtering")
+    scope = parser.add_mutually_exclusive_group(required=True)
+    scope.add_argument("--reference", help="passage label such as 1Sam.16.7; BHSA aliases are normalized only for filtering")
+    scope.add_argument("--all", action="store_true", dest="export_all", help="export every available BHSA word node")
     parser.add_argument("--limit", type=int, default=0)
     args = parser.parse_args()
     try:
