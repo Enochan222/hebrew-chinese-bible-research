@@ -797,9 +797,13 @@ Fields:
 
 An edge must not connect nodes from incompatible layer semantics unless the relation definition explicitly permits a cross-layer mapping.
 
-## 7.7 `cross_annotation_mappings`
+## 7.7 Cross-annotation mappings
 
 Mappings are research data, not identity assumptions.
+
+### 7.7.1 Pairwise `cross_annotation_mappings`
+
+Use only when one source node to one target node is itself a defensible mapping statement.
 
 Fields:
 
@@ -813,6 +817,41 @@ Fields:
 - `mapping_method text`
 - `review_status text`
 - `provenance_id uuid nullable FK`
+
+Do not decompose an n:m span mapping into a Cartesian set of pairwise rows when that would falsely imply individual node equivalence.
+
+### 7.7.2 Grouped `cross_annotation_mapping_groups`
+
+Real OSHB/BHSA tokenization evidence requires grouped mappings whose scholarly claim is about two ordered node spans rather than each source/target pair independently.
+
+Group fields:
+
+- `mapping_group_id uuid PK`
+- `from_annotation_layer_id uuid FK`
+- `to_annotation_layer_id uuid FK`
+- `reference_span_id uuid FK`
+- `mapping_type text`
+- `mapping_method text`
+- `review_status text`
+- `canonical boolean`
+- `confidence numeric nullable`
+- `properties jsonb`
+
+Member tables:
+
+- `cross_annotation_mapping_from_members(mapping_group_id, from_annotation_layer_id, from_node_id, member_order)`
+- `cross_annotation_mapping_to_members(mapping_group_id, to_annotation_layer_id, to_node_id, member_order)`
+
+Required invariants:
+
+- member nodes belong to the layer pinned on their side of the group;
+- all members share the group's ReferenceSpan for the first implementation;
+- member order is explicit;
+- `CANDIDATE_AUTOMATED` groups cannot be canonical;
+- annotation-only nodes with no orthographic contribution are excluded from orthographic grouped mappings unless separately reviewed for a non-orthographic mapping type;
+- unreviewed grouped mappings remain Authoring research data and are not projected into public Serving corpus mappings.
+
+This grouped form is a real-corpus correction discovered by WB-0. It preserves 1:1, 1:n, n:1 and n:m evidence without inventing universal token identity.
 
 ## 7.8 `equivalence_hypotheses`
 
