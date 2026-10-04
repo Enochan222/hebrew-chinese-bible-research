@@ -47,6 +47,21 @@ def main() -> int:
     if totals.get("candidateMappingGroups")!=foundation["coverage"]["crosswalk"]["candidateMappings"]: errors.append("crosswalk candidate total mismatch")
     if totals.get("unresolvedCrossFrameworkReferences")!=foundation["coverage"]["crosswalk"]["unresolvedReferenceSpans"]: errors.append("crosswalk unresolved total mismatch")
     if totals.get("selectedReferenceAtoms")!=foundation["referenceSystem"]["expectedReferenceSpans"]: errors.append("selected ReferenceAtom total mismatch source inventory")
+    expected_provider_only=len(foundation.get("exceptions",{}).get("bhsaProviderOnlyReferences",[]))
+    if totals.get("providerOnlyReferenceAtoms")!=expected_provider_only: errors.append("providerOnlyReferenceAtoms mismatch source exceptions")
+    if totals.get("relationalReferenceAtoms") != totals.get("selectedReferenceAtoms",0) + totals.get("providerOnlyReferenceAtoms",0):
+        errors.append("relationalReferenceAtoms must equal selected + provider-only atoms")
+    if totals.get("reviewedAnnotationOnlyBhsaNodes")!=foundation["coverage"]["crosswalk"]["annotationOnlyNodes"]:
+        errors.append("reviewed annotation-only BHSA node total mismatch source foundation")
+    if totals.get("unresolvedCrossFrameworkReferences")!=len(foundation.get("exceptions",{}).get("unresolvedCrosswalkReferences",[])):
+        errors.append("unresolved reference count mismatch exception inventory")
+    for exception_key in (
+        "oshbMissingExpectedReferences","oshbProviderOnlyReferences",
+        "bhsaMissingExpectedReferences","crosswalkMissingProviderReferences",
+        "crosswalkProviderOnlyReferences","silentReferenceLossReferences",
+    ):
+        if foundation.get("exceptions",{}).get(exception_key):
+            errors.append(f"source foundation contains non-empty {exception_key}: {foundation['exceptions'][exception_key]}")
     if totals.get("oshbMissingSurfaceRecords")!=0: errors.append("OSHB missing source surface is not accepted")
     if totals.get("servingCorpusRows")!=0: errors.append("WB-1 must not write real corpus rows to Serving")
 
@@ -77,6 +92,17 @@ def main() -> int:
         if source.get("oshbMissingSurfaceProviderIds"): errors.append(f"{code}: OSHB missing surface records")
         if expected.get("oshbWordNodes")!=source.get("oshbWordRecords"): errors.append(f"{code}: OSHB expected import mismatch")
         if expected.get("bhsaWordNodes")!=source.get("bhsaWordRecords"): errors.append(f"{code}: BHSA expected import mismatch")
+        if expected.get("oshbTextSegments") != source.get("oshbWordRecords",0) - len(source.get("oshbMissingSurfaceProviderIds",[])):
+            errors.append(f"{code}: OSHB segment/source arithmetic mismatch")
+        expected_bhsa_segments = (
+            source.get("bhsaWordRecords",0)
+            - len(source.get("reviewedAnnotationOnlyBhsaProviderIds",[]))
+            - len(source.get("unclassifiedEmptyBhsaProviderIds",[]))
+        )
+        if expected.get("bhsaTextSegments") != expected_bhsa_segments:
+            errors.append(f"{code}: BHSA segment/source arithmetic mismatch")
+        if row.get("crosswalk",{}).get("annotationOnlyRecordsEmitted") != len(source.get("reviewedAnnotationOnlyBhsaProviderIds",[])):
+            errors.append(f"{code}: annotation-only crosswalk/source classification mismatch")
         for unresolved in row.get("crosswalk",{}).get("unresolved",[]):
             if not unresolved.get("reason"): errors.append(f"{code}: unresolved mapping missing reason")
 
