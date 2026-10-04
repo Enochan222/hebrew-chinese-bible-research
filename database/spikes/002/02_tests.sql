@@ -29,23 +29,22 @@ BEGIN
     RAISE EXCEPTION 'at least one imported book has no reference labels';
   END IF;
 
-  IF EXISTS (
-    SELECT 1
-    FROM authoring.analysis_nodes node
-    LEFT JOIN authoring.analysis_node_segments ns ON ns.analysis_node_id = node.analysis_node_id
-    GROUP BY node.analysis_node_id
-    HAVING count(ns.text_segment_id) <> 1
-  ) THEN
+  IF (SELECT count(*) FROM authoring.analysis_node_segments)
+       <> (SELECT count(*) FROM authoring.analysis_nodes)
+     OR EXISTS (
+       SELECT 1
+       FROM authoring.analysis_nodes node
+       WHERE NOT EXISTS (
+         SELECT 1
+         FROM authoring.analysis_node_segments ns
+         WHERE ns.analysis_node_id = node.analysis_node_id
+       )
+     ) THEN
     RAISE EXCEPTION 'an OSHB morphology node does not have exactly one text-segment membership';
   END IF;
 
-  IF EXISTS (
-    SELECT 1
-    FROM authoring.text_segments seg
-    LEFT JOIN authoring.analysis_node_segments ns ON ns.text_segment_id = seg.text_segment_id
-    GROUP BY seg.text_segment_id
-    HAVING count(ns.analysis_node_id) <> 1
-  ) THEN
+  IF (SELECT count(DISTINCT text_segment_id) FROM authoring.analysis_node_segments)
+       <> (SELECT count(*) FROM authoring.text_segments) THEN
     RAISE EXCEPTION 'an imported OSHB text segment does not have exactly one morphology node';
   END IF;
 
