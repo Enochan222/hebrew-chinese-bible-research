@@ -105,18 +105,21 @@ The intended corpus path is:
 immutable upstream pin
   -> bounded fetch
   -> source-manifest integrity verification
-  -> provider-scoped export
+  -> independent ReferenceSystem inventory
+  -> explicit whole-provider exports
+  -> reference reconciliation / candidate crosswalk
+  -> deterministic WB-CORPUS-001 coverage manifest
   -> relational import
-  -> explicit cross-framework mappings
-  -> whole-corpus QA / coverage report
+  -> persisted framework-scoped mappings
+  -> relational whole-corpus QA
   -> release-scoped serving projection
   -> ResearchRelease
   -> public passage API / reader
 ```
 
-The current 1 Samuel 16:7 corpus smoke is the first importer/crosswalk canary.
+WB-0 has accepted 1 Samuel 16:7 as the relational importer/crosswalk canary.
 
-Once the relational importer passes that canary, the next acceptance target is not another hand-picked passage. It is a whole-corpus import and coverage audit.
+The next acceptance target is not another hand-picked passage. WB-CORPUS-001 establishes the deterministic complete-source input boundary, and WB-1 must then run the same corpus-wide importer architecture against that foundation.
 
 ## 6. Whole-Bible coverage evidence
 
@@ -155,11 +158,17 @@ Prove the database preserves:
 - release pinning;
 - fail-closed mapping/query behavior.
 
+### WB-CORPUS-001: whole-Bible source foundation
+
+Build complete pinned OSHB and BHSA/bridging exports, an independent selected-ReferenceSystem inventory, conservative cross-framework candidate mappings and a deterministic source-coverage manifest.
+
+This is source/build evidence only. Provider book-division counts are not a canonical completeness gate, and explicit provider/mapping exceptions remain distinct from silent reference loss.
+
 ### WB-1: whole-Bible corpus load
 
-Run the same importer across the complete configured Hebrew-Bible source coverage.
+Run the same corpus-wide importer architecture proven by WB-0 across the complete WB-CORPUS-001 source foundation.
 
-Produce a machine-auditable coverage/error report.
+Produce a machine-auditable relational coverage/error report.
 
 ### WB-2: whole-Bible release-pinned passage serving
 

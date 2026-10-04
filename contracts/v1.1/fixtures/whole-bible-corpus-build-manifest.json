@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "1.0",
+  "buildType": "WB-CORPUS-001",
+  "buildId": "wb-corpus-0123456789abcdef01234567",
+  "status": "COMPLETE_WITH_EXPLICIT_EXCEPTIONS",
+  "gatePass": true,
+  "referenceSystem": {
+    "code": "OSHB_OSIS",
+    "authorityStatus": "BOOTSTRAP_SOURCE_DERIVED_NOT_FINAL_CANON_ADJUDICATION",
+    "derivation": "PINNED_OSHB_SOURCE_XML_INDEPENDENT_OF_EXPORTER_OUTPUT",
+    "referenceSetSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "expectedReferenceSpans": 2,
+    "providerBookDivisionCount": 2,
+    "note": "Contract fixture: provider division counts are metadata, not the coverage gate."
+  },
+  "sourcePins": {
+    "OSHB_MORPHHB": {
+      "commitSha": "3d15126fb1ef74867fc1434be1942e837932691f",
+      "datasetVersion": null
+    },
+    "BHSA_2021": {
+      "commitSha": "4db00e2157915495e1a4d3d57e41223df24775da",
+      "datasetVersion": "2021"
+    },
+    "ETCBC_BRIDGING_2021": {
+      "commitSha": "324598bb3f9cb3a36543e77ac61e4b0f77addf82",
+      "datasetVersion": "2021"
+    }
+  },
+  "coverage": {
+    "oshb": {
+      "wordRecords": 2,
+      "referenceSpans": 2
+    },
+    "bhsa": {
+      "wordNodes": 1,
+      "referenceSpans": 1
+    },
+    "crosswalk": {
+      "observedReferenceSpans": 2,
+      "candidateMappings": 1,
+      "annotationOnlyNodes": 0,
+      "mappedSourceNodes": 1,
+      "mappedTargetNodes": 1,
+      "unresolvedReferenceSpans": 1,
+      "unresolvedReasons": {
+        "MISSING_PROVIDER_ROWS": 1
+      },
+      "recordTypes": {
+        "CANDIDATE_SPAN_MAPPING": 1,
+        "UNRESOLVED_REFERENCE": 1
+      }
+    },
+    "silentReferenceLoss": 0
+  },
+  "exceptions": {
+    "oshbMissingExpectedReferences": [],
+    "oshbProviderOnlyReferences": [],
+    "bhsaMissingExpectedReferences": [
+      "Exod.1.1"
+    ],
+    "bhsaProviderOnlyReferences": [],
+    "crosswalkMissingProviderReferences": [],
+    "crosswalkProviderOnlyReferences": [],
+    "silentReferenceLossReferences": [],
+    "unresolvedCrosswalkReferences": [
+      "Exod.1.1"
+    ]
+  },
+  "perBook": [
+    {
+      "bookCode": "Exod",
+      "expectedReferences": 1,
+      "oshbReferences": 1,
+      "oshbWords": 1,
+      "bhsaReferences": 0,
+      "bhsaWordNodes": 0,
+      "crosswalkObservedReferences": 1,
+      "unresolvedReferences": 1
+    },
+    {
+      "bookCode": "Gen",
+      "expectedReferences": 1,
+      "oshbReferences": 1,
+      "oshbWords": 1,
+      "bhsaReferences": 1,
+      "bhsaWordNodes": 1,
+      "crosswalkObservedReferences": 1,
+      "unresolvedReferences": 0
+    }
+  ],
+  "artifacts": {
+    "referenceInventory": {
+      "fileName": "reference-inventory.json",
+      "bytes": 1,
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    "oshbExport": {
+      "fileName": "oshb.ndjson",
+      "bytes": 1,
+      "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    },
+    "bhsaExport": {
+      "fileName": "bhsa.ndjson",
+      "bytes": 1,
+      "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    },
+    "crosswalk": {
+      "fileName": "crosswalk.ndjson",
+      "bytes": 1,
+      "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    }
+  }
+}

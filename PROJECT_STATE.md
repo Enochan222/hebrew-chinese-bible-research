@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-05.7**
+State Revision: **2026-10-05.9**
 
 ## Mandatory governance rule
 
@@ -261,10 +261,26 @@ WB-0 is implemented as an independent PostgreSQL 17 job alongside the existing s
 
 WB-0 implementation acceptance is now PASS on the reviewed PR head: the original synthetic `postgres-spike` regression and the independent `wb0-real-corpus-canary` job both completed successfully, alongside Contract validation, Project governance, Corpus source smoke and the P1 shell regression. The protected merge remains the repository publication action for this change. This PASS is bounded to the pinned 1 Samuel 16:7 canary and does not satisfy `CORE-FZ-WB-002`. WB-1 remains responsible for generalizing this importer and producing complete configured-corpus coverage/error evidence.
 
+## WB-CORPUS-001 source-foundation state
+
+This revision introduces the whole-corpus source/build boundary that WB-1 must consume:
+
+- full OSHB and BHSA export modes are explicit through `--all`; canary/debug execution remains `--reference`;
+- an independent `OSHB_OSIS` reference inventory is scanned directly from the exact pinned OSHB source XML/source manifest rather than inferred from exporter success;
+- the inventory is labelled as a source-derived bootstrap ReferenceSystem snapshot, not final CanonSystem adjudication;
+- the conservative OSHB/BHSA crosswalk runs across the complete provider exports and keeps candidate mappings non-canonical;
+- recognized annotation-only BHSA nodes remain explicit even when another node in the same reference forces that reference into unresolved review;
+- the deterministic coverage manifest records pins, reference-set hash, provider/reference counts, annotation-only/mapping counts, unresolved reasons, per-book diagnostics, explicit provider gaps and artifact hashes;
+- silent reference loss is a build failure;
+- provider book-division counts are diagnostic provenance only, not a fixed 39/24 completeness criterion;
+- no PostgreSQL, Serving projection or ResearchRelease is written by WB-CORPUS-001.
+
+The dedicated whole-Bible workflow is the executable acceptance authority for this source foundation. Its first exact-head execution completed the full corpus build successfully and observed 23,213 selected-reference spans, 306,785 OSHB word records, 426,590 BHSA word nodes, 287,216 candidate span mappings, 1,138 explicitly unresolved references and zero silent reference loss. The generated manifest returned `gatePass=true` and `COMPLETE_WITH_EXPLICIT_EXCEPTIONS`. That run then failed only in the separate schema-validation step because the workflow had installed corpus dependencies but not the repository's pinned `jsonschema` validator. The workflow now installs both `requirements-corpus.txt` and `requirements-contracts.txt` and also runs on relevant pushes to `main`, so validation is repeated after merge. WB-0's exact 1 Samuel 16:7 export shape/hashes remain regression evidence; the new BHSA `--all` mode does not change the canary record shape.
+
 ## Current implementation priority
 
 1. Preserve contract/governance consistency and the whole-Bible scope guard.
-2. Complete WB-1: generalize the WB-0 provider-scoped importer across the complete configured Hebrew Bible and produce auditable book/reference/count/error/exception coverage evidence.
+2. Use WB-CORPUS-001 as the required complete-source input boundary for WB-1, then generalize the WB-0 provider-scoped importer across it and produce auditable relational book/reference/count/error/exception evidence.
 3. Complete WB-2: compile the whole-corpus Authoring result into rights-safe, release-pinned passage-serving projections.
 4. Complete WB-3: replace fixture-only Hebrew passage content with a database-backed whole-Bible reader/navigation.
 5. Complete WB-4/WB-5: add selected translation witnesses, alignment/comparison, project/user translation workflow and deterministic whole-corpus analysis.
@@ -272,4 +288,4 @@ WB-0 implementation acceptance is now PASS on the reviewed PR head: the original
 
 ## Latest push intent
 
-Close WB-0 after real-corpus execution rather than treating a green synthetic schema as sufficient evidence. The pinned 1 Samuel 16:7 data now loads into PostgreSQL Authoring with 25 OSHB words, 34 BHSA words, 22 phrases, 7 clauses, 90 graph-membership edges, 35 bridging feature values, two preserved annotation-only nodes, 25 grouped mapping candidates of which seven are non-1:1, one project BODY_PART target and zero unresolved references. All automatic mappings remain non-canonical, no real BHSA/bridging projection is written to Serving, and the original synthetic relational/RLS/publication spike still passes. WB-0 is therefore complete as a bounded relational canary; WB-1 whole-Bible ingestion and coverage audit is now the next implementation priority.
+Repair the WB-CORPUS-001 CI validation dependency after the first full-source execution proved the corpus build itself succeeds. That run produced 23,213 expected reference spans, 306,785 OSHB words, 426,590 BHSA nodes, 287,216 candidate mappings, 1,138 explicit unresolved references, zero silent reference loss and a `gatePass=true` manifest, then failed only because the inline generated-manifest validator imported `jsonschema` without installing the pinned contract requirements. The workflow now installs both corpus and contract-validator requirements and gains a relevant-path `main` push trigger. No corpus semantics, canary output shape, PostgreSQL schema or publication boundary is changed by this correction.

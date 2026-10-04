@@ -266,6 +266,16 @@ python scripts/corpora/export_bhsa_features.py --reference 1Sam.16.7 --output .l
 python scripts/corpora/build_candidate_crosswalk.py --oshb .local/exports/oshb-1sam16-7.ndjson --bhsa .local/exports/bhsa-1sam16-7.ndjson --output .local/exports/crosswalk-1sam16-7.ndjson
 ```
 
+Build the complete pinned source foundation separately from PostgreSQL ingestion:
+
+```bash
+python -m pip install -r requirements-corpus.txt
+python scripts/corpora/fetch_sources.py
+python scripts/corpora/build_whole_bible_corpus.py
+```
+
+This WB-CORPUS-001 build creates an independent `OSHB_OSIS` reference inventory, complete OSHB/BHSA exports, a conservative whole-corpus candidate crosswalk and a deterministic coverage manifest. Its coverage gate is based on the selected ReferenceSystem inventory, not a hard-coded 39-book or 24-book provider convention. WB-0 remains the accepted 1 Samuel 16:7 relational canary; WB-1 must consume this source foundation through the same corpus-wide importer architecture.
+
 Source pins and rights defaults are machine-readable in `contracts/v1.1/corpus-source-registry.json`.
 
 Do not auto-update upstream versions and do not flatten OSHB/BHSA disagreement into a single canonical analysis.

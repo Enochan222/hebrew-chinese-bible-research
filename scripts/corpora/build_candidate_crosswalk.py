@@ -212,6 +212,11 @@ def main() -> int:
     parser.add_argument("--oshb", type=Path, required=True)
     parser.add_argument("--bhsa", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--quiet-unresolved",
+        action="store_true",
+        help="suppress per-reference unresolved diagnostics on stdout; records remain in the output",
+    )
     args = parser.parse_args()
 
     groups_o: dict[tuple[str, int, int], list[dict]] = defaultdict(list)
@@ -233,6 +238,9 @@ def main() -> int:
             annotation_only_ids = {r.get("providerScopedNodeId") for r in annotation_only}
             b_rows = [r for r in all_b_rows if r.get("providerScopedNodeId") not in annotation_only_ids]
 
+            for row in annotation_only:
+                out.write(json.dumps(annotation_only_record(ref, row), ensure_ascii=False, sort_keys=True) + "\n")
+
             unclassified_empty = [
                 r for r in all_b_rows
                 if not bhsa_signature(r) and r.get("providerScopedNodeId") not in annotation_only_ids
@@ -243,23 +251,21 @@ def main() -> int:
                 unresolved_count += 1
                 continue
 
-            for row in annotation_only:
-                out.write(json.dumps(annotation_only_record(ref, row), ensure_ascii=False, sort_keys=True) + "\n")
-
             groups, reason = align_contiguous_spans(o_rows, b_rows)
 
             if groups is None:
                 record = unresolved_record(ref, o_rows, all_b_rows, reason or "UNKNOWN_ALIGNMENT_FAILURE")
                 out.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
-                print(
-                    f"unresolved {ref[0]}.{ref[1]}.{ref[2]}: {record['reason']}; "
-                    f"oshb_words={len(o_rows)} bhsa_words={len(b_rows)} "
-                    f"oshb_letters={record['oshbConsonantalLength']} bhsa_letters={record['bhsaConsonantalLength']} "
-                    f"first_difference={record['firstDifferenceIndex']} "
-                    f"oshb_empty_tokens={record['oshbEmptySignatureTokens']} "
-                    f"bhsa_empty_tokens={record['bhsaEmptySignatureTokens']} "
-                    f"oshb_sha256={record['oshbStreamSha256']} bhsa_sha256={record['bhsaStreamSha256']}"
-                )
+                if not args.quiet_unresolved:
+                    print(
+                        f"unresolved {ref[0]}.{ref[1]}.{ref[2]}: {record['reason']}; "
+                        f"oshb_words={len(o_rows)} bhsa_words={len(b_rows)} "
+                        f"oshb_letters={record['oshbConsonantalLength']} bhsa_letters={record['bhsaConsonantalLength']} "
+                        f"first_difference={record['firstDifferenceIndex']} "
+                        f"oshb_empty_tokens={record['oshbEmptySignatureTokens']} "
+                        f"bhsa_empty_tokens={record['bhsaEmptySignatureTokens']} "
+                        f"oshb_sha256={record['oshbStreamSha256']} bhsa_sha256={record['bhsaStreamSha256']}"
+                    )
                 unresolved_count += 1
                 continue
 
