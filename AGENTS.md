@@ -25,6 +25,19 @@ The canonical product baseline is the **whole Hebrew Bible**.
 - Research Pro is a progressive overlay and must not block base passage availability.
 - Read `architecture/whole-bible-base-product.md` before corpus, serving, passage-UI or Research Pro implementation work.
 
+## AI execution policy
+
+GitHub Copilot is not an authorized project agent or reviewer for this repository.
+
+- Do not request GitHub Copilot pull-request review.
+- Do not use Copilot Coding Agent, Copilot Autofix, Copilot Chat/code generation, or any GitHub feature that consumes Copilot quota, premium requests, or equivalent Copilot AI credits for this project.
+- Do not treat a Copilot comment, review, suggestion, or status as project acceptance evidence.
+- AI-assisted implementation, analysis, repository orchestration and code review are performed through the project's ChatGPT workflow.
+- Deterministic GitHub Actions, ordinary GitHub repository features, and human collaborators remain allowed; this restriction targets GitHub Copilot AI consumption.
+- Any exception requires an explicit repository-owner policy change committed through the governed PR path.
+
+Machine authority: `contracts/v1.1/github-ai-usage-policy.json`.
+
 ## During research/database work
 
 For external scholarly discovery, follow:
