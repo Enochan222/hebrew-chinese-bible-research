@@ -159,7 +159,23 @@ Prove the database preserves:
 
 Run the same importer across the complete configured Hebrew-Bible source coverage.
 
+Machine configuration:
+
+- CanonSystem contract: `contracts/v1.1/hebrew-bible-canon-system.json`;
+- current code: `TANAKH_OSIS_39`;
+- source pins remain those in `contracts/v1.1/corpus-source-registry.json`.
+
 Produce a machine-auditable coverage/error report.
+
+The WB-1 importer is book-bounded so one source irregularity cannot require holding the entire corpus in memory. Each book imports transactionally. Coverage evidence must distinguish:
+
+- source-ingestion failure;
+- provider record retained without an orthographic TextSegment;
+- reviewed annotation-only node;
+- unresolved cross-framework mapping;
+- explicit source-only or framework-only reference address.
+
+Only source-ingestion parity, duplicate identity, configured-book coverage and database reconciliation are load-bearing for `CORE-FZ-WB-002`. Cross-framework disagreement may remain unresolved if it is explicitly reported and no source record is silently discarded.
 
 ### WB-2: whole-Bible release-pinned passage serving
 
