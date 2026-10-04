@@ -4,6 +4,7 @@
     "PROJECT_CHARTER.md",
     "PROJECT_STATE.md",
     "architecture/database-api-cross-stage-contract-v1.1.md",
+    "architecture/whole-bible-base-product.md",
     "architecture/corpus-source-integration.md",
     "architecture/product-platform-and-publication-model.md",
     "architecture/integration-boundaries-mcp-api-database.md",
@@ -51,6 +52,7 @@
     "Active architecture documents implement the charter and must not contradict its non-negotiable requirements.",
     "Active documents must not depend normatively on superseded documents.",
     "AI/coding agents should consult active entries before semantic/code search results from superseded paths.",
-    "Superseded documents remain design history only."
+    "Superseded documents remain design history only.",
+    "Whole-Bible base-product coverage is canonical; passage-specific fixtures are acceptance vectors only and Research Pro must not block base passage availability."
   ]
 }
