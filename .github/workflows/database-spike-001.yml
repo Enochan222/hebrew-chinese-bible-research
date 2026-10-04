@@ -159,10 +159,19 @@ jobs:
           assert report["reference"] == "1Sam.16.7"
           assert report["counts"]["oshbWordNodes"] == 25
           assert report["counts"]["bhsaWordNodes"] == 34
+          assert report["counts"]["bhsaTextBearingWordNodes"] == 32
           assert report["counts"]["bhsaAnnotationOnlyWordNodes"] == 2
+          assert report["counts"]["bhsaPhraseNodes"] == 22
+          assert report["counts"]["bhsaClauseNodes"] == 7
+          assert report["counts"]["bhsaMembershipEdges"] == 90
+          assert report["counts"]["bridgeFeatureValues"] == 35
           assert report["counts"]["candidateMappingGroups"] == 25
-          assert report["counts"]["manyToManyCandidateGroups"] > 0
+          assert report["counts"]["manyToManyCandidateGroups"] == 7
+          assert report["counts"]["projectBodyPartTargetNodes"] == 1
           assert report["counts"]["unresolvedReferences"] == 0
+          assert report["inputSha256"]["oshb"] == "3ddba4e8a39959effd6ae7b803d1bbd6ab95be52a5641ace8d2b0262e76a3b33"
+          assert report["inputSha256"]["bhsa"] == "4b83026a29adc352ff910679f4f7cfe69d06385438363393da75f0bc0f7e0836"
+          assert report["inputSha256"]["crosswalk"] == "9d8f815625bdd580cb777bd3a3dfc1e65bdf65a93a651fa1d04e2f66fc24bb72"
           assert report["canonicalCandidateMappings"] == 0
           assert report["servingProjectionWritten"] is False
           assert report["annotationOnlyProviderNodeIds"] == ["150439", "150445"]
