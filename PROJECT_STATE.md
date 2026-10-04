@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-05.11**
+State Revision: **2026-10-05.12**
 
 ## Mandatory governance rule
 
@@ -317,17 +317,16 @@ Current review-branch implementation:
 - real BHSA/bridging-derived rows remain absent from Serving in WB-1;
 - `.github/workflows/wb1-relational-whole-corpus.yml` rebuilds WB-CORPUS-001, imports the relational corpus and uploads the machine-auditable WB-1 report.
 
-WB-1 acceptance remains **PENDING** until the exact PR head completes the full pinned corpus workflow and its observed exception/count profile is independently reviewed. `CORE-FZ-WB-002` must not be marked complete before that evidence exists.
+WB-1 acceptance is **PASS** for `CORE-FZ-WB-002`. The synchronized implementation head `6ec515067f05a901667e4d1f783329f0ee46a53a` passed the complete pinned-source relational workflow and every independent regression gate. Machine evidence reconciles 39/39 configured books, 23,213 selected/reference atoms, 306,785 OSHB words, 426,590 BHSA words, 253,203 BHSA phrases, 88,131 BHSA clauses, 1,106,383 graph-membership edges, 469,484 bridging feature values, 287,216 grouped candidate mappings, 6,409 reviewed annotation-only BHSA nodes and 79 explicit unclassified empty-source BHSA nodes. It reports zero missing configured books, provider-ID duplicates, importer errors, source/database parity failures, OSHB missing-surface records or real-corpus Serving rows. The 1,138 unresolved cross-framework references exactly match WB-CORPUS-001 and remain explicit research/mapping exceptions rather than silent source-record drops.
 
 ## Current implementation priority
 
-1. Preserve contract/governance consistency and the whole-Bible scope guard.
-2. Execute and repair WB-1 against the complete accepted WB-CORPUS-001 foundation until the relational source/database parity gate passes without silent record loss.
-3. After WB-1 acceptance, complete WB-2: compile the whole-corpus Authoring result into rights-safe, release-pinned passage-serving projections.
-4. Complete WB-3: replace fixture-only Hebrew passage content with a database-backed whole-Bible reader/navigation.
-5. Complete WB-4/WB-5: add selected translation witnesses, alignment/comparison, project/user translation workflow and deterministic whole-corpus analysis.
-6. Only then make Research Pro provider adapters, ResearchModelAdapter and end-to-end literature builds the primary product implementation frontier; academic enrichment may proceed in parallel where it does not block the base path.
+1. Preserve contract/governance consistency, the ChatGPT-only project AI policy and the whole-Bible scope guard.
+2. Complete WB-2: compile the accepted WB-1 whole-corpus Authoring result into rights-safe, release-pinned passage-serving projections without leaking BHSA/bridging-derived data that lacks an ALLOW RightsDecision.
+3. Complete WB-3: replace fixture-only Hebrew passage content with a database-backed whole-Bible reader/navigation and verify `CORE-FZ-WB-001` / `CORE-FZ-WB-003` behavior.
+4. Complete WB-4/WB-5: add selected translation witnesses, alignment/comparison, project/user translation workflow and deterministic whole-corpus analysis.
+5. Only then make Research Pro provider adapters, ResearchModelAdapter and end-to-end literature builds the primary product implementation frontier; academic enrichment may proceed in parallel where it does not block the base path.
 
 ## Latest push intent
 
-Synchronize WB-1 with the repository's ChatGPT-only AI execution policy and harden the already-green whole-corpus relational candidate before acceptance. The first WB-1 exact-head execution showed 39/39 configured books, 23,213 selected/reference atoms, 306,785 OSHB words, 426,590 BHSA words, 287,216 grouped candidate mappings, 1,138 explicit unresolved cross-framework references, zero importer/parity failures, zero OSHB missing-surface records and zero real-corpus Serving rows. This revision additionally rejects any orthographic mapping candidate that targets either a reviewed annotation-only or an unclassified empty-source BHSA node, strengthens independent report verification, and adds a stable-UUID regression proving WB-1 preserves accepted WB-0 identities. CORE-FZ-WB-002 remains pending until this synchronized candidate reruns exact-head validation and the evidence is formally closed out.
+Close WB-1 on machine-auditable whole-corpus evidence and advance the implementation frontier to WB-2. The accepted relational import preserves the complete configured WB-CORPUS-001 provider record set in Authoring, keeps 1,138 unresolved cross-framework references explicit rather than guessed, preserves empty-source BHSA nodes without invented text, keeps every automatic mapping non-canonical, preserves WB-0 stable identities, and writes no real BHSA/bridging corpus rows to Serving. `CORE-FZ-WB-002` is now PASS; `CORE-FZ-WB-001` remains pending end-user navigation verification and `CORE-FZ-WB-003` remains pending rights-safe release-pinned Serving/reader implementation. The closeout head must rerun all required deterministic GitHub Actions before merge.
