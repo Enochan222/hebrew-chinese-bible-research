@@ -4,6 +4,36 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+## 2026-10-04 — Close CitationLocator and passage-scoped MCP identity gaps
+
+### Push intent
+
+Repair two machine-contract defects found by post-merge adversarial review, and synchronize the living state with the fact that Database Spike 001 is now merged.
+
+### Why
+
+The CitationLocator schema required type-specific property names but several identity properties still accepted `null`, while printed-page labels could be empty. Separately, the Product MCP `get_rule_applications` input retained a pre-ReferenceSystem bare `reference` string even though the project now requires every human reference label to carry explicit ReferenceSystem identity. Existing fixtures did not exercise either failure mode.
+
+### What changed
+
+- made SOURCE_SPAN, PRINTED_PAGE, SOURCE_ASSET_PAGE, DOCUMENT_SECTION, LEXICON_ENTRY, BIBLICAL_REFERENCE, and CORPUS_RESULT locator identities non-null and made printed-page labels non-empty;
+- changed RuleApplicationsRequestV1 to reuse PassageLocatorV1, accepting either canonical `referenceSpanId` or `referenceSystemCode` plus `referenceLabel`;
+- added one positive rule-application request fixture and nine negative regression fixtures;
+- updated Product MCP prose, active architecture, and the machine-contract inventory;
+- corrected PROJECT_STATE implementation priorities and latest intent after PR #9 merged to protected `main`.
+- limited secret scanning to repository-controlled source and configuration, excluding dependency, build, test-report, coverage, cache, and VCS directories so generated third-party files cannot create false positives.
+
+### Intended effect
+
+Public evidence cannot carry formally present but unusable locator identities, and passage-scoped rule-application reads can no longer resolve human labels outside an explicit reference system.
+
+### Validation
+
+- regression-first contract runs failed on the new rule-application fixture and eight nullable/empty CitationLocator cases before the schema repair;
+- a combined web/contract validation run reproduced false secret alarms from `.next` and `node_modules` before the generated-directory exclusion;
+- repaired local contract validation passes with 40 positive fixtures plus all negative, semantic, vocabulary, governance, and secret checks;
+- Core and Research Pro OpenAPI validation remain required before push/merge;
+- GitHub `contracts` and `state-and-changelog` checks remain the merge authority.
 
 ## 2026-10-04 — Connect pinned OSHB, BHSA 2021, and ETCBC bridging corpus sources
 
@@ -174,6 +204,52 @@ Before creating the repository commit:
 Corpus source smoke run `37196120231` PASS proved the pinned acquisition/export/crosswalk path on the pre-sync head. The synchronized PR head must rerun `contracts`, `state-and-changelog`, and `Corpus source smoke` against latest `main` before squash merge. The merged Database Spike 001 already proves the PostgreSQL integrity slice with controlled fixtures; real-corpus import into that schema remains pending and is the next integration gate.
 
 
+## 2026-10-04 — Add P1 fixture-backed release-pinned Passage serving shell
+
+### Push intent
+
+Implement P1-VS-001A–F as the first executable Product Serving shell without binding the UI to physical database tables or freezing the rich PassageExperience DTO.
+
+### Why
+
+The Core contract gates permit implementation work, while DB-0 and real publication/storage evidence remain pending. Phase 1 explicitly permits fixture releases, requires public fixture responses to be release-pinned, and requires Study/Research to share the same ResearchRelease. A server-side adapter boundary lets the serving shell be exercised now without creating a second data contract or pre-empting database decisions.
+
+### What changed
+
+- added `apps/web` with Next.js App Router and strict TypeScript;
+- added domain ports/services for release resolution, passage reads and experience capabilities;
+- added server-only fixture adapters that read and runtime-validate the existing canonical v1.1 fixture chain;
+- added current and pinned passage APIs plus the current-release endpoint and capability endpoint;
+- added current passage navigation that resolves the current fixture release once and redirects to the pinned release route;
+- added a minimal Study/Research switch that retains the same release/reference/reference-system identity;
+- added visible fixture/non-production labelling, ResearchRelease and ReferenceSpan display, and explicit later-phase placeholders;
+- added distinct invalid-reference, missing-reference-system, invalid-release, missing-release, invalid-mode, contract-violation and temporary-unavailability states;
+- added boundary checks prohibiting app/feature imports from adapters, DB/ORM/auth/cloud SDK dependencies, and SQL statement text in the scoped web implementation;
+- after the first branch-only lockfile generation, narrowed lint tooling to that deterministic boundary scanner rather than carrying an unnecessary framework lint preset and its transitive dependency surface;
+- added unit, HTTP integration and Playwright E2E/visual-state tests;
+- added a feature-branch-only validation workflow to generate the npm lockfile artifact and, once tracked, run full acceptance;
+- did not add database migrations, Supabase/PostgreSQL integration, ORM, auth, cloud credentials, publication worker, CorpusQuery, translation workbench, annotation storage, rich PassageExperience DTO or A1–A4 semantic changes.
+
+### Intended effect
+
+Provide a verifiable release/reference-aware serving shell whose fixture adapter can later be replaced by a DB-0-backed Serving adapter without changing page/business logic or treating provider identifiers as canonical reference identity.
+
+### Validation
+
+Feature-branch workflow run `37180410353` succeeded and produced the initial npm lockfile artifact. Dependency review then found that the framework lint preset introduced unnecessary transitive tooling for this narrowly scoped shell. The preset was removed while strict TypeScript and the deterministic source/import/SQL/SDK boundary scanner were retained.
+
+The subsequent full local run exposed two real blockers that the first unit test did not cover: Ajv schema compilation received an `unknown` TypeScript value, and PassageRequest compilation could not resolve its external PassageLocator `$ref`, causing the current-release endpoint to return 503 throughout the HTTP integration test. The repair:
+
+- tracks the regenerated npm lockfile;
+- types parsed contract JSON as an Ajv schema;
+- pre-registers canonical `$id` schemas before validator lookup/compilation;
+- adds a regression test for PassageRequest external-reference resolution;
+- narrows dynamic contract file access to `contracts/v1.1`, removing the production-build whole-repository trace warning;
+- synchronizes Next.js 16 generated TypeScript declarations/settings and disables unwanted agent-rule file generation;
+- ignores generated web build, dependency, report and incremental-build paths;
+- excludes dependency, build, test-report, coverage, cache and VCS trees from the repository secret scan after generated Next.js/dependency files caused false alarms in the combined validation run.
+
+After repair, local contract validation, Core/Research Pro OpenAPI validation, deterministic lockfile regeneration, `npm ci`, typecheck, boundary lint, eight unit tests, HTTP integration, and production build pass. Playwright could not install Chromium locally because the permitted download path returned a zero-byte invalid archive; the branch workflow must therefore run Playwright E2E/visual capture and the complete suite before merge. Visual QA must then be inspected for ready, invalid-mode, missing-reference and missing-release states.
 ## 2026-10-04 — Close inactive Serving candidate visibility leak
 
 ### Push intent

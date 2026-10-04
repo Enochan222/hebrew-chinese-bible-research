@@ -43,6 +43,11 @@ Core OpenAPI does not override Research Pro extension endpoints merely because t
 - `json-schema/passage-core.schema.json`
 - `json-schema/passage-request.schema.json`
 - `json-schema/passage-locator.schema.json`
+- `json-schema/release-pointer.schema.json`
+- `json-schema/construction-instances-request.schema.json`
+- `json-schema/rule-applications-request.schema.json`
+- `json-schema/evidence-request.schema.json`
+- `json-schema/semantic-sets-request.schema.json`
 - `json-schema/query-execution-policy.schema.json`
 - `json-schema/release-manifest.schema.json`
 - `json-schema/rights-decision-snapshot.schema.json`

@@ -133,7 +133,13 @@
       "then": {
         "required": [
           "sourceSpanId"
-        ]
+        ],
+        "properties": {
+          "sourceSpanId": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+          }
+        }
       }
     },
     {
@@ -148,7 +154,17 @@
         "required": [
           "editionId",
           "printedPageLabel"
-        ]
+        ],
+        "properties": {
+          "editionId": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+          },
+          "printedPageLabel": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
       }
     },
     {
@@ -162,7 +178,13 @@
       "then": {
         "required": [
           "sourceAssetPageId"
-        ]
+        ],
+        "properties": {
+          "sourceAssetPageId": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+          }
+        }
       }
     },
     {
@@ -179,6 +201,10 @@
           "sectionPath"
         ],
         "properties": {
+          "editionId": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+          },
           "sectionPath": {
             "type": "array",
             "minItems": 1,
@@ -204,6 +230,10 @@
           "entryLabel"
         ],
         "properties": {
+          "editionId": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+          },
           "entryLabel": {
             "type": "string",
             "minLength": 1
@@ -222,7 +252,13 @@
       "then": {
         "required": [
           "referenceSpanId"
-        ]
+        ],
+        "properties": {
+          "referenceSpanId": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+          }
+        }
       }
     },
     {
@@ -236,7 +272,13 @@
       "then": {
         "required": [
           "corpusQueryRunId"
-        ]
+        ],
+        "properties": {
+          "corpusQueryRunId": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+          }
+        }
       }
     }
   ]

@@ -1,10 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/rule-applications-request.schema.json",
   "title": "RuleApplicationsRequestV1",
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "reference"
+    "locator"
   ],
   "properties": {
     "researchReleaseId": {
@@ -14,9 +15,8 @@
       ],
       "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
     },
-    "reference": {
-      "type": "string",
-      "minLength": 1
+    "locator": {
+      "$ref": "./passage-locator.schema.json"
     }
   }
 }

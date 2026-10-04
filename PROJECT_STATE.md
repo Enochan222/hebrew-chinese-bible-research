@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.14**
+State Revision: **2026-10-04.16**
 
 ## Mandatory governance rule
 
@@ -138,7 +138,8 @@ Repository visibility remains public as observed state; this audit does not chan
 - Official project TranslationDecision pins an immutable TranslationSourceBasis and exact TranslationPolicyVersion.
 - Corpus query execution separates scholarly query meaning from cursor/page retrieval state and distinguishes exact from unavailable total counts.
 - RightsDecisionSnapshot is fail-closed: unresolved/unknown permission cannot surface as an UNKNOWN final outcome or ALLOW.
-- Public evidence uses typed CitationLocator semantics; excerpts require rights snapshots and immutable evidence requires content hashes.
+- Public evidence uses typed CitationLocator semantics whose required identity cannot be null or empty; excerpts require rights snapshots and immutable evidence requires content hashes.
+- Passage-scoped rule-application MCP reads use the shared ReferenceSystem-aware PassageLocator contract rather than an ambiguous bare reference string.
 - ResearchPositionVersion pins the exact ResearchIssueVersion framing used for that scholarly position.
 - Database Spike 001 is specified as an adversarial scholarly-integrity vertical slice, not a table-creation demo.
 - `main` is live-protected by active repository ruleset `Protect main` (ID `24409248`).
@@ -204,14 +205,34 @@ See `architecture/corpus-source-integration.md` and `contracts/v1.1/corpus-sourc
 - final entitlement/pricing model;
 - detailed visual system within scholarly UX constraints.
 
+## Phase 1 fixture serving-shell implementation state
+
+P1-VS-001A–F introduces the first executable public-serving shell under `apps/web` as a deliberately fixture-backed implementation boundary.
+
+Current bounded state:
+
+- Next.js App Router + strict TypeScript is used for the fixture serving shell only; this does not select a cloud provider or database platform;
+- current passage navigation resolves the fixture PRODUCTION ResearchRelease once and redirects to a citation-stable pinned-release route;
+- pinned passage reads never re-resolve the current release;
+- Study and Research mode switching preserves the same ResearchRelease, human reference and ReferenceSystem;
+- the canonical v1.1 release-pointer, passage-core and experience-capabilities fixture chain is runtime-validated before rendering;
+- the UI visibly labels all data as fixture/non-production and does not claim database-backed passage content;
+- application/features depend on domain ports/services rather than fixture adapter implementations;
+- no PostgreSQL/Supabase/ORM/auth/cloud SDK, migration, publication worker, CorpusQuery, translation workbench or annotation storage is introduced;
+- scoped npm lint uses a deterministic source/import/SQL/dependency boundary scanner rather than a framework lint preset, minimizing transitive tooling surface;
+- the rich PassageExperience projection remains deliberately unfrozen;
+- DB-0 remains responsible for real relational constraints, RLS/grants, ReferenceSystem resolution against persisted data, ResearchRelease/channel persistence and publication visibility atomicity.
+
+This is fixture-shell implementation evidence only. It does not satisfy real-database CORE_FREEZE gates or complete Phase 1.
+
 ## Current implementation priority
 
 1. Preserve contract/governance consistency.
 2. Connect the pinned OSHB/BHSA/ETCBC-bridging exports to the merged Database Spike 001 relational schema and validate real-corpus cross-layer constraints/queries without promoting unreviewed candidate mappings.
-3. Implement provider adapters and ResearchModelAdapter interfaces.
+3. Implement scholarly provider adapters and ResearchModelAdapter interfaces.
 4. Validate one end-to-end literature-discovery build against a real Hebrew-Bible ResearchIssue.
 5. Continue later application stages without weakening publication/rights/reproducibility boundaries.
 
 ## Latest push intent
 
-PR #8 is synchronized onto current protected `main` after the executable Database Spike 001 and the post-merge Serving-publication RLS correction. Real-corpus source-adapter evidence is now cleanly separated from relational evidence: corpus smoke run `37196120231` passed pinned OSHB/BHSA/bridging acquisition, OSHB 25-word/BHSA 34-slot export, annotation-only BHSA article-node preservation, and conservative many-to-many candidate alignment with no unresolved reference. The merged PostgreSQL spike remains a controlled-fixture integrity slice; importing these real corpus exports into its relational schema is still pending and is now the next corpus/database integration gate.
+Main now includes the publication-visibility, contract-identity, and P1 fixture-serving repairs through `21ef79f07dffddde5b87aa86f16a50d3c2f1cdc5`. PR #8 is synchronized onto that protected main. Real-corpus source-adapter evidence remains cleanly separated from relational evidence: the pinned OSHB/BHSA/bridging smoke passes with 25 OSHB words, 34 BHSA slots, two annotation-only article nodes, 25 conservative candidate mappings, and no unresolved reference. The merged PostgreSQL spike remains a controlled-fixture integrity slice; importing these real corpus exports into its relational schema is still pending and is the next corpus/database integration gate. No remote Supabase project has been designated or modified.
