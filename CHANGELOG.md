@@ -21,6 +21,7 @@ The CitationLocator schema required type-specific property names but several ide
 - added one positive rule-application request fixture and nine negative regression fixtures;
 - updated Product MCP prose, active architecture, and the machine-contract inventory;
 - corrected PROJECT_STATE implementation priorities and latest intent after PR #9 merged to protected `main`.
+- limited secret scanning to repository-controlled source and configuration, excluding dependency, build, test-report, coverage, cache, and VCS directories so generated third-party files cannot create false positives.
 
 ### Intended effect
 
@@ -29,6 +30,7 @@ Public evidence cannot carry formally present but unusable locator identities, a
 ### Validation
 
 - regression-first contract runs failed on the new rule-application fixture and eight nullable/empty CitationLocator cases before the schema repair;
+- a combined web/contract validation run reproduced false secret alarms from `.next` and `node_modules` before the generated-directory exclusion;
 - repaired local contract validation passes with 40 positive fixtures plus all negative, semantic, vocabulary, governance, and secret checks;
 - Core and Research Pro OpenAPI validation remain required before push/merge;
 - GitHub `contracts` and `state-and-changelog` checks remain the merge authority.

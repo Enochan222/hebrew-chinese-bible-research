@@ -347,8 +347,9 @@ def vocab_drift():
 def secret_scan():
     assignment=re.compile(r"(?i)\b(GEMINI_API_KEY|GOOGLE_API_KEY|OPENAI_API_KEY|ANTHROPIC_API_KEY|SCITE_API_KEY|CORE_API_KEY|SEMANTIC_SCHOLAR_API_KEY|OPENALEX_API_KEY)\s*=\s*[\"']?([A-Za-z0-9_\-]{8,})")
     literals=[re.compile(r"AIza[0-9A-Za-z_\-]{30,}"),re.compile(r"sk-[A-Za-z0-9_\-]{20,}"),re.compile(r"scite_[A-Za-z0-9_\-]{20,}")]
+    excluded_dirs={".git", ".next", "node_modules", "playwright-report", "test-results", "dist", "build", "coverage", "__pycache__"}
     for p in ROOT.rglob("*"):
-        if not p.is_file() or ".git" in p.parts: continue
+        if not p.is_file() or excluded_dirs.intersection(p.relative_to(ROOT).parts): continue
         rel=p.relative_to(ROOT)
         if rel.name in {".env",".env.local",".env.production",".env.development"}: fail(f"forbidden env file {rel}")
         if p.suffix.lower() not in {".md",".json",".yaml",".yml",".py",".ts",".tsx",".js",".jsx",".toml",".txt"}: continue
