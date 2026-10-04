@@ -771,6 +771,8 @@ Fields:
 
 A phrase or clause exists according to its pinned annotation layer.
 
+An AnalysisNode may legitimately have zero `analysis_node_segments` rows when the source framework contains an annotation-bearing node with no orthographic text contribution. Such a node must retain provider identity, reference span, framework features, provenance and graph relations, but it must not be assigned an invented TextSegment merely to satisfy cross-framework alignment. Any cross-annotation mapping that depends on textual identity must exclude or separately review such annotation-only nodes.
+
 ## 7.5 `analysis_node_segments`
 
 Fields:

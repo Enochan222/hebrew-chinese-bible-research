@@ -35,6 +35,175 @@ Public evidence cannot carry formally present but unusable locator identities, a
 - Core and Research Pro OpenAPI validation remain required before push/merge;
 - GitHub `contracts` and `state-and-changelog` checks remain the merge authority.
 
+## 2026-10-04 — Connect pinned OSHB, BHSA 2021, and ETCBC bridging corpus sources
+
+### Push intent
+
+Turn the previously open OSHB/BHSA corpus-source decision into a reproducible first implementation for Database Spike 001 without vendoring large upstream corpora or collapsing incompatible annotation frameworks.
+
+### Why
+
+The project already had the correct framework-scoped ontology, CorpusQuery layer pinning, rights model, and an explicit Spike requirement to test OSHB against structurally different BHSA/MACULA-style data. What was missing was an executable acquisition/import boundary: exact upstream pins, local download rules, provider-scoped exporters, rights defaults, and a decision table telling future agents which source should answer which class of corpus question.
+
+OSHB and BHSA are complementary rather than interchangeable. OSHB is well suited to the initial word/lemma/morpheme/morphology baseline. BHSA provides a rich independent phrase/clause/syntactic framework. ETCBC bridging provides Open Scriptures morphology comparison on BHSA word nodes, but does not prove a universal provider-word-ID identity.
+
+### What changed
+
+- added `contracts/v1.1/corpus-source-registry.json` with exact reviewed pins for:
+  - OSHB/morphhb commit `3d15126fb1ef74867fc1434be1942e837932691f`;
+  - BHSA frozen dataset `2021` from repo commit `4db00e2157915495e1a4d3d57e41223df24775da`;
+  - ETCBC bridging `2021` commit `324598bb3f9cb3a36543e77ac61e4b0f77addf82`;
+- added JSON Schema validation for the corpus source registry;
+- added `architecture/corpus-source-integration.md` as active authority;
+- added `scripts/corpora/fetch_sources.py` to download only configured pinned source material into `.local/corpora/`, generate SHA-256 source manifests, verify existing caches, and report upstream movement without ever auto-advancing pins;
+- added `scripts/corpora/export_oshb_words.py` for provider-scoped OSHB OSIS NDJSON export with source Unicode preserved exactly;
+- added `scripts/corpora/export_bhsa_features.py` for provider-scoped BHSA word/phrase/clause NDJSON export and optional pinned bridging features;
+- added `scripts/corpora/build_candidate_crosswalk.py` to propose only fail-closed, non-canonical current-OSHB to BHSA word mappings when reference/order/consonantal signatures agree;
+- pinned Text-Fabric `13.1.0` in `requirements-corpus.txt` for the BHSA adapter;
+- added `.gitignore` rules so downloaded corpora and generated local exports do not enter Git;
+- documented the usage policy:
+  - OSHB for the first morphology/morpheme baseline;
+  - BHSA for declared phrase/clause/syntax layers;
+  - ETCBC bridging for derived comparison/mapping evidence;
+  - project SemanticSetVersion for project semantic classes;
+  - preserve disagreement rather than silently flattening it;
+- documented the rights boundary:
+  - OSHB licensed morphology/lemma data requires attribution;
+  - BHSA data is treated as CC BY-NC with explicit RightsDecision required for public/commercial serving;
+  - bridging-derived public serving defaults to deny until mixed upstream rights are reviewed;
+- strengthened the Database Spike 001 specification so the next real-corpus relational round must import these pinned sources and require an explicit compatible cross-layer mapping; the currently merged PostgreSQL harness still uses controlled synthetic fixtures;
+- extended contract validation to validate the registry, its semantic source ensemble/rights invariants, and corpus-adapter Python syntax;
+- updated README, contracts README, architecture manifest, PROJECT_STATE and this CHANGELOG.
+
+### Intended effect
+
+A developer can now reproducibly fetch and inspect the exact upstream Hebrew data prepared for the next real-corpus database-spike round, export provider-scoped records, and know which annotation layer owns each claim. Upstream branch movement cannot silently change an existing ResearchRelease, and BHSA licensing cannot be bypassed by treating repository availability as public/commercial permission.
+
+### Validation
+
+#### First real smoke result and repair
+
+The first `Corpus source smoke` run on PR #8 provided useful negative evidence rather than being bypassed:
+
+- exact OSHB, BHSA 2021 and ETCBC bridging downloads all completed and verified;
+- OSHB 1 Samuel 16:7 export succeeded with 25 provider-scoped word records;
+- BHSA export failed during Text-Fabric initialization with `KeyError: 'g_cons'`;
+- inspection of pinned BHSA `tf/2021/otext.tf` showed that its declared text/lexical formats reference both UTF-8 and transliterated/plain features, so the original curated subset was incomplete even though the exporter itself did not request `g_cons`.
+
+Repair:
+
+- add every pinned feature referenced by `otext.tf` format expressions plus section features to the BHSA acquisition set;
+- make `fetch_sources.py` parse pinned `otext.tf` and fail early if any referenced local feature file is missing;
+- make contract validation assert the minimum BHSA Text-Fabric dependency set;
+- rerun the unchanged real-corpus smoke until export and candidate crosswalk complete successfully.
+
+#### Second real smoke result and repair
+
+Run `37192323018` advanced materially further:
+
+- all exact pinned source downloads passed;
+- OSHB export passed with 25 words for 1 Samuel 16:7;
+- BHSA Text-Fabric initialization and export process itself passed, proving the dependency-closure repair;
+- the requested BHSA filter still produced zero rows;
+- crosswalk compilation then correctly emitted one unresolved reference rather than inventing mappings;
+- final smoke verification failed because `bhsa.ndjson` was empty.
+
+The zero-row result exposed a provider-label assumption, not a corpus absence. BHSA ships both Latin `book` labels such as `Samuel_I` and English `book@en` labels such as `1_Samuel`; Text-Fabric section presentation must not be assumed to equal the CLI's hard-coded spelling.
+
+Repair:
+
+- add shared `scripts/corpora/reference_aliases.py` covering OSHB, BHSA Latin, and BHSA English book labels;
+- use alias normalization only to compare/filter references;
+- preserve provider-native labels in exported records;
+- make BHSA requested-reference zero-row output a hard error with diagnostics;
+- make current-OSHB/BHSA crosswalk normalize both provider labels through the same shared function;
+- use `1Sam.16.7` as the common smoke input and rerun the real workflow.
+
+#### Third real smoke finding: segmentation is genuinely many-to-many
+
+Run `37192627166` passed the complete existing smoke and produced the first reliable real-data comparison:
+
+- OSHB 1 Samuel 16:7: 25 word records;
+- BHSA 1 Samuel 16:7: 34 word records;
+- all pinned downloads, Text-Fabric load, both exporters, crosswalk process, and output-format validation succeeded;
+- the previous 1:1/count-equality crosswalk correctly refused to fabricate mappings and emitted one `UNRESOLVED_REFERENCE`.
+
+This result is not treated as a nuisance to suppress. It proves the architecture's framework-scoped segmentation premise on the primary spike verse.
+
+Repair/extension:
+
+- replace count-equality/zip mapping with conservative contiguous many-to-many span alignment;
+- require exact equality of the whole normalized verse consonantal stream before any automatic span proposal;
+- form the smallest contiguous source/target groups whose Hebrew-letter signatures match;
+- support 1:1, 1:n, n:1, and n:m candidates while preserving provider IDs and word orders;
+- keep every generated mapping `CANDIDATE_AUTOMATED`, `canonical = false`;
+- fail closed to `NEEDS_REVIEW` for textual stream mismatch, empty signatures, exhaustion, or non-prefix divergence;
+- tighten the 1 Samuel 16:7 smoke so it must produce at least one actual many-to-many candidate and no unresolved reference.
+
+#### Fourth smoke diagnostic hardening
+
+The stricter many-to-many smoke still produced one unresolved reference and no candidate spans. The existing job output did not expose the unresolved reason, so changing the mapping algorithm again would be guesswork.
+
+Added permanent fail-closed diagnostics to unresolved crosswalk records and CI output:
+
+- machine reason code;
+- OSHB/BHSA word counts;
+- consonantal stream lengths;
+- SHA-256 of each consonantal stream;
+- first differing character index.
+
+The diagnostic deliberately does not print the verse text. The next smoke run is used to classify the failure before any further mapping change.
+
+#### Fifth smoke: isolate zero-letter provider tokens
+
+Run `37193120184` classified the previous ambiguity:
+
+- OSHB whole-verse consonantal length: 92;
+- BHSA whole-verse consonantal length: 92;
+- SHA-256 of both normalized consonantal streams: `886cfe4cab6d1c1d3d032b5ed3cd201d3c12a41f82655ba04be075155f494253`;
+- first differing character: none;
+- alignment nevertheless stopped with `EMPTY_CONSONANTAL_SIGNATURE`.
+
+Therefore the failure is not a textual-version mismatch and not a whole-verse normalization mismatch. Before changing alignment semantics, the crosswalk now records only the order/provider identity and boolean source-field presence of zero-letter tokens. It still does not print source Hebrew text. The next real smoke must identify which provider records have empty Hebrew-letter signatures; only then may the alignment rule decide whether they are ignorable structural tokens, exporter defects, or separately reviewable mappings.
+
+The next diagnostic run identified the zero-letter side precisely: OSHB has no empty-signature word records, while BHSA word-order positions 27 and 33 are nodes `150439` and `150445`; both have neither `g_cons_utf8` nor `g_word_utf8`. Because BHSA documentation describes those features as the normal word-occurrence representations, the integration does not yet classify the nodes as ignorable. A narrower metadata-only probe now records POS/PDP, language, presence of lexeme/qere/bridging morphology, and phrase/clause membership for those two nodes. Mapping behavior remains fail-closed until that probe classifies them.
+
+#### Sixth smoke: classify BHSA annotation-only nodes
+
+Run `37195737087` showed that both zero-letter BHSA slots are genuine annotation-bearing nodes rather than exporter omissions:
+
+- node `150439`, verse order 27: lexeme present, `sp=art`, `pdp=art`, `languageISO=hbo`, phrase `737331`, clause `455846`, no qere, no bridging morphology, no orthographic/consonantal value;
+- node `150445`, verse order 33: lexeme present, `sp=art`, `pdp=art`, `languageISO=hbo`, phrase `737335`, clause `455847`, no qere, no bridging morphology, no orthographic/consonantal value;
+- OSHB still has no empty-signature records;
+- the complete normalized OSHB/BHSA consonantal verse streams remain identical.
+
+Resolution:
+
+- preserve those BHSA nodes as `ANNOTATION_ONLY_TARGET_NODE` records;
+- do not delete them from the BHSA annotation graph;
+- do not fabricate an orthographic TextSegment or attach them automatically to a neighbouring OSHB token;
+- exclude them only from the orthographic span alignment;
+- allow only text-bearing BHSA nodes into the conservative consonantal crosswalk;
+- keep any unclassified empty node fail-closed as `NEEDS_REVIEW`;
+- make Database Spike 001 explicitly test that an AnalysisNode may have zero segment memberships while retaining framework features and graph relations.
+
+Before creating the repository commit:
+
+- current upstream repository heads and frozen BHSA/bridging 2021 directories were inspected;
+- the registry draft passed Draft 2020-12 JSON Schema validation;
+- all three corpus Python adapters passed Python syntax compilation;
+- the OSHB exporter was exercised against a synthetic namespaced OSIS verse and preserved source Hebrew, lemma, morphology, provider ID and verse order;
+- Text-Fabric `13.1.0` was verified as the current PyPI release and supports pinned/local Text-Fabric data workflows;
+- independent review found that BHSA uses `Samuel_I`, not `1_Samuel`, as the section book label and corrected the adapter/docs;
+- independent review also found that ETCBC bridging 2021 must not be treated as a direct mapping from this project's current OSHB commit to BHSA nodes because the bridge artifact does not embed that current immutable OSHB input pin;
+- a dedicated `Corpus source smoke` workflow was therefore added to fetch all three pinned sources and execute the OSHB exporter, BHSA exporter, and conservative crosswalk on 1 Samuel 16:7.
+- first real smoke run `37141481533` proved all three pinned-source downloads and cache hashes, and exported 25 OSHB words, but failed at BHSA Text-Fabric load with `KeyError: g_cons`;
+- inspection of BHSA 2021 `otext.tf` showed that Text-Fabric format initialization references a closure of transliterated/UTF-8 word, consonantal, trailer, qere, and lexeme features even when the exporter requests only a narrower analysis subset;
+- the BHSA acquisition subset is expanded to that exact format dependency closure, preserving the bounded-download design; the failed smoke is retained as validation evidence and the workflow must pass on the corrected PR head.
+
+Corpus source smoke run `37196120231` PASS proved the pinned acquisition/export/crosswalk path on the pre-sync head. The synchronized PR head must rerun `contracts`, `state-and-changelog`, and `Corpus source smoke` against latest `main` before squash merge. The merged Database Spike 001 already proves the PostgreSQL integrity slice with controlled fixtures; real-corpus import into that schema remains pending and is the next integration gate.
+
+
 ## 2026-10-04 — Add P1 fixture-backed release-pinned Passage serving shell
 
 ### Push intent

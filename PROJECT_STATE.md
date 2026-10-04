@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-04.15**
+State Revision: **2026-10-04.16**
 
 ## Mandatory governance rule
 
@@ -147,6 +147,28 @@ Repository visibility remains public as observed state; this audit does not chan
 - Normal changes require PR + latest-main synchronization + `contracts` PASS + `state-and-changelog` PASS + resolved conversations + squash merge.
 - Panel contract-closure adjudication is recorded in `architecture/reviews/2026-10-03-panel-contract-closure.md` and registered as current validation authority.
 
+## Current pinned Hebrew corpus integration
+
+The first corpus-source adapter integration intended for Database Spike 001 is now machine-pinned and reproducible:
+
+- OSHB/morphhb commit `3d15126fb1ef74867fc1434be1942e837932691f` is the initial text/word/lemma/morpheme/morphology baseline;
+- BHSA frozen dataset `2021`, fetched from repository commit `4db00e2157915495e1a4d3d57e41223df24775da`, is an independent framework-scoped phrase/clause/syntactic annotation source;
+- ETCBC bridging `2021`, commit `324598bb3f9cb3a36543e77ac61e4b0f77addf82`, is 2021-derived morphology-comparison evidence on BHSA word nodes and is not assumed to map the current OSHB pin's provider word IDs;
+- project SemanticSetVersion remains the authority for project-curated semantic categories such as BODY_PART;
+- upstream corpus data is downloaded on demand into gitignored `.local/corpora/`, never vendored as the repository's canonical data;
+- BHSA local cache is now required to contain every feature referenced by its pinned `otext.tf` formats and section configuration; the fetcher rejects incomplete caches before Text-Fabric loading;
+- source exact Unicode is preserved; OSHB source identity is not NFC-normalized;
+- provider book-name aliases are normalized only for passage filtering/candidate comparison; emitted provider reference labels remain source-native and canonical project passage identity still resolves through ReferenceSystem/ReferenceSpan;
+- live 1 Samuel 16:7 smoke evidence shows OSHB and BHSA do not share 1:1 tokenization (25 OSHB word records versus 34 BHSA word records);
+- a conservative candidate crosswalk compiler therefore proposes contiguous many-to-many span mappings only when normalized verse identity and concatenated consonantal signatures agree; mismatch is `NEEDS_REVIEW`, and automatic canonical promotion is forbidden;
+- source pins never auto-advance and every upstream change requires reviewed PR, corpus diff, spike rerun and a new ResearchBuild/ResearchRelease;
+- OSHB public serving defaults to attribution-compatible use under its upstream terms;
+- BHSA public/commercial serving requires an explicit RightsDecision;
+- bridging-derived public serving is denied until its mixed upstream rights are reviewed;
+- the source smoke has **not** yet loaded these real OSHB/BHSA exports into the merged PostgreSQL Database Spike 001 schema; that relational real-corpus ingestion remains the next integration gate.
+
+See `architecture/corpus-source-integration.md` and `contracts/v1.1/corpus-source-registry.json`.
+
 ## Current data/research boundaries
 
 - Google Drive: curated private scholarly source base, subject to operation-specific rights.
@@ -177,7 +199,7 @@ Repository visibility remains public as observed state; this audit does not chan
 
 - exact Chinese translation witness launch list;
 - final provider for each translation witness;
-- final production mix/releases of OSHB/MACULA/BHSA layers;
+- final production/public-serving mix of OSHB/MACULA/BHSA layers after real-corpus relational evidence and BHSA/MACULA rights review; the initial OSHB/BHSA/bridging source pins and roles are fixed in the corpus source registry;
 - commercial provider licences/quotas for Scite/CORE/Semantic Scholar where applicable;
 - final Research Pro rollout sequence;
 - final entitlement/pricing model;
@@ -206,12 +228,11 @@ This is fixture-shell implementation evidence only. It does not satisfy real-dat
 ## Current implementation priority
 
 1. Preserve contract/governance consistency.
-2. Synchronize and complete the pinned OSHB/BHSA corpus-source integration against current `main`.
-3. Complete the fixture-backed Phase 1 serving shell acceptance gate and open its PR.
-4. Implement scholarly provider adapters and ResearchModelAdapter interfaces.
-5. Validate one end-to-end literature-discovery build against a real Hebrew-Bible ResearchIssue.
-6. Continue later application stages without weakening publication/rights/reproducibility boundaries.
+2. Connect the pinned OSHB/BHSA/ETCBC-bridging exports to the merged Database Spike 001 relational schema and validate real-corpus cross-layer constraints/queries without promoting unreviewed candidate mappings.
+3. Implement scholarly provider adapters and ResearchModelAdapter interfaces.
+4. Validate one end-to-end literature-discovery build against a real Hebrew-Bible ResearchIssue.
+5. Continue later application stages without weakening publication/rights/reproducibility boundaries.
 
 ## Latest push intent
 
-Main now includes the publication-visibility and contract-identity repairs through `a9fab9bd34c982b8ff927a0e5c5c6986d6c75cdc`. This revision synchronizes the P1 fixture shell with that protected main and closes its local acceptance blockers: the npm lockfile is tracked; Ajv receives typed schema values and pre-registers canonical `$id` schemas so PassageRequest resolves PassageLocator at runtime; contract reads are scoped to `contracts/v1.1`; Next.js TypeScript configuration is synchronized; generated paths are ignored; and secret validation skips dependency/build/report/cache/VCS trees. A regression test exercises the previously failing external-schema reference. Local contract validation, both OpenAPI validators, lockfile stability, typecheck, boundary lint, eight unit tests, HTTP integration, and production build pass. Local Playwright remains unverified because the permitted browser download returned a zero-byte archive; GitHub Actions must complete browser and visual acceptance before merge.
+Main now includes the publication-visibility, contract-identity, and P1 fixture-serving repairs through `21ef79f07dffddde5b87aa86f16a50d3c2f1cdc5`. PR #8 is synchronized onto that protected main. Real-corpus source-adapter evidence remains cleanly separated from relational evidence: the pinned OSHB/BHSA/bridging smoke passes with 25 OSHB words, 34 BHSA slots, two annotation-only article nodes, 25 conservative candidate mappings, and no unresolved reference. The merged PostgreSQL spike remains a controlled-fixture integrity slice; importing these real corpus exports into its relational schema is still pending and is the next corpus/database integration gate. No remote Supabase project has been designated or modified.

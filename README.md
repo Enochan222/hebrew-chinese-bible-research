@@ -113,6 +113,7 @@ Read in this order:
 Other active specialised architecture:
 
 - `architecture/integration-boundaries-mcp-api-database.md`
+- `architecture/corpus-source-integration.md`
 - `architecture/academic-evidence-policy.md`
 - `architecture/academic-storage-and-rag.md`
 - `architecture/research-pro-scholarly-intelligence.md`
@@ -220,6 +221,33 @@ See:
 5. Rules + published commentary/literature review + Research serving + optional NL-to-DSL + product operations
 
 The Research Compiler remains a permanent subsystem after Phase 5.
+
+## Hebrew corpus source bootstrap
+
+The repository now connects to pinned upstream corpus sources without vendoring the corpora into Git:
+
+- OSHB/morphhb for the initial text/word/lemma/morpheme/morphology baseline;
+- BHSA 2021 for an independent framework-scoped phrase/clause/syntactic annotation layer;
+- ETCBC bridging 2021 for Open Scriptures morphology comparison on BHSA nodes.
+
+Download into the gitignored local cache:
+
+```bash
+python scripts/corpora/fetch_sources.py
+```
+
+Export the 1 Samuel 16:7 spike inputs:
+
+```bash
+python scripts/corpora/export_oshb_words.py --reference 1Sam.16.7 --output .local/exports/oshb-1sam16-7.ndjson
+python -m pip install -r requirements-corpus.txt
+python scripts/corpora/export_bhsa_features.py --reference 1Sam.16.7 --output .local/exports/bhsa-1sam16-7.ndjson
+python scripts/corpora/build_candidate_crosswalk.py --oshb .local/exports/oshb-1sam16-7.ndjson --bhsa .local/exports/bhsa-1sam16-7.ndjson --output .local/exports/crosswalk-1sam16-7.ndjson
+```
+
+Source pins and rights defaults are machine-readable in `contracts/v1.1/corpus-source-registry.json`.
+
+Do not auto-update upstream versions and do not flatten OSHB/BHSA disagreement into a single canonical analysis.
 
 ## Runtime AI policy
 

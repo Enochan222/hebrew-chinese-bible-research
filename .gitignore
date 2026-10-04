@@ -1,3 +1,12 @@
+# Local downloaded corpora and generated corpus exports
+.local/corpora/
+.local/exports/
+
+# Python local build/cache
+__pycache__/
+*.pyc
+
+# Web dependencies and generated outputs
 apps/web/.next/
 apps/web/node_modules/
 apps/web/playwright-report/
