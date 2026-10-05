@@ -10,8 +10,9 @@ import { PostgrestServingClient } from "@/adapters/serving/postgrest-serving-cli
 
 const servingUrl = process.env.HCBIBLE_SERVING_REST_URL?.trim();
 const servingKey = process.env.HCBIBLE_SERVING_ANON_KEY?.trim();
+const servingSchema = process.env.HCBIBLE_SERVING_REST_SCHEMA?.trim() || "serving";
 
-const servingClient = servingUrl ? new PostgrestServingClient(servingUrl, servingKey) : null;
+const servingClient = servingUrl ? new PostgrestServingClient(servingUrl, servingKey, servingSchema) : null;
 
 export const runtime = servingClient
   ? {
