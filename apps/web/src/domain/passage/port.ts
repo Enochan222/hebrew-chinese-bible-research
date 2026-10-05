@@ -29,6 +29,7 @@ export type PassageCoreV1 = {
         referenceLabel: string;
       }
     | null;
+  textReconstructionStatus?: "OSHB_WORD_TOKENS_ONLY";
   hebrewText?: string;
   tokens?: PassageTokenV1[];
   navigation?: PassageNavigationV1;
