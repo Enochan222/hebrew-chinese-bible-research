@@ -115,7 +115,12 @@
     "attribution": {
       "type": "string",
       "minLength": 1
+    },
+    "textReconstructionStatus": {
+      "enum": [
+        "OSHB_WORD_TOKENS_ONLY"
+      ]
     }
   },
-  "description": "Core passage envelope. Canonical ReferenceSpan identity is always present. A resolved human label is included when the request used a ReferenceSystem-aware label; direct ReferenceSpan requests need not invent a display system. Published Serving responses may add release-pinned Hebrew text, OSHB token morphology, navigation and attribution."
+  "description": "Core passage envelope. Canonical ReferenceSpan identity is always present. A resolved human label is included when the request used a ReferenceSystem-aware label. Published Serving responses may add an OSHB word-token sequence, morphology, navigation and attribution. OSHB_WORD_TOKENS_ONLY explicitly means punctuation/orthographic <seg> nodes such as maqqef, paseq and sof pasuq have not been reconstructed into the display string."
 }
