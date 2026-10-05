@@ -46,7 +46,76 @@
           "type": "null"
         }
       ]
+    },
+    "dataSource": {
+      "enum": [
+        "FIXTURE",
+        "SERVING"
+      ]
+    },
+    "hebrewText": {
+      "type": "string"
+    },
+    "tokens": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "analysisNodeId",
+          "textSegmentId",
+          "surface"
+        ],
+        "properties": {
+          "analysisNodeId": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+          },
+          "textSegmentId": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+          },
+          "surface": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lemmaRaw": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "morphRaw": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "navigation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "previousReference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "nextReference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "attribution": {
+      "type": "string",
+      "minLength": 1
     }
   },
-  "description": "Core passage envelope. Canonical ReferenceSpan identity is always present. A resolved human label is included when the request used a ReferenceSystem-aware label; direct ReferenceSpan requests need not invent a display system."
+  "description": "Core passage envelope. Canonical ReferenceSpan identity is always present. A resolved human label is included when the request used a ReferenceSystem-aware label; direct ReferenceSpan requests need not invent a display system. Published Serving responses may add release-pinned Hebrew text, OSHB token morphology, navigation and attribution."
 }
