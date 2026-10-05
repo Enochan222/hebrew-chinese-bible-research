@@ -1172,6 +1172,39 @@ CREATE TABLE serving.reference_spans (
   CHECK (start_sequence <= end_sequence)
 );
 
+CREATE TABLE serving.reference_systems (
+  reference_system_id uuid PRIMARY KEY,
+  code text NOT NULL UNIQUE,
+  name text NOT NULL
+);
+
+CREATE TABLE serving.reference_labels (
+  corpus_release_id uuid NOT NULL REFERENCES serving.research_objects(research_object_id),
+  reference_label_id uuid NOT NULL,
+  reference_system_id uuid NOT NULL REFERENCES serving.reference_systems(reference_system_id),
+  reference_span_id uuid NOT NULL REFERENCES serving.reference_spans(reference_span_id),
+  book_code text NOT NULL,
+  label text NOT NULL,
+  chapter_number integer,
+  verse_label text,
+  reference_sort_key bigint NOT NULL,
+  PRIMARY KEY (corpus_release_id, reference_label_id),
+  UNIQUE (corpus_release_id, reference_system_id, label),
+  UNIQUE (corpus_release_id, reference_system_id, reference_sort_key)
+);
+
+CREATE TABLE serving.corpus_text_segments (
+  corpus_release_id uuid NOT NULL REFERENCES serving.research_objects(research_object_id),
+  text_segment_id uuid NOT NULL,
+  reference_span_id uuid NOT NULL REFERENCES serving.reference_spans(reference_span_id),
+  segment_order integer NOT NULL,
+  surface_original text NOT NULL,
+  segment_kind text NOT NULL,
+  content_hash text,
+  PRIMARY KEY (corpus_release_id, text_segment_id),
+  UNIQUE (corpus_release_id, segment_order)
+);
+
 CREATE TABLE serving.corpus_nodes (
   corpus_release_id uuid NOT NULL REFERENCES serving.research_objects(research_object_id),
   analysis_node_id uuid NOT NULL,
@@ -1179,6 +1212,19 @@ CREATE TABLE serving.corpus_nodes (
   node_type text NOT NULL,
   reference_span_id uuid NOT NULL REFERENCES serving.reference_spans(reference_span_id),
   PRIMARY KEY (corpus_release_id, analysis_node_id)
+);
+
+CREATE TABLE serving.corpus_node_segments (
+  corpus_release_id uuid NOT NULL,
+  analysis_node_id uuid NOT NULL,
+  text_segment_id uuid NOT NULL,
+  member_order integer NOT NULL CHECK (member_order >= 0),
+  membership_role text NOT NULL,
+  PRIMARY KEY (corpus_release_id, analysis_node_id, text_segment_id, membership_role),
+  FOREIGN KEY (corpus_release_id, analysis_node_id)
+    REFERENCES serving.corpus_nodes(corpus_release_id, analysis_node_id) ON DELETE CASCADE,
+  FOREIGN KEY (corpus_release_id, text_segment_id)
+    REFERENCES serving.corpus_text_segments(corpus_release_id, text_segment_id) ON DELETE CASCADE
 );
 
 CREATE TABLE serving.corpus_node_features (
@@ -1647,6 +1693,27 @@ BEGIN
     RAISE EXCEPTION 'release has no components';
   END IF;
 
+  IF EXISTS (
+    SELECT 1
+    FROM serving.research_release_components c
+    WHERE c.research_release_id = p_release_id
+      AND c.component_kind = 'CORPUS'
+      AND NOT EXISTS (
+        SELECT 1
+        FROM serving.rights_decision_snapshots rds
+        WHERE rds.subject_type = 'CORPUS_RELEASE'
+          AND rds.subject_identifier = c.component_research_object_id
+          AND rds.operation = 'DISPLAY_FULLTEXT'
+          AND rds.purpose_scope = 'PUBLIC_DISPLAY'
+          AND rds.audience_scope = 'PUBLIC'
+          AND rds.commercial_context IN ('MIXED','COMMERCIAL')
+          AND rds.decision IN ('ALLOW','CONDITIONAL')
+          AND rds.decision_basis = 'RULE'
+      )
+  ) THEN
+    RAISE EXCEPTION 'corpus component lacks a public DISPLAY_FULLTEXT rights decision';
+  END IF;
+
   SELECT release_channel_id INTO channel_id
   FROM serving.release_channels
   WHERE channel_key = p_channel_key;
@@ -1691,6 +1758,118 @@ SELECT c.channel_key, p.research_release_id, r.release_label, r.published_at
 FROM serving.release_channels c
 JOIN serving.release_channel_pointers p USING (release_channel_id)
 JOIN serving.research_releases r USING (research_release_id);
+
+CREATE OR REPLACE FUNCTION serving.read_passage_core(
+  p_release_id uuid,
+  p_reference_system_code text,
+  p_reference_label text
+)
+RETURNS jsonb
+LANGUAGE sql
+STABLE
+SECURITY INVOKER
+AS $passage_core$
+  WITH pinned_corpus AS (
+    SELECT component_research_object_id AS corpus_release_id
+    FROM serving.research_release_components
+    WHERE research_release_id = p_release_id
+      AND component_kind = 'CORPUS'
+      AND serving.release_is_published(p_release_id)
+    ORDER BY component_order
+    LIMIT 1
+  ),
+  resolved AS (
+    SELECT
+      rl.corpus_release_id,
+      rl.reference_label_id,
+      rl.reference_system_id,
+      rsys.code AS reference_system_code,
+      rl.reference_span_id,
+      rl.label,
+      rl.reference_sort_key
+    FROM pinned_corpus pc
+    JOIN serving.reference_labels rl ON rl.corpus_release_id = pc.corpus_release_id
+    JOIN serving.reference_systems rsys ON rsys.reference_system_id = rl.reference_system_id
+    WHERE rsys.code = p_reference_system_code
+      AND rl.label = p_reference_label
+  ),
+  token_features AS (
+    SELECT
+      n.corpus_release_id,
+      n.analysis_node_id,
+      ns.text_segment_id,
+      ts.segment_order,
+      ts.surface_original,
+      COALESCE(jsonb_object_agg(f.feature_key, f.feature_value)
+        FILTER (WHERE f.feature_key IS NOT NULL), '{}'::jsonb) AS features
+    FROM resolved r
+    JOIN serving.corpus_nodes n
+      ON n.corpus_release_id = r.corpus_release_id
+     AND n.reference_span_id = r.reference_span_id
+     AND n.node_type = 'WORD'
+    JOIN serving.corpus_node_segments ns
+      ON ns.corpus_release_id = n.corpus_release_id
+     AND ns.analysis_node_id = n.analysis_node_id
+    JOIN serving.corpus_text_segments ts
+      ON ts.corpus_release_id = ns.corpus_release_id
+     AND ts.text_segment_id = ns.text_segment_id
+    LEFT JOIN serving.corpus_node_features f
+      ON f.corpus_release_id = n.corpus_release_id
+     AND f.analysis_node_id = n.analysis_node_id
+    GROUP BY n.corpus_release_id,n.analysis_node_id,ns.text_segment_id,ts.segment_order,ts.surface_original
+  )
+  SELECT jsonb_build_object(
+    'researchReleaseId', p_release_id::text,
+    'referenceSpanId', r.reference_span_id::text,
+    'resolvedReference', jsonb_build_object(
+      'referenceSystemId', r.reference_system_id::text,
+      'referenceSystemCode', r.reference_system_code,
+      'referenceLabel', r.label
+    ),
+    'hebrewText', COALESCE((
+      SELECT string_agg(tf.surface_original, ' ' ORDER BY tf.segment_order)
+      FROM token_features tf
+    ), ''),
+    'tokens', COALESCE((
+      SELECT jsonb_agg(
+        jsonb_build_object(
+          'analysisNodeId', tf.analysis_node_id::text,
+          'textSegmentId', tf.text_segment_id::text,
+          'surface', tf.surface_original,
+          'lemmaRaw', tf.features->>'LEMMA_RAW',
+          'morphRaw', tf.features->>'MORPH_RAW'
+        )
+        ORDER BY tf.segment_order
+      )
+      FROM token_features tf
+    ), '[]'::jsonb),
+    'navigation', jsonb_build_object(
+      'previousReference', (
+        SELECT p.label
+        FROM serving.reference_labels p
+        WHERE p.corpus_release_id = r.corpus_release_id
+          AND p.reference_system_id = r.reference_system_id
+          AND p.reference_sort_key < r.reference_sort_key
+        ORDER BY p.reference_sort_key DESC
+        LIMIT 1
+      ),
+      'nextReference', (
+        SELECT n.label
+        FROM serving.reference_labels n
+        WHERE n.corpus_release_id = r.corpus_release_id
+          AND n.reference_system_id = r.reference_system_id
+          AND n.reference_sort_key > r.reference_sort_key
+        ORDER BY n.reference_sort_key
+        LIMIT 1
+      )
+    ),
+    'attribution', 'Open Scriptures Hebrew Bible / Westminster Leningrad Codex; source and morphology attribution required.'
+  )
+  FROM resolved r
+$passage_core$;
+
+REVOKE ALL ON FUNCTION serving.read_passage_core(uuid,text,text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION serving.read_passage_core(uuid,text,text) TO anon, authenticated;
 
 CREATE OR REPLACE FUNCTION serving.spike_corpus_query(
   p_release_id uuid,
@@ -1869,7 +2048,11 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON workspace.user_translation_drafts TO aut
 
 ALTER TABLE serving.research_objects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE serving.reference_spans ENABLE ROW LEVEL SECURITY;
+ALTER TABLE serving.reference_systems ENABLE ROW LEVEL SECURITY;
+ALTER TABLE serving.reference_labels ENABLE ROW LEVEL SECURITY;
+ALTER TABLE serving.corpus_text_segments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE serving.corpus_nodes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE serving.corpus_node_segments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE serving.corpus_node_features ENABLE ROW LEVEL SECURITY;
 ALTER TABLE serving.corpus_edges ENABLE ROW LEVEL SECURITY;
 ALTER TABLE serving.corpus_node_mappings ENABLE ROW LEVEL SECURITY;
@@ -1887,6 +2070,17 @@ ALTER TABLE serving.published_assertion_evidence ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY public_read_reference_spans ON serving.reference_spans
 FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY public_read_reference_systems ON serving.reference_systems
+FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY public_read_reference_labels ON serving.reference_labels
+FOR SELECT TO anon, authenticated
+USING (serving.component_is_published(corpus_release_id));
+CREATE POLICY public_read_corpus_text_segments ON serving.corpus_text_segments
+FOR SELECT TO anon, authenticated
+USING (serving.component_is_published(corpus_release_id));
+CREATE POLICY public_read_corpus_node_segments ON serving.corpus_node_segments
+FOR SELECT TO anon, authenticated
+USING (serving.component_is_published(corpus_release_id));
 
 -- Release-scoped Serving rows remain physically materialized before publication,
 -- but public roles must not observe them until the release has a committed
@@ -1949,7 +2143,8 @@ USING (
   )
 );
 
-GRANT SELECT ON serving.reference_spans,
+GRANT SELECT ON serving.reference_spans, serving.reference_systems,
+  serving.reference_labels, serving.corpus_text_segments, serving.corpus_node_segments,
   serving.corpus_nodes, serving.corpus_node_features, serving.corpus_edges,
   serving.corpus_node_mappings, serving.semantic_set_members,
   serving.research_releases, serving.research_release_components,
