@@ -1819,6 +1819,7 @@ AS $passage_core$
     GROUP BY n.corpus_release_id,n.analysis_node_id,ns.text_segment_id,ts.segment_order,ts.surface_original
   )
   SELECT jsonb_build_object(
+    'dataSource', 'SERVING',
     'researchReleaseId', p_release_id::text,
     'referenceSpanId', r.reference_span_id::text,
     'resolvedReference', jsonb_build_object(
