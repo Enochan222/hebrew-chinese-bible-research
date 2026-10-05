@@ -1,0 +1,162 @@
+name: WB-2 WB-3 Serving Reader
+
+on:
+  pull_request:
+    paths:
+      - 'database/**'
+      - 'scripts/corpora/**'
+      - 'apps/web/**'
+      - 'requirements-corpus.txt'
+      - 'requirements-contracts.txt'
+      - 'contracts/v1.1/corpus-source-registry.json'
+      - 'contracts/v1.1/hebrew-bible-canon-system.json'
+      - 'contracts/v1.1/json-schema/**'
+      - '.github/workflows/wb2-wb3-serving-reader.yml'
+      - 'PROJECT_STATE.md'
+      - 'CHANGELOG.md'
+  push:
+    branches: [main]
+    paths:
+      - 'database/**'
+      - 'scripts/corpora/**'
+      - 'apps/web/**'
+      - 'requirements-corpus.txt'
+      - 'requirements-contracts.txt'
+      - 'contracts/v1.1/corpus-source-registry.json'
+      - 'contracts/v1.1/hebrew-bible-canon-system.json'
+      - 'contracts/v1.1/json-schema/**'
+      - '.github/workflows/wb2-wb3-serving-reader.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  wb2-wb3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: hcb_wb2
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d hcb_wb2"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: hcb_wb2
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned corpus and contract tooling
+        run: python -m pip install -r requirements-corpus.txt -r requirements-contracts.txt
+      - name: Compile corpus tooling
+        run: |
+          python -m py_compile \
+            scripts/corpora/partition_wb_corpus_for_relational.py \
+            scripts/corpora/load_wb1_postgres.py \
+            scripts/corpora/verify_wb1_report.py
+      - name: Bootstrap PostgreSQL 17
+        run: |
+          psql -v ON_ERROR_STOP=1 -f database/spikes/001/00_bootstrap.sql
+          psql -v ON_ERROR_STOP=1 -f database/migrations/001_database_spike_001.sql
+      - name: Fetch exact pinned sources
+        run: python scripts/corpora/fetch_sources.py
+      - name: Build WB-CORPUS-001
+        run: python scripts/corpora/build_whole_bible_corpus.py
+      - name: Partition accepted corpus
+        run: |
+          mkdir -p .local/wb2/partitions .local/wb2/reports .local/wb2/sql
+          python scripts/corpora/partition_wb_corpus_for_relational.py \
+            --foundation-dir .local/whole-bible-corpus \
+            --output-dir .local/wb2/partitions \
+            --report .local/wb2/reports/partition.json
+      - name: Rebuild accepted WB-1 Authoring state
+        run: |
+          python scripts/corpora/load_wb1_postgres.py \
+            --oshb-dir .local/wb2/partitions/oshb \
+            --bhsa-dir .local/wb2/partitions/bhsa \
+            --crosswalk-dir .local/wb2/partitions/crosswalk \
+            --source-foundation-manifest .local/whole-bible-corpus/coverage-manifest.json \
+            --reference-inventory .local/whole-bible-corpus/reference-inventory.json \
+            --partition-report .local/wb2/reports/partition.json \
+            --report .local/wb2/reports/wb1-relational-coverage.json \
+            --sql-dir .local/wb2/sql
+      - name: Reverify WB-1 source database parity
+        run: |
+          python scripts/corpora/verify_wb1_report.py \
+            --report .local/wb2/reports/wb1-relational-coverage.json \
+            --canon contracts/v1.1/hebrew-bible-canon-system.json \
+            --source-foundation-manifest .local/whole-bible-corpus/coverage-manifest.json \
+            --partition-report .local/wb2/reports/partition.json
+      - name: Compile and publish rights-safe OSHB ResearchRelease
+        run: |
+          psql -v ON_ERROR_STOP=1 -v GIT_SHA="$GITHUB_SHA" \
+            -f database/publication/wb2_publish_oshb_serving.sql
+      - name: Verify public RLS passage runtime
+        run: |
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          SET ROLE anon;
+          DO $public_runtime$
+          DECLARE p jsonb;
+          BEGIN
+            p := serving.read_passage_core(
+              '71000000-0000-4000-8000-000000000005','OSHB_OSIS','Gen.1.1'
+            );
+            IF p IS NULL OR jsonb_array_length(p->'tokens') = 0 THEN
+              RAISE EXCEPTION 'anon Serving runtime cannot read Gen.1.1';
+            END IF;
+            IF p->'navigation'->>'nextReference' IS NULL THEN
+              RAISE EXCEPTION 'anon Serving runtime navigation missing';
+            END IF;
+          END
+          $public_runtime$;
+          RESET ROLE;
+          SQL
+      - name: Assert Serving contains OSHB only
+        run: |
+          test "$(psql -At -c "SELECT count(*) FROM serving.reference_labels WHERE corpus_release_id='$(psql -At -c "SELECT component_research_object_id FROM serving.research_release_components WHERE research_release_id='71000000-0000-4000-8000-000000000005' AND component_kind='CORPUS'")';")" = "23213"
+          test "$(psql -At -c "SELECT count(*) FROM serving.corpus_nodes;")" = "306785"
+          test "$(psql -At -c "SELECT count(*) FROM serving.corpus_text_segments;")" = "306785"
+          test "$(psql -At -c "SELECT count(*) FROM serving.corpus_node_features WHERE feature_key='SOURCE_KEY' AND feature_value='BHSA_2021';")" = "0"
+          test "$(psql -At -c "SELECT count(*) FROM serving.corpus_node_features WHERE feature_key LIKE 'BRIDGE_%';")" = "0"
+      - name: Capture WB-2/WB-3 evidence
+        run: |
+          mkdir -p .local/wb2/evidence
+          psql -At -c "SELECT jsonb_pretty(jsonb_build_object(
+            'researchReleaseId','71000000-0000-4000-8000-000000000005',
+            'referenceLabels',(SELECT count(*) FROM serving.reference_labels),
+            'oshbNodes',(SELECT count(*) FROM serving.corpus_nodes),
+            'textSegments',(SELECT count(*) FROM serving.corpus_text_segments),
+            'nodeSegments',(SELECT count(*) FROM serving.corpus_node_segments),
+            'bhsaSourceRows',(SELECT count(*) FROM serving.corpus_node_features WHERE feature_key='SOURCE_KEY' AND feature_value='BHSA_2021'),
+            'bridgeRows',(SELECT count(*) FROM serving.corpus_node_features WHERE feature_key LIKE 'BRIDGE_%'),
+            'productionRelease',(SELECT research_release_id FROM serving.current_release WHERE channel_key='PRODUCTION'),
+            'genesis1_1',serving.read_passage_core('71000000-0000-4000-8000-000000000005','OSHB_OSIS','Gen.1.1'),
+            'canary1Sam16_7',serving.read_passage_core('71000000-0000-4000-8000-000000000005','OSHB_OSIS','1Sam.16.7')
+          ));" > .local/wb2/evidence/wb2-wb3-serving-evidence.json
+          cat .local/wb2/evidence/wb2-wb3-serving-evidence.json
+      - name: Upload WB-2/WB-3 evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: wb2-wb3-serving-evidence
+          path: |
+            .local/whole-bible-corpus/reference-inventory.json
+            .local/whole-bible-corpus/coverage-manifest.json
+            .local/wb2/reports/partition.json
+            .local/wb2/reports/wb1-relational-coverage.json
+            .local/wb2/evidence/wb2-wb3-serving-evidence.json
+          if-no-files-found: warn
+          retention-days: 30
