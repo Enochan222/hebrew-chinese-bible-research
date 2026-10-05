@@ -1827,6 +1827,7 @@ AS $passage_core$
       'referenceSystemCode', r.reference_system_code,
       'referenceLabel', r.label
     ),
+    'textReconstructionStatus', 'OSHB_WORD_TOKENS_ONLY',
     'hebrewText', COALESCE((
       SELECT string_agg(tf.surface_original, ' ' ORDER BY tf.segment_order)
       FROM token_features tf
