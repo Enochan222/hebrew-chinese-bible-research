@@ -37,7 +37,7 @@ export function PassageShell(props: {
           <h1>{reference}</h1>
           <p className="subtitle">
             {isServing
-              ? "Release-pinned Hebrew text and OSHB morphology from the published Serving projection."
+              ? "Release-pinned OSHB word tokens and morphology from the published Serving projection."
               : "Phase 1 serving-shell fixture for release and reference identity only."}
           </p>
         </div>
@@ -75,7 +75,7 @@ export function PassageShell(props: {
           <section className="passage-reader" aria-labelledby="passage-heading">
             <div className="passage-reader-heading">
               <div>
-                <p className="eyebrow">Hebrew text</p>
+                <p className="eyebrow">OSHB source tokens</p>
                 <h2 id="passage-heading">{reference}</h2>
               </div>
               <nav className="passage-navigation" aria-label="Passage navigation">
