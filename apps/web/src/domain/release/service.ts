@@ -32,7 +32,7 @@ export async function resolveRelease(
   }
 
   if (!(await releaseReader.releaseExists(selector.researchReleaseId))) {
-    throw new ReleaseNotFoundError("Requested research release is not available in the fixture release set.");
+    throw new ReleaseNotFoundError("Requested research release is not available.");
   }
 
   return selector.researchReleaseId;
