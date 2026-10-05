@@ -901,15 +901,35 @@ AS $$
       SELECT 1
       FROM jsonb_array_elements(value) e
       WHERE
-        (e->>'type' = 'MAX_EXCERPT' AND (
-          NOT (e ? 'value') OR COALESCE(e->>'unit','') NOT IN ('WORD','UNICODE_CODEPOINT','GRAPHEME_CLUSTER','BYTE','PERCENT_OF_WORK')
-        ))
-        OR
-        (e->>'type' = 'RETENTION_LIMIT' AND (
-          NOT (e ? 'duration') OR e->>'unit' <> 'DAY'
-        ))
-        OR
-        (COALESCE(e->>'type','') NOT IN ('MAX_EXCERPT','RETENTION_LIMIT','ATTRIBUTION'))
+        jsonb_typeof(e) <> 'object'
+        OR COALESCE(e->>'obligationType','') NOT IN ('MAX_EXCERPT','RETENTION_LIMIT','ATTRIBUTION')
+        OR e ? 'type'
+        OR (
+          e->>'obligationType' = 'ATTRIBUTION'
+          AND (
+            length(COALESCE(e->>'value','')) = 0
+            OR EXISTS (SELECT 1 FROM jsonb_object_keys(e) k WHERE k NOT IN ('obligationType','value'))
+          )
+        )
+        OR (
+          e->>'obligationType' = 'MAX_EXCERPT'
+          AND (
+            jsonb_typeof(e->'value') <> 'number'
+            OR (e->>'value')::numeric <= 0
+            OR COALESCE(e->>'unit','') NOT IN ('WORD','UNICODE_CODEPOINT','GRAPHEME_CLUSTER','BYTE','PERCENT_OF_WORK')
+            OR EXISTS (SELECT 1 FROM jsonb_object_keys(e) k WHERE k NOT IN ('obligationType','value','unit'))
+          )
+        )
+        OR (
+          e->>'obligationType' = 'RETENTION_LIMIT'
+          AND (
+            jsonb_typeof(e->'value') <> 'number'
+            OR (e->>'value')::numeric < 0
+            OR trunc((e->>'value')::numeric) <> (e->>'value')::numeric
+            OR e->>'unit' <> 'DAY'
+            OR EXISTS (SELECT 1 FROM jsonb_object_keys(e) k WHERE k NOT IN ('obligationType','value','unit'))
+          )
+        )
     )
   END
 $$;
@@ -1018,17 +1038,38 @@ AS $rights_obligations$
     WHEN value IS NULL THEN true
     WHEN jsonb_typeof(value) <> 'array' THEN false
     ELSE NOT EXISTS (
-      SELECT 1 FROM jsonb_array_elements(value) e
+      SELECT 1
+      FROM jsonb_array_elements(value) e
       WHERE
-        (e->>'type' = 'MAX_EXCERPT' AND (
-          NOT (e ? 'value') OR COALESCE(e->>'unit','') NOT IN ('WORD','UNICODE_CODEPOINT','GRAPHEME_CLUSTER','BYTE','PERCENT_OF_WORK')
-        ))
-        OR
-        (e->>'type' = 'RETENTION_LIMIT' AND (
-          NOT (e ? 'duration') OR e->>'unit' <> 'DAY'
-        ))
-        OR
-        (COALESCE(e->>'type','') NOT IN ('MAX_EXCERPT','RETENTION_LIMIT','ATTRIBUTION'))
+        jsonb_typeof(e) <> 'object'
+        OR COALESCE(e->>'obligationType','') NOT IN ('MAX_EXCERPT','RETENTION_LIMIT','ATTRIBUTION')
+        OR e ? 'type'
+        OR (
+          e->>'obligationType' = 'ATTRIBUTION'
+          AND (
+            length(COALESCE(e->>'value','')) = 0
+            OR EXISTS (SELECT 1 FROM jsonb_object_keys(e) k WHERE k NOT IN ('obligationType','value'))
+          )
+        )
+        OR (
+          e->>'obligationType' = 'MAX_EXCERPT'
+          AND (
+            jsonb_typeof(e->'value') <> 'number'
+            OR (e->>'value')::numeric <= 0
+            OR COALESCE(e->>'unit','') NOT IN ('WORD','UNICODE_CODEPOINT','GRAPHEME_CLUSTER','BYTE','PERCENT_OF_WORK')
+            OR EXISTS (SELECT 1 FROM jsonb_object_keys(e) k WHERE k NOT IN ('obligationType','value','unit'))
+          )
+        )
+        OR (
+          e->>'obligationType' = 'RETENTION_LIMIT'
+          AND (
+            jsonb_typeof(e->'value') <> 'number'
+            OR (e->>'value')::numeric < 0
+            OR trunc((e->>'value')::numeric) <> (e->>'value')::numeric
+            OR e->>'unit' <> 'DAY'
+            OR EXISTS (SELECT 1 FROM jsonb_object_keys(e) k WHERE k NOT IN ('obligationType','value','unit'))
+          )
+        )
     )
   END
 $rights_obligations$;
