@@ -23,10 +23,10 @@ export async function readPassage(input: {
   const researchReleaseId = await resolveRelease(input.selector, input.releaseReader);
   const passage = await input.passageReader.getPassageCore({ researchReleaseId, locator });
   if (!passage) {
-    throw new ReferenceNotFoundError("Requested reference is not present in the fixture release.");
+    throw new ReferenceNotFoundError("Requested reference is not present in the selected ResearchRelease.");
   }
   if (passage.researchReleaseId !== researchReleaseId) {
-    throw new Error("Fixture passage resolved to a different ResearchRelease than requested.");
+    throw new Error("Passage resolved to a different ResearchRelease than requested.");
   }
   return passage;
 }
