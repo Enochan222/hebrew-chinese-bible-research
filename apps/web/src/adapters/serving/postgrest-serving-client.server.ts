@@ -4,12 +4,15 @@ export class PostgrestServingClient {
   constructor(
     private readonly baseUrl: string,
     private readonly apiKey?: string,
+    private readonly schema = "serving",
   ) {}
 
   private headers(extra?: HeadersInit): HeadersInit {
     const headers: Record<string, string> = {
       Accept: "application/json",
       "Content-Type": "application/json",
+      "Accept-Profile": this.schema,
+      "Content-Profile": this.schema,
     };
     if (this.apiKey) {
       headers.apikey = this.apiKey;
