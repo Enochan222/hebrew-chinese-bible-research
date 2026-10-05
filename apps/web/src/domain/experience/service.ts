@@ -17,7 +17,7 @@ export async function readCapabilities(
 ): Promise<ExperienceCapabilitiesV1> {
   const capabilities = await capabilityReader.getCapabilities({ researchReleaseId });
   if (capabilities.researchReleaseId !== researchReleaseId) {
-    throw new Error("Fixture capabilities resolved to a different ResearchRelease than requested.");
+    throw new Error("Capabilities resolved to a different ResearchRelease than requested.");
   }
   return capabilities;
 }
