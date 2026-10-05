@@ -699,6 +699,64 @@ RESET ROLE;
 
 ALTER SCHEMA authoring_offline RENAME TO authoring;
 
+
+-- WB-2/WB-3: publication must fail closed when a CORPUS component lacks public full-text rights.
+SET ROLE publication_worker;
+DO $wb2_missing_corpus_rights$
+DECLARE failed boolean := false;
+BEGIN
+  DELETE FROM serving.rights_decision_snapshots
+  WHERE rights_decision_snapshot_id='45200000-0000-4000-8000-000000000003';
+  BEGIN
+    PERFORM publication_control.publish_release_to_channel(
+      'PRODUCTION','47000000-0000-4000-8000-000000000002',NULL,false
+    );
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN
+    RAISE EXCEPTION 'release publication without corpus DISPLAY_FULLTEXT rights must fail';
+  END IF;
+  INSERT INTO serving.rights_decision_snapshots(
+    rights_decision_snapshot_id,subject_type,subject_identifier,operation,purpose_scope,audience_scope,
+    commercial_context,applicable_rule_ids,winning_rule_ids,decision,decision_basis,obligations_json,
+    resolver_version,evaluated_at,decision_hash
+  ) VALUES (
+    '45200000-0000-4000-8000-000000000003','CORPUS_RELEASE','30000000-0000-4000-8000-000000000001',
+    'DISPLAY_FULLTEXT','PUBLIC_DISPLAY','PUBLIC','MIXED',
+    ARRAY['45100000-0000-4000-8000-000000000004'::uuid],
+    ARRAY['45100000-0000-4000-8000-000000000004'::uuid],
+    'CONDITIONAL','RULE',
+    '[{"obligationType":"ATTRIBUTION","value":"Fixture Hebrew attribution"}]'::jsonb,
+    'spike-rights-1',now(),'5656565656565656565656565656565656565656565656565656565656565656'
+  );
+END
+$wb2_missing_corpus_rights$;
+RESET ROLE;
+
+-- WB-3: public runtime reads the release-pinned Serving projection, not Authoring.
+SET ROLE anon;
+SELECT spike_test.assert_true(
+  serving.read_passage_core(
+    '47000000-0000-4000-8000-000000000001','MT_TEST','1 Sam 16:7'
+  )->>'referenceSpanId' = '13000000-0000-4000-8000-000000000001',
+  'Serving passage RPC must resolve the pinned ReferenceSpan'
+);
+SELECT spike_test.assert_true(
+  serving.read_passage_core(
+    '47000000-0000-4000-8000-000000000001','MT_TEST','1 Sam 16:7'
+  )->>'hebrewText' = 'יראה עינים',
+  'Serving passage RPC must reconstruct Hebrew surface from published text segments'
+);
+SELECT spike_test.assert_true(
+  jsonb_array_length(
+    serving.read_passage_core(
+      '47000000-0000-4000-8000-000000000001','MT_TEST','1 Sam 16:7'
+    )->'tokens'
+  ) = 2,
+  'Serving passage RPC must return published word tokens only'
+);
+RESET ROLE;
+
 DROP SCHEMA spike_test CASCADE;
 
 
