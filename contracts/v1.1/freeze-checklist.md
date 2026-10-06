@@ -86,7 +86,7 @@ Database Spike 001 may begin when all CORE-SPIKE gates are PASS. This does not d
 
 ### Current release-lifecycle gate status
 
-- `CORE-FZ-RELEASE-002`: **PENDING**. The v1.1 machine/architecture contract now defines deterministic event sequencing, valid transitions, permanent immutability and lifecycle-aware public servability. PostgreSQL/RLS/RPC/channel implementation evidence is still required.
+- `CORE-FZ-RELEASE-002`: **PASS**. PR #26 exact implementation head `a9b15633b213d8bdfface2295c6b87b3bf8fa2fc` passed Database Spike 001 run `37461381384`, including PostgreSQL migration, controlled fixtures, adversarial lifecycle SQL and query-plan validation. The tests prove contiguous per-release event sequencing, valid transition enforcement, permanent immutability after first PUBLISHED, SUPERSEDED historical public pinning, REVOKED public/RPC invisibility, revoked-channel rejection, stale current-release pointer fail-closed behavior, explicit REACTIVATED restoration, rollback pointer preservation, and publication-worker inability to bypass Publication Control with direct event inserts. The same head passed WB-2/WB-3 Serving Reader `37461381480`, WB-1 Relational Whole Corpus `37461381178`, Whole-Bible corpus foundation `37461381409`, P1 fixture shell validation `37461381450`, Contract validation `37461381391`, and Project governance `37461381515`.
 
 ### Current whole-Bible gate status
 

@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-06.11**
+State Revision: **2026-10-06.12**
 
 ## Mandatory governance rule
 
@@ -321,11 +321,11 @@ WB-1 acceptance is **PASS** for `CORE-FZ-WB-002`. The synchronized implementatio
 
 ## Current implementation priority
 
-1. Preserve contract/governance consistency, the ChatGPT-only project AI policy and the whole-Bible scope guard.
-2. Treat WB-2/WB-3 as accepted whole-Bible base-reader infrastructure and preserve its exact-head regression suite.
-3. Close the separate ResearchRelease lifecycle semantics gap: distinguish "ever published / immutable" from "currently publicly servable" before implementing REVOKED/REACTIVATED behavior; do not overload one predicate for both concerns.
-4. Complete WB-4/WB-5: add selected translation witnesses, alignment/comparison, project/user translation workflow and deterministic whole-corpus analysis.
-5. Only then make Research Pro provider adapters, ResearchModelAdapter and end-to-end literature builds the primary product implementation frontier; academic enrichment may proceed in parallel where it does not block the base path.
+1. Preserve contract/governance consistency, the ChatGPT-only project AI policy, whole-Bible scope guard, accepted WB-2/WB-3 reader regressions, and accepted RL-1 lifecycle invariants.
+2. Begin WB-4/WB-5 as the next base-product frontier: selected Chinese translation witnesses, witness identity/provenance, many-to-many Hebrew-Chinese alignment/comparison, project/user translation workflow, and deterministic whole-corpus translation analysis.
+3. Keep rights and provider constraints explicit: a translation witness is not publishable merely because the product can privately retrieve it, and documented translator rationale must remain distinct from system inference.
+4. Preserve release-pinned publication and lifecycle behavior while translation data is introduced; no WB-4/WB-5 path may bypass ResearchRelease, rights, RLS, or canonical ReferenceSystem identity.
+5. After the base translation workflow is materially functional, make Research Pro provider adapters, ResearchModelAdapter and end-to-end literature builds the primary enrichment frontier; academic enrichment may proceed in parallel where it does not block the base path.
 
 ## WB-2 / WB-3 implementation state
 
@@ -349,22 +349,27 @@ Exact-head machine evidence is complete. WB-2/WB-3 Serving Reader run `374243988
 
 `CORE-FZ-WB-001` and `CORE-FZ-WB-003` are now **PASS**.
 
-## RL-1 release-lifecycle contract state
+## RL-1 release-lifecycle implementation state
 
-Issue #25 is now the active repository frontier.
+Issue #25 is implemented and accepted on PR #26 exact implementation head `a9b15633b213d8bdfface2295c6b87b3bf8fa2fc`.
 
-The contract is locked before implementation:
+Accepted behavior:
 
-- `eventSequence` is the sole per-release lifecycle ordering authority; `effectiveAt` remains audit time and UUIDs never break lifecycle ties;
-- valid transitions are PUBLISHED -> SUPERSEDED/REVOKED, SUPERSEDED -> REVOKED, REVOKED -> REACTIVATED, and REACTIVATED -> SUPERSEDED/REVOKED;
-- existence of PUBLISHED permanently seals the release payload and projections;
-- current public servability is separately derived from the latest event: PUBLISHED, SUPERSEDED and REACTIVATED are servable; REVOKED is not;
-- SUPERSEDED remains citation-stable and eligible for explicit pinning/rollback;
-- REVOKED cannot be exposed through public release/RLS/RPC/channel resolution until explicit REACTIVATED;
-- lifecycle appends belong to the privileged Publication Control boundary.
+- `eventSequence` is the sole per-release lifecycle ordering authority; `effectiveAt` remains audit time and UUIDs never define chronology;
+- valid transitions are enforced under a per-release row lock;
+- first PUBLISHED permanently seals the release payload and component projections;
+- current public servability is independently derived from the latest lifecycle event;
+- PUBLISHED, SUPERSEDED and REACTIVATED remain publicly servable; REVOKED does not;
+- SUPERSEDED releases remain citation-stable and eligible for explicit pinning/rollback;
+- public RLS, PassageCore RPC and `current_release` fail closed for REVOKED releases, including stale stored channel pointers;
+- channel selection rejects a REVOKED release until explicit REACTIVATED;
+- lifecycle append belongs to privileged Publication Control, and publication_worker cannot directly insert lifecycle event rows;
+- rollback remains a channel-pointer move and never mutates historical release payload.
 
-`CORE-FZ-RELEASE-002` is **PENDING** until PostgreSQL implementation and adversarial lifecycle tests pass. No SQL behavior is claimed by this contract-lock commit.
+Exact-head evidence: Database Spike 001 `37461381384`, WB-2/WB-3 `37461381480`, WB-1 `37461381178`, Whole-Bible corpus foundation `37461381409`, P1 fixture shell `37461381450`, Contract validation `37461381391`, and Project governance `37461381515` all passed.
+
+`CORE-FZ-RELEASE-002` is now **PASS**.
 
 ## Latest push intent
 
-Strengthen RL-1 acceptance after the core lifecycle Database Spike passed. Add a negative privilege test proving publication_worker cannot insert lifecycle rows directly, and a stale-channel-pointer regression proving public `current_release` returns no revoked release even when the stored pointer still references it; explicit REACTIVATED restores resolution. Rerun the exact-head Database Spike and all dependent whole-Bible/web regressions before promoting `CORE-FZ-RELEASE-002`.
+Record final exact-head acceptance of RL-1 after the strengthened lifecycle implementation and every dependent whole-Bible/web/database/contract/governance regression passed on `a9b15633b213d8bdfface2295c6b87b3bf8fa2fc`. Promote only `CORE-FZ-RELEASE-002`, which is directly supported by the lifecycle evidence, and move the active base-product frontier to WB-4/WB-5 translation witnesses, alignment/comparison, project/user translation workflow and deterministic whole-corpus translation analysis.

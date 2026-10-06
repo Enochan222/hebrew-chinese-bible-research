@@ -5,6 +5,34 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
 
+## 2026-10-06 — Accept RL-1 release lifecycle gate
+
+### Push intent
+
+Synchronize repository authority with the exact-head lifecycle implementation evidence and move the base-product frontier to WB-4/WB-5.
+
+### What changed
+
+- promote `CORE-FZ-RELEASE-002` from PENDING to PASS;
+- record exact commit and workflow evidence for deterministic lifecycle ordering, permanent immutability, public servability, revocation, reactivation and stale-pointer behavior;
+- mark Issue #25 / RL-1 implementation as accepted in living project state;
+- move current implementation priority to translation witnesses, Hebrew-Chinese alignment/comparison, project/user translation workflow and deterministic whole-corpus translation analysis.
+
+### Validation
+
+Exact implementation head `a9b15633b213d8bdfface2295c6b87b3bf8fa2fc` passed:
+
+- Database Spike 001 `37461381384`;
+- WB-2 WB-3 Serving Reader `37461381480`;
+- WB-1 Relational Whole Corpus `37461381178`;
+- Whole-Bible corpus foundation `37461381409`;
+- P1 fixture shell validation `37461381450`;
+- Contract validation `37461381391`;
+- Project governance `37461381515`.
+
+The Database Spike adversarial lifecycle suite proves valid sequence/transition enforcement, SUPERSEDED pinning, REVOKED invisibility, post-revocation immutability, rejected revoked-channel selection, fail-closed stale current-release pointers, explicit reactivation, rollback preservation and Publication Control write isolation.
+
+
 ## 2026-10-06 — Strengthen RL-1 lifecycle boundary tests
 
 ### Push intent
