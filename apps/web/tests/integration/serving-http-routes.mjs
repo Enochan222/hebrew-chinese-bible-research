@@ -81,16 +81,19 @@ const restServer = http.createServer(async (req, res) => {
     const parsed = JSON.parse(body);
     assert.equal(parsed.p_release_id, releaseId);
     assert.equal(parsed.p_reference_system_code, "OSHB_OSIS");
-    if (parsed.p_reference_label === "Gen.1.2") {
-      res.end(JSON.stringify({
-        dataSource: "SERVING",
-        researchReleaseId: releaseId,
-        referenceSpanId: "4089aeaa-ddae-5adb-9510-1ca22845c4c2",
-      }));
-      return;
-    }
-    assert.equal(parsed.p_reference_label, "Gen.1.1");
-    res.end(JSON.stringify(passagePayload));
+    assert.ok(["Gen.1.1", "Gen.1.2"].includes(parsed.p_reference_label));
+    res.end(JSON.stringify({
+      ...passagePayload,
+      resolvedReference: {
+        ...passagePayload.resolvedReference,
+        referenceLabel: parsed.p_reference_label,
+      },
+      navigation: {
+        ...passagePayload.navigation,
+        previousReference: parsed.p_reference_label === "Gen.1.1" ? null : "Gen.1.1",
+        nextReference: parsed.p_reference_label === "Gen.1.1" ? "Gen.1.2" : "Gen.1.3",
+      },
+    }));
     return;
   }
   res.statusCode = 404;
