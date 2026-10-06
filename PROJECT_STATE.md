@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-05.12**
+State Revision: **2026-10-06.1**
 
 ## Mandatory governance rule
 
@@ -297,7 +297,7 @@ The dedicated whole-Bible workflow is the executable acceptance authority for th
 
 WB-1 is now implemented as a relational consumer of WB-CORPUS-001 rather than a competing second whole-source build.
 
-Current review-branch implementation:
+Current accepted implementation:
 
 - selected navigation/relational CanonSystem `TANAKH_OSIS_39` is machine-declared and contract-validated;
 - source completeness remains anchored to the independent WB-CORPUS-001 `OSHB_OSIS` ReferenceSystem inventory, not to the CanonSystem's book count;
@@ -319,6 +319,24 @@ Current review-branch implementation:
 
 WB-1 acceptance is **PASS** for `CORE-FZ-WB-002`. The synchronized implementation head `6ec515067f05a901667e4d1f783329f0ee46a53a` passed the complete pinned-source relational workflow and every independent regression gate. Machine evidence reconciles 39/39 configured books, 23,213 selected/reference atoms, 306,785 OSHB words, 426,590 BHSA words, 253,203 BHSA phrases, 88,131 BHSA clauses, 1,106,383 graph-membership edges, 469,484 bridging feature values, 287,216 grouped candidate mappings, 6,409 reviewed annotation-only BHSA nodes and 79 explicit unclassified empty-source BHSA nodes. It reports zero missing configured books, provider-ID duplicates, importer errors, source/database parity failures, OSHB missing-surface records or real-corpus Serving rows. The 1,138 unresolved cross-framework references exactly match WB-CORPUS-001 and remain explicit research/mapping exceptions rather than silent source-record drops.
 
+## WB-2 rights-safe Serving candidate state
+
+WB-2 is now under implementation as a one-way compiler from the accepted WB-1 Authoring corpus into an inactive, release-pinned Serving package.
+
+Current candidate boundary:
+
+- `database/migrations/002_wb2_serving_projection.sql` adds Serving-owned public text segments, node/segment membership, passage-reference resolution, attribution and operation-specific corpus rights bindings;
+- the migration also repairs the database rights-obligation validator to the canonical `obligationType` contract used by RightsDecisionSnapshot v1.1;
+- the first public corpus projection is intentionally OSHB-only because the pinned registry records OSHB public/commercial serving as allowed subject to attribution;
+- OSHB persistent-storage and public-display decisions are separate RightsDecisionSnapshots; public display is conditional on an attribution obligation materialized in Serving;
+- BHSA 2021 remains excluded while its default is `CONDITIONAL_RIGHTS_REVIEW`; ETCBC bridging remains excluded while its default is `DENY_UNTIL_RIGHTS_REVIEW`;
+- no automatic OSHB/BHSA cross-framework candidate is projected to Serving;
+- `scripts/corpora/publish_wb2_serving.py` materializes an inactive ResearchRelease with CORPUS + ANNOTATION_LAYER components and records machine-auditable rights/count evidence;
+- `serving.get_passage_core(...)` provides a release-pinned database read over the Serving projection, but the web application remains fixture-backed until WB-3;
+- `.github/workflows/wb2-rights-safe-serving.yml` rebuilds WB-CORPUS-001 and WB-1 from exact pins before materializing/publishing WB-2, so the Serving evidence cannot be detached from the accepted source denominator.
+
+WB-2 acceptance is **PENDING**. The candidate must pass clean-PostgreSQL migration, inactive-public-isolation, whole-corpus OSHB parity, atomic publication, representative cross-canon passage reads, Authoring isolation, zero BHSA/bridging leakage and post-publication immutability on the exact PR head before WB-2 is accepted.
+
 ## Current implementation priority
 
 1. Preserve contract/governance consistency, the ChatGPT-only project AI policy and the whole-Bible scope guard.
@@ -329,4 +347,4 @@ WB-1 acceptance is **PASS** for `CORE-FZ-WB-002`. The synchronized implementatio
 
 ## Latest push intent
 
-Close WB-1 on machine-auditable whole-corpus evidence and advance the implementation frontier to WB-2. The accepted relational import preserves the complete configured WB-CORPUS-001 provider record set in Authoring, keeps 1,138 unresolved cross-framework references explicit rather than guessed, preserves empty-source BHSA nodes without invented text, keeps every automatic mapping non-canonical, preserves WB-0 stable identities, and writes no real BHSA/bridging corpus rows to Serving. `CORE-FZ-WB-002` is now PASS; `CORE-FZ-WB-001` remains pending end-user navigation verification and `CORE-FZ-WB-003` remains pending rights-safe release-pinned Serving/reader implementation. The closeout head must rerun all required deterministic GitHub Actions before merge.
+Implement WB-2 as the first real whole-Bible public-serving compiler without weakening the rights boundary. The candidate projects only OSHB/WLC-derived text and OSHB morphology, binds storage/display to explicit RightsDecisionSnapshots, materializes attribution, keeps BHSA/bridging and automatic cross-framework mappings out of Serving, builds a Serving-owned OSHB_OSIS passage index, and publishes only through the existing inactive-materialization plus atomic channel-pointer transaction. WB-3 UI/database adapter work is deliberately not included. WB-2 remains provisional until exact-head CI produces independent machine evidence.
