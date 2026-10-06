@@ -154,8 +154,10 @@ WITH label_ranges AS (
     max(rlm.atom_sequence) AS end_sequence
   FROM authoring.reference_labels rl
   JOIN authoring.reference_systems rsys USING (reference_system_id)
-  JOIN authoring.reference_label_members rlm USING (reference_label_id)
-  JOIN authoring.biblical_books b USING (book_id)
+  JOIN authoring.reference_label_members rlm
+    ON rlm.reference_label_id=rl.reference_label_id
+   AND rlm.book_id=rl.book_id
+  JOIN authoring.biblical_books b ON b.book_id=rl.book_id
   WHERE rsys.code='OSHB_OSIS'
   GROUP BY
     rl.reference_system_id,rsys.code,rl.label,rl.book_id,b.osis_code,
@@ -460,8 +462,10 @@ WITH label_ranges AS (
     max(rlm.atom_sequence) AS end_sequence
   FROM authoring.reference_labels rl
   JOIN authoring.reference_systems rsys USING (reference_system_id)
-  JOIN authoring.reference_label_members rlm USING (reference_label_id)
-  JOIN authoring.biblical_books b USING (book_id)
+  JOIN authoring.reference_label_members rlm
+    ON rlm.reference_label_id=rl.reference_label_id
+   AND rlm.book_id=rl.book_id
+  JOIN authoring.biblical_books b ON b.book_id=rl.book_id
   WHERE rsys.code='OSHB_OSIS'
   GROUP BY
     rl.reference_system_id,rsys.code,rl.label,rl.book_id,b.osis_code,
