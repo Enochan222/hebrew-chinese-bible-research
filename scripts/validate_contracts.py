@@ -51,6 +51,7 @@ POSITIVE = [
  ("contracts/v1.1/json-schema/provider-witness-binding.schema.json","contracts/v1.1/fixtures/provider-witness-snapshot.json"),
  ("contracts/v1.1/json-schema/provider-witness-binding.schema.json","contracts/v1.1/fixtures/provider-witness-live.json"),
  ("contracts/v1.1/json-schema/release-event.schema.json","contracts/v1.1/fixtures/release-event-published.json"),
+ ("contracts/v1.1/json-schema/release-lifecycle-policy.schema.json","contracts/v1.1/release-lifecycle-policy.json"),
  ("contracts/v1.1/json-schema/release-channel-pointer.schema.json","contracts/v1.1/fixtures/release-channel-production.json"),
  ("contracts/v1.1/json-schema/semantic-set-version.schema.json","contracts/v1.1/fixtures/semantic-set-body-part.json"),
  ("contracts/v1.1/json-schema/construction-compilation-run.schema.json","contracts/v1.1/fixtures/construction-compilation-run.json"),
