@@ -5,6 +5,42 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
 
+## 2026-10-06 — Implement RL-1 deterministic ResearchRelease lifecycle
+
+### Push intent
+
+Close Issue #25 by separating permanent post-publication immutability from current public servability before claiming REVOKED/REACTIVATED Product Operations semantics.
+
+### Why
+
+The accepted WB-2/WB-3 schema used `release_is_published()` for both mutation guards and public RLS. That predicate meant only "has ever received PUBLISHED". Reusing it for revocation would either leave REVOKED releases public or, if redefined naively, make revoked releases mutable again. The old event contract also lacked a total-order key for equal `effectiveAt` timestamps.
+
+### What changed
+
+- add `eventSequence` to the canonical ReleaseEvent contract and persisted lifecycle table;
+- fail migration closed on ambiguous legacy multi-event histories instead of inferring chronology from UUIDs/timestamps;
+- add a machine `release-lifecycle-policy.json` defining ordering, transitions, servability and channel behavior;
+- split ever-published immutability predicates from current-public-servability predicates;
+- make PUBLISHED/SUPERSEDED/REACTIVATED servable and REVOKED non-servable;
+- enforce contiguous sequence, nondecreasing effective time and valid transitions;
+- require explicit reason for non-PUBLISHED transitions;
+- remove channel pointers on REVOKED and prohibit pointers to non-servable releases;
+- require explicit REACTIVATED before a revoked release can be assigned to a channel again;
+- preserve rollback as a pointer-only operation;
+- update public RLS/current-release behavior to current servability while mutation guards remain permanently keyed to first publication;
+- add adversarial Database Spike tests for equal-time ordering, sequence gaps, invalid transitions, anon/authenticated visibility, pinned reads, revoked immutability, channel eligibility, reactivation and rollback;
+- exercise revoke/reactivate against the real published whole-Bible WB-2/WB-3 OSHB release;
+- add `CORE-FZ-RELEASE-002` as the lifecycle freeze gate.
+
+### Intended effect
+
+A release can be withdrawn from public serving without deleting history or regaining mutability. Historical superseded pinned releases remain citation-stable; revoked releases disappear from public RLS/pinned reads and channel resolution; explicit reactivation restores servability but never silently restores deployment selection.
+
+### Validation
+
+Pending exact-head CI. Acceptance requires Contract validation, Database Spike 001 including `05_release_lifecycle_tests.sql`, the real WB-2/WB-3 whole-Bible revoke/reactivate regression, Project governance and all triggered existing regressions to pass without Copilot review or acceptance evidence.
+
+
 ## 2026-10-06 — Accept WB-2/WB-3 whole-Bible reader gates
 
 ### Push intent
