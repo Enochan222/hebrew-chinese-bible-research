@@ -6,6 +6,7 @@ import { FixtureBanner } from "./FixtureBanner";
 import { ModeSwitch } from "./ModeSwitch";
 import type { PassagePageFailure } from "./page-state";
 import { ReleaseBadge } from "./ReleaseBadge";
+import { ReferenceNavigator } from "./ReferenceNavigator";
 
 export function PassageShell(props: {
   passage: PassageCoreV1;
@@ -50,6 +51,16 @@ export function PassageShell(props: {
         reference={reference}
         referenceSystemCode={referenceSystemCode}
       />
+
+      {isServing && navigation?.books?.length ? (
+        <ReferenceNavigator
+          researchReleaseId={props.passage.researchReleaseId}
+          referenceSystemCode={referenceSystemCode}
+          currentReference={reference}
+          mode={props.mode}
+          navigation={navigation}
+        />
+      ) : null}
 
       <section className="identity-grid" aria-label="Resolved scholarly identity">
         <article>
