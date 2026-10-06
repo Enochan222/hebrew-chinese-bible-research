@@ -293,6 +293,15 @@ ALTER TABLE serving.corpus_text_segments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE serving.corpus_node_segments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE serving.passage_reference_index ENABLE ROW LEVEL SECURITY;
 
+-- These tables are compiler-owned Serving payload. Runtime/public roles receive
+-- SELECT only below; FORCE prevents a future non-superuser table-owner path
+-- from accidentally bypassing the publication RLS boundary.
+ALTER TABLE serving.corpus_projection_rights FORCE ROW LEVEL SECURITY;
+ALTER TABLE serving.corpus_attributions FORCE ROW LEVEL SECURITY;
+ALTER TABLE serving.corpus_text_segments FORCE ROW LEVEL SECURITY;
+ALTER TABLE serving.corpus_node_segments FORCE ROW LEVEL SECURITY;
+ALTER TABLE serving.passage_reference_index FORCE ROW LEVEL SECURITY;
+
 CREATE POLICY public_read_corpus_attributions ON serving.corpus_attributions
 FOR SELECT TO anon, authenticated
 USING (serving.component_is_published(corpus_release_id));
