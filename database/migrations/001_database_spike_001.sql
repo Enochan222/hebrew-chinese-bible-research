@@ -1785,6 +1785,8 @@ AS $passage_core$
       rl.reference_system_id,
       rsys.code AS reference_system_code,
       rl.reference_span_id,
+      rl.book_code,
+      rl.chapter_number,
       rl.label,
       rl.reference_sort_key
     FROM pinned_corpus pc
@@ -1846,6 +1848,8 @@ AS $passage_core$
       FROM token_features tf
     ), '[]'::jsonb),
     'navigation', jsonb_build_object(
+      'currentBookCode', r.book_code,
+      'currentChapter', r.chapter_number,
       'previousReference', (
         SELECT p.label
         FROM serving.reference_labels p
@@ -1863,7 +1867,60 @@ AS $passage_core$
           AND n.reference_sort_key > r.reference_sort_key
         ORDER BY n.reference_sort_key
         LIMIT 1
-      )
+      ),
+      'books', COALESCE((
+        SELECT jsonb_agg(
+          jsonb_build_object(
+            'bookCode', b.book_code,
+            'firstReference', b.first_reference
+          )
+          ORDER BY b.first_sort
+        )
+        FROM (
+          SELECT
+            x.book_code,
+            min(x.reference_sort_key) AS first_sort,
+            (array_agg(x.label ORDER BY x.reference_sort_key))[1] AS first_reference
+          FROM serving.reference_labels x
+          WHERE x.corpus_release_id = r.corpus_release_id
+            AND x.reference_system_id = r.reference_system_id
+          GROUP BY x.book_code
+        ) b
+      ), '[]'::jsonb),
+      'chapters', COALESCE((
+        SELECT jsonb_agg(
+          jsonb_build_object(
+            'chapterNumber', c.chapter_number,
+            'firstReference', c.first_reference
+          )
+          ORDER BY c.chapter_number
+        )
+        FROM (
+          SELECT
+            x.chapter_number,
+            (array_agg(x.label ORDER BY x.reference_sort_key))[1] AS first_reference
+          FROM serving.reference_labels x
+          WHERE x.corpus_release_id = r.corpus_release_id
+            AND x.reference_system_id = r.reference_system_id
+            AND x.book_code = r.book_code
+            AND x.chapter_number IS NOT NULL
+          GROUP BY x.chapter_number
+        ) c
+      ), '[]'::jsonb),
+      'passages', COALESCE((
+        SELECT jsonb_agg(
+          jsonb_build_object(
+            'referenceLabel', p.label,
+            'verseLabel', p.verse_label
+          )
+          ORDER BY p.reference_sort_key
+        )
+        FROM serving.reference_labels p
+        WHERE p.corpus_release_id = r.corpus_release_id
+          AND p.reference_system_id = r.reference_system_id
+          AND p.book_code = r.book_code
+          AND p.chapter_number = r.chapter_number
+      ), '[]'::jsonb)
     ),
     'attribution', 'Open Scriptures Hebrew Bible / Westminster Leningrad Codex; source and morphology attribution required.'
   )
