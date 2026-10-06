@@ -76,6 +76,7 @@ Database Spike 001 may begin when all CORE-SPIKE gates are PASS. This does not d
 | CORE-FZ-TC-001 | Grouped apparatus reading retains raw apparatus, witness uncertainty, siglum source context, and exact locus |
 | CORE-FZ-RIGHTS-001 | Conflicting rights + default/unknown restrictive deny + typed conditions/obligations fixtures pass |
 | CORE-FZ-RELEASE-001 | Real database publication provides visibility atomicity; partial failure cannot move production pointer |
+| CORE-FZ-RELEASE-002 | Release lifecycle separates ever-published immutability from current public servability; deterministic event sequence/transition, revoke/reactivate, channel-pointer eligibility and public RLS/API regressions pass |
 | CORE-FZ-RLS-001 | RLS/grants/views/RPC negative tests pass |
 | CORE-FZ-QUERY-001 | Real deterministic query compiler reproduces fixture results with stable cursor pagination and explicit page/total count semantics |
 | CORE-FZ-VOCAB-001 | Active docs/vocabulary/schema enum drift check passes |

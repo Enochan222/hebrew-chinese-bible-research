@@ -4,6 +4,33 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+## 2026-10-06 — Implement RL-1 release lifecycle split candidate
+
+### Push intent
+
+Close the load-bearing lifecycle ambiguity discovered during WB-2/WB-3 review before translation-witness publication expands the Serving surface.
+
+### Why
+
+The database used the existence of a PUBLISHED event both to make release payloads immutable and to decide whether a release was currently public. That made REVOKED ineffective for public withdrawal, while redefining the same predicate would have made revoked historical releases mutable. The release event contract also lacked deterministic ordering for equal timestamps.
+
+### What changed
+
+- add required per-release `eventSequence` to the canonical ReleaseEvent contract and PostgreSQL event table;
+- enforce gapless event order, non-decreasing effective time and valid PUBLISHED/SUPERSEDED/REVOKED/REACTIVATED transitions;
+- split ever-published immutability from lifecycle-aware public servability;
+- keep SUPERSEDED historical releases pinned-readable and permanently immutable;
+- make REVOKED remove public RLS/API visibility and atomically detach channel pointers without mutating payloads;
+- require an explicit REACTIVATED transition before a revoked release can be assigned to a channel again;
+- make reactivation restore eligibility only, never deployment selection;
+- reject channel pointers to non-servable releases;
+- add Database Spike adversarial coverage for revoke, reactivation, equal-time ordering, immutable revoked payloads, invalid transitions, sequence gaps, time reversal, channel safety and unauthorized transition attempts;
+- add `CORE-FZ-RELEASE-002` so Core freeze cannot ignore lifecycle semantics.
+
+### Validation
+
+This commit is an implementation candidate. Exact-head Contract validation, Project governance, Database Spike 001 and affected whole-Bible/Serving regressions must pass before RL-1 is accepted or Issue #25 is closed.
+
 
 ## 2026-10-06 — Accept WB-2/WB-3 whole-Bible reader gates
 
