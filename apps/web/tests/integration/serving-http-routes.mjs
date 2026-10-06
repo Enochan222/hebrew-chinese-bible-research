@@ -102,7 +102,10 @@ async function waitForApp() {
 
 async function json(pathname, expectedStatus = 200) {
   const response = await fetch(`${appBase}${pathname}`);
-  assert.equal(response.status, expectedStatus, await response.text());
+  if (response.status !== expectedStatus) {
+    const body = await response.text();
+    assert.fail(`${pathname} returned ${response.status}; expected ${expectedStatus}: ${body}`);
+  }
   return response.json();
 }
 
