@@ -2179,6 +2179,8 @@ Two separate predicates are mandatory:
 
 The corresponding component predicates must preserve the same split.
 
+Permanent payload immutability covers every row that can change a pinned public response. Component-scoped `reference_labels`, `corpus_text_segments`, `corpus_node_segments`, corpus nodes/features/edges/mappings and semantic-set members may be edited only before their component has ever participated in a PUBLISHED release. Serving `research_objects`, `reference_spans`, `reference_systems` and `rights_decision_snapshots` are append-only identity/snapshot rows from materialization; later variants receive new IDs rather than in-place mutation.
+
 Servability states are PUBLISHED, SUPERSEDED and REACTIVATED. REVOKED is not publicly servable. A SUPERSEDED release remains accessible by an explicitly pinned historical release ID unless later REVOKED.
 
 Canonical machine state machine: `contracts/v1.1/release-lifecycle-policy.json`.
