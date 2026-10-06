@@ -155,9 +155,11 @@ try {
   assert.deepEqual(passage.navigation.passages.map((item) => item.referenceLabel), ["Gen.1.1", "Gen.1.2"]);
   assert.match(passage.attribution, /Open Scriptures Hebrew Bible/);
 
-  const malformed = await json("/api/v1/passages/Gen.1.2?referenceSystemCode=OSHB_OSIS", 500);
-  assert.equal(malformed.code, "CONTRACT_VIOLATION");
-  assert.match(malformed.message, /serving contract validation failed/i);
+  const adjacent = await json("/api/v1/passages/Gen.1.2?referenceSystemCode=OSHB_OSIS");
+  assert.equal(adjacent.dataSource, "SERVING");
+  assert.equal(adjacent.resolvedReference.referenceLabel, "Gen.1.2");
+  assert.equal(adjacent.navigation.previousReference, "Gen.1.1");
+  assert.equal(adjacent.navigation.nextReference, "Gen.1.3");
 
   const page = await fetch(
     `${appBase}/releases/${releaseId}/passages/Gen.1.1?referenceSystemCode=OSHB_OSIS&mode=STUDY`,
