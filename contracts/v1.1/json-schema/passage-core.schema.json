@@ -109,6 +109,81 @@
             "string",
             "null"
           ]
+        },
+        "currentBookCode": {
+          "type": "string",
+          "minLength": 1
+        },
+        "currentChapter": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "books": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "bookCode",
+              "firstReference"
+            ],
+            "properties": {
+              "bookCode": {
+                "type": "string",
+                "minLength": 1
+              },
+              "firstReference": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "chapters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "chapterNumber",
+              "firstReference"
+            ],
+            "properties": {
+              "chapterNumber": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "firstReference": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "passages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "referenceLabel"
+            ],
+            "properties": {
+              "referenceLabel": {
+                "type": "string",
+                "minLength": 1
+              },
+              "verseLabel": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
         }
       }
     },
