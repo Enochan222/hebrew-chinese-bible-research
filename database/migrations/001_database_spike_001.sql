@@ -1551,6 +1551,18 @@ BEGIN
 END
 $$;
 
+CREATE TRIGGER serving_research_objects_immutable
+BEFORE UPDATE OR DELETE ON serving.research_objects
+FOR EACH ROW EXECUTE FUNCTION serving.reject_immutable_update();
+
+CREATE TRIGGER serving_reference_spans_immutable
+BEFORE UPDATE OR DELETE ON serving.reference_spans
+FOR EACH ROW EXECUTE FUNCTION serving.reject_immutable_update();
+
+CREATE TRIGGER serving_reference_systems_immutable
+BEFORE UPDATE OR DELETE ON serving.reference_systems
+FOR EACH ROW EXECUTE FUNCTION serving.reject_immutable_update();
+
 CREATE TRIGGER research_release_immutable
 BEFORE UPDATE OR DELETE ON serving.research_releases
 FOR EACH ROW EXECUTE FUNCTION serving.reject_immutable_update();
@@ -1838,15 +1850,25 @@ RETURNS trigger
 LANGUAGE plpgsql
 AS $guard_direct_release_payload$
 DECLARE
-  release_id uuid;
+  old_release_id uuid;
+  new_release_id uuid;
 BEGIN
-  release_id := CASE
-    WHEN TG_OP = 'DELETE' THEN (to_jsonb(OLD)->>'research_release_id')::uuid
-    ELSE (to_jsonb(NEW)->>'research_release_id')::uuid
-  END;
+  IF TG_OP <> 'INSERT' THEN
+    old_release_id := (to_jsonb(OLD)->>'research_release_id')::uuid;
+  END IF;
+  IF TG_OP <> 'DELETE' THEN
+    new_release_id := (to_jsonb(NEW)->>'research_release_id')::uuid;
+  END IF;
 
-  IF serving.release_ever_published(release_id) THEN
-    RAISE EXCEPTION 'release % payload is immutable after first PUBLISHED event', release_id;
+  IF old_release_id IS NOT NULL
+     AND serving.release_ever_published(old_release_id) THEN
+    RAISE EXCEPTION 'release % payload is immutable after first PUBLISHED event', old_release_id;
+  END IF;
+
+  IF new_release_id IS NOT NULL
+     AND new_release_id IS DISTINCT FROM old_release_id
+     AND serving.release_ever_published(new_release_id) THEN
+    RAISE EXCEPTION 'release % payload is immutable after first PUBLISHED event', new_release_id;
   END IF;
 
   RETURN CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NEW END;
@@ -1858,24 +1880,40 @@ RETURNS trigger
 LANGUAGE plpgsql
 AS $guard_evidence_item_payload$
 DECLARE
-  packet_id uuid;
-  release_id uuid;
+  old_packet_id uuid;
+  new_packet_id uuid;
+  old_release_id uuid;
+  new_release_id uuid;
 BEGIN
-  packet_id := CASE
-    WHEN TG_OP = 'DELETE' THEN OLD.published_evidence_packet_id
-    ELSE NEW.published_evidence_packet_id
-  END;
+  IF TG_OP <> 'INSERT' THEN
+    old_packet_id := OLD.published_evidence_packet_id;
+    SELECT research_release_id INTO old_release_id
+    FROM serving.published_evidence_packets
+    WHERE published_evidence_packet_id = old_packet_id;
 
-  SELECT research_release_id INTO release_id
-  FROM serving.published_evidence_packets
-  WHERE published_evidence_packet_id = packet_id;
+    IF old_release_id IS NULL THEN
+      RAISE EXCEPTION 'evidence packet % does not resolve to a release', old_packet_id;
+    END IF;
 
-  IF release_id IS NULL THEN
-    RAISE EXCEPTION 'evidence packet % does not resolve to a release', packet_id;
+    IF serving.release_ever_published(old_release_id) THEN
+      RAISE EXCEPTION 'release % evidence payload is immutable after first PUBLISHED event', old_release_id;
+    END IF;
   END IF;
 
-  IF serving.release_ever_published(release_id) THEN
-    RAISE EXCEPTION 'release % evidence payload is immutable after first PUBLISHED event', release_id;
+  IF TG_OP <> 'DELETE' THEN
+    new_packet_id := NEW.published_evidence_packet_id;
+    SELECT research_release_id INTO new_release_id
+    FROM serving.published_evidence_packets
+    WHERE published_evidence_packet_id = new_packet_id;
+
+    IF new_release_id IS NULL THEN
+      RAISE EXCEPTION 'evidence packet % does not resolve to a release', new_packet_id;
+    END IF;
+
+    IF new_release_id IS DISTINCT FROM old_release_id
+       AND serving.release_ever_published(new_release_id) THEN
+      RAISE EXCEPTION 'release % evidence payload is immutable after first PUBLISHED event', new_release_id;
+    END IF;
   END IF;
 
   RETURN CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NEW END;
@@ -1887,30 +1925,56 @@ RETURNS trigger
 LANGUAGE plpgsql
 AS $guard_assertion_evidence_payload$
 DECLARE
-  assertion_id uuid;
-  evidence_id uuid;
-  assertion_release uuid;
-  evidence_release uuid;
+  old_assertion_release uuid;
+  old_evidence_release uuid;
+  new_assertion_release uuid;
+  new_evidence_release uuid;
 BEGIN
-  assertion_id := CASE WHEN TG_OP='DELETE' THEN OLD.published_assertion_id ELSE NEW.published_assertion_id END;
-  evidence_id := CASE WHEN TG_OP='DELETE' THEN OLD.published_evidence_item_id ELSE NEW.published_evidence_item_id END;
+  IF TG_OP <> 'INSERT' THEN
+    SELECT research_release_id INTO old_assertion_release
+    FROM serving.published_assertions
+    WHERE published_assertion_id = OLD.published_assertion_id;
 
-  SELECT research_release_id INTO assertion_release
-  FROM serving.published_assertions
-  WHERE published_assertion_id = assertion_id;
+    SELECT p.research_release_id INTO old_evidence_release
+    FROM serving.published_evidence_items i
+    JOIN serving.published_evidence_packets p
+      ON p.published_evidence_packet_id = i.published_evidence_packet_id
+    WHERE i.published_evidence_item_id = OLD.published_evidence_item_id;
 
-  SELECT p.research_release_id INTO evidence_release
-  FROM serving.published_evidence_items i
-  JOIN serving.published_evidence_packets p
-    ON p.published_evidence_packet_id = i.published_evidence_packet_id
-  WHERE i.published_evidence_item_id = evidence_id;
+    IF old_assertion_release IS NULL
+       OR old_evidence_release IS NULL
+       OR old_assertion_release <> old_evidence_release THEN
+      RAISE EXCEPTION 'assertion and evidence must belong to the same ResearchRelease';
+    END IF;
 
-  IF assertion_release IS NULL OR evidence_release IS NULL OR assertion_release <> evidence_release THEN
-    RAISE EXCEPTION 'assertion and evidence must belong to the same ResearchRelease';
+    IF serving.release_ever_published(old_assertion_release) THEN
+      RAISE EXCEPTION 'release % assertion/evidence links are immutable after first PUBLISHED event',
+        old_assertion_release;
+    END IF;
   END IF;
 
-  IF serving.release_ever_published(assertion_release) THEN
-    RAISE EXCEPTION 'release % assertion/evidence links are immutable after first PUBLISHED event', assertion_release;
+  IF TG_OP <> 'DELETE' THEN
+    SELECT research_release_id INTO new_assertion_release
+    FROM serving.published_assertions
+    WHERE published_assertion_id = NEW.published_assertion_id;
+
+    SELECT p.research_release_id INTO new_evidence_release
+    FROM serving.published_evidence_items i
+    JOIN serving.published_evidence_packets p
+      ON p.published_evidence_packet_id = i.published_evidence_packet_id
+    WHERE i.published_evidence_item_id = NEW.published_evidence_item_id;
+
+    IF new_assertion_release IS NULL
+       OR new_evidence_release IS NULL
+       OR new_assertion_release <> new_evidence_release THEN
+      RAISE EXCEPTION 'assertion and evidence must belong to the same ResearchRelease';
+    END IF;
+
+    IF new_assertion_release IS DISTINCT FROM old_assertion_release
+       AND serving.release_ever_published(new_assertion_release) THEN
+      RAISE EXCEPTION 'release % assertion/evidence links are immutable after first PUBLISHED event',
+        new_assertion_release;
+    END IF;
   END IF;
 
   RETURN CASE WHEN TG_OP='DELETE' THEN OLD ELSE NEW END;
@@ -1922,15 +1986,25 @@ RETURNS trigger
 LANGUAGE plpgsql
 AS $guard_component_projection$
 DECLARE
-  object_id uuid;
+  old_object_id uuid;
+  new_object_id uuid;
 BEGIN
-  object_id := CASE
-    WHEN TG_OP='DELETE' THEN (to_jsonb(OLD)->>TG_ARGV[0])::uuid
-    ELSE (to_jsonb(NEW)->>TG_ARGV[0])::uuid
-  END;
+  IF TG_OP <> 'INSERT' THEN
+    old_object_id := (to_jsonb(OLD)->>TG_ARGV[0])::uuid;
+  END IF;
+  IF TG_OP <> 'DELETE' THEN
+    new_object_id := (to_jsonb(NEW)->>TG_ARGV[0])::uuid;
+  END IF;
 
-  IF serving.component_is_ever_published(object_id) THEN
-    RAISE EXCEPTION 'ever-published component % projection is permanently immutable', object_id;
+  IF old_object_id IS NOT NULL
+     AND serving.component_is_ever_published(old_object_id) THEN
+    RAISE EXCEPTION 'ever-published component % projection is permanently immutable', old_object_id;
+  END IF;
+
+  IF new_object_id IS NOT NULL
+     AND new_object_id IS DISTINCT FROM old_object_id
+     AND serving.component_is_ever_published(new_object_id) THEN
+    RAISE EXCEPTION 'ever-published component % projection is permanently immutable', new_object_id;
   END IF;
 
   RETURN CASE WHEN TG_OP='DELETE' THEN OLD ELSE NEW END;
@@ -1960,6 +2034,18 @@ FOR EACH ROW EXECUTE FUNCTION serving.guard_evidence_item_payload();
 CREATE TRIGGER assertion_evidence_release_lock
 BEFORE INSERT OR UPDATE OR DELETE ON serving.published_assertion_evidence
 FOR EACH ROW EXECUTE FUNCTION serving.guard_assertion_evidence_payload();
+
+CREATE TRIGGER reference_labels_component_lock
+BEFORE INSERT OR UPDATE OR DELETE ON serving.reference_labels
+FOR EACH ROW EXECUTE FUNCTION serving.guard_component_projection('corpus_release_id');
+
+CREATE TRIGGER corpus_text_segments_component_lock
+BEFORE INSERT OR UPDATE OR DELETE ON serving.corpus_text_segments
+FOR EACH ROW EXECUTE FUNCTION serving.guard_component_projection('corpus_release_id');
+
+CREATE TRIGGER corpus_node_segments_component_lock
+BEFORE INSERT OR UPDATE OR DELETE ON serving.corpus_node_segments
+FOR EACH ROW EXECUTE FUNCTION serving.guard_component_projection('corpus_release_id');
 
 CREATE TRIGGER corpus_nodes_component_lock
 BEFORE INSERT OR UPDATE OR DELETE ON serving.corpus_nodes
