@@ -145,6 +145,92 @@ def main() -> int:
     if not re.fullmatch(r"[0-9a-fA-F]{64}", oshb_layer_hash):
         raise SystemExit("OSHB annotation-layer content hash is missing or not SHA-256")
 
+    authoring_reference_projection_sql = f"""
+WITH label_ranges AS (
+  SELECT
+    rl.reference_system_id,rsys.code AS reference_system_code,rl.label AS reference_label,
+    rl.book_id,b.osis_code AS book_code,rl.chapter_number,rl.verse_label,
+    min(rlm.atom_sequence) AS start_sequence,
+    max(rlm.atom_sequence) AS end_sequence
+  FROM authoring.reference_labels rl
+  JOIN authoring.reference_systems rsys USING (reference_system_id)
+  JOIN authoring.reference_label_members rlm USING (reference_label_id)
+  JOIN authoring.biblical_books b USING (book_id)
+  WHERE rsys.code='OSHB_OSIS'
+  GROUP BY
+    rl.reference_system_id,rsys.code,rl.label,rl.book_id,b.osis_code,
+    rl.chapter_number,rl.verse_label
+)
+SELECT
+  lr.reference_system_id::text,lr.reference_system_code,lr.reference_label,
+  sp.reference_span_id::text,lr.book_code,
+  COALESCE(lr.chapter_number::text,''),COALESCE(lr.verse_label,''),
+  (cb.book_order::bigint * 1000000 + lr.start_sequence)::text
+FROM label_ranges lr
+JOIN authoring.reference_spans sp
+  ON sp.book_id=lr.book_id
+ AND sp.start_sequence=lr.start_sequence
+ AND sp.end_sequence=lr.end_sequence
+ AND sp.span_kind='VERSE'
+JOIN authoring.canon_books cb ON cb.book_id=lr.book_id
+JOIN authoring.canon_systems cs USING (canon_system_id)
+WHERE cs.code={sql_literal(selected_canon)}
+  AND cb.included
+ORDER BY cb.book_order,lr.start_sequence,lr.reference_system_code,lr.reference_label;
+"""
+    authoring_text_projection_sql = f"""
+SELECT
+  s.text_segment_id::text,s.reference_span_id::text,s.segment_order::text,
+  'OSHB_MORPHHB',s.surface_original,s.segment_kind,s.content_hash
+FROM authoring.text_segments s
+WHERE s.text_stream_id={sql_literal(oshb_stream)}::uuid
+  AND s.segment_storage_mode='PERSISTED_CONTENT'
+  AND s.surface_original IS NOT NULL
+  AND s.content_hash IS NOT NULL
+ORDER BY s.segment_order,s.text_segment_id;
+"""
+    authoring_nodes_projection_sql = f"""
+SELECT
+  n.analysis_node_id::text,n.annotation_layer_id::text,n.node_type,n.reference_span_id::text
+FROM authoring.analysis_nodes n
+WHERE n.annotation_layer_id={sql_literal(oshb_layer)}::uuid
+ORDER BY n.analysis_node_id;
+"""
+    authoring_features_projection_sql = f"""
+SELECT f.analysis_node_id::text,f.feature_key,f.feature_value
+FROM authoring.analysis_node_features f
+JOIN authoring.analysis_nodes n USING (analysis_node_id)
+WHERE n.annotation_layer_id={sql_literal(oshb_layer)}::uuid
+ORDER BY f.analysis_node_id,f.feature_key,f.feature_value;
+"""
+    authoring_membership_projection_sql = f"""
+SELECT
+  ns.analysis_node_id::text,ns.text_segment_id::text,ns.member_order::text,
+  COALESCE(ns.membership_role,'')
+FROM authoring.analysis_node_segments ns
+JOIN authoring.analysis_nodes n USING (analysis_node_id)
+WHERE n.annotation_layer_id={sql_literal(oshb_layer)}::uuid
+ORDER BY ns.analysis_node_id,ns.member_order,ns.text_segment_id;
+"""
+    attribution_projection_sql = (
+        "SELECT 'OSHB_MORPHHB',"
+        + sql_literal(ATTRIBUTION_TEXT)
+        + ","
+        + sql_literal(LICENSE_LABEL)
+        + ";"
+    )
+
+    authoring_corpus_projection_hash = stream_hash_sections([
+        ("reference-index", authoring_reference_projection_sql),
+        ("text-segments", authoring_text_projection_sql),
+        ("attribution", attribution_projection_sql),
+    ])
+    authoring_annotation_projection_hash = stream_hash_sections([
+        ("analysis-nodes", authoring_nodes_projection_sql),
+        ("analysis-node-features", authoring_features_projection_sql),
+        ("analysis-node-segments", authoring_membership_projection_sql),
+    ])
+
     build_id = stable_uuid("research-build", "WB-2", foundation["buildId"], args.git_commit_sha)
     release_id = stable_uuid("research-release", "WB-2", foundation["buildId"], args.git_commit_sha)
     rights_policy_id = stable_uuid("rights-policy", "OSHB_MORPHHB", "WB2_PUBLIC_COMMERCIAL_V1")
@@ -161,14 +247,14 @@ def main() -> int:
             "componentKind": "CORPUS",
             "researchObjectId": oshb_corpus,
             "componentVersion": component_version,
-            "contentHash": oshb_source_checksum,
+            "contentHash": authoring_corpus_projection_hash,
             "componentOrder": 0,
         },
         {
             "componentKind": "ANNOTATION_LAYER",
             "researchObjectId": oshb_layer,
             "componentVersion": component_version,
-            "contentHash": oshb_layer_hash,
+            "contentHash": authoring_annotation_projection_hash,
             "componentOrder": 1,
         },
     ]
@@ -272,8 +358,8 @@ $rights_eval$;
 
 INSERT INTO serving.research_objects(research_object_id,object_type,source_content_hash,published_at)
 VALUES
-({sql_literal(oshb_corpus)}::uuid,'CORPUS_RELEASE',{sql_literal(oshb_source_checksum)},now()),
-({sql_literal(oshb_layer)}::uuid,'ANNOTATION_LAYER',{sql_literal(oshb_layer_hash)},now());
+({sql_literal(oshb_corpus)}::uuid,'CORPUS_RELEASE',{sql_literal(authoring_corpus_projection_hash)},now()),
+({sql_literal(oshb_layer)}::uuid,'ANNOTATION_LAYER',{sql_literal(authoring_annotation_projection_hash)},now());
 
 INSERT INTO serving.rights_decision_snapshots(
   rights_decision_snapshot_id,subject_type,subject_identifier,operation,purpose_scope,
@@ -416,11 +502,11 @@ INSERT INTO serving.research_release_components(
 ) VALUES
 (
   {sql_literal(release_id)}::uuid,'CORPUS',{sql_literal(oshb_corpus)}::uuid,
-  {sql_literal(component_version)},{sql_literal(oshb_source_checksum)},0
+  {sql_literal(component_version)},{sql_literal(authoring_corpus_projection_hash)},0
 ),
 (
   {sql_literal(release_id)}::uuid,'ANNOTATION_LAYER',{sql_literal(oshb_layer)}::uuid,
-  {sql_literal(component_version)},{sql_literal(oshb_layer_hash)},1
+  {sql_literal(component_version)},{sql_literal(authoring_annotation_projection_hash)},1
 );
 
 INSERT INTO serving.release_channels(release_channel_id,channel_key,description)
