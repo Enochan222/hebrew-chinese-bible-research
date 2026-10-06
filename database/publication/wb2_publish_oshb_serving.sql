@@ -11,6 +11,9 @@ JOIN authoring.digital_expressions de
 WHERE de.metadata->>'sourceKey' = 'OSHB_MORPHHB'
 \gset
 
+SELECT set_config('wb2.oshb_corpus_id', :'oshb_corpus_id', true);
+
+
 SELECT al.annotation_layer_id::text AS oshb_layer_id
 FROM authoring.annotation_layers al
 WHERE al.metadata->>'sourceKey' = 'OSHB_MORPHHB'
@@ -241,7 +244,6 @@ SELECT publication_control.publish_release_to_channel(
 );
 
 -- Fail closed on any whole-corpus drift.
-SELECT set_config('wb2.oshb_corpus_id', :'oshb_corpus_id', true);
 DO $wb2_acceptance$
 DECLARE
   ref_count bigint;
