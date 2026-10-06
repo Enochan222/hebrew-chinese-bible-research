@@ -2152,12 +2152,36 @@ Fields:
 - `research_release_event_id uuid PK`
 - `research_release_id uuid FK`
 - `event_type text`
+- `event_sequence bigint`
 - `effective_at timestamptz`
 - `reason text nullable`
 - `changed_by uuid nullable`
-- `metadata jsonb`
 
 Event type comes from `researchReleaseEventType`.
+
+RL-1 lifecycle invariants:
+
+- `event_sequence` begins at 1 and is contiguous within each ResearchRelease;
+- the first event is PUBLISHED;
+- `effective_at` is nondecreasing;
+- equal `effective_at` values are valid and are ordered only by `event_sequence`;
+- UUID ordering is never lifecycle chronology;
+- non-PUBLISHED lifecycle transitions require an explicit reason;
+- PUBLISHED may transition to SUPERSEDED or REVOKED;
+- SUPERSEDED may transition only to REVOKED;
+- REVOKED may transition only to REACTIVATED;
+- REACTIVATED may transition to SUPERSEDED or REVOKED.
+
+Two separate predicates are mandatory:
+
+- `release_was_published(release_id)`: permanent immutability predicate;
+- `release_is_publicly_servable(release_id)`: latest-event public visibility predicate.
+
+The corresponding component predicates must preserve the same split.
+
+Servability states are PUBLISHED, SUPERSEDED and REACTIVATED. REVOKED is not publicly servable. A SUPERSEDED release remains accessible by an explicitly pinned historical release ID unless later REVOKED.
+
+Canonical machine state machine: `contracts/v1.1/release-lifecycle-policy.json`.
 
 ## 29.5 `release_channels`
 
@@ -2185,7 +2209,7 @@ Fields:
 - `updated_by uuid nullable`
 - `row_version integer`
 
-Rollback changes a channel pointer. It does not mutate historical release payloads.
+A pointer target must be currently publicly servable. REVOKED removes pointers to that release in the same lifecycle transaction. REACTIVATED does not recreate a pointer. Rollback is a pointer move only and does not append lifecycle events or mutate historical release payloads.
 
 ## 29.7 Release manifest hashing
 
