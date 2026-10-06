@@ -58,6 +58,32 @@ def rows(sql: str) -> list[list[str]]:
     return [line.split("\t") for line in psql_query(sql).splitlines() if line]
 
 
+def symmetric_difference_count(left_sql: str, right_sql: str) -> int:
+    sql = f"""
+WITH left_rows AS (
+{left_sql.rstrip().rstrip(";")}
+),
+right_rows AS (
+{right_sql.rstrip().rstrip(";")}
+),
+left_minus_right AS (
+  SELECT * FROM left_rows
+  EXCEPT ALL
+  SELECT * FROM right_rows
+),
+right_minus_left AS (
+  SELECT * FROM right_rows
+  EXCEPT ALL
+  SELECT * FROM left_rows
+)
+SELECT
+  (SELECT count(*) FROM left_minus_right)
+  +
+  (SELECT count(*) FROM right_minus_left);
+"""
+    return count(sql)
+
+
 def stream_hash_sections(sections: list[tuple[str, str]]) -> str:
     """Hash deterministic psql result streams without loading the corpus into memory."""
     digest = hashlib.sha256()
@@ -216,11 +242,11 @@ WHERE n.annotation_layer_id={sql_literal(oshb_layer)}::uuid
 ORDER BY ns.analysis_node_id,ns.member_order,ns.text_segment_id;
 """
     attribution_projection_sql = (
-        "SELECT 'OSHB_MORPHHB',"
+        "SELECT 'OSHB_MORPHHB'::text AS source_key,"
         + sql_literal(ATTRIBUTION_TEXT)
-        + ","
+        + "::text AS attribution_text,"
         + sql_literal(LICENSE_LABEL)
-        + ";"
+        + "::text AS license_label;"
     )
 
     authoring_corpus_projection_hash = stream_hash_sections([
@@ -557,7 +583,9 @@ WHERE corpus_release_id={sql_literal(oshb_corpus)}::uuid
 ORDER BY segment_order,text_segment_id;
 """
     serving_attribution_projection_sql = f"""
-SELECT source_key,attribution_text,license_label
+SELECT source_key::text AS source_key,
+       attribution_text::text AS attribution_text,
+       license_label::text AS license_label
 FROM serving.corpus_attributions
 WHERE corpus_release_id={sql_literal(oshb_corpus)}::uuid
 ORDER BY source_key;
@@ -582,6 +610,23 @@ FROM serving.corpus_node_segments
 WHERE corpus_release_id={sql_literal(oshb_corpus)}::uuid
 ORDER BY analysis_node_id,member_order,text_segment_id;
 """
+
+    authoring_reference_hash = stream_hash_sections([("reference-index", authoring_reference_projection_sql)])
+    serving_reference_hash = stream_hash_sections([("reference-index", serving_reference_projection_sql)])
+    authoring_text_hash = stream_hash_sections([("text-segments", authoring_text_projection_sql)])
+    serving_text_hash = stream_hash_sections([("text-segments", serving_text_projection_sql)])
+    authoring_attribution_hash = stream_hash_sections([("attribution", attribution_projection_sql)])
+    serving_attribution_hash = stream_hash_sections([("attribution", serving_attribution_projection_sql)])
+
+    reference_projection_diff_rows = symmetric_difference_count(
+        authoring_reference_projection_sql, serving_reference_projection_sql
+    )
+    text_projection_diff_rows = symmetric_difference_count(
+        authoring_text_projection_sql, serving_text_projection_sql
+    )
+    attribution_projection_diff_rows = symmetric_difference_count(
+        attribution_projection_sql, serving_attribution_projection_sql
+    )
 
     serving_corpus_projection_hash = stream_hash_sections([
         ("reference-index", serving_reference_projection_sql),
@@ -662,6 +707,12 @@ ORDER BY analysis_node_id,member_order,text_segment_id;
         "candidateRemainsInactive": published_events == 0,
         "oshbStorageRightsAllow": rights_rows.get("STORE_EXTRACTED_TEXT") == "ALLOW",
         "oshbDisplayRightsConditionalAttribution": rights_rows.get("DISPLAY_FULLTEXT") == "CONDITIONAL",
+        "referenceProjectionRowsMatchAuthoring": reference_projection_diff_rows == 0,
+        "textProjectionRowsMatchAuthoring": text_projection_diff_rows == 0,
+        "attributionProjectionRowsMatchAuthoring": attribution_projection_diff_rows == 0,
+        "referenceProjectionHashMatchesAuthoring": serving_reference_hash == authoring_reference_hash,
+        "textProjectionHashMatchesAuthoring": serving_text_hash == authoring_text_hash,
+        "attributionProjectionHashMatchesAuthoring": serving_attribution_hash == authoring_attribution_hash,
         "corpusProjectionHashMatchesAuthoring": serving_corpus_projection_hash == authoring_corpus_projection_hash,
         "annotationProjectionHashMatchesAuthoring": serving_annotation_projection_hash == authoring_annotation_projection_hash,
     }
@@ -685,6 +736,23 @@ ORDER BY analysis_node_id,member_order,text_segment_id;
             "servingCorpus": serving_corpus_projection_hash,
             "authoringAnnotationLayer": authoring_annotation_projection_hash,
             "servingAnnotationLayer": serving_annotation_projection_hash,
+            "sections": {
+                "referenceIndex": {
+                    "authoring": authoring_reference_hash,
+                    "serving": serving_reference_hash,
+                    "symmetricDifferenceRows": reference_projection_diff_rows,
+                },
+                "textSegments": {
+                    "authoring": authoring_text_hash,
+                    "serving": serving_text_hash,
+                    "symmetricDifferenceRows": text_projection_diff_rows,
+                },
+                "attribution": {
+                    "authoring": authoring_attribution_hash,
+                    "serving": serving_attribution_hash,
+                    "symmetricDifferenceRows": attribution_projection_diff_rows,
+                },
+            },
         },
         "sourceHashes": {
             "oshbCorpusSourceChecksum": oshb_source_checksum,
