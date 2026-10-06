@@ -5,6 +5,29 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
 
+## 2026-10-06 — Enforce full RightsDecisionSnapshot table parity
+
+### Push intent
+
+Close the remaining machine-contract drift at the persisted WB-2 publication-rights boundary.
+
+### Why
+
+The nested RightsCondition and obligation validators had been aligned with v1.1, but the SQL table still accepted snapshot states the canonical JSON Schema rejects: unknown subject/operation/scope values, duplicate rule IDs, empty resolver versions, malformed decision hashes, and restrictive default-deny snapshots carrying residual conditions or obligations.
+
+### What changed
+
+- constrain subject type, operation, purpose scope, audience scope and commercial context to the canonical v1.1 enum domains;
+- add deterministic UUID-array uniqueness validation, including rejection of duplicate/null members;
+- require a non-empty resolver version and a 64-hex-character decision hash;
+- require DEFAULT_DENY and UNKNOWN_RESTRICTIVE snapshots to be DENY with no winning rules, conditions or obligations;
+- add adversarial SQL inserts covering invalid enum values, duplicate rule IDs, restrictive snapshots with residual restrictions metadata, empty resolver versions and malformed hashes.
+
+### Validation
+
+Database Spike and all exact-head whole-Bible/web/contract regressions must pass before WB-2/WB-3 is accepted.
+
+
 ## 2026-10-06 — Complete strict AJV typing for SERVING PassageCore conditional
 
 ### Push intent

@@ -877,3 +877,134 @@ BEGIN
   END IF;
 END
 $wb2_rights_contract_parity$;
+
+
+-- WB-2 hardening: RightsDecisionSnapshot table semantics must match the
+-- canonical v1.1 JSON Schema, not only its nested condition/obligation parsers.
+DO $wb2_snapshot_contract_parity$
+DECLARE
+  failed boolean;
+BEGIN
+  IF NOT serving.uuid_array_is_unique(ARRAY[]::uuid[])
+     OR serving.uuid_array_is_unique(ARRAY[
+       '90000000-0000-4000-8000-000000000001'::uuid,
+       '90000000-0000-4000-8000-000000000001'::uuid
+     ]) THEN
+    RAISE EXCEPTION 'uuid array uniqueness helper does not match JSON Schema uniqueItems';
+  END IF;
+
+  failed := false;
+  BEGIN
+    INSERT INTO serving.rights_decision_snapshots(
+      rights_decision_snapshot_id,subject_type,subject_identifier,operation,
+      purpose_scope,audience_scope,commercial_context,applicable_rule_ids,winning_rule_ids,
+      decision,decision_basis,conditions_json,obligations_json,resolver_version,evaluated_at,decision_hash
+    ) VALUES (
+      '9f000000-0000-4000-8000-000000000001','NOT_A_SUBJECT',
+      '9f000000-0000-4000-8000-000000000101','DISPLAY_FULLTEXT',
+      'PUBLIC_DISPLAY','PUBLIC','COMMERCIAL','{}','{}','DENY','DEFAULT_DENY',
+      NULL,'[]','rights-test-1',now(),repeat('a',64)
+    );
+  EXCEPTION WHEN check_violation THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'invalid subjectType must fail closed'; END IF;
+
+  failed := false;
+  BEGIN
+    INSERT INTO serving.rights_decision_snapshots(
+      rights_decision_snapshot_id,subject_type,subject_identifier,operation,
+      purpose_scope,audience_scope,commercial_context,applicable_rule_ids,winning_rule_ids,
+      decision,decision_basis,conditions_json,obligations_json,resolver_version,evaluated_at,decision_hash
+    ) VALUES (
+      '9f000000-0000-4000-8000-000000000002','CORPUS_RELEASE',
+      '9f000000-0000-4000-8000-000000000102','NOT_AN_OPERATION',
+      'PUBLIC_DISPLAY','PUBLIC','COMMERCIAL','{}','{}','DENY','DEFAULT_DENY',
+      NULL,'[]','rights-test-1',now(),repeat('b',64)
+    );
+  EXCEPTION WHEN check_violation THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'invalid operation must fail closed'; END IF;
+
+  failed := false;
+  BEGIN
+    INSERT INTO serving.rights_decision_snapshots(
+      rights_decision_snapshot_id,subject_type,subject_identifier,operation,
+      purpose_scope,audience_scope,commercial_context,applicable_rule_ids,winning_rule_ids,
+      decision,decision_basis,conditions_json,obligations_json,resolver_version,evaluated_at,decision_hash
+    ) VALUES (
+      '9f000000-0000-4000-8000-000000000003','CORPUS_RELEASE',
+      '9f000000-0000-4000-8000-000000000103','DISPLAY_FULLTEXT',
+      'PUBLIC_DISPLAY','PUBLIC','COMMERCIAL',
+      ARRAY['9f100000-0000-4000-8000-000000000001'::uuid,'9f100000-0000-4000-8000-000000000001'::uuid],
+      '{}','DENY','DEFAULT_DENY',NULL,'[]','rights-test-1',now(),repeat('c',64)
+    );
+  EXCEPTION WHEN check_violation THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'duplicate applicableRuleIds must fail closed'; END IF;
+
+  failed := false;
+  BEGIN
+    INSERT INTO serving.rights_decision_snapshots(
+      rights_decision_snapshot_id,subject_type,subject_identifier,operation,
+      purpose_scope,audience_scope,commercial_context,applicable_rule_ids,winning_rule_ids,
+      decision,decision_basis,conditions_json,obligations_json,resolver_version,evaluated_at,decision_hash
+    ) VALUES (
+      '9f000000-0000-4000-8000-000000000004','CORPUS_RELEASE',
+      '9f000000-0000-4000-8000-000000000104','DISPLAY_FULLTEXT',
+      'PUBLIC_DISPLAY','PUBLIC','COMMERCIAL','{}','{}','DENY','DEFAULT_DENY',
+      NULL,'[{"obligationType":"AUTHENTICATED_ONLY"}]','rights-test-1',now(),repeat('d',64)
+    );
+  EXCEPTION WHEN check_violation THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'DEFAULT_DENY with obligations must fail closed'; END IF;
+
+  failed := false;
+  BEGIN
+    INSERT INTO serving.rights_decision_snapshots(
+      rights_decision_snapshot_id,subject_type,subject_identifier,operation,
+      purpose_scope,audience_scope,commercial_context,applicable_rule_ids,winning_rule_ids,
+      decision,decision_basis,conditions_json,obligations_json,resolver_version,evaluated_at,decision_hash
+    ) VALUES (
+      '9f000000-0000-4000-8000-000000000005','CORPUS_RELEASE',
+      '9f000000-0000-4000-8000-000000000105','DISPLAY_FULLTEXT',
+      'PUBLIC_DISPLAY','PUBLIC','COMMERCIAL','{}','{}','DENY','UNKNOWN_RESTRICTIVE',
+      '[{"conditionSchemaId":"AUTHENTICATED_AUDIENCE","conditionSchemaVersion":"1.0","evaluatorVersion":"x","payload":{"required":true}}]',
+      '[]','rights-test-1',now(),repeat('e',64)
+    );
+  EXCEPTION WHEN check_violation THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'UNKNOWN_RESTRICTIVE with conditions must fail closed'; END IF;
+
+  failed := false;
+  BEGIN
+    INSERT INTO serving.rights_decision_snapshots(
+      rights_decision_snapshot_id,subject_type,subject_identifier,operation,
+      purpose_scope,audience_scope,commercial_context,applicable_rule_ids,winning_rule_ids,
+      decision,decision_basis,conditions_json,obligations_json,resolver_version,evaluated_at,decision_hash
+    ) VALUES (
+      '9f000000-0000-4000-8000-000000000006','CORPUS_RELEASE',
+      '9f000000-0000-4000-8000-000000000106','DISPLAY_FULLTEXT',
+      'PUBLIC_DISPLAY','PUBLIC','COMMERCIAL','{}','{}','DENY','DEFAULT_DENY',
+      NULL,'[]','',now(),repeat('f',64)
+    );
+  EXCEPTION WHEN check_violation THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'empty resolverVersion must fail closed'; END IF;
+
+  failed := false;
+  BEGIN
+    INSERT INTO serving.rights_decision_snapshots(
+      rights_decision_snapshot_id,subject_type,subject_identifier,operation,
+      purpose_scope,audience_scope,commercial_context,applicable_rule_ids,winning_rule_ids,
+      decision,decision_basis,conditions_json,obligations_json,resolver_version,evaluated_at,decision_hash
+    ) VALUES (
+      '9f000000-0000-4000-8000-000000000007','CORPUS_RELEASE',
+      '9f000000-0000-4000-8000-000000000107','DISPLAY_FULLTEXT',
+      'PUBLIC_DISPLAY','PUBLIC','COMMERCIAL','{}','{}','DENY','DEFAULT_DENY',
+      NULL,'[]','rights-test-1',now(),'not-a-sha256'
+    );
+  EXCEPTION WHEN check_violation THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'invalid decisionHash must fail closed'; END IF;
+END
+$wb2_snapshot_contract_parity$;

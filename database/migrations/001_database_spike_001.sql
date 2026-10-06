@@ -1412,30 +1412,64 @@ CREATE INDEX serving_corpus_mappings_source_idx
 CREATE INDEX serving_semantic_members_lookup_idx
   ON serving.semantic_set_members(semantic_set_version_id, member_key);
 
+CREATE OR REPLACE FUNCTION serving.uuid_array_is_unique(value uuid[])
+RETURNS boolean
+LANGUAGE sql
+IMMUTABLE
+AS $uuid_array_is_unique$
+  SELECT value IS NOT NULL
+     AND cardinality(value) = (
+       SELECT count(DISTINCT item)
+       FROM unnest(value) AS x(item)
+     )
+$uuid_array_is_unique$;
+
 CREATE TABLE serving.rights_decision_snapshots (
   rights_decision_snapshot_id uuid PRIMARY KEY,
-  subject_type text NOT NULL,
+  subject_type text NOT NULL CHECK (subject_type IN (
+    'SOURCE_ASSET','WORK','EDITION','TEXTUAL_WORK','TEXTUAL_EDITION',
+    'DIGITAL_EXPRESSION','PROVIDER_DISTRIBUTION','CORPUS_RELEASE',
+    'ANNOTATION_LAYER','RESEARCH_OBJECT'
+  )),
   subject_identifier uuid NOT NULL,
-  operation text NOT NULL,
-  purpose_scope text NOT NULL,
-  audience_scope text NOT NULL,
-  commercial_context text NOT NULL,
+  operation text NOT NULL CHECK (operation IN (
+    'STORE_ORIGINAL','EXTRACT_TEXT','STORE_EXTRACTED_TEXT','EMBED','MODEL_CONTEXT',
+    'CACHE','DISPLAY_FULLTEXT','DISPLAY_EXCERPT','QUOTE','EXPORT','REDISTRIBUTE','COMMERCIAL_USE'
+  )),
+  purpose_scope text NOT NULL CHECK (purpose_scope IN (
+    'PRIVATE_RESEARCH','RESEARCH_COMPILATION','PUBLICATION','PUBLIC_DISPLAY',
+    'USER_WORKSPACE','MODEL_ASSISTANCE','EXPORT'
+  )),
+  audience_scope text NOT NULL CHECK (audience_scope IN (
+    'INTERNAL_SERVICE','PRIVATE_RESEARCHER','AUTHENTICATED_USER','PUBLIC'
+  )),
+  commercial_context text NOT NULL CHECK (commercial_context IN (
+    'NONCOMMERCIAL','COMMERCIAL','MIXED','UNKNOWN'
+  )),
   applicable_rule_ids uuid[] NOT NULL DEFAULT '{}',
   winning_rule_ids uuid[] NOT NULL DEFAULT '{}',
   decision text NOT NULL CHECK (decision IN ('ALLOW','DENY','CONDITIONAL')),
   decision_basis text NOT NULL CHECK (decision_basis IN ('RULE','DEFAULT_DENY','UNKNOWN_RESTRICTIVE')),
   conditions_json jsonb,
   obligations_json jsonb NOT NULL DEFAULT '[]'::jsonb,
-  resolver_version text NOT NULL,
+  resolver_version text NOT NULL CHECK (length(resolver_version) > 0),
   evaluated_at timestamptz NOT NULL,
-  decision_hash text NOT NULL,
+  decision_hash text NOT NULL CHECK (decision_hash ~ '^[0-9A-Fa-f]{64}$'),
+  CHECK (serving.uuid_array_is_unique(applicable_rule_ids)),
+  CHECK (serving.uuid_array_is_unique(winning_rule_ids)),
   CHECK (winning_rule_ids <@ applicable_rule_ids),
   CHECK (serving.valid_rights_conditions(conditions_json)),
   CHECK (serving.valid_rights_obligations(obligations_json)),
   CHECK (
     (decision_basis = 'RULE' AND cardinality(winning_rule_ids) > 0)
     OR
-    (decision_basis IN ('DEFAULT_DENY','UNKNOWN_RESTRICTIVE') AND decision = 'DENY' AND cardinality(winning_rule_ids) = 0)
+    (
+      decision_basis IN ('DEFAULT_DENY','UNKNOWN_RESTRICTIVE')
+      AND decision = 'DENY'
+      AND cardinality(winning_rule_ids) = 0
+      AND COALESCE(jsonb_array_length(conditions_json),0) = 0
+      AND COALESCE(jsonb_array_length(obligations_json),0) = 0
+    )
   ),
   CHECK (
     decision <> 'CONDITIONAL'

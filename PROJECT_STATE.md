@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-06.3**
+State Revision: **2026-10-06.4**
 
 ## Mandatory governance rule
 
@@ -351,4 +351,4 @@ The synchronized exact head must prove 39-book navigation index coverage, Genesi
 
 ## Latest push intent
 
-Continue the exact-head SERVING PassageCore regression repair. After the first AJV strictRequired correction, P1 exposed the next schema-compilation rule: conditional constraints such as minLength/minItems must redeclare their applicable primitive/container types under AJV strictTypes. This revision adds those local type declarations without changing the canonical SERVING requirements or fixture semantics. Exact-head validation must rerun before any whole-Bible gate is promoted.
+Complete the WB-2 rights-contract parity audit at the persisted RightsDecisionSnapshot boundary. Nested condition/obligation validators now match the canonical v1.1 language, but the snapshot table itself still lacked canonical enum checks, JSON-Schema-style uniqueness for rule-ID arrays, resolver/hash format constraints, and the requirement that DEFAULT_DENY / UNKNOWN_RESTRICTIVE carry no conditions or obligations. This revision adds those table-level constraints and adversarial insert tests. Exact-head CI must rerun before acceptance.
