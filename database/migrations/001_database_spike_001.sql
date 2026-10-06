@@ -1520,9 +1520,13 @@ CREATE TABLE serving.research_release_components (
 CREATE TABLE serving.research_release_events (
   research_release_event_id uuid PRIMARY KEY,
   research_release_id uuid NOT NULL REFERENCES serving.research_releases(research_release_id),
+  event_sequence integer NOT NULL CHECK (event_sequence > 0),
   event_type text NOT NULL CHECK (event_type IN ('PUBLISHED','SUPERSEDED','REVOKED','REACTIVATED')),
   effective_at timestamptz NOT NULL,
-  reason text
+  reason text,
+  changed_by uuid,
+  metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+  UNIQUE (research_release_id, event_sequence)
 );
 
 CREATE TABLE serving.release_channels (
@@ -1559,6 +1563,70 @@ FOR EACH ROW EXECUTE FUNCTION serving.reject_immutable_update();
 CREATE TRIGGER research_release_event_append_only
 BEFORE UPDATE OR DELETE ON serving.research_release_events
 FOR EACH ROW EXECUTE FUNCTION serving.reject_immutable_update();
+
+CREATE OR REPLACE FUNCTION serving.validate_release_event_insert()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $release_event_transition$
+DECLARE
+  previous_type text;
+  previous_sequence integer;
+  expected_sequence integer;
+BEGIN
+  PERFORM 1
+  FROM serving.research_releases
+  WHERE research_release_id = NEW.research_release_id
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'release % does not exist', NEW.research_release_id;
+  END IF;
+
+  SELECT event_type, event_sequence
+    INTO previous_type, previous_sequence
+  FROM serving.research_release_events
+  WHERE research_release_id = NEW.research_release_id
+  ORDER BY event_sequence DESC
+  LIMIT 1;
+
+  expected_sequence := COALESCE(previous_sequence, 0) + 1;
+
+  IF NEW.event_sequence <> expected_sequence THEN
+    RAISE EXCEPTION 'release % lifecycle event sequence must be %, got %',
+      NEW.research_release_id, expected_sequence, NEW.event_sequence;
+  END IF;
+
+  IF previous_type IS NULL THEN
+    IF NEW.event_type <> 'PUBLISHED' THEN
+      RAISE EXCEPTION 'first lifecycle event must be PUBLISHED';
+    END IF;
+  ELSIF previous_type = 'PUBLISHED' THEN
+    IF NEW.event_type NOT IN ('SUPERSEDED','REVOKED') THEN
+      RAISE EXCEPTION 'invalid lifecycle transition % -> %', previous_type, NEW.event_type;
+    END IF;
+  ELSIF previous_type = 'SUPERSEDED' THEN
+    IF NEW.event_type <> 'REVOKED' THEN
+      RAISE EXCEPTION 'invalid lifecycle transition % -> %', previous_type, NEW.event_type;
+    END IF;
+  ELSIF previous_type = 'REVOKED' THEN
+    IF NEW.event_type <> 'REACTIVATED' THEN
+      RAISE EXCEPTION 'invalid lifecycle transition % -> %', previous_type, NEW.event_type;
+    END IF;
+  ELSIF previous_type = 'REACTIVATED' THEN
+    IF NEW.event_type NOT IN ('SUPERSEDED','REVOKED') THEN
+      RAISE EXCEPTION 'invalid lifecycle transition % -> %', previous_type, NEW.event_type;
+    END IF;
+  ELSE
+    RAISE EXCEPTION 'unsupported lifecycle state %', previous_type;
+  END IF;
+
+  RETURN NEW;
+END
+$release_event_transition$;
+
+CREATE TRIGGER research_release_event_transition_guard
+BEFORE INSERT ON serving.research_release_events
+FOR EACH ROW EXECUTE FUNCTION serving.validate_release_event_insert();
 
 CREATE TABLE serving.published_passage_analyses (
   published_analysis_id uuid PRIMARY KEY,
@@ -1652,6 +1720,7 @@ CREATE UNIQUE INDEX research_release_single_published_event
   ON serving.research_release_events(research_release_id)
   WHERE event_type = 'PUBLISHED';
 
+-- Ever-published predicates are permanent immutability facts.
 CREATE OR REPLACE FUNCTION serving.release_is_published(p_release_id uuid)
 RETURNS boolean
 LANGUAGE sql
@@ -1683,6 +1752,38 @@ AS $component_is_published$
     WHERE c.component_research_object_id = p_research_object_id
   )
 $component_is_published$;
+
+-- Public servability is lifecycle-aware and intentionally separate from immutability.
+CREATE OR REPLACE FUNCTION serving.release_is_publicly_servable(p_release_id uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = pg_catalog, serving
+AS $release_is_publicly_servable$
+  SELECT COALESCE((
+    SELECT event_type IN ('PUBLISHED','SUPERSEDED','REACTIVATED')
+    FROM serving.research_release_events
+    WHERE research_release_id = p_release_id
+    ORDER BY event_sequence DESC
+    LIMIT 1
+  ), false)
+$release_is_publicly_servable$;
+
+CREATE OR REPLACE FUNCTION serving.component_is_publicly_servable(p_research_object_id uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = pg_catalog, serving
+AS $component_is_publicly_servable$
+  SELECT EXISTS (
+    SELECT 1
+    FROM serving.research_release_components c
+    WHERE c.component_research_object_id = p_research_object_id
+      AND serving.release_is_publicly_servable(c.research_release_id)
+  )
+$component_is_publicly_servable$;
 
 CREATE OR REPLACE FUNCTION serving.guard_direct_release_payload()
 RETURNS trigger
@@ -1832,6 +1933,94 @@ CREATE TRIGGER semantic_members_component_lock
 BEFORE INSERT OR UPDATE OR DELETE ON serving.semantic_set_members
 FOR EACH ROW EXECUTE FUNCTION serving.guard_component_projection('semantic_set_version_id');
 
+CREATE OR REPLACE FUNCTION publication_control.append_release_event_internal(
+  p_release_id uuid,
+  p_event_type text,
+  p_reason text DEFAULT NULL,
+  p_changed_by uuid DEFAULT NULL,
+  p_metadata jsonb DEFAULT '{}'::jsonb
+)
+RETURNS integer
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, serving
+AS $append_release_event$
+DECLARE
+  next_sequence integer;
+BEGIN
+  PERFORM 1
+  FROM serving.research_releases
+  WHERE research_release_id = p_release_id
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'release does not exist';
+  END IF;
+
+  SELECT COALESCE(MAX(event_sequence), 0) + 1
+    INTO next_sequence
+  FROM serving.research_release_events
+  WHERE research_release_id = p_release_id;
+
+  INSERT INTO serving.research_release_events(
+    research_release_event_id,
+    research_release_id,
+    event_sequence,
+    event_type,
+    effective_at,
+    reason,
+    changed_by,
+    metadata
+  ) VALUES (
+    pg_catalog.gen_random_uuid(),
+    p_release_id,
+    next_sequence,
+    p_event_type,
+    pg_catalog.clock_timestamp(),
+    p_reason,
+    p_changed_by,
+    COALESCE(p_metadata, '{}'::jsonb)
+  );
+
+  RETURN next_sequence;
+END
+$append_release_event$;
+
+REVOKE ALL ON FUNCTION publication_control.append_release_event_internal(uuid,text,text,uuid,jsonb)
+  FROM PUBLIC, anon, authenticated, publication_worker;
+
+CREATE OR REPLACE FUNCTION publication_control.transition_release_lifecycle(
+  p_release_id uuid,
+  p_event_type text,
+  p_reason text DEFAULT NULL,
+  p_changed_by uuid DEFAULT NULL,
+  p_metadata jsonb DEFAULT '{}'::jsonb
+)
+RETURNS integer
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, serving
+AS $transition_release_lifecycle$
+BEGIN
+  IF p_event_type = 'PUBLISHED' THEN
+    RAISE EXCEPTION 'PUBLISHED is created only by atomic publication';
+  END IF;
+
+  IF p_event_type NOT IN ('SUPERSEDED','REVOKED','REACTIVATED') THEN
+    RAISE EXCEPTION 'unsupported release lifecycle event %', p_event_type;
+  END IF;
+
+  RETURN publication_control.append_release_event_internal(
+    p_release_id, p_event_type, p_reason, p_changed_by, p_metadata
+  );
+END
+$transition_release_lifecycle$;
+
+REVOKE ALL ON FUNCTION publication_control.transition_release_lifecycle(uuid,text,text,uuid,jsonb)
+  FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION publication_control.transition_release_lifecycle(uuid,text,text,uuid,jsonb)
+  TO publication_worker;
+
 CREATE OR REPLACE FUNCTION publication_control.publish_release_to_channel(
   p_channel_key text,
   p_release_id uuid,
@@ -1890,11 +2079,15 @@ BEGIN
   END IF;
 
   IF NOT serving.release_is_published(p_release_id) THEN
-    INSERT INTO serving.research_release_events(
-      research_release_event_id,research_release_id,event_type,effective_at,reason
-    ) VALUES (
-      pg_catalog.gen_random_uuid(),p_release_id,'PUBLISHED',now(),'publication_control.publish_release_to_channel'
+    PERFORM publication_control.append_release_event_internal(
+      p_release_id,
+      'PUBLISHED',
+      'publication_control.publish_release_to_channel',
+      p_updated_by,
+      jsonb_build_object('channelKey', p_channel_key)
     );
+  ELSIF NOT serving.release_is_publicly_servable(p_release_id) THEN
+    RAISE EXCEPTION 'release is REVOKED and cannot be selected by a channel until REACTIVATED';
   END IF;
 
   IF p_inject_failure THEN
@@ -1941,7 +2134,7 @@ AS $passage_core$
     FROM serving.research_release_components
     WHERE research_release_id = p_release_id
       AND component_kind = 'CORPUS'
-      AND serving.release_is_published(p_release_id)
+      AND serving.release_is_publicly_servable(p_release_id)
     ORDER BY component_order
     LIMIT 1
   ),
@@ -2303,10 +2496,10 @@ FOR SELECT TO anon, authenticated
 USING (serving.component_is_published(corpus_release_id));
 CREATE POLICY public_read_corpus_text_segments ON serving.corpus_text_segments
 FOR SELECT TO anon, authenticated
-USING (serving.component_is_published(corpus_release_id));
+USING (serving.component_is_publicly_servable(corpus_release_id));
 CREATE POLICY public_read_corpus_node_segments ON serving.corpus_node_segments
 FOR SELECT TO anon, authenticated
-USING (serving.component_is_published(corpus_release_id));
+USING (serving.component_is_publicly_servable(corpus_release_id));
 
 -- Release-scoped Serving rows remain physically materialized before publication,
 -- but public roles must not observe them until the release has a committed
@@ -2314,37 +2507,37 @@ USING (serving.component_is_published(corpus_release_id));
 -- channel pointer in one transaction, so visibility changes atomically.
 CREATE POLICY public_read_corpus_nodes ON serving.corpus_nodes
 FOR SELECT TO anon, authenticated
-USING (serving.component_is_published(corpus_release_id));
+USING (serving.component_is_publicly_servable(corpus_release_id));
 CREATE POLICY public_read_corpus_node_features ON serving.corpus_node_features
 FOR SELECT TO anon, authenticated
-USING (serving.component_is_published(corpus_release_id));
+USING (serving.component_is_publicly_servable(corpus_release_id));
 CREATE POLICY public_read_corpus_edges ON serving.corpus_edges
 FOR SELECT TO anon, authenticated
-USING (serving.component_is_published(corpus_release_id));
+USING (serving.component_is_publicly_servable(corpus_release_id));
 CREATE POLICY public_read_corpus_node_mappings ON serving.corpus_node_mappings
 FOR SELECT TO anon, authenticated
-USING (serving.component_is_published(corpus_release_id));
+USING (serving.component_is_publicly_servable(corpus_release_id));
 CREATE POLICY public_read_semantic_set_members ON serving.semantic_set_members
 FOR SELECT TO anon, authenticated
-USING (serving.component_is_published(semantic_set_version_id));
+USING (serving.component_is_publicly_servable(semantic_set_version_id));
 
 CREATE POLICY public_read_releases ON serving.research_releases
 FOR SELECT TO anon, authenticated
-USING (serving.release_is_published(research_release_id));
+USING (serving.release_is_publicly_servable(research_release_id));
 CREATE POLICY public_read_release_components ON serving.research_release_components
 FOR SELECT TO anon, authenticated
-USING (serving.release_is_published(research_release_id));
+USING (serving.release_is_publicly_servable(research_release_id));
 CREATE POLICY public_read_release_channels ON serving.release_channels
 FOR SELECT TO anon, authenticated USING (true);
 CREATE POLICY public_read_release_channel_pointers ON serving.release_channel_pointers
 FOR SELECT TO anon, authenticated
-USING (serving.release_is_published(research_release_id));
+USING (serving.release_is_publicly_servable(research_release_id));
 CREATE POLICY public_read_passage_analyses ON serving.published_passage_analyses
 FOR SELECT TO anon, authenticated
-USING (serving.release_is_published(research_release_id));
+USING (serving.release_is_publicly_servable(research_release_id));
 CREATE POLICY public_read_evidence_packets ON serving.published_evidence_packets
 FOR SELECT TO anon, authenticated
-USING (serving.release_is_published(research_release_id));
+USING (serving.release_is_publicly_servable(research_release_id));
 CREATE POLICY public_read_evidence_items ON serving.published_evidence_items
 FOR SELECT TO anon, authenticated
 USING (
@@ -2352,12 +2545,12 @@ USING (
     SELECT 1
     FROM serving.published_evidence_packets p
     WHERE p.published_evidence_packet_id = published_evidence_items.published_evidence_packet_id
-      AND serving.release_is_published(p.research_release_id)
+      AND serving.release_is_publicly_servable(p.research_release_id)
   )
 );
 CREATE POLICY public_read_assertions ON serving.published_assertions
 FOR SELECT TO anon, authenticated
-USING (serving.release_is_published(research_release_id));
+USING (serving.release_is_publicly_servable(research_release_id));
 CREATE POLICY public_read_assertion_evidence ON serving.published_assertion_evidence
 FOR SELECT TO anon, authenticated
 USING (
@@ -2365,7 +2558,7 @@ USING (
     SELECT 1
     FROM serving.published_assertions a
     WHERE a.published_assertion_id = published_assertion_evidence.published_assertion_id
-      AND serving.release_is_published(a.research_release_id)
+      AND serving.release_is_publicly_servable(a.research_release_id)
   )
 );
 
@@ -2387,15 +2580,19 @@ REVOKE ALL ON FUNCTION serving.valid_rights_obligations(jsonb) FROM PUBLIC, anon
 REVOKE ALL ON FUNCTION serving.valid_citation_locator(jsonb) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION serving.release_is_published(uuid) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION serving.component_is_published(uuid) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION serving.release_is_publicly_servable(uuid) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION serving.component_is_publicly_servable(uuid) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION serving.valid_rights_conditions(jsonb),
   serving.valid_rights_obligations(jsonb),
   serving.valid_citation_locator(jsonb),
   serving.release_is_published(uuid),
-  serving.component_is_published(uuid)
+  serving.component_is_published(uuid),
+  serving.release_is_publicly_servable(uuid),
+  serving.component_is_publicly_servable(uuid)
 TO publication_worker;
 
-GRANT EXECUTE ON FUNCTION serving.release_is_published(uuid),
-  serving.component_is_published(uuid)
+GRANT EXECUTE ON FUNCTION serving.release_is_publicly_servable(uuid),
+  serving.component_is_publicly_servable(uuid)
 TO anon, authenticated;
 
 DO $authoring_rls$

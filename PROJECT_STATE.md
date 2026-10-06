@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-06.8**
+State Revision: **2026-10-06.9**
 
 ## Mandatory governance rule
 
@@ -367,4 +367,4 @@ The contract is locked before implementation:
 
 ## Latest push intent
 
-Lock the RL-1 / Issue #25 release-lifecycle contract before changing database behavior. Add deterministic per-release event sequencing, an explicit legal transition matrix, and a strict separation between permanent post-PUBLISHED immutability and current public servability. Add `CORE-FZ-RELEASE-002` as PENDING implementation evidence. The next commit must implement these semantics in PostgreSQL/RLS/RPC/channel logic and prove them adversarially.
+Implement the locked RL-1 lifecycle contract in PostgreSQL without weakening immutable ResearchRelease guarantees. Keep ever-published predicates for permanent payload/projection locks; add separate lifecycle-aware public-servability predicates for RLS and passage reads; append events only through validated Publication Control functions; reject channel selection of REVOKED releases; and add adversarial SUPERSEDED/REVOKED/REACTIVATED, sequence, privilege, rollback and post-revocation immutability tests. `CORE-FZ-RELEASE-002` remains PENDING until exact-head CI passes.

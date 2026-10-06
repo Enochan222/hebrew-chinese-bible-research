@@ -525,6 +525,21 @@ BEGIN
 END $$;
 RESET ROLE;
 
+SET ROLE authenticated;
+DO $authenticated_lifecycle_transition$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    PERFORM publication_control.transition_release_lifecycle(
+      '47000000-0000-4000-8000-000000000001','REVOKED','must-fail',NULL,'{}'::jsonb
+    );
+  EXCEPTION WHEN insufficient_privilege THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'authenticated role must not execute lifecycle transition function'; END IF;
+END
+$authenticated_lifecycle_transition$;
+RESET ROLE;
+
 -- Publication failure before pointer move preserves old production release.
 DO $$
 DECLARE failed boolean := false;
@@ -588,6 +603,198 @@ SELECT spike_test.assert_true(
   'published evidence packet must become visible to anon'
 );
 RESET ROLE;
+
+-- Release lifecycle state machine: PUBLISHED is sequence 1 and cannot be reactivated directly.
+SELECT spike_test.assert_true(
+  (SELECT event_sequence FROM serving.research_release_events
+   WHERE research_release_id='47000000-0000-4000-8000-000000000002'
+     AND event_type='PUBLISHED') = 1,
+  'first release lifecycle event must be PUBLISHED sequence 1'
+);
+
+DO $invalid_early_reactivation$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    PERFORM publication_control.transition_release_lifecycle(
+      '47000000-0000-4000-8000-000000000002','REACTIVATED',
+      'invalid early reactivation',NULL,'{}'::jsonb
+    );
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'REACTIVATED must fail unless previous state is REVOKED'; END IF;
+END
+$invalid_early_reactivation$;
+
+SELECT publication_control.transition_release_lifecycle(
+  '47000000-0000-4000-8000-000000000002','SUPERSEDED',
+  'superseded lifecycle regression',NULL,'{}'::jsonb
+);
+SELECT spike_test.assert_true(
+  (SELECT event_sequence FROM serving.research_release_events
+   WHERE research_release_id='47000000-0000-4000-8000-000000000002'
+     AND event_type='SUPERSEDED') = 2,
+  'SUPERSEDED must append sequence 2'
+);
+
+SET ROLE anon;
+SELECT spike_test.assert_true(
+  (SELECT count(*) FROM serving.research_releases
+   WHERE research_release_id='47000000-0000-4000-8000-000000000002') = 1,
+  'SUPERSEDED release must remain citation-stable and publicly pin-able'
+);
+RESET ROLE;
+
+-- Roll back the channel before revoking release 2.
+SELECT publication_control.publish_release_to_channel(
+  'PRODUCTION','47000000-0000-4000-8000-000000000001',NULL,false
+);
+SELECT publication_control.transition_release_lifecycle(
+  '47000000-0000-4000-8000-000000000002','REVOKED',
+  'revocation lifecycle regression',NULL,'{}'::jsonb
+);
+SELECT spike_test.assert_true(
+  (SELECT event_sequence FROM serving.research_release_events
+   WHERE research_release_id='47000000-0000-4000-8000-000000000002'
+     AND event_type='REVOKED') = 3,
+  'REVOKED must append sequence 3'
+);
+SELECT spike_test.assert_true(
+  serving.release_is_published('47000000-0000-4000-8000-000000000002'),
+  'REVOKED release must remain permanently ever-published/immutable'
+);
+SELECT spike_test.assert_true(
+  NOT serving.release_is_publicly_servable('47000000-0000-4000-8000-000000000002'),
+  'REVOKED release must not be publicly servable'
+);
+
+SET ROLE anon;
+SELECT spike_test.assert_true(
+  (SELECT count(*) FROM serving.research_releases
+   WHERE research_release_id='47000000-0000-4000-8000-000000000002') = 0,
+  'anon must not read a REVOKED ResearchRelease'
+);
+SELECT spike_test.assert_true(
+  (SELECT count(*) FROM serving.research_release_components
+   WHERE research_release_id='47000000-0000-4000-8000-000000000002') = 0,
+  'anon must not read components of a REVOKED ResearchRelease'
+);
+SELECT spike_test.assert_true(
+  serving.read_passage_core(
+    '47000000-0000-4000-8000-000000000002','OSHB_OSIS','1Sam.16.7'
+  ) IS NULL,
+  'pinned passage RPC must fail closed for a REVOKED release'
+);
+RESET ROLE;
+
+DO $revoked_channel_move$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    PERFORM publication_control.publish_release_to_channel(
+      'PRODUCTION','47000000-0000-4000-8000-000000000002',NULL,false
+    );
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'channel pointer must reject a REVOKED release'; END IF;
+END
+$revoked_channel_move$;
+
+SELECT spike_test.assert_true(
+  (SELECT research_release_id FROM serving.release_channel_pointers
+   WHERE release_channel_id='47200000-0000-4000-8000-000000000001')
+   = '47000000-0000-4000-8000-000000000001',
+  'failed revoked channel selection must preserve rollback pointer'
+);
+
+INSERT INTO serving.research_objects(research_object_id,object_type,source_content_hash,published_at)
+VALUES (
+  '52000000-0000-4000-8000-000000000002','PUBLISHED_ANALYSIS_SET',
+  'revoked-immutability-fixture',now()
+);
+
+DO $revoked_release_stays_immutable$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    INSERT INTO serving.research_release_components(
+      research_release_id,component_kind,component_research_object_id,
+      component_version,content_hash,component_order
+    ) VALUES (
+      '47000000-0000-4000-8000-000000000002','PUBLISHED_ANALYSIS',
+      '52000000-0000-4000-8000-000000000002','1',
+      '3434343434343434343434343434343434343434343434343434343434343434',98
+    );
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'REVOKED release must remain immutable'; END IF;
+END
+$revoked_release_stays_immutable$;
+
+SELECT publication_control.transition_release_lifecycle(
+  '47000000-0000-4000-8000-000000000002','REACTIVATED',
+  'reactivation lifecycle regression',NULL,'{}'::jsonb
+);
+SELECT spike_test.assert_true(
+  (SELECT event_sequence FROM serving.research_release_events
+   WHERE research_release_id='47000000-0000-4000-8000-000000000002'
+     AND event_type='REACTIVATED') = 4,
+  'REACTIVATED must append sequence 4'
+);
+SELECT spike_test.assert_true(
+  serving.release_is_publicly_servable('47000000-0000-4000-8000-000000000002'),
+  'REACTIVATED release must become publicly servable again'
+);
+
+SET ROLE anon;
+SELECT spike_test.assert_true(
+  (SELECT count(*) FROM serving.research_releases
+   WHERE research_release_id='47000000-0000-4000-8000-000000000002') = 1,
+  'anon must regain pinned access after REACTIVATED'
+);
+RESET ROLE;
+
+SELECT publication_control.publish_release_to_channel(
+  'PRODUCTION','47000000-0000-4000-8000-000000000002',NULL,false
+);
+SELECT spike_test.assert_true(
+  (SELECT research_release_id FROM serving.release_channel_pointers
+   WHERE release_channel_id='47200000-0000-4000-8000-000000000001')
+   = '47000000-0000-4000-8000-000000000002',
+  'reactivated release must be eligible for channel selection'
+);
+
+DO $invalid_duplicate_reactivation$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    PERFORM publication_control.transition_release_lifecycle(
+      '47000000-0000-4000-8000-000000000002','REACTIVATED',
+      'duplicate reactivation',NULL,'{}'::jsonb
+    );
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'duplicate REACTIVATED transition must fail'; END IF;
+END
+$invalid_duplicate_reactivation$;
+
+DO $invalid_sequence_insert$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    INSERT INTO serving.research_release_events(
+      research_release_event_id,research_release_id,event_sequence,event_type,
+      effective_at,reason,changed_by,metadata
+    ) VALUES (
+      '47000000-0000-4000-8000-000000000099',
+      '47000000-0000-4000-8000-000000000002',
+      99,'REVOKED',clock_timestamp(),'invalid sequence',NULL,'{}'::jsonb
+    );
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'non-contiguous lifecycle event sequence must fail'; END IF;
+END
+$invalid_sequence_insert$;
 
 INSERT INTO serving.research_objects(research_object_id,object_type,source_content_hash,published_at)
 VALUES (

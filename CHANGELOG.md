@@ -5,6 +5,29 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
 
+## 2026-10-06 — Implement RL-1 lifecycle state machine
+
+### Push intent
+
+Implement the contract-locked separation between permanent post-publication immutability and current public servability.
+
+### What changed
+
+- persist per-release lifecycle `event_sequence`, `changed_by` and `metadata`;
+- validate contiguous event sequence and the canonical lifecycle transition matrix under a per-release row lock;
+- keep `release_is_published` / `component_is_published` as ever-published immutability predicates;
+- add `release_is_publicly_servable` / `component_is_publicly_servable` for current RLS/RPC visibility;
+- move public release/component/corpus/evidence policies and PassageCore reads to lifecycle-aware servability;
+- add privileged Publication Control lifecycle transition functions while keeping PUBLISHED inside the atomic publish-to-channel transaction;
+- reject channel selection of a REVOKED release until explicit REACTIVATED;
+- stop granting public roles access to the ever-published predicates;
+- add adversarial Database Spike tests for SUPERSEDED visibility, REVOKED non-servability, post-revocation immutability, invalid transitions, sequence integrity, reactivation and rollback/channel behavior.
+
+### Validation
+
+Contract lock `def31d71cfd11ae0df2169e3fdbaedc74a9fbff7` passed contract validation before this implementation. Database Spike, WB-2/WB-3, P1 web, whole-corpus and governance regressions must now pass on the exact implementation head before `CORE-FZ-RELEASE-002` can be promoted.
+
+
 ## 2026-10-06 — Lock RL-1 release lifecycle semantics
 
 ### Push intent
