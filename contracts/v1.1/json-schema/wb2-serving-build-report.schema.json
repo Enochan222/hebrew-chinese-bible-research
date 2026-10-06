@@ -251,7 +251,7 @@
           "const": "SHA256"
         },
         "serialization": {
-          "const": "WB2_PSQL_TSV_SECTIONS_V1"
+          "const": "WB2_PSQL_TSV_ROW_MULTISET_V2"
         },
         "authoringCorpus": {
           "type": "string",
