@@ -94,6 +94,12 @@ export function PassageShell(props: {
             <p className="hebrew-text" dir="rtl" lang="he" data-testid="hebrew-text">
               {props.passage.hebrewText}
             </p>
+            {props.passage.textReconstructionStatus === "OSHB_WORD_TOKENS_ONLY" ? (
+              <p className="reconstruction-note">
+                Word-token display only. Independent OSHB punctuation segments such as maqqef, paseq and sof pasuq
+                are not yet reconstructed into this display string.
+              </p>
+            ) : null}
             <div className="token-grid" aria-label="OSHB word morphology">
               {(props.passage.tokens ?? []).map((token, index) => (
                 <article key={token.analysisNodeId} className="token-card">
