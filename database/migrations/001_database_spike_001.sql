@@ -1526,6 +1526,7 @@ CREATE TABLE serving.research_release_events (
   reason text,
   changed_by uuid,
   metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+  CHECK (jsonb_typeof(metadata) = 'object'),
   UNIQUE (research_release_id, event_sequence)
 );
 
@@ -2493,7 +2494,7 @@ CREATE POLICY public_read_reference_systems ON serving.reference_systems
 FOR SELECT TO anon, authenticated USING (true);
 CREATE POLICY public_read_reference_labels ON serving.reference_labels
 FOR SELECT TO anon, authenticated
-USING (serving.component_is_published(corpus_release_id));
+USING (serving.component_is_publicly_servable(corpus_release_id));
 CREATE POLICY public_read_corpus_text_segments ON serving.corpus_text_segments
 FOR SELECT TO anon, authenticated
 USING (serving.component_is_publicly_servable(corpus_release_id));

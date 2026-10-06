@@ -5,6 +5,26 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
 
+## 2026-10-06 — Repair lifecycle-aware reference-label RLS
+
+### Push intent
+
+Fix the first RL-1 exact-head Database Spike regression.
+
+### Why
+
+The lifecycle implementation moved release-scoped public policies to the new servability predicates, but the `serving.reference_labels` policy remained on `component_is_published`. Public roles intentionally no longer execute the ever-published immutability predicate, so PassageCore hit a permission error while evaluating that stale RLS policy.
+
+### What changed
+
+- move public ReferenceLabel RLS from `component_is_published` to `component_is_publicly_servable`;
+- add a SQL `jsonb_typeof(metadata) = 'object'` constraint to match the tightened ReleaseEvent machine schema.
+
+### Validation
+
+Database Spike must rerun through the full SUPERSEDED/REVOKED/REACTIVATED adversarial sequence. WB-2/WB-3 and P1 public-reader regressions must also remain green.
+
+
 ## 2026-10-06 — Implement RL-1 lifecycle state machine
 
 ### Push intent

@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-06.9**
+State Revision: **2026-10-06.10**
 
 ## Mandatory governance rule
 
@@ -367,4 +367,4 @@ The contract is locked before implementation:
 
 ## Latest push intent
 
-Implement the locked RL-1 lifecycle contract in PostgreSQL without weakening immutable ResearchRelease guarantees. Keep ever-published predicates for permanent payload/projection locks; add separate lifecycle-aware public-servability predicates for RLS and passage reads; append events only through validated Publication Control functions; reject channel selection of REVOKED releases; and add adversarial SUPERSEDED/REVOKED/REACTIVATED, sequence, privilege, rollback and post-revocation immutability tests. `CORE-FZ-RELEASE-002` remains PENDING until exact-head CI passes.
+Repair the first exact-head RL-1 Database Spike regression without changing lifecycle semantics. The new public servability model was correct, but `serving.reference_labels` retained the old ever-published RLS predicate while anon/authenticated no longer execute that immutability helper directly; PassageCore therefore failed on reference-label policy evaluation after revocation. Move that final public label policy to `component_is_publicly_servable` and enforce that lifecycle metadata is a JSON object at the SQL boundary. Rerun the full exact-head lifecycle and whole-Bible regressions.
