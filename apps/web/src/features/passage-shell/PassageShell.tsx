@@ -125,7 +125,7 @@ export function PassageShell(props: {
               {props.passage.attribution}
             </p>
           </section>
-          <AvailabilityPanel />
+          <AvailabilityPanel isServing />
         </>
       ) : (
         <>
