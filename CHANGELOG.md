@@ -4,6 +4,37 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+## 2026-10-06 — Implement WB-2 rights-safe Serving candidate
+
+### Push intent
+
+Compile the accepted WB-1 whole-corpus Authoring result into the first real release-pinned public Serving projection while keeping unresolved public-rights sources fail-closed.
+
+### Why
+
+WB-1 proves complete relational ingestion, but it intentionally leaves real corpus rows out of Serving. The current Serving schema also lacks public text-segment projection, node-to-segment membership and a Serving-owned passage reference index. In addition, the PostgreSQL rights-obligation validator still expected an obsolete `type` key while the canonical RightsDecisionSnapshot v1.1 contract uses `obligationType`; leaving that drift in place would make an attribution-bound OSHB publication internally inconsistent.
+
+### What changed
+
+- added migration `002_wb2_serving_projection.sql` with Serving-owned text segments, node/segment membership, passage reference index, corpus attribution and operation-specific rights bindings;
+- aligned PostgreSQL rights-obligation validation with the canonical v1.1 `obligationType` schema;
+- require both storage and public-display RightsDecisionSnapshots before a public text segment can be materialized;
+- require any ATTRIBUTION display obligation to match a materialized Serving attribution;
+- keep the initial public projection OSHB-only under the pinned registry's `ALLOW_WITH_ATTRIBUTION` state;
+- keep BHSA 2021 and ETCBC bridging out of Serving while their registry states require/deny public rights review;
+- keep automatic cross-framework candidates Authoring-only;
+- added `serving.get_passage_core(...)` as a release-pinned database passage read over Serving-owned data;
+- added `publish_wb2_serving.py`, a strict WB-2 report schema and a two-phase verifier for inactive/public isolation and published behavior;
+- added a clean-PostgreSQL WB-2 GitHub Actions workflow that reconstructs WB-CORPUS-001 and WB-1 from exact pins before compilation.
+
+### Intended effect
+
+WB-2 should prove that whole-Bible OSHB text can cross the publication firewall into an immutable ResearchRelease without granting public access to Authoring or accidentally publishing BHSA/bridging-derived data. The application reader remains fixture-backed until WB-3.
+
+### Validation
+
+Pending exact-head CI. Acceptance requires: migration success; accepted WB-1 parity; 39 configured books and 23,213 selected references in the Serving passage index; 306,785 rights-approved OSHB nodes/text segments and node-segment memberships; zero BHSA nodes, bridging features or non-OSHB text segments in Serving; invisibility before publication; atomic PRODUCTION publication; representative Genesis, 1 Samuel and 2 Chronicles reads; Authoring isolation; and post-publication projection immutability.
+
 
 ## 2026-10-05 — Implement WB-1 relational whole-corpus candidate
 
