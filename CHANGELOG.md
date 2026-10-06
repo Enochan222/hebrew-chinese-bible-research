@@ -5,6 +5,28 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
 
+## 2026-10-06 — Lock RL-1 release lifecycle semantics
+
+### Push intent
+
+Resolve the contract ambiguity identified in Issue #25 before modifying PostgreSQL behavior.
+
+### What changed
+
+- add required per-release `eventSequence` to ResearchReleaseEvent;
+- define sequence as the sole lifecycle-ordering authority and retain `effectiveAt` as audit time only;
+- define the valid PUBLISHED / SUPERSEDED / REVOKED / REACTIVATED transition matrix;
+- separate permanent ever-published immutability from current public servability;
+- define SUPERSEDED as historically pin-able/servable and REVOKED as non-public but still immutable;
+- require channel pointers to resolve only to currently servable releases;
+- align the release-event machine fixture with sequence and metadata;
+- add `CORE-FZ-RELEASE-002` as a PENDING real-database freeze gate.
+
+### Validation
+
+This is a contract-lock checkpoint only. Contract validation and governance must pass before SQL implementation begins. Database lifecycle behavior remains intentionally unclaimed until the next implementation checkpoint.
+
+
 ## 2026-10-06 — Accept WB-2/WB-3 whole-Bible reader gates
 
 ### Push intent

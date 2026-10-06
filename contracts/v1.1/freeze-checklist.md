@@ -76,12 +76,17 @@ Database Spike 001 may begin when all CORE-SPIKE gates are PASS. This does not d
 | CORE-FZ-TC-001 | Grouped apparatus reading retains raw apparatus, witness uncertainty, siglum source context, and exact locus |
 | CORE-FZ-RIGHTS-001 | Conflicting rights + default/unknown restrictive deny + typed conditions/obligations fixtures pass |
 | CORE-FZ-RELEASE-001 | Real database publication provides visibility atomicity; partial failure cannot move production pointer |
+| CORE-FZ-RELEASE-002 | Release lifecycle separates permanent post-PUBLISHED immutability from current public servability; eventSequence deterministically orders valid SUPERSEDED/REVOKED/REACTIVATED transitions and revoked releases cannot resolve through public RLS/RPC/channel reads |
 | CORE-FZ-RLS-001 | RLS/grants/views/RPC negative tests pass |
 | CORE-FZ-QUERY-001 | Real deterministic query compiler reproduces fixture results with stable cursor pagination and explicit page/total count semantics |
 | CORE-FZ-VOCAB-001 | Active docs/vocabulary/schema enum drift check passes |
 | CORE-FZ-API-001 | Core OpenAPI validates and generated/client compatibility smoke test passes |
 | CORE-FZ-EVIDENCE-001 | CitationLocator is typed; public excerpts require rights snapshots; immutable evidence requires content hash |
 | CORE-FZ-HASH-001 | Publishable subtype content-hash canonical projections have versioned golden vectors |
+
+### Current release-lifecycle gate status
+
+- `CORE-FZ-RELEASE-002`: **PENDING**. The v1.1 machine/architecture contract now defines deterministic event sequencing, valid transitions, permanent immutability and lifecycle-aware public servability. PostgreSQL/RLS/RPC/channel implementation evidence is still required.
 
 ### Current whole-Bible gate status
 

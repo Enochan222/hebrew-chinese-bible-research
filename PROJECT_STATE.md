@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-06.7**
+State Revision: **2026-10-06.8**
 
 ## Mandatory governance rule
 
@@ -349,21 +349,22 @@ Exact-head machine evidence is complete. WB-2/WB-3 Serving Reader run `374243988
 
 `CORE-FZ-WB-001` and `CORE-FZ-WB-003` are now **PASS**.
 
-## Known release-lifecycle semantic gap
+## RL-1 release-lifecycle contract state
 
-This whole-Bible acceptance does **not** claim that the later Product Operations revoke/reactivate lifecycle is complete.
+Issue #25 is now the active repository frontier.
 
-Independent adversarial review found that the current `serving.release_is_published()` predicate means "has ever received a PUBLISHED event" and is used for both public visibility and post-publication immutability. The active architecture separately defines PUBLISHED, SUPERSEDED, REVOKED and REACTIVATED events, but the machine contract does not yet define a total event-ordering rule for equal `effectiveAt` values.
+The contract is locked before implementation:
 
-A future lifecycle implementation must not simply redefine `release_is_published()` as "currently visible": doing so would make a REVOKED release mutable again because immutability triggers rely on the same predicate. The next lifecycle work package must separate:
+- `eventSequence` is the sole per-release lifecycle ordering authority; `effectiveAt` remains audit time and UUIDs never break lifecycle ties;
+- valid transitions are PUBLISHED -> SUPERSEDED/REVOKED, SUPERSEDED -> REVOKED, REVOKED -> REACTIVATED, and REACTIVATED -> SUPERSEDED/REVOKED;
+- existence of PUBLISHED permanently seals the release payload and projections;
+- current public servability is separately derived from the latest event: PUBLISHED, SUPERSEDED and REACTIVATED are servable; REVOKED is not;
+- SUPERSEDED remains citation-stable and eligible for explicit pinning/rollback;
+- REVOKED cannot be exposed through public release/RLS/RPC/channel resolution until explicit REACTIVATED;
+- lifecycle appends belong to the privileged Publication Control boundary.
 
-- ever-published / permanently immutable state;
-- currently publicly servable lifecycle state;
-- channel-pointer eligibility;
-- deterministic REVOKED / REACTIVATED ordering and tests.
-
-Until that contract is explicitly closed, revoke/reactivate behavior is not treated as implemented. This gap does not invalidate `CORE-FZ-WB-001` or `CORE-FZ-WB-003`, whose requirements concern whole-Bible coverage/navigation and the release-pinned public reader.
+`CORE-FZ-RELEASE-002` is **PENDING** until PostgreSQL implementation and adversarial lifecycle tests pass. No SQL behavior is claimed by this contract-lock commit.
 
 ## Latest push intent
 
-Record exact-head acceptance of WB-2/WB-3 after every required whole-Bible, database, contract, governance, web integration, visual E2E and production-build gate passed on `21a2cedafb394b84d51e244de6ff37bbac4d6a82`. Promote only `CORE-FZ-WB-001` and `CORE-FZ-WB-003`, which are directly supported by the evidence. Preserve the independently identified REVOKED/REACTIVATED lifecycle predicate ambiguity as a separate next work package rather than silently inventing event ordering or weakening immutable-release guarantees.
+Lock the RL-1 / Issue #25 release-lifecycle contract before changing database behavior. Add deterministic per-release event sequencing, an explicit legal transition matrix, and a strict separation between permanent post-PUBLISHED immutability and current public servability. Add `CORE-FZ-RELEASE-002` as PENDING implementation evidence. The next commit must implement these semantics in PostgreSQL/RLS/RPC/channel logic and prove them adversarially.

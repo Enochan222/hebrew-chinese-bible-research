@@ -2151,6 +2151,7 @@ Fields:
 
 - `research_release_event_id uuid PK`
 - `research_release_id uuid FK`
+- `event_sequence integer NOT NULL`
 - `event_type text`
 - `effective_at timestamptz`
 - `reason text nullable`
@@ -2158,6 +2159,27 @@ Fields:
 - `metadata jsonb`
 
 Event type comes from `researchReleaseEventType`.
+
+`event_sequence` is the sole lifecycle-ordering authority within one ResearchRelease. It starts at 1 for PUBLISHED, increases contiguously by 1, and is unique per release. `effective_at` is audit time only and must not be used to break lifecycle ties; UUID ordering is never lifecycle chronology.
+
+Canonical transition matrix:
+
+- no prior event -> PUBLISHED;
+- PUBLISHED -> SUPERSEDED or REVOKED;
+- SUPERSEDED -> REVOKED;
+- REVOKED -> REACTIVATED;
+- REACTIVATED -> SUPERSEDED or REVOKED.
+
+All other transitions fail closed. PUBLISHED occurs at most once.
+
+Two different predicates are required:
+
+1. **ever published / permanently immutable**: existence of the PUBLISHED event permanently seals the ResearchRelease payload and every release/component projection that inherits release immutability;
+2. **currently publicly servable**: the highest-`event_sequence` state is PUBLISHED, SUPERSEDED, or REACTIVATED. REVOKED is not publicly servable.
+
+SUPERSEDED remains citation-stable and may still be explicitly pinned or selected by rollback. REVOKED preserves historical immutable data but removes ordinary public servability. REACTIVATED restores public servability without mutating the release payload.
+
+Lifecycle events may be appended only through the privileged Publication Control transition boundary. Direct callers must not synthesize event ordering.
 
 ## 29.5 `release_channels`
 
@@ -2186,6 +2208,8 @@ Fields:
 - `row_version integer`
 
 Rollback changes a channel pointer. It does not mutate historical release payloads.
+
+A channel pointer may resolve only to a currently publicly servable ResearchRelease. Initial publication may atomically append the first PUBLISHED event and move the pointer in the same database transaction. A REVOKED release cannot be selected by a channel until a valid REACTIVATED event is appended.
 
 ## 29.7 Release manifest hashing
 

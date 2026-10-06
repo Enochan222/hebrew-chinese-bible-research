@@ -292,7 +292,18 @@ Append-only lifecycle history:
 - REVOKED
 - REACTIVATED
 
-Superseding or revoking a release does not mutate its scholarly payload.
+Each event has a per-release `event_sequence`. Sequence, not timestamp or UUID, is the lifecycle ordering authority. The first event is PUBLISHED at sequence 1; later events increment contiguously.
+
+Allowed transitions are:
+
+- PUBLISHED -> SUPERSEDED or REVOKED;
+- SUPERSEDED -> REVOKED;
+- REVOKED -> REACTIVATED;
+- REACTIVATED -> SUPERSEDED or REVOKED.
+
+Superseding, revoking, or reactivating a release does not mutate its scholarly payload.
+
+A release that has ever been PUBLISHED is permanently immutable. Public servability is a separate derived state: PUBLISHED, SUPERSEDED and REACTIVATED are publicly servable; REVOKED is not. A superseded historical release therefore remains citation-stable and pin-able, while revocation removes it from ordinary public serving without deleting it.
 
 ### 5.5 Release channels
 
@@ -304,7 +315,7 @@ Canonical channels:
 - STAGING
 - PRODUCTION
 
-Rollback updates a channel pointer to an earlier valid ResearchRelease.
+Rollback updates a channel pointer to an earlier currently servable ResearchRelease. A channel must not resolve to a REVOKED release. Initial publication may create PUBLISHED and move the pointer atomically; reactivation is explicit and never inferred from a pointer move.
 
 ## 6. Manifest integrity
 
