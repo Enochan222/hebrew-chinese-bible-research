@@ -5,6 +5,27 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
 
+## 2026-10-06 — Repair strict AJV compilation of SERVING PassageCore conditional
+
+### Push intent
+
+Fix the first regression found by exact-head validation of the WB-2/WB-3 trust-boundary hardening.
+
+### Why
+
+AJV strict mode requires every field named by a conditional `then.required` to be declared in the same conditional `then.properties` scope. The new SERVING PassageCore rule correctly identified the required runtime fields but relied on their top-level property declarations, causing schema compilation to fail before fixture or Serving validation ran.
+
+### What changed
+
+- declare attribution and reconstruction-status fields inside the SERVING conditional property scope;
+- declare previous/next reference fields inside the conditional navigation property scope;
+- preserve the same semantic requirements for complete SERVING Hebrew, token, navigation and attribution data.
+
+### Validation
+
+P1 fixture shell, Contract validation, WB-2/WB-3, Database Spike, WB-1 and whole-Bible corpus workflows must rerun on the new exact head. No gate status changes in this correction.
+
+
 ## 2026-10-06 — Harden WB-2/WB-3 rights and Serving trust boundaries
 
 ### Push intent

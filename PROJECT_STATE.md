@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-06.1**
+State Revision: **2026-10-06.2**
 
 ## Mandatory governance rule
 
@@ -351,4 +351,4 @@ The synchronized exact head must prove 39-book navigation index coverage, Genesi
 
 ## Latest push intent
 
-Harden and independently verify PR #23 before accepting whole-Bible Serving. Review found two contract-boundary defects beyond the happy path: PostgreSQL implemented only a subset of the canonical RightsCondition/obligation language, and new PostgREST adapters trusted external JSON through TypeScript casts instead of runtime AJV validation. Concurrent WB-3 work has now added a data-driven Book / Chapter / Passage navigator. This revision completes rights-contract parity, adds fail-closed Serving validation, strengthens the real-database navigation gate, and keeps both whole-Bible freeze gates PENDING until the synchronized exact head passes all required workflows.
+Repair the first exact-head regression exposed by the WB-2/WB-3 hardening cycle. P1 fixture-shell unit tests showed that AJV strict mode rejects a conditional schema when names listed in `then.required` are not also declared in that same `then.properties` scope. The canonical SERVING requirements themselves remain unchanged; this revision declares the required fields in the conditional scope so fixture contracts continue to compile while malformed Serving projections still fail closed. All exact-head workflows must rerun after this schema-only semantic-preserving correction.

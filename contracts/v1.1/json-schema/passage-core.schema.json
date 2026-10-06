@@ -255,9 +255,13 @@
               },
               "passages": {
                 "minItems": 1
-              }
+              },
+              "previousReference": {},
+              "nextReference": {}
             }
-          }
+          },
+          "attribution": {},
+          "textReconstructionStatus": {}
         }
       }
     }
