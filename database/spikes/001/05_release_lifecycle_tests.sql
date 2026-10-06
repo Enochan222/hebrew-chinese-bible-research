@@ -266,13 +266,15 @@ BEGIN
 END
 $rl1_node_segment_immutable$;
 
--- Serving identities and rights snapshots are append-only from materialization.
+-- Serving identity rows used by published payloads are append-only from
+-- materialization. RightsDecisionSnapshot hardening remains a separate rights
+-- work package because the pre-RL-1 spike intentionally creates/removes
+-- candidate snapshots while exercising fail-closed publication.
 DO $rl1_global_serving_identity_immutable$
 DECLARE
   failed_object boolean := false;
   failed_span boolean := false;
   failed_system boolean := false;
-  failed_rights boolean := false;
 BEGIN
   BEGIN
     UPDATE serving.research_objects SET object_type=object_type
@@ -292,21 +294,162 @@ BEGIN
   EXCEPTION WHEN raise_exception THEN failed_system := true;
   END;
 
-  BEGIN
-    UPDATE serving.rights_decision_snapshots SET resolver_version=resolver_version
-    WHERE rights_decision_snapshot_id=(
-      SELECT rights_decision_snapshot_id FROM serving.rights_decision_snapshots LIMIT 1
-    );
-  EXCEPTION WHEN raise_exception THEN failed_rights := true;
-  END;
-
-  IF NOT (failed_object AND failed_span AND failed_system AND failed_rights) THEN
+  IF NOT (failed_object AND failed_span AND failed_system) THEN
     RAISE EXCEPTION
-      'Serving identity/snapshot immutability gap object=% span=% system=% rights=%',
-      failed_object,failed_span,failed_system,failed_rights;
+      'Serving identity immutability gap object=% span=% system=%',
+      failed_object,failed_span,failed_system;
   END IF;
 END
 $rl1_global_serving_identity_immutable$;
+
+-- Mutation guards must inspect both OLD and NEW ownership. Otherwise a
+-- privileged writer could move an ever-published row to an unpublished
+-- release/component and mutate it in the same UPDATE.
+INSERT INTO serving.research_releases(
+  research_release_id,release_label,source_build_id,published_at,
+  manifest_schema_version,manifest_hash,manifest_hash_algorithm,
+  manifest_canonical_serialization,git_commit_sha,compiler_version
+) VALUES (
+  '47000000-0000-4000-8000-000000000003',
+  'rl1-unpublished-reparent-target',
+  '46000000-0000-4000-8000-000000000002',
+  now(),'1.1',
+  '3434343434343434343434343434343434343434343434343434343434343434',
+  'SHA256','RFC8785_JSON_CANONICALIZATION_SCHEME',
+  'rl1-reparent-test','rl1-test'
+);
+
+INSERT INTO serving.research_objects(
+  research_object_id,object_type,source_content_hash,published_at
+) VALUES (
+  '53000000-0000-4000-8000-000000000001',
+  'CORPUS_RELEASE','rl1-unpublished-component',now()
+);
+
+INSERT INTO serving.published_evidence_packets(
+  published_evidence_packet_id,research_release_id,packet_type
+) VALUES (
+  '50100000-0000-4000-8000-000000000003',
+  '47000000-0000-4000-8000-000000000003',
+  'RL1_UNPUBLISHED_PACKET'
+);
+
+INSERT INTO serving.published_evidence_items(
+  published_evidence_item_id,published_evidence_packet_id,research_object_id,
+  research_object_version,evidence_content_hash,evidence_class,citation_locator,
+  permitted_excerpt,rights_decision_snapshot_id,evidence_stability_class,sort_order
+) VALUES (
+  '50200000-0000-4000-8000-000000000003',
+  '50100000-0000-4000-8000-000000000003',
+  '51000000-0000-4000-8000-000000000001',
+  NULL,NULL,'SCHOLARLY_SOURCE_TEXT',NULL,NULL,NULL,'METADATA_ONLY',0
+);
+
+INSERT INTO serving.published_assertions(
+  published_assertion_id,research_release_id,assertion_text,assertion_type,
+  confidence_class,assertion_hash
+) VALUES (
+  '50300000-0000-4000-8000-000000000003',
+  '47000000-0000-4000-8000-000000000003',
+  'RL-1 unpublished assertion','TRANSLATION',NULL,
+  '4545454545454545454545454545454545454545454545454545454545454545'
+);
+
+INSERT INTO serving.published_assertion_evidence(
+  published_assertion_id,published_evidence_item_id,stance,
+  entailment_review_status,weight_metadata
+) VALUES (
+  '50300000-0000-4000-8000-000000000003',
+  '50200000-0000-4000-8000-000000000003',
+  'SUPPORTS','UNREVIEWED',NULL
+);
+
+DO $rl1_direct_release_reparent$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    UPDATE serving.published_passage_analyses
+    SET research_release_id='47000000-0000-4000-8000-000000000003'
+    WHERE published_analysis_id='50000000-0000-4000-8000-000000000001';
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN
+    RAISE EXCEPTION 'ever-published direct payload escaped immutability by reparenting';
+  END IF;
+END
+$rl1_direct_release_reparent$;
+
+DO $rl1_component_reparent$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    UPDATE serving.reference_labels
+    SET corpus_release_id='53000000-0000-4000-8000-000000000001'
+    WHERE (corpus_release_id,reference_label_id)=(
+      SELECT corpus_release_id,reference_label_id
+      FROM serving.reference_labels
+      WHERE corpus_release_id='30000000-0000-4000-8000-000000000001'
+      LIMIT 1
+    );
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN
+    RAISE EXCEPTION 'ever-published component projection escaped immutability by reparenting';
+  END IF;
+END
+$rl1_component_reparent$;
+
+DO $rl1_evidence_item_reparent$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    UPDATE serving.published_evidence_items
+    SET published_evidence_packet_id='50100000-0000-4000-8000-000000000003'
+    WHERE published_evidence_item_id='50200000-0000-4000-8000-000000000001';
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN
+    RAISE EXCEPTION 'ever-published evidence item escaped immutability by reparenting';
+  END IF;
+END
+$rl1_evidence_item_reparent$;
+
+DO $rl1_assertion_evidence_reparent$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    UPDATE serving.published_assertion_evidence
+    SET published_assertion_id='50300000-0000-4000-8000-000000000003',
+        published_evidence_item_id='50200000-0000-4000-8000-000000000003'
+    WHERE published_assertion_id='50300000-0000-4000-8000-000000000001'
+      AND published_evidence_item_id='50200000-0000-4000-8000-000000000001';
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN
+    RAISE EXCEPTION 'ever-published assertion/evidence link escaped immutability by reparenting';
+  END IF;
+END
+$rl1_assertion_evidence_reparent$;
+
+SELECT rl1_test.assert_true(
+  (SELECT research_release_id
+   FROM serving.published_passage_analyses
+   WHERE published_analysis_id='50000000-0000-4000-8000-000000000001')
+    = '47000000-0000-4000-8000-000000000001',
+  'failed reparenting attempt must preserve direct payload ownership'
+);
+SELECT rl1_test.assert_true(
+  (SELECT corpus_release_id
+   FROM serving.reference_labels
+   WHERE reference_label_id=(
+     SELECT reference_label_id
+     FROM serving.reference_labels
+     WHERE corpus_release_id='30000000-0000-4000-8000-000000000001'
+     LIMIT 1
+   ))
+    = '30000000-0000-4000-8000-000000000001',
+  'failed reparenting attempt must preserve component ownership'
+);
 
 -- Neither direct pointer mutation nor publish-to-channel may expose a revoked release.
 DO $rl1_revoked_pointer$
