@@ -61,7 +61,7 @@ export function ReferenceNavigator(props: {
       <label>
         <span>Passage</span>
         <select
-          aria-label="Passage"
+          aria-label="Passage selector"
           value={props.currentReference}
           onChange={(event) => navigate(event.target.value)}
         >
