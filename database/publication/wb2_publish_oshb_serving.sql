@@ -305,6 +305,18 @@ BEGIN
   IF position('Open Scriptures Hebrew Bible' in (gen_payload->>'attribution')) = 0 THEN
     RAISE EXCEPTION 'WB-3 attribution missing from passage payload';
   END IF;
+  IF jsonb_array_length(gen_payload->'navigation'->'books') <> 39 THEN
+    RAISE EXCEPTION 'WB-3 configured CanonSystem book navigation drift: %',
+      jsonb_array_length(gen_payload->'navigation'->'books');
+  END IF;
+  IF jsonb_array_length(gen_payload->'navigation'->'chapters') < 1
+     OR jsonb_array_length(gen_payload->'navigation'->'passages') < 1 THEN
+    RAISE EXCEPTION 'WB-3 chapter/passage navigation is incomplete for Gen.1.1';
+  END IF;
+  IF gen_payload->'navigation'->>'currentBookCode' <> 'Gen'
+     OR (gen_payload->'navigation'->>'currentChapter')::integer <> 1 THEN
+    RAISE EXCEPTION 'WB-3 current navigation context drift';
+  END IF;
 
   SELECT next_label.label INTO cross_book_next
   FROM serving.reference_labels current_label
