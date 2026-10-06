@@ -161,6 +161,29 @@ try {
   assert.equal(adjacent.navigation.previousReference, "Gen.1.1");
   assert.equal(adjacent.navigation.nextReference, "Gen.1.3");
 
+  const directRelease = await fetch(
+    `${restBase}/research_releases?research_release_id=eq.${releaseId}&select=research_release_id&limit=1`,
+    { headers: { "Accept-Profile": "serving", "Content-Profile": "serving" } },
+  );
+  assert.equal(directRelease.status, 200);
+  assert.deepEqual(await directRelease.json(), [{ research_release_id: releaseId }]);
+
+  const directPassage = await fetch(`${restBase}/rpc/read_passage_core`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept-Profile": "serving",
+      "Content-Profile": "serving",
+    },
+    body: JSON.stringify({
+      p_release_id: releaseId,
+      p_reference_system_code: "OSHB_OSIS",
+      p_reference_label: "Gen.1.1",
+    }),
+  });
+  assert.equal(directPassage.status, 200);
+  assert.equal((await directPassage.json()).resolvedReference.referenceLabel, "Gen.1.1");
+
   const page = await fetch(
     `${appBase}/releases/${releaseId}/passages/Gen.1.1?referenceSystemCode=OSHB_OSIS&mode=STUDY`,
   );
