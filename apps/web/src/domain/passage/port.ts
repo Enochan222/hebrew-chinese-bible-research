@@ -14,8 +14,13 @@ export type PassageTokenV1 = {
 };
 
 export type PassageNavigationV1 = {
+  currentBookCode?: string;
+  currentChapter?: number | null;
   previousReference?: string | null;
   nextReference?: string | null;
+  books?: Array<{ bookCode: string; firstReference: string }>;
+  chapters?: Array<{ chapterNumber: number; firstReference: string }>;
+  passages?: Array<{ referenceLabel: string; verseLabel?: string | null }>;
 };
 
 export type PassageCoreV1 = {
