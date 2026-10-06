@@ -30,7 +30,11 @@ The accepted WB-2/WB-3 schema used `release_is_published()` for both mutation gu
 - update public RLS/current-release behavior to current servability while mutation guards remain permanently keyed to first publication;
 - add adversarial Database Spike tests for equal-time ordering, sequence gaps, invalid transitions, anon/authenticated visibility, pinned reads, revoked immutability, channel eligibility, reactivation and rollback;
 - exercise revoke/reactivate against the real published whole-Bible WB-2/WB-3 OSHB release;
-- add `CORE-FZ-RELEASE-002` as the lifecycle freeze gate.
+- add `CORE-FZ-RELEASE-002` as the lifecycle freeze gate;
+- close the real Serving projection gap exposed by whole-Bible CI by locking reference labels, corpus text segments and node/segment memberships after their component has ever been published;
+- make Serving research-object identities and reference spans/systems append-only after materialization;
+- harden all release/component mutation guards against OLD->NEW ownership reparenting, including direct release payloads, component projections, evidence items and assertion/evidence links;
+- keep RightsDecisionSnapshot table-lifecycle hardening outside RL-1 so the pre-existing rights spike can continue to create/remove candidate snapshots while testing fail-closed publication.
 
 ### Intended effect
 
@@ -38,7 +42,9 @@ A release can be withdrawn from public serving without deleting history or regai
 
 ### Validation
 
-Pending exact-head CI. Acceptance requires Contract validation, Database Spike 001 including `05_release_lifecycle_tests.sql`, the real WB-2/WB-3 whole-Bible revoke/reactivate regression, Project governance and all triggered existing regressions to pass without Copilot review or acceptance evidence.
+The repaired intermediate head `185feee5db42d1c571d3d73bace0506d9d786a9c` passed Contract validation `37463854101`, Project governance `37463854125`, P1 fixture shell `37463854237`, Whole-Bible corpus foundation `37463854073`, WB-1 Relational Whole Corpus `37463854056`, and critically WB-2/WB-3 Serving Reader `37463854143`, including the real whole-Bible revoke -> hidden/non-servable -> immutable -> reactivate -> restore-serving chain. Database Spike `37463854043` failed earlier in its legacy rights test because an additional global RightsDecisionSnapshot immutability trigger blocked intentional candidate-snapshot deletion. That restriction was outside RL-1 and has been removed.
+
+The newest exact head must rerun Contract validation, Database Spike 001 including `05_release_lifecycle_tests.sql` and the new reparenting attacks, the real WB-2/WB-3 whole-Bible lifecycle regression, Project governance and all triggered existing regressions before `CORE-FZ-RELEASE-002` can pass.
 
 
 ## 2026-10-06 — Accept WB-2/WB-3 whole-Bible reader gates
