@@ -20,7 +20,9 @@
     "rights",
     "counts",
     "checks",
-    "pass"
+    "pass",
+    "projectionHashes",
+    "sourceHashes"
   ],
   "properties": {
     "schemaVersion": {
@@ -231,6 +233,60 @@
     },
     "pass": {
       "const": true
+    },
+    "projectionHashes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "serialization",
+        "authoringCorpus",
+        "servingCorpus",
+        "authoringAnnotationLayer",
+        "servingAnnotationLayer"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "SHA256"
+        },
+        "serialization": {
+          "const": "WB2_PSQL_TSV_SECTIONS_V1"
+        },
+        "authoringCorpus": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{64}$"
+        },
+        "servingCorpus": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{64}$"
+        },
+        "authoringAnnotationLayer": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{64}$"
+        },
+        "servingAnnotationLayer": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{64}$"
+        }
+      }
+    },
+    "sourceHashes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "oshbCorpusSourceChecksum",
+        "oshbAnnotationSourceHash"
+      ],
+      "properties": {
+        "oshbCorpusSourceChecksum": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{64}$"
+        },
+        "oshbAnnotationSourceHash": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{64}$"
+        }
+      }
     }
   }
 }
