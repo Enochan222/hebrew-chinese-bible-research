@@ -33,7 +33,24 @@ const passagePayload = {
       morphRaw: "HR/Ncfsa",
     },
   ],
-  navigation: { previousReference: null, nextReference: "Gen.1.2" },
+  navigation: {
+    currentBookCode: "Gen",
+    currentChapter: 1,
+    previousReference: null,
+    nextReference: "Gen.1.2",
+    books: [
+      { bookCode: "Gen", firstReference: "Gen.1.1" },
+      { bookCode: "Exod", firstReference: "Exod.1.1" },
+    ],
+    chapters: [
+      { chapterNumber: 1, firstReference: "Gen.1.1" },
+      { chapterNumber: 2, firstReference: "Gen.2.1" },
+    ],
+    passages: [
+      { referenceLabel: "Gen.1.1", verseLabel: "1" },
+      { referenceLabel: "Gen.1.2", verseLabel: "2" },
+    ],
+  },
   attribution: "Open Scriptures Hebrew Bible / Westminster Leningrad Codex; source and morphology attribution required.",
 };
 
@@ -124,6 +141,9 @@ try {
   assert.equal(passage.tokens.length, 1);
   assert.equal(passage.tokens[0].morphRaw, "HR/Ncfsa");
   assert.equal(passage.navigation.nextReference, "Gen.1.2");
+  assert.deepEqual(passage.navigation.books.map((item) => item.bookCode), ["Gen", "Exod"]);
+  assert.deepEqual(passage.navigation.chapters.map((item) => item.chapterNumber), [1, 2]);
+  assert.deepEqual(passage.navigation.passages.map((item) => item.referenceLabel), ["Gen.1.1", "Gen.1.2"]);
   assert.match(passage.attribution, /Open Scriptures Hebrew Bible/);
 
   const page = await fetch(
@@ -135,6 +155,8 @@ try {
   assert.match(html, /OSHB source tokens/);
   assert.match(html, /Word-token display only/);
   assert.match(html, /Gen\.1\.2/);
+  assert.match(html, /Whole-Bible reference navigation/);
+  assert.match(html, /Exod/);
 
   assert.ok(observed.length >= 3);
   for (const request of observed) {
