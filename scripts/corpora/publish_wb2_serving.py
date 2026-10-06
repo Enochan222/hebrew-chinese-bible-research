@@ -534,6 +534,61 @@ COMMIT;
         if not keep_sql:
             sql_path.unlink(missing_ok=True)
 
+    serving_reference_projection_sql = f"""
+SELECT
+  reference_system_id::text,reference_system_code,reference_label,
+  reference_span_id::text,book_code,COALESCE(chapter_number::text,''),
+  COALESCE(verse_label,''),reference_sort_key::text
+FROM serving.passage_reference_index
+WHERE corpus_release_id={sql_literal(oshb_corpus)}::uuid
+ORDER BY reference_sort_key,reference_system_code,reference_label;
+"""
+    serving_text_projection_sql = f"""
+SELECT
+  text_segment_id::text,reference_span_id::text,segment_order::text,
+  source_key,surface_original,segment_kind,content_hash
+FROM serving.corpus_text_segments
+WHERE corpus_release_id={sql_literal(oshb_corpus)}::uuid
+ORDER BY segment_order,text_segment_id;
+"""
+    serving_attribution_projection_sql = f"""
+SELECT source_key,attribution_text,license_label
+FROM serving.corpus_attributions
+WHERE corpus_release_id={sql_literal(oshb_corpus)}::uuid
+ORDER BY source_key;
+"""
+    serving_nodes_projection_sql = f"""
+SELECT analysis_node_id::text,annotation_layer_id::text,node_type,reference_span_id::text
+FROM serving.corpus_nodes
+WHERE corpus_release_id={sql_literal(oshb_corpus)}::uuid
+ORDER BY analysis_node_id;
+"""
+    serving_features_projection_sql = f"""
+SELECT analysis_node_id::text,feature_key,feature_value
+FROM serving.corpus_node_features
+WHERE corpus_release_id={sql_literal(oshb_corpus)}::uuid
+ORDER BY analysis_node_id,feature_key,feature_value;
+"""
+    serving_membership_projection_sql = f"""
+SELECT
+  analysis_node_id::text,text_segment_id::text,member_order::text,
+  COALESCE(membership_role,'')
+FROM serving.corpus_node_segments
+WHERE corpus_release_id={sql_literal(oshb_corpus)}::uuid
+ORDER BY analysis_node_id,member_order,text_segment_id;
+"""
+
+    serving_corpus_projection_hash = stream_hash_sections([
+        ("reference-index", serving_reference_projection_sql),
+        ("text-segments", serving_text_projection_sql),
+        ("attribution", serving_attribution_projection_sql),
+    ])
+    serving_annotation_projection_hash = stream_hash_sections([
+        ("analysis-nodes", serving_nodes_projection_sql),
+        ("analysis-node-features", serving_features_projection_sql),
+        ("analysis-node-segments", serving_membership_projection_sql),
+    ])
+
     authoring_oshb_nodes = count(
         f"SELECT count(*) FROM authoring.analysis_nodes WHERE annotation_layer_id='{oshb_layer}'::uuid;"
     )
@@ -602,6 +657,8 @@ COMMIT;
         "candidateRemainsInactive": published_events == 0,
         "oshbStorageRightsAllow": rights_rows.get("STORE_EXTRACTED_TEXT") == "ALLOW",
         "oshbDisplayRightsConditionalAttribution": rights_rows.get("DISPLAY_FULLTEXT") == "CONDITIONAL",
+        "corpusProjectionHashMatchesAuthoring": serving_corpus_projection_hash == authoring_corpus_projection_hash,
+        "annotationProjectionHashMatchesAuthoring": serving_annotation_projection_hash == authoring_annotation_projection_hash,
     }
 
     report = {
@@ -616,6 +673,18 @@ COMMIT;
         "releaseLabel": release_label,
         "manifest": manifest,
         "manifestHash": manifest_hash,
+        "projectionHashes": {
+            "algorithm": "SHA256",
+            "serialization": "WB2_PSQL_TSV_SECTIONS_V1",
+            "authoringCorpus": authoring_corpus_projection_hash,
+            "servingCorpus": serving_corpus_projection_hash,
+            "authoringAnnotationLayer": authoring_annotation_projection_hash,
+            "servingAnnotationLayer": serving_annotation_projection_hash,
+        },
+        "sourceHashes": {
+            "oshbCorpusSourceChecksum": oshb_source_checksum,
+            "oshbAnnotationSourceHash": oshb_layer_hash,
+        },
         "projectedSources": ["OSHB_MORPHHB"],
         "excludedSources": [
             {
