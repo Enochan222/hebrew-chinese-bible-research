@@ -85,31 +85,42 @@ SELECT
 
 
 def stream_hash_sections(sections: list[tuple[str, str]]) -> str:
-    """Hash deterministic psql result streams without loading the corpus into memory."""
+    """Hash projection row multisets while retaining semantic order keys in rows.
+
+    Query planners may emit the same relational projection in different physical
+    row orders. Every WB-2 projection row already carries its semantic ordering
+    key (for example segment_order or reference_sort_key), so the stable release
+    hash sorts per-row SHA-256 digests rather than depending on iterator order.
+    Duplicate rows remain significant because duplicate digests are retained.
+    """
     digest = hashlib.sha256()
     for section_name, sql in sections:
-        digest.update(b"WB2-SECTION\0")
-        digest.update(section_name.encode("utf-8"))
-        digest.update(b"\0")
+        row_digests: list[bytes] = []
         proc = subprocess.Popen(
             ["psql", "-X", "-v", "ON_ERROR_STOP=1", "-At", "-F", "\t", "-c", sql],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            text=True,
         )
         assert proc.stdout is not None
         assert proc.stderr is not None
-        for block in iter(lambda: proc.stdout.read(1024 * 1024), b""):
-            digest.update(block)
+        for line in proc.stdout:
+            row_digests.append(hashlib.sha256(line.rstrip("\n").encode("utf-8")).digest())
         stderr = proc.stderr.read()
         returncode = proc.wait()
         if returncode != 0:
             raise RuntimeError(
-                f"psql projection-hash query failed for {section_name}: "
-                + stderr.decode("utf-8", errors="replace")
+                f"psql projection-hash query failed for {section_name}: {stderr}"
             )
+        digest.update(b"WB2-SECTION-MULTISET\0")
+        digest.update(section_name.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(str(len(row_digests)).encode("ascii"))
+        digest.update(b"\0")
+        for row_digest in sorted(row_digests):
+            digest.update(row_digest)
         digest.update(b"\0WB2-END-SECTION\0")
     return digest.hexdigest()
-
 
 def main() -> int:
     parser = argparse.ArgumentParser(
@@ -731,7 +742,7 @@ ORDER BY analysis_node_id,member_order,text_segment_id;
         "manifestHash": manifest_hash,
         "projectionHashes": {
             "algorithm": "SHA256",
-            "serialization": "WB2_PSQL_TSV_SECTIONS_V1",
+            "serialization": "WB2_PSQL_TSV_ROW_MULTISET_V2",
             "authoringCorpus": authoring_corpus_projection_hash,
             "servingCorpus": serving_corpus_projection_hash,
             "authoringAnnotationLayer": authoring_annotation_projection_hash,
