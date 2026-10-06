@@ -213,6 +213,101 @@ BEGIN
 END
 $rl1_revoked_immutable$;
 
+-- Every release-pinned Serving payload surface stays immutable after first
+-- publication, not only corpus_nodes/features/edges.
+DO $rl1_reference_label_immutable$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    UPDATE serving.reference_labels
+    SET label=label
+    WHERE (corpus_release_id,reference_label_id)=(
+      SELECT corpus_release_id,reference_label_id
+      FROM serving.reference_labels
+      LIMIT 1
+    );
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'published reference label became mutable'; END IF;
+END
+$rl1_reference_label_immutable$;
+
+DO $rl1_text_segment_immutable$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    UPDATE serving.corpus_text_segments
+    SET surface_original=surface_original
+    WHERE (corpus_release_id,text_segment_id)=(
+      SELECT corpus_release_id,text_segment_id
+      FROM serving.corpus_text_segments
+      LIMIT 1
+    );
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'published corpus text segment became mutable'; END IF;
+END
+$rl1_text_segment_immutable$;
+
+DO $rl1_node_segment_immutable$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    UPDATE serving.corpus_node_segments
+    SET member_order=member_order
+    WHERE (corpus_release_id,analysis_node_id,text_segment_id,membership_role)=(
+      SELECT corpus_release_id,analysis_node_id,text_segment_id,membership_role
+      FROM serving.corpus_node_segments
+      LIMIT 1
+    );
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'published corpus node/segment membership became mutable'; END IF;
+END
+$rl1_node_segment_immutable$;
+
+-- Serving identities and rights snapshots are append-only from materialization.
+DO $rl1_global_serving_identity_immutable$
+DECLARE
+  failed_object boolean := false;
+  failed_span boolean := false;
+  failed_system boolean := false;
+  failed_rights boolean := false;
+BEGIN
+  BEGIN
+    UPDATE serving.research_objects SET object_type=object_type
+    WHERE research_object_id=(SELECT research_object_id FROM serving.research_objects LIMIT 1);
+  EXCEPTION WHEN raise_exception THEN failed_object := true;
+  END;
+
+  BEGIN
+    UPDATE serving.reference_spans SET span_kind=span_kind
+    WHERE reference_span_id=(SELECT reference_span_id FROM serving.reference_spans LIMIT 1);
+  EXCEPTION WHEN raise_exception THEN failed_span := true;
+  END;
+
+  BEGIN
+    UPDATE serving.reference_systems SET name=name
+    WHERE reference_system_id=(SELECT reference_system_id FROM serving.reference_systems LIMIT 1);
+  EXCEPTION WHEN raise_exception THEN failed_system := true;
+  END;
+
+  BEGIN
+    UPDATE serving.rights_decision_snapshots SET resolver_version=resolver_version
+    WHERE rights_decision_snapshot_id=(
+      SELECT rights_decision_snapshot_id FROM serving.rights_decision_snapshots LIMIT 1
+    );
+  EXCEPTION WHEN raise_exception THEN failed_rights := true;
+  END;
+
+  IF NOT (failed_object AND failed_span AND failed_system AND failed_rights) THEN
+    RAISE EXCEPTION
+      'Serving identity/snapshot immutability gap object=% span=% system=% rights=%',
+      failed_object,failed_span,failed_system,failed_rights;
+  END IF;
+END
+$rl1_global_serving_identity_immutable$;
+
 -- Neither direct pointer mutation nor publish-to-channel may expose a revoked release.
 DO $rl1_revoked_pointer$
 DECLARE failed boolean := false;
