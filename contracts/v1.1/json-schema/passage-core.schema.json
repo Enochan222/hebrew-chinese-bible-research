@@ -197,5 +197,69 @@
       ]
     }
   },
-  "description": "Core passage envelope. Canonical ReferenceSpan identity is always present. A resolved human label is included when the request used a ReferenceSystem-aware label. Published Serving responses may add an OSHB word-token sequence, morphology, navigation and attribution. OSHB_WORD_TOKENS_ONLY explicitly means punctuation/orthographic <seg> nodes such as maqqef, paseq and sof pasuq have not been reconstructed into the display string."
+  "description": "Core passage envelope. Canonical ReferenceSpan identity is always present. A resolved human label is included when the request used a ReferenceSystem-aware label. Published Serving responses may add an OSHB word-token sequence, morphology, navigation and attribution. OSHB_WORD_TOKENS_ONLY explicitly means punctuation/orthographic <seg> nodes such as maqqef, paseq and sof pasuq have not been reconstructed into the display string.",
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "dataSource"
+        ],
+        "properties": {
+          "dataSource": {
+            "const": "SERVING"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "resolvedReference",
+          "hebrewText",
+          "tokens",
+          "navigation",
+          "attribution",
+          "textReconstructionStatus"
+        ],
+        "properties": {
+          "resolvedReference": {
+            "type": "object"
+          },
+          "hebrewText": {
+            "minLength": 1
+          },
+          "tokens": {
+            "minItems": 1
+          },
+          "navigation": {
+            "required": [
+              "currentBookCode",
+              "currentChapter",
+              "previousReference",
+              "nextReference",
+              "books",
+              "chapters",
+              "passages"
+            ],
+            "properties": {
+              "currentBookCode": {
+                "minLength": 1
+              },
+              "currentChapter": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "books": {
+                "minItems": 1
+              },
+              "chapters": {
+                "minItems": 1
+              },
+              "passages": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

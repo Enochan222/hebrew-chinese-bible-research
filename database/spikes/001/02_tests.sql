@@ -822,3 +822,58 @@ BEGIN
 END
 $wb2_reject_legacy_obligation_key$;
 
+
+
+-- WB-2 hardening: complete semantic parity with canonical v1.1 rights JSON.
+DO $wb2_rights_contract_parity$
+DECLARE
+  valid_conditions jsonb := '[
+    {"conditionSchemaId":"AUTHENTICATED_AUDIENCE","conditionSchemaVersion":"1.0","evaluatorVersion":"test-1","payload":{"required":true}},
+    {"conditionSchemaId":"TERRITORY_ALLOWLIST","conditionSchemaVersion":"1.0","evaluatorVersion":"test-1","payload":{"territories":["HK","GB"]}},
+    {"conditionSchemaId":"PURPOSE_ALLOWLIST","conditionSchemaVersion":"1.0","evaluatorVersion":"test-1","payload":{"purposes":["PUBLICATION","PUBLIC_DISPLAY"]}},
+    {"conditionSchemaId":"COMMERCIAL_CONTEXT_ALLOWLIST","conditionSchemaVersion":"1.0","evaluatorVersion":"test-1","payload":{"contexts":["COMMERCIAL","MIXED"]}},
+    {"conditionSchemaId":"PROVIDER_TERMS_VERSION","conditionSchemaVersion":"1.0","evaluatorVersion":"test-1","payload":{"providerTermsVersion":"2026-10"}}
+  ]'::jsonb;
+  valid_obligations jsonb := '[
+    {"obligationType":"ATTRIBUTION","value":"Required attribution"},
+    {"obligationType":"MAX_EXCERPT","value":25,"unit":"WORD"},
+    {"obligationType":"RETENTION_LIMIT","value":30,"unit":"DAY"},
+    {"obligationType":"AUTHENTICATED_ONLY"},
+    {"obligationType":"TERRITORY_LIMIT","value":["HK","GB"]},
+    {"obligationType":"TEMPORARY_PROCESSING_ONLY"}
+  ]'::jsonb;
+BEGIN
+  IF NOT authoring.valid_rights_conditions(valid_conditions)
+     OR NOT serving.valid_rights_conditions(valid_conditions) THEN
+    RAISE EXCEPTION 'all canonical RightsCondition variants must validate in both schemas';
+  END IF;
+  IF NOT authoring.valid_rights_obligations(valid_obligations)
+     OR NOT serving.valid_rights_obligations(valid_obligations) THEN
+    RAISE EXCEPTION 'all canonical rights obligation variants must validate in both schemas';
+  END IF;
+  IF authoring.valid_rights_conditions(
+       '[{"conditionSchemaId":"PURPOSE_ALLOWLIST","conditionSchemaVersion":"2.0","evaluatorVersion":"x","payload":{"purposes":["PUBLIC_DISPLAY"]}}]'::jsonb)
+     OR serving.valid_rights_conditions(
+       '[{"conditionSchemaId":"PURPOSE_ALLOWLIST","conditionSchemaVersion":"2.0","evaluatorVersion":"x","payload":{"purposes":["PUBLIC_DISPLAY"]}}]'::jsonb) THEN
+    RAISE EXCEPTION 'non-canonical RightsCondition schema versions must fail closed';
+  END IF;
+  IF authoring.valid_rights_conditions(
+       '[{"conditionSchemaId":"PURPOSE_ALLOWLIST","conditionSchemaVersion":"1.0","evaluatorVersion":"x","payload":{"purposes":["NOT_A_PURPOSE"]}}]'::jsonb)
+     OR serving.valid_rights_conditions(
+       '[{"conditionSchemaId":"PURPOSE_ALLOWLIST","conditionSchemaVersion":"1.0","evaluatorVersion":"x","payload":{"purposes":["NOT_A_PURPOSE"]}}]'::jsonb) THEN
+    RAISE EXCEPTION 'invalid RightsCondition payload enums must fail closed';
+  END IF;
+  IF authoring.valid_rights_obligations(
+       '[{"obligationType":"TERRITORY_LIMIT","value":["HK","HK"]}]'::jsonb)
+     OR serving.valid_rights_obligations(
+       '[{"obligationType":"TERRITORY_LIMIT","value":["HK","HK"]}]'::jsonb) THEN
+    RAISE EXCEPTION 'duplicate TERRITORY_LIMIT members must fail closed';
+  END IF;
+  IF authoring.valid_rights_obligations(
+       '[{"obligationType":"AUTHENTICATED_ONLY","value":"unexpected"}]'::jsonb)
+     OR serving.valid_rights_obligations(
+       '[{"obligationType":"AUTHENTICATED_ONLY","value":"unexpected"}]'::jsonb) THEN
+    RAISE EXCEPTION 'obligation additional properties must fail closed';
+  END IF;
+END
+$wb2_rights_contract_parity$;

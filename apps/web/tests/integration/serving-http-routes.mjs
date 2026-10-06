@@ -79,11 +79,17 @@ const restServer = http.createServer(async (req, res) => {
     let body = "";
     for await (const chunk of req) body += chunk;
     const parsed = JSON.parse(body);
-    assert.deepEqual(parsed, {
-      p_release_id: releaseId,
-      p_reference_system_code: "OSHB_OSIS",
-      p_reference_label: "Gen.1.1",
-    });
+    assert.equal(parsed.p_release_id, releaseId);
+    assert.equal(parsed.p_reference_system_code, "OSHB_OSIS");
+    if (parsed.p_reference_label === "Gen.1.2") {
+      res.end(JSON.stringify({
+        dataSource: "SERVING",
+        researchReleaseId: releaseId,
+        referenceSpanId: "4089aeaa-ddae-5adb-9510-1ca22845c4c2",
+      }));
+      return;
+    }
+    assert.equal(parsed.p_reference_label, "Gen.1.1");
     res.end(JSON.stringify(passagePayload));
     return;
   }
@@ -145,6 +151,10 @@ try {
   assert.deepEqual(passage.navigation.chapters.map((item) => item.chapterNumber), [1, 2]);
   assert.deepEqual(passage.navigation.passages.map((item) => item.referenceLabel), ["Gen.1.1", "Gen.1.2"]);
   assert.match(passage.attribution, /Open Scriptures Hebrew Bible/);
+
+  const malformed = await json("/api/v1/passages/Gen.1.2?referenceSystemCode=OSHB_OSIS", 500);
+  assert.equal(malformed.code, "CONTRACT_VIOLATION");
+  assert.match(malformed.message, /serving contract validation failed/i);
 
   const page = await fetch(
     `${appBase}/releases/${releaseId}/passages/Gen.1.1?referenceSystemCode=OSHB_OSIS&mode=STUDY`,

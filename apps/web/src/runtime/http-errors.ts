@@ -22,10 +22,10 @@ export function apiErrorResponse(error: unknown): NextResponse<ApiErrorBody> {
     return NextResponse.json({ code: error.code, message: error.message }, { status: 404 });
   }
   if (error instanceof ContractViolationError) {
-    return NextResponse.json({ code: error.code, message: "Canonical fixture contract validation failed." }, { status: 500 });
+    return NextResponse.json({ code: error.code, message: "Canonical serving contract validation failed." }, { status: 500 });
   }
   return NextResponse.json(
-    { code: "DATA_TEMPORARILY_UNAVAILABLE", message: "Fixture serving data is temporarily unavailable." },
+    { code: "DATA_TEMPORARILY_UNAVAILABLE", message: "Serving data is temporarily unavailable." },
     { status: 503 },
   );
 }

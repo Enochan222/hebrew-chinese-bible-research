@@ -869,70 +869,136 @@ FOR EACH ROW EXECUTE FUNCTION authoring.enforce_research_object_type('RESEARCH_P
 
 CREATE OR REPLACE FUNCTION authoring.valid_rights_conditions(value jsonb)
 RETURNS boolean
-LANGUAGE sql
+LANGUAGE plpgsql
 IMMUTABLE
-AS $$
-  SELECT CASE
-    WHEN value IS NULL THEN true
-    WHEN jsonb_typeof(value) <> 'array' THEN false
-    ELSE NOT EXISTS (
-      SELECT 1
-      FROM jsonb_array_elements(value) e
-      WHERE e->>'conditionSchemaId' NOT IN (
-        'AUTHENTICATED_AUDIENCE','TERRITORY_ALLOWLIST','PURPOSE_ALLOWLIST',
-        'COMMERCIAL_CONTEXT_ALLOWLIST','PROVIDER_TERMS_VERSION'
-      )
-      OR COALESCE(e->>'conditionSchemaVersion','') = ''
-      OR COALESCE(e->>'evaluatorVersion','') = ''
-      OR jsonb_typeof(e->'payload') IS DISTINCT FROM 'object'
-    )
-  END
-$$;
+AS $rights_conditions$
+DECLARE
+  e jsonb;
+  payload jsonb;
+BEGIN
+  IF value IS NULL THEN RETURN true; END IF;
+  IF jsonb_typeof(value) <> 'array' THEN RETURN false; END IF;
+  IF jsonb_array_length(value) <> (
+    SELECT count(DISTINCT item) FROM jsonb_array_elements(value) AS x(item)
+  ) THEN RETURN false; END IF;
+  FOR e IN SELECT item FROM jsonb_array_elements(value) AS x(item)
+  LOOP
+    IF jsonb_typeof(e) <> 'object'
+       OR NOT (e ?& ARRAY['conditionSchemaId','conditionSchemaVersion','evaluatorVersion','payload'])
+       OR (SELECT count(*) FROM jsonb_object_keys(e)) <> 4
+       OR jsonb_typeof(e->'conditionSchemaId') <> 'string'
+       OR jsonb_typeof(e->'conditionSchemaVersion') <> 'string'
+       OR e->>'conditionSchemaVersion' <> '1.0'
+       OR jsonb_typeof(e->'evaluatorVersion') <> 'string'
+       OR length(e->>'evaluatorVersion') = 0
+       OR jsonb_typeof(e->'payload') <> 'object'
+    THEN RETURN false; END IF;
+    payload := e->'payload';
+    CASE e->>'conditionSchemaId'
+      WHEN 'AUTHENTICATED_AUDIENCE' THEN
+        IF payload <> '{"required":true}'::jsonb THEN RETURN false; END IF;
+      WHEN 'TERRITORY_ALLOWLIST' THEN
+        IF NOT (payload ? 'territories')
+           OR (SELECT count(*) FROM jsonb_object_keys(payload)) <> 1
+           OR jsonb_typeof(payload->'territories') <> 'array'
+           OR jsonb_array_length(payload->'territories') = 0
+           OR jsonb_array_length(payload->'territories') <> (
+             SELECT count(DISTINCT item) FROM jsonb_array_elements(payload->'territories') AS x(item))
+           OR EXISTS (SELECT 1 FROM jsonb_array_elements(payload->'territories') AS x(item)
+                      WHERE jsonb_typeof(item) <> 'string' OR length(item #>> '{}') < 2)
+        THEN RETURN false; END IF;
+      WHEN 'PURPOSE_ALLOWLIST' THEN
+        IF NOT (payload ? 'purposes')
+           OR (SELECT count(*) FROM jsonb_object_keys(payload)) <> 1
+           OR jsonb_typeof(payload->'purposes') <> 'array'
+           OR jsonb_array_length(payload->'purposes') = 0
+           OR jsonb_array_length(payload->'purposes') <> (
+             SELECT count(DISTINCT item) FROM jsonb_array_elements(payload->'purposes') AS x(item))
+           OR EXISTS (SELECT 1 FROM jsonb_array_elements(payload->'purposes') AS x(item)
+                      WHERE jsonb_typeof(item) <> 'string'
+                         OR (item #>> '{}') NOT IN (
+                           'PRIVATE_RESEARCH','RESEARCH_COMPILATION','PUBLICATION','PUBLIC_DISPLAY',
+                           'USER_WORKSPACE','MODEL_ASSISTANCE','EXPORT'))
+        THEN RETURN false; END IF;
+      WHEN 'COMMERCIAL_CONTEXT_ALLOWLIST' THEN
+        IF NOT (payload ? 'contexts')
+           OR (SELECT count(*) FROM jsonb_object_keys(payload)) <> 1
+           OR jsonb_typeof(payload->'contexts') <> 'array'
+           OR jsonb_array_length(payload->'contexts') = 0
+           OR jsonb_array_length(payload->'contexts') <> (
+             SELECT count(DISTINCT item) FROM jsonb_array_elements(payload->'contexts') AS x(item))
+           OR EXISTS (SELECT 1 FROM jsonb_array_elements(payload->'contexts') AS x(item)
+                      WHERE jsonb_typeof(item) <> 'string'
+                         OR (item #>> '{}') NOT IN ('NONCOMMERCIAL','COMMERCIAL','MIXED','UNKNOWN'))
+        THEN RETURN false; END IF;
+      WHEN 'PROVIDER_TERMS_VERSION' THEN
+        IF NOT (payload ? 'providerTermsVersion')
+           OR (SELECT count(*) FROM jsonb_object_keys(payload)) <> 1
+           OR jsonb_typeof(payload->'providerTermsVersion') <> 'string'
+           OR length(payload->>'providerTermsVersion') = 0
+        THEN RETURN false; END IF;
+      ELSE RETURN false;
+    END CASE;
+  END LOOP;
+  RETURN true;
+END
+$rights_conditions$;
 
 CREATE OR REPLACE FUNCTION authoring.valid_rights_obligations(value jsonb)
 RETURNS boolean
-LANGUAGE sql
+LANGUAGE plpgsql
 IMMUTABLE
-AS $$
-  SELECT CASE
-    WHEN value IS NULL THEN true
-    WHEN jsonb_typeof(value) <> 'array' THEN false
-    ELSE NOT EXISTS (
-      SELECT 1
-      FROM jsonb_array_elements(value) e
-      WHERE
-        jsonb_typeof(e) <> 'object'
-        OR COALESCE(e->>'obligationType','') NOT IN ('MAX_EXCERPT','RETENTION_LIMIT','ATTRIBUTION')
-        OR e ? 'type'
-        OR (
-          e->>'obligationType' = 'ATTRIBUTION'
-          AND (
-            length(COALESCE(e->>'value','')) = 0
-            OR EXISTS (SELECT 1 FROM jsonb_object_keys(e) k WHERE k NOT IN ('obligationType','value'))
-          )
-        )
-        OR (
-          e->>'obligationType' = 'MAX_EXCERPT'
-          AND (
-            jsonb_typeof(e->'value') <> 'number'
-            OR (e->>'value')::numeric <= 0
-            OR COALESCE(e->>'unit','') NOT IN ('WORD','UNICODE_CODEPOINT','GRAPHEME_CLUSTER','BYTE','PERCENT_OF_WORK')
-            OR EXISTS (SELECT 1 FROM jsonb_object_keys(e) k WHERE k NOT IN ('obligationType','value','unit'))
-          )
-        )
-        OR (
-          e->>'obligationType' = 'RETENTION_LIMIT'
-          AND (
-            jsonb_typeof(e->'value') <> 'number'
-            OR (e->>'value')::numeric < 0
-            OR trunc((e->>'value')::numeric) <> (e->>'value')::numeric
-            OR e->>'unit' <> 'DAY'
-            OR EXISTS (SELECT 1 FROM jsonb_object_keys(e) k WHERE k NOT IN ('obligationType','value','unit'))
-          )
-        )
-    )
-  END
-$$;
+AS $rights_obligations$
+DECLARE
+  e jsonb;
+BEGIN
+  IF value IS NULL THEN RETURN true; END IF;
+  IF jsonb_typeof(value) <> 'array' THEN RETURN false; END IF;
+  IF jsonb_array_length(value) <> (
+    SELECT count(DISTINCT item) FROM jsonb_array_elements(value) AS x(item)
+  ) THEN RETURN false; END IF;
+  FOR e IN SELECT item FROM jsonb_array_elements(value) AS x(item)
+  LOOP
+    IF jsonb_typeof(e) <> 'object' OR NOT (e ? 'obligationType')
+       OR jsonb_typeof(e->'obligationType') <> 'string' THEN RETURN false; END IF;
+    CASE e->>'obligationType'
+      WHEN 'ATTRIBUTION' THEN
+        IF NOT (e ?& ARRAY['obligationType','value'])
+           OR (SELECT count(*) FROM jsonb_object_keys(e)) <> 2
+           OR jsonb_typeof(e->'value') <> 'string' OR length(e->>'value') = 0
+        THEN RETURN false; END IF;
+      WHEN 'MAX_EXCERPT' THEN
+        IF NOT (e ?& ARRAY['obligationType','value','unit'])
+           OR (SELECT count(*) FROM jsonb_object_keys(e)) <> 3
+           OR jsonb_typeof(e->'value') <> 'number' OR (e->>'value')::numeric <= 0
+           OR jsonb_typeof(e->'unit') <> 'string'
+           OR e->>'unit' NOT IN ('WORD','UNICODE_CODEPOINT','GRAPHEME_CLUSTER','BYTE','PERCENT_OF_WORK')
+        THEN RETURN false; END IF;
+      WHEN 'RETENTION_LIMIT' THEN
+        IF NOT (e ?& ARRAY['obligationType','value','unit'])
+           OR (SELECT count(*) FROM jsonb_object_keys(e)) <> 3
+           OR jsonb_typeof(e->'value') <> 'number' OR (e->>'value')::numeric < 0
+           OR trunc((e->>'value')::numeric) <> (e->>'value')::numeric OR e->>'unit' <> 'DAY'
+        THEN RETURN false; END IF;
+      WHEN 'AUTHENTICATED_ONLY' THEN
+        IF (SELECT count(*) FROM jsonb_object_keys(e)) <> 1 THEN RETURN false; END IF;
+      WHEN 'TERRITORY_LIMIT' THEN
+        IF NOT (e ?& ARRAY['obligationType','value'])
+           OR (SELECT count(*) FROM jsonb_object_keys(e)) <> 2
+           OR jsonb_typeof(e->'value') <> 'array' OR jsonb_array_length(e->'value') = 0
+           OR jsonb_array_length(e->'value') <> (
+             SELECT count(DISTINCT item) FROM jsonb_array_elements(e->'value') AS x(item))
+           OR EXISTS (SELECT 1 FROM jsonb_array_elements(e->'value') AS x(item)
+                      WHERE jsonb_typeof(item) <> 'string' OR length(item #>> '{}') < 2)
+        THEN RETURN false; END IF;
+      WHEN 'TEMPORARY_PROCESSING_ONLY' THEN
+        IF (SELECT count(*) FROM jsonb_object_keys(e)) <> 1 THEN RETURN false; END IF;
+      ELSE RETURN false;
+    END CASE;
+  END LOOP;
+  RETURN true;
+END
+$rights_obligations$;
 
 CREATE TABLE authoring.rights_policies (
   rights_policy_id uuid PRIMARY KEY,
@@ -1010,68 +1076,135 @@ $$;
 
 CREATE OR REPLACE FUNCTION serving.valid_rights_conditions(value jsonb)
 RETURNS boolean
-LANGUAGE sql
+LANGUAGE plpgsql
 IMMUTABLE
 AS $rights_conditions$
-  SELECT CASE
-    WHEN value IS NULL THEN true
-    WHEN jsonb_typeof(value) <> 'array' THEN false
-    ELSE NOT EXISTS (
-      SELECT 1 FROM jsonb_array_elements(value) e
-      WHERE e->>'conditionSchemaId' NOT IN (
-        'AUTHENTICATED_AUDIENCE','TERRITORY_ALLOWLIST','PURPOSE_ALLOWLIST',
-        'COMMERCIAL_CONTEXT_ALLOWLIST','PROVIDER_TERMS_VERSION'
-      )
-      OR COALESCE(e->>'conditionSchemaVersion','') = ''
-      OR COALESCE(e->>'evaluatorVersion','') = ''
-      OR jsonb_typeof(e->'payload') IS DISTINCT FROM 'object'
-    )
-  END
+DECLARE
+  e jsonb;
+  payload jsonb;
+BEGIN
+  IF value IS NULL THEN RETURN true; END IF;
+  IF jsonb_typeof(value) <> 'array' THEN RETURN false; END IF;
+  IF jsonb_array_length(value) <> (
+    SELECT count(DISTINCT item) FROM jsonb_array_elements(value) AS x(item)
+  ) THEN RETURN false; END IF;
+  FOR e IN SELECT item FROM jsonb_array_elements(value) AS x(item)
+  LOOP
+    IF jsonb_typeof(e) <> 'object'
+       OR NOT (e ?& ARRAY['conditionSchemaId','conditionSchemaVersion','evaluatorVersion','payload'])
+       OR (SELECT count(*) FROM jsonb_object_keys(e)) <> 4
+       OR jsonb_typeof(e->'conditionSchemaId') <> 'string'
+       OR jsonb_typeof(e->'conditionSchemaVersion') <> 'string'
+       OR e->>'conditionSchemaVersion' <> '1.0'
+       OR jsonb_typeof(e->'evaluatorVersion') <> 'string'
+       OR length(e->>'evaluatorVersion') = 0
+       OR jsonb_typeof(e->'payload') <> 'object'
+    THEN RETURN false; END IF;
+    payload := e->'payload';
+    CASE e->>'conditionSchemaId'
+      WHEN 'AUTHENTICATED_AUDIENCE' THEN
+        IF payload <> '{"required":true}'::jsonb THEN RETURN false; END IF;
+      WHEN 'TERRITORY_ALLOWLIST' THEN
+        IF NOT (payload ? 'territories')
+           OR (SELECT count(*) FROM jsonb_object_keys(payload)) <> 1
+           OR jsonb_typeof(payload->'territories') <> 'array'
+           OR jsonb_array_length(payload->'territories') = 0
+           OR jsonb_array_length(payload->'territories') <> (
+             SELECT count(DISTINCT item) FROM jsonb_array_elements(payload->'territories') AS x(item))
+           OR EXISTS (SELECT 1 FROM jsonb_array_elements(payload->'territories') AS x(item)
+                      WHERE jsonb_typeof(item) <> 'string' OR length(item #>> '{}') < 2)
+        THEN RETURN false; END IF;
+      WHEN 'PURPOSE_ALLOWLIST' THEN
+        IF NOT (payload ? 'purposes')
+           OR (SELECT count(*) FROM jsonb_object_keys(payload)) <> 1
+           OR jsonb_typeof(payload->'purposes') <> 'array'
+           OR jsonb_array_length(payload->'purposes') = 0
+           OR jsonb_array_length(payload->'purposes') <> (
+             SELECT count(DISTINCT item) FROM jsonb_array_elements(payload->'purposes') AS x(item))
+           OR EXISTS (SELECT 1 FROM jsonb_array_elements(payload->'purposes') AS x(item)
+                      WHERE jsonb_typeof(item) <> 'string'
+                         OR (item #>> '{}') NOT IN (
+                           'PRIVATE_RESEARCH','RESEARCH_COMPILATION','PUBLICATION','PUBLIC_DISPLAY',
+                           'USER_WORKSPACE','MODEL_ASSISTANCE','EXPORT'))
+        THEN RETURN false; END IF;
+      WHEN 'COMMERCIAL_CONTEXT_ALLOWLIST' THEN
+        IF NOT (payload ? 'contexts')
+           OR (SELECT count(*) FROM jsonb_object_keys(payload)) <> 1
+           OR jsonb_typeof(payload->'contexts') <> 'array'
+           OR jsonb_array_length(payload->'contexts') = 0
+           OR jsonb_array_length(payload->'contexts') <> (
+             SELECT count(DISTINCT item) FROM jsonb_array_elements(payload->'contexts') AS x(item))
+           OR EXISTS (SELECT 1 FROM jsonb_array_elements(payload->'contexts') AS x(item)
+                      WHERE jsonb_typeof(item) <> 'string'
+                         OR (item #>> '{}') NOT IN ('NONCOMMERCIAL','COMMERCIAL','MIXED','UNKNOWN'))
+        THEN RETURN false; END IF;
+      WHEN 'PROVIDER_TERMS_VERSION' THEN
+        IF NOT (payload ? 'providerTermsVersion')
+           OR (SELECT count(*) FROM jsonb_object_keys(payload)) <> 1
+           OR jsonb_typeof(payload->'providerTermsVersion') <> 'string'
+           OR length(payload->>'providerTermsVersion') = 0
+        THEN RETURN false; END IF;
+      ELSE RETURN false;
+    END CASE;
+  END LOOP;
+  RETURN true;
+END
 $rights_conditions$;
 
 CREATE OR REPLACE FUNCTION serving.valid_rights_obligations(value jsonb)
 RETURNS boolean
-LANGUAGE sql
+LANGUAGE plpgsql
 IMMUTABLE
 AS $rights_obligations$
-  SELECT CASE
-    WHEN value IS NULL THEN true
-    WHEN jsonb_typeof(value) <> 'array' THEN false
-    ELSE NOT EXISTS (
-      SELECT 1
-      FROM jsonb_array_elements(value) e
-      WHERE
-        jsonb_typeof(e) <> 'object'
-        OR COALESCE(e->>'obligationType','') NOT IN ('MAX_EXCERPT','RETENTION_LIMIT','ATTRIBUTION')
-        OR e ? 'type'
-        OR (
-          e->>'obligationType' = 'ATTRIBUTION'
-          AND (
-            length(COALESCE(e->>'value','')) = 0
-            OR EXISTS (SELECT 1 FROM jsonb_object_keys(e) k WHERE k NOT IN ('obligationType','value'))
-          )
-        )
-        OR (
-          e->>'obligationType' = 'MAX_EXCERPT'
-          AND (
-            jsonb_typeof(e->'value') <> 'number'
-            OR (e->>'value')::numeric <= 0
-            OR COALESCE(e->>'unit','') NOT IN ('WORD','UNICODE_CODEPOINT','GRAPHEME_CLUSTER','BYTE','PERCENT_OF_WORK')
-            OR EXISTS (SELECT 1 FROM jsonb_object_keys(e) k WHERE k NOT IN ('obligationType','value','unit'))
-          )
-        )
-        OR (
-          e->>'obligationType' = 'RETENTION_LIMIT'
-          AND (
-            jsonb_typeof(e->'value') <> 'number'
-            OR (e->>'value')::numeric < 0
-            OR trunc((e->>'value')::numeric) <> (e->>'value')::numeric
-            OR e->>'unit' <> 'DAY'
-            OR EXISTS (SELECT 1 FROM jsonb_object_keys(e) k WHERE k NOT IN ('obligationType','value','unit'))
-          )
-        )
-    )
-  END
+DECLARE
+  e jsonb;
+BEGIN
+  IF value IS NULL THEN RETURN true; END IF;
+  IF jsonb_typeof(value) <> 'array' THEN RETURN false; END IF;
+  IF jsonb_array_length(value) <> (
+    SELECT count(DISTINCT item) FROM jsonb_array_elements(value) AS x(item)
+  ) THEN RETURN false; END IF;
+  FOR e IN SELECT item FROM jsonb_array_elements(value) AS x(item)
+  LOOP
+    IF jsonb_typeof(e) <> 'object' OR NOT (e ? 'obligationType')
+       OR jsonb_typeof(e->'obligationType') <> 'string' THEN RETURN false; END IF;
+    CASE e->>'obligationType'
+      WHEN 'ATTRIBUTION' THEN
+        IF NOT (e ?& ARRAY['obligationType','value'])
+           OR (SELECT count(*) FROM jsonb_object_keys(e)) <> 2
+           OR jsonb_typeof(e->'value') <> 'string' OR length(e->>'value') = 0
+        THEN RETURN false; END IF;
+      WHEN 'MAX_EXCERPT' THEN
+        IF NOT (e ?& ARRAY['obligationType','value','unit'])
+           OR (SELECT count(*) FROM jsonb_object_keys(e)) <> 3
+           OR jsonb_typeof(e->'value') <> 'number' OR (e->>'value')::numeric <= 0
+           OR jsonb_typeof(e->'unit') <> 'string'
+           OR e->>'unit' NOT IN ('WORD','UNICODE_CODEPOINT','GRAPHEME_CLUSTER','BYTE','PERCENT_OF_WORK')
+        THEN RETURN false; END IF;
+      WHEN 'RETENTION_LIMIT' THEN
+        IF NOT (e ?& ARRAY['obligationType','value','unit'])
+           OR (SELECT count(*) FROM jsonb_object_keys(e)) <> 3
+           OR jsonb_typeof(e->'value') <> 'number' OR (e->>'value')::numeric < 0
+           OR trunc((e->>'value')::numeric) <> (e->>'value')::numeric OR e->>'unit' <> 'DAY'
+        THEN RETURN false; END IF;
+      WHEN 'AUTHENTICATED_ONLY' THEN
+        IF (SELECT count(*) FROM jsonb_object_keys(e)) <> 1 THEN RETURN false; END IF;
+      WHEN 'TERRITORY_LIMIT' THEN
+        IF NOT (e ?& ARRAY['obligationType','value'])
+           OR (SELECT count(*) FROM jsonb_object_keys(e)) <> 2
+           OR jsonb_typeof(e->'value') <> 'array' OR jsonb_array_length(e->'value') = 0
+           OR jsonb_array_length(e->'value') <> (
+             SELECT count(DISTINCT item) FROM jsonb_array_elements(e->'value') AS x(item))
+           OR EXISTS (SELECT 1 FROM jsonb_array_elements(e->'value') AS x(item)
+                      WHERE jsonb_typeof(item) <> 'string' OR length(item #>> '{}') < 2)
+        THEN RETURN false; END IF;
+      WHEN 'TEMPORARY_PROCESSING_ONLY' THEN
+        IF (SELECT count(*) FROM jsonb_object_keys(e)) <> 1 THEN RETURN false; END IF;
+      ELSE RETURN false;
+    END CASE;
+  END LOOP;
+  RETURN true;
+END
 $rights_obligations$;
 
 CREATE OR REPLACE FUNCTION serving.valid_citation_locator(value jsonb)

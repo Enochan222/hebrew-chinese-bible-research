@@ -120,6 +120,25 @@ jobs:
             IF p->'navigation'->>'nextReference' IS NULL THEN
               RAISE EXCEPTION 'anon Serving runtime navigation missing';
             END IF;
+            IF p->'navigation'->>'currentBookCode' <> 'Gen'
+               OR (p->'navigation'->>'currentChapter')::integer <> 1
+               OR jsonb_array_length(p->'navigation'->'books') <> 39
+               OR jsonb_array_length(p->'navigation'->'chapters') <> 50
+               OR jsonb_array_length(p->'navigation'->'passages') <> 31 THEN
+              RAISE EXCEPTION 'whole-Bible book/chapter/passage navigation index is incomplete';
+            END IF;
+            p := serving.read_passage_core(
+              '71000000-0000-4000-8000-000000000005','OSHB_OSIS','Gen.50.26'
+            );
+            IF p->'navigation'->>'nextReference' <> 'Exod.1.1' THEN
+              RAISE EXCEPTION 'cross-book navigation must move Gen.50.26 -> Exod.1.1';
+            END IF;
+            p := serving.read_passage_core(
+              '71000000-0000-4000-8000-000000000005','OSHB_OSIS','Isa.6.1'
+            );
+            IF p IS NULL OR jsonb_array_length(p->'tokens') = 0 THEN
+              RAISE EXCEPTION 'arbitrary non-fixture whole-Bible passage Isa.6.1 is unreadable';
+            END IF;
           END
           $public_runtime$;
           RESET ROLE;
@@ -144,7 +163,9 @@ jobs:
             'bridgeRows',(SELECT count(*) FROM serving.corpus_node_features WHERE feature_key LIKE 'BRIDGE_%'),
             'productionRelease',(SELECT research_release_id FROM serving.current_release WHERE channel_key='PRODUCTION'),
             'genesis1_1',serving.read_passage_core('71000000-0000-4000-8000-000000000005','OSHB_OSIS','Gen.1.1'),
-            'canary1Sam16_7',serving.read_passage_core('71000000-0000-4000-8000-000000000005','OSHB_OSIS','1Sam.16.7')
+            'canary1Sam16_7',serving.read_passage_core('71000000-0000-4000-8000-000000000005','OSHB_OSIS','1Sam.16.7'),
+            'crossBookGen50_26',serving.read_passage_core('71000000-0000-4000-8000-000000000005','OSHB_OSIS','Gen.50.26'),
+            'nonFixtureIsa6_1',serving.read_passage_core('71000000-0000-4000-8000-000000000005','OSHB_OSIS','Isa.6.1')
           ));" > .local/wb2/evidence/wb2-wb3-serving-evidence.json
           cat .local/wb2/evidence/wb2-wb3-serving-evidence.json
       - name: Upload WB-2/WB-3 evidence

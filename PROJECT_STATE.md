@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-05.13**
+State Revision: **2026-10-06.1**
 
 ## Mandatory governance rule
 
@@ -329,10 +329,26 @@ WB-1 acceptance is **PASS** for `CORE-FZ-WB-002`. The synchronized implementatio
 
 ## WB-2 / WB-3 implementation state
 
-WB-2/WB-3 has started with a contract-first rights regression. The canonical RightsDecisionSnapshot schema uses `obligationType`, while the PostgreSQL obligation validator still reads the older `type` key. A RED database regression now requires an ATTRIBUTION obligation in canonical contract shape to persist before any real OSHB public release is compiled.
+WB-2/WB-3 is now an active implementation candidate on PR #23 rather than only the original RED rights regression.
 
-No Serving corpus projection or reader adapter is claimed by this RED step. The expected first failure is the existing SQL/schema semantic mismatch; implementation follows only after that failure is observed.
+Current branch implementation includes:
+
+- complete canonical `obligationType` rights payload validation across all current v1.1 RightsCondition and obligation variants;
+- a rights-safe OSHB-only Serving projection compiled from the accepted WB-1 Authoring corpus;
+- a release-pinned ResearchRelease and atomic PRODUCTION publication path;
+- Serving ReferenceSystem/label, text-segment, node, feature and membership projections for the complete accepted OSHB corpus;
+- a `serving.read_passage_core` RPC returning real release-pinned Hebrew word tokens, basic OSHB morphology, attribution and data-driven navigation;
+- a real Book / Chapter / Passage selector derived from the Serving ReferenceSystem, plus previous/next traversal, without hard-coded React book arrays;
+- PostgREST Serving adapters behind the existing ReleaseReadPort / PassageReadPort boundary, while fixture adapters remain a regression mode;
+- runtime AJV validation of external Serving passage/release/capability payloads so TypeScript casts cannot bypass canonical machine contracts;
+- conditional PassageCore validation requiring complete Hebrew/tokens/navigation/attribution fields for `dataSource=SERVING`;
+- hostile malformed-Serving-response regression that must fail closed as `CONTRACT_VIOLATION`;
+- explicit non-exposure of BHSA and ETCBC bridging rows in public Serving.
+
+The synchronized exact head must prove 39-book navigation index coverage, Genesis chapter/passage indexing, Gen.50.26 -> Exod.1.1 cross-book traversal, an arbitrary non-fixture passage such as Isa.6.1, OSHB-only public Serving, and all earlier whole-corpus/database/web regressions.
+
+`CORE-FZ-WB-001` and `CORE-FZ-WB-003` remain PENDING until that exact-head evidence passes. Their implementation prerequisites are now present; no PASS is claimed merely from code existence.
 
 ## Latest push intent
 
-Close WB-1 on machine-auditable whole-corpus evidence and advance the implementation frontier to WB-2. The accepted relational import preserves the complete configured WB-CORPUS-001 provider record set in Authoring, keeps 1,138 unresolved cross-framework references explicit rather than guessed, preserves empty-source BHSA nodes without invented text, keeps every automatic mapping non-canonical, preserves WB-0 stable identities, and writes no real BHSA/bridging corpus rows to Serving. `CORE-FZ-WB-002` is now PASS; `CORE-FZ-WB-001` remains pending end-user navigation verification and `CORE-FZ-WB-003` remains pending rights-safe release-pinned Serving/reader implementation. The closeout head must rerun all required deterministic GitHub Actions before merge.
+Harden and independently verify PR #23 before accepting whole-Bible Serving. Review found two contract-boundary defects beyond the happy path: PostgreSQL implemented only a subset of the canonical RightsCondition/obligation language, and new PostgREST adapters trusted external JSON through TypeScript casts instead of runtime AJV validation. Concurrent WB-3 work has now added a data-driven Book / Chapter / Passage navigator. This revision completes rights-contract parity, adds fail-closed Serving validation, strengthens the real-database navigation gate, and keeps both whole-Bible freeze gates PENDING until the synchronized exact head passes all required workflows.

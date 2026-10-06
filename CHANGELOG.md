@@ -4,6 +4,38 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+
+## 2026-10-06 — Harden WB-2/WB-3 rights and Serving trust boundaries
+
+### Push intent
+
+Review the updated whole-Bible Serving/reader branch against the canonical machine contracts before accepting WB-2/WB-3.
+
+### Why
+
+The branch had progressed beyond its original RED rights test, but independent review found two trust-boundary gaps. PostgreSQL used the canonical `obligationType` key while still implementing only part of the v1.1 rights language. Separately, PostgREST adapters trusted external JSON through TypeScript casts and bypassed the AJV runtime validation already used by fixture contracts. Concurrent WB-3 work also introduced the data-driven whole-Bible navigator, so its real database coverage now needs explicit acceptance evidence rather than UI existence alone.
+
+### What changed
+
+- aligned authoring and Serving SQL rights validators with all five canonical RightsCondition variants and all six canonical obligation variants;
+- enforce exact schema version, required/exclusive keys, enum domains, nested uniqueness and additional-property rejection;
+- added positive and adversarial PostgreSQL rights regressions;
+- validate external PostgREST PassageCore and ReleasePointer responses against canonical AJV contracts;
+- validate Serving capability projections;
+- require complete Hebrew, token, attribution and Book/Chapter/Passage navigation payload for `dataSource=SERVING`;
+- added a malformed Serving response regression that must return `CONTRACT_VIOLATION`;
+- strengthened real PostgreSQL WB-3 acceptance to prove 39-book navigation, Genesis 50 chapters, Genesis 1 passage index, Gen.50.26 -> Exod.1.1 transition and non-fixture Isa.6.1 retrieval;
+- removed stale fixture-only wording from runtime errors;
+- synchronized PROJECT_STATE to the actual WB-2/WB-3 implementation frontier.
+
+### Intended effect
+
+WB-2 cannot claim rights-safe publication with a database rights language narrower than the canonical contract, malformed Serving payloads fail closed at the external-data boundary, and WB-3 whole-Bible navigation can be accepted only on machine evidence over the real published corpus.
+
+### Validation
+
+Exact-head CI is required after this commit. This entry does not itself promote `CORE-FZ-WB-001` or `CORE-FZ-WB-003`.
+
 ## 2026-10-05 — Start WB-2/WB-3 with rights obligation contract regression
 
 ### Push intent
