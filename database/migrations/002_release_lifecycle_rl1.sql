@@ -391,6 +391,39 @@ BEGIN
 END
 $guard_component_projection$;
 
+-- Close immutability gaps in Serving support rows that are part of the
+-- release-pinned public payload but were added before a permanent lifecycle
+-- predicate existed.
+CREATE TRIGGER reference_labels_component_lock
+BEFORE INSERT OR UPDATE OR DELETE ON serving.reference_labels
+FOR EACH ROW EXECUTE FUNCTION serving.guard_component_projection('corpus_release_id');
+
+CREATE TRIGGER corpus_text_segments_component_lock
+BEFORE INSERT OR UPDATE OR DELETE ON serving.corpus_text_segments
+FOR EACH ROW EXECUTE FUNCTION serving.guard_component_projection('corpus_release_id');
+
+CREATE TRIGGER corpus_node_segments_component_lock
+BEFORE INSERT OR UPDATE OR DELETE ON serving.corpus_node_segments
+FOR EACH ROW EXECUTE FUNCTION serving.guard_component_projection('corpus_release_id');
+
+-- These rows are identities/snapshots rather than mutable channel state.
+-- They are append-only from materialization; later versions receive new IDs.
+CREATE TRIGGER research_objects_immutable
+BEFORE UPDATE OR DELETE ON serving.research_objects
+FOR EACH ROW EXECUTE FUNCTION serving.reject_immutable_update();
+
+CREATE TRIGGER reference_spans_immutable
+BEFORE UPDATE OR DELETE ON serving.reference_spans
+FOR EACH ROW EXECUTE FUNCTION serving.reject_immutable_update();
+
+CREATE TRIGGER reference_systems_immutable
+BEFORE UPDATE OR DELETE ON serving.reference_systems
+FOR EACH ROW EXECUTE FUNCTION serving.reject_immutable_update();
+
+CREATE TRIGGER rights_decision_snapshots_immutable
+BEFORE UPDATE OR DELETE ON serving.rights_decision_snapshots
+FOR EACH ROW EXECUTE FUNCTION serving.reject_immutable_update();
+
 CREATE OR REPLACE FUNCTION publication_control.publish_release_to_channel(
   p_channel_key text,
   p_release_id uuid,
