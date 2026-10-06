@@ -330,7 +330,7 @@ def governance():
     gates=re.findall(r"\|\s*([A-Z]+(?:-[A-Z]+)*-\d{3})\s*\|",text)
     for g in set(gates):
         if gates.count(g)>1: fail(f"duplicate freeze gate {g}")
-    required_scope_gates={"CORE-FZ-WB-001","CORE-FZ-WB-002","CORE-FZ-WB-003"}
+    required_scope_gates={"CORE-FZ-WB-001","CORE-FZ-WB-002","CORE-FZ-WB-003","CORE-FZ-RELEASE-002"}
     missing_scope_gates=sorted(required_scope_gates-set(gates))
     if missing_scope_gates: fail(f"whole-Bible core freeze gates missing: {missing_scope_gates}")
     if "architecture/whole-bible-base-product.md" not in m.get("active",[]):
