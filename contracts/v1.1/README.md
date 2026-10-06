@@ -63,6 +63,8 @@ Core OpenAPI does not override Research Pro extension endpoints merely because t
 - `json-schema/annotation-layer.schema.json`
 - `json-schema/provider-witness-binding.schema.json`
 - `json-schema/release-event.schema.json`
+- `json-schema/release-lifecycle-policy.schema.json`
+- `release-lifecycle-policy.json`
 - `json-schema/release-channel-pointer.schema.json`
 - `json-schema/semantic-set-version.schema.json`
 - `json-schema/construction-compilation-run.schema.json`
