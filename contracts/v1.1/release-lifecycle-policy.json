@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "1.0",
+  "policyKey": "RESEARCH_RELEASE_LIFECYCLE_V1",
+  "ordering": {
+    "sequenceField": "eventSequence",
+    "firstSequence": 1,
+    "contiguous": true,
+    "effectiveAtNondecreasing": true,
+    "equalEffectiveAtAllowed": true,
+    "equalEffectiveAtTieBreaker": "eventSequence",
+    "uuidOrderingForbidden": true
+  },
+  "immutability": {
+    "permanentlyImmutableAfterFirstEvent": "PUBLISHED",
+    "revocationRestoresMutability": false
+  },
+  "publicServability": {
+    "servableStates": [
+      "PUBLISHED",
+      "SUPERSEDED",
+      "REACTIVATED"
+    ],
+    "nonServableStates": [
+      "REVOKED"
+    ],
+    "supersededPinnedReleaseRemainsServable": true
+  },
+  "channelPointer": {
+    "requiresPubliclyServableTarget": true,
+    "revokeRemovesPointers": true,
+    "reactivationRestoresPointerAutomatically": false,
+    "rollbackIsPointerMoveOnly": true
+  },
+  "transitions": [
+    {
+      "from": null,
+      "to": "PUBLISHED"
+    },
+    {
+      "from": "PUBLISHED",
+      "to": "SUPERSEDED"
+    },
+    {
+      "from": "PUBLISHED",
+      "to": "REVOKED"
+    },
+    {
+      "from": "SUPERSEDED",
+      "to": "REVOKED"
+    },
+    {
+      "from": "REVOKED",
+      "to": "REACTIVATED"
+    },
+    {
+      "from": "REACTIVATED",
+      "to": "SUPERSEDED"
+    },
+    {
+      "from": "REACTIVATED",
+      "to": "REVOKED"
+    }
+  ]
+}
