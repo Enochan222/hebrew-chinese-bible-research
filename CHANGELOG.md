@@ -5,6 +5,26 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
 
+## 2026-10-06 — Complete strict AJV typing for SERVING PassageCore conditional
+
+### Push intent
+
+Repair the second schema-compilation regression exposed by the P1 fixture-shell gate.
+
+### Why
+
+The prior correction made conditional required fields visible to AJV strictRequired, but strictTypes independently requires keywords such as `minLength`, `minItems` and nested object properties to declare their applicable type in the same conditional scope. The semantic rule was correct; its strict-schema representation was incomplete.
+
+### What changed
+
+- redeclare string/object/array/integer types inside the SERVING conditional for every local constraint;
+- retain the same mandatory resolved reference, non-empty Hebrew/token payload, complete Book/Chapter/Passage navigation index, attribution and reconstruction status.
+
+### Validation
+
+All exact-head workflows must rerun. No freeze gate is promoted by this schema-encoding correction.
+
+
 ## 2026-10-06 — Repair strict AJV compilation of SERVING PassageCore conditional
 
 ### Push intent

@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-06.2**
+State Revision: **2026-10-06.3**
 
 ## Mandatory governance rule
 
@@ -351,4 +351,4 @@ The synchronized exact head must prove 39-book navigation index coverage, Genesi
 
 ## Latest push intent
 
-Repair the first exact-head regression exposed by the WB-2/WB-3 hardening cycle. P1 fixture-shell unit tests showed that AJV strict mode rejects a conditional schema when names listed in `then.required` are not also declared in that same `then.properties` scope. The canonical SERVING requirements themselves remain unchanged; this revision declares the required fields in the conditional scope so fixture contracts continue to compile while malformed Serving projections still fail closed. All exact-head workflows must rerun after this schema-only semantic-preserving correction.
+Continue the exact-head SERVING PassageCore regression repair. After the first AJV strictRequired correction, P1 exposed the next schema-compilation rule: conditional constraints such as minLength/minItems must redeclare their applicable primitive/container types under AJV strictTypes. This revision adds those local type declarations without changing the canonical SERVING requirements or fixture semantics. Exact-head validation must rerun before any whole-Bible gate is promoted.

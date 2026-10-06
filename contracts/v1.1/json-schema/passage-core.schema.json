@@ -224,9 +224,11 @@
             "type": "object"
           },
           "hebrewText": {
+            "type": "string",
             "minLength": 1
           },
           "tokens": {
+            "type": "array",
             "minItems": 1
           },
           "navigation": {
@@ -241,6 +243,7 @@
             ],
             "properties": {
               "currentBookCode": {
+                "type": "string",
                 "minLength": 1
               },
               "currentChapter": {
@@ -248,20 +251,39 @@
                 "minimum": 1
               },
               "books": {
+                "type": "array",
                 "minItems": 1
               },
               "chapters": {
+                "type": "array",
                 "minItems": 1
               },
               "passages": {
+                "type": "array",
                 "minItems": 1
               },
-              "previousReference": {},
-              "nextReference": {}
-            }
+              "previousReference": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "nextReference": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "type": "object"
           },
-          "attribution": {},
-          "textReconstructionStatus": {}
+          "attribution": {
+            "type": "string",
+            "minLength": 1
+          },
+          "textReconstructionStatus": {
+            "type": "string"
+          }
         }
       }
     }
