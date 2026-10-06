@@ -71,6 +71,7 @@ jobs:
         run: |
           psql -v ON_ERROR_STOP=1 -f database/spikes/001/00_bootstrap.sql
           psql -v ON_ERROR_STOP=1 -f database/migrations/001_database_spike_001.sql
+          psql -v ON_ERROR_STOP=1 -f database/migrations/002_release_lifecycle_rl1.sql
       - name: Fetch exact pinned sources
         run: python scripts/corpora/fetch_sources.py
       - name: Build WB-CORPUS-001
