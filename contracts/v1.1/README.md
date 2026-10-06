@@ -37,6 +37,7 @@ Core OpenAPI does not override Research Pro extension endpoints merely because t
 - `json-schema/whole-bible-corpus-build-manifest.schema.json`
 - `fixtures/whole-bible-corpus-build-manifest.json`
 - `json-schema/hebrew-bible-canon-system.schema.json`
+- `json-schema/wb2-serving-build-report.schema.json`
 - `hebrew-bible-canon-system.json`
 - `json-schema/corpus-query.schema.json`
 - `json-schema/corpus-query-normalized.schema.json`
