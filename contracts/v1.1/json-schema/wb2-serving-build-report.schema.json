@@ -243,7 +243,8 @@
         "authoringCorpus",
         "servingCorpus",
         "authoringAnnotationLayer",
-        "servingAnnotationLayer"
+        "servingAnnotationLayer",
+        "sections"
       ],
       "properties": {
         "algorithm": {
@@ -267,6 +268,86 @@
         "servingAnnotationLayer": {
           "type": "string",
           "pattern": "^[0-9a-fA-F]{64}$"
+        },
+        "sections": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "referenceIndex",
+            "textSegments",
+            "attribution"
+          ],
+          "properties": {
+            "referenceIndex": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "authoring",
+                "serving",
+                "symmetricDifferenceRows"
+              ],
+              "properties": {
+                "authoring": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{64}$"
+                },
+                "serving": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{64}$"
+                },
+                "symmetricDifferenceRows": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "textSegments": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "authoring",
+                "serving",
+                "symmetricDifferenceRows"
+              ],
+              "properties": {
+                "authoring": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{64}$"
+                },
+                "serving": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{64}$"
+                },
+                "symmetricDifferenceRows": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "attribution": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "authoring",
+                "serving",
+                "symmetricDifferenceRows"
+              ],
+              "properties": {
+                "authoring": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{64}$"
+                },
+                "serving": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{64}$"
+                },
+                "symmetricDifferenceRows": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          }
         }
       }
     },
