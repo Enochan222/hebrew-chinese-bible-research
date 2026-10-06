@@ -5,6 +5,173 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
 
+## 2026-10-06 — Accept WB-2/WB-3 whole-Bible reader gates
+
+### Push intent
+
+Synchronize repository authority with the exact-head evidence after the complete WB-2/WB-3 candidate passed.
+
+### What changed
+
+- promote `CORE-FZ-WB-001` from PENDING to PASS;
+- promote `CORE-FZ-WB-003` from PENDING to PASS;
+- record the exact commit and GitHub Actions runs supporting the two gates;
+- move the implementation frontier from WB-2/WB-3 to WB-4/WB-5 while preserving the accepted reader regression suite;
+- document the separate release-lifecycle semantic gap discovered during adversarial review without conflating it with whole-Bible acceptance.
+
+### Validation
+
+Exact head `21a2cedafb394b84d51e244de6ff37bbac4d6a82` passed:
+
+- WB-2 WB-3 Serving Reader `37424398827`;
+- WB-1 Relational Whole Corpus `37424398811`;
+- Whole-Bible corpus foundation `37424398932`;
+- Database Spike 001 `37424398816`;
+- Contract validation `37424398834`;
+- Project governance `37424398970`;
+- P1 fixture shell validation `37424398799`, including unit/integration tests, fixture and Serving visual E2E, and production build.
+
+The WB-2/WB-3 run proved rights-safe OSHB-only publication, anon RLS reads, 39-book data-driven navigation, Genesis chapter/passage indexes, Gen.50.26 -> Exod.1.1 traversal and arbitrary non-fixture passage retrieval. No Research Pro/BYOK dependency is required for the base reader.
+
+
+## 2026-10-06 — Remove non-canonical Serving capability keys
+
+### Push intent
+
+Fix the remaining P1 integration failure after runtime capability validation was enabled.
+
+### Why
+
+The Serving capability adapter emitted PASSAGE_RESEARCH, HEBREW_TEXT and TRANSLATION_WITNESSES, but none of those names exists in the canonical ExperienceCapabilities v1.1 feature vocabulary. The passage API did not read capabilities, so it passed; full page rendering did and correctly failed closed with CONTRACT_VIOLATION.
+
+### What changed
+
+- remove the three ad hoc feature-decision keys from ServingCapabilityReader;
+- keep PASSAGE_STUDY as the canonical base-reader capability;
+- keep STUDY and RESEARCH experience modes in experienceModesAllowed;
+- leave translation and Research Pro capability expansion to an explicit future contract revision rather than silently widening the schema.
+
+### Validation
+
+P1 integration, Serving E2E/visual capture and production build must rerun on the new exact head. Previously green database, corpus, rights and contract gates must remain green.
+
+
+## 2026-10-06 — Enforce full RightsDecisionSnapshot table parity
+
+### Push intent
+
+Close the remaining machine-contract drift at the persisted WB-2 publication-rights boundary.
+
+### Why
+
+The nested RightsCondition and obligation validators had been aligned with v1.1, but the SQL table still accepted snapshot states the canonical JSON Schema rejects: unknown subject/operation/scope values, duplicate rule IDs, empty resolver versions, malformed decision hashes, and restrictive default-deny snapshots carrying residual conditions or obligations.
+
+### What changed
+
+- constrain subject type, operation, purpose scope, audience scope and commercial context to the canonical v1.1 enum domains;
+- add deterministic UUID-array uniqueness validation, including rejection of duplicate/null members;
+- require a non-empty resolver version and a 64-hex-character decision hash;
+- require DEFAULT_DENY and UNKNOWN_RESTRICTIVE snapshots to be DENY with no winning rules, conditions or obligations;
+- add adversarial SQL inserts covering invalid enum values, duplicate rule IDs, restrictive snapshots with residual restrictions metadata, empty resolver versions and malformed hashes.
+
+### Validation
+
+Database Spike and all exact-head whole-Bible/web/contract regressions must pass before WB-2/WB-3 is accepted.
+
+
+## 2026-10-06 — Complete strict AJV typing for SERVING PassageCore conditional
+
+### Push intent
+
+Repair the second schema-compilation regression exposed by the P1 fixture-shell gate.
+
+### Why
+
+The prior correction made conditional required fields visible to AJV strictRequired, but strictTypes independently requires keywords such as `minLength`, `minItems` and nested object properties to declare their applicable type in the same conditional scope. The semantic rule was correct; its strict-schema representation was incomplete.
+
+### What changed
+
+- redeclare string/object/array/integer types inside the SERVING conditional for every local constraint;
+- retain the same mandatory resolved reference, non-empty Hebrew/token payload, complete Book/Chapter/Passage navigation index, attribution and reconstruction status.
+
+### Validation
+
+All exact-head workflows must rerun. No freeze gate is promoted by this schema-encoding correction.
+
+
+## 2026-10-06 — Repair strict AJV compilation of SERVING PassageCore conditional
+
+### Push intent
+
+Fix the first regression found by exact-head validation of the WB-2/WB-3 trust-boundary hardening.
+
+### Why
+
+AJV strict mode requires every field named by a conditional `then.required` to be declared in the same conditional `then.properties` scope. The new SERVING PassageCore rule correctly identified the required runtime fields but relied on their top-level property declarations, causing schema compilation to fail before fixture or Serving validation ran.
+
+### What changed
+
+- declare attribution and reconstruction-status fields inside the SERVING conditional property scope;
+- declare previous/next reference fields inside the conditional navigation property scope;
+- preserve the same semantic requirements for complete SERVING Hebrew, token, navigation and attribution data.
+
+### Validation
+
+P1 fixture shell, Contract validation, WB-2/WB-3, Database Spike, WB-1 and whole-Bible corpus workflows must rerun on the new exact head. No gate status changes in this correction.
+
+
+## 2026-10-06 — Harden WB-2/WB-3 rights and Serving trust boundaries
+
+### Push intent
+
+Review the updated whole-Bible Serving/reader branch against the canonical machine contracts before accepting WB-2/WB-3.
+
+### Why
+
+The branch had progressed beyond its original RED rights test, but independent review found two trust-boundary gaps. PostgreSQL used the canonical `obligationType` key while still implementing only part of the v1.1 rights language. Separately, PostgREST adapters trusted external JSON through TypeScript casts and bypassed the AJV runtime validation already used by fixture contracts. Concurrent WB-3 work also introduced the data-driven whole-Bible navigator, so its real database coverage now needs explicit acceptance evidence rather than UI existence alone.
+
+### What changed
+
+- aligned authoring and Serving SQL rights validators with all five canonical RightsCondition variants and all six canonical obligation variants;
+- enforce exact schema version, required/exclusive keys, enum domains, nested uniqueness and additional-property rejection;
+- added positive and adversarial PostgreSQL rights regressions;
+- validate external PostgREST PassageCore and ReleasePointer responses against canonical AJV contracts;
+- validate Serving capability projections;
+- require complete Hebrew, token, attribution and Book/Chapter/Passage navigation payload for `dataSource=SERVING`;
+- added a malformed Serving response regression that must return `CONTRACT_VIOLATION`;
+- strengthened real PostgreSQL WB-3 acceptance to prove 39-book navigation, Genesis 50 chapters, Genesis 1 passage index, Gen.50.26 -> Exod.1.1 transition and non-fixture Isa.6.1 retrieval;
+- removed stale fixture-only wording from runtime errors;
+- synchronized PROJECT_STATE to the actual WB-2/WB-3 implementation frontier.
+
+### Intended effect
+
+WB-2 cannot claim rights-safe publication with a database rights language narrower than the canonical contract, malformed Serving payloads fail closed at the external-data boundary, and WB-3 whole-Bible navigation can be accepted only on machine evidence over the real published corpus.
+
+### Validation
+
+Exact-head CI is required after this commit. This entry does not itself promote `CORE-FZ-WB-001` or `CORE-FZ-WB-003`.
+
+## 2026-10-05 — Start WB-2/WB-3 with rights obligation contract regression
+
+### Push intent
+
+Begin the database-backed whole-Bible Serving/reader milestone by proving the current PostgreSQL rights validator is out of sync with the canonical machine contract before changing production logic.
+
+### Why
+
+The canonical RightsDecisionSnapshot schema uses `obligationType`, including `ATTRIBUTION`, but `authoring.valid_rights_obligations` / `serving.valid_rights_obligations` still inspect the legacy key `type`. OSHB public serving requires attribution, so WB-2 must not publish a release while this contract/database mismatch exists.
+
+### What changed
+
+- added a RED Database Spike regression that inserts a CONDITIONAL corpus DISPLAY_FULLTEXT rights snapshot using canonical `obligationType: ATTRIBUTION`;
+- deliberately made no Serving projection or reader implementation in this commit;
+- recorded WB-2/WB-3 as started but not accepted.
+
+### Validation
+
+Expected RED: Database Spike 001 must reject the canonical obligation payload until the validator is corrected. Other independent gates should remain unaffected.
+
+
 ## 2026-10-05 — Implement WB-1 relational whole-corpus candidate
 
 ### Push intent

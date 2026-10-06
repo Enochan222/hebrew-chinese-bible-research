@@ -869,50 +869,136 @@ FOR EACH ROW EXECUTE FUNCTION authoring.enforce_research_object_type('RESEARCH_P
 
 CREATE OR REPLACE FUNCTION authoring.valid_rights_conditions(value jsonb)
 RETURNS boolean
-LANGUAGE sql
+LANGUAGE plpgsql
 IMMUTABLE
-AS $$
-  SELECT CASE
-    WHEN value IS NULL THEN true
-    WHEN jsonb_typeof(value) <> 'array' THEN false
-    ELSE NOT EXISTS (
-      SELECT 1
-      FROM jsonb_array_elements(value) e
-      WHERE e->>'conditionSchemaId' NOT IN (
-        'AUTHENTICATED_AUDIENCE','TERRITORY_ALLOWLIST','PURPOSE_ALLOWLIST',
-        'COMMERCIAL_CONTEXT_ALLOWLIST','PROVIDER_TERMS_VERSION'
-      )
-      OR COALESCE(e->>'conditionSchemaVersion','') = ''
-      OR COALESCE(e->>'evaluatorVersion','') = ''
-      OR jsonb_typeof(e->'payload') IS DISTINCT FROM 'object'
-    )
-  END
-$$;
+AS $rights_conditions$
+DECLARE
+  e jsonb;
+  payload jsonb;
+BEGIN
+  IF value IS NULL THEN RETURN true; END IF;
+  IF jsonb_typeof(value) <> 'array' THEN RETURN false; END IF;
+  IF jsonb_array_length(value) <> (
+    SELECT count(DISTINCT item) FROM jsonb_array_elements(value) AS x(item)
+  ) THEN RETURN false; END IF;
+  FOR e IN SELECT item FROM jsonb_array_elements(value) AS x(item)
+  LOOP
+    IF jsonb_typeof(e) <> 'object'
+       OR NOT (e ?& ARRAY['conditionSchemaId','conditionSchemaVersion','evaluatorVersion','payload'])
+       OR (SELECT count(*) FROM jsonb_object_keys(e)) <> 4
+       OR jsonb_typeof(e->'conditionSchemaId') <> 'string'
+       OR jsonb_typeof(e->'conditionSchemaVersion') <> 'string'
+       OR e->>'conditionSchemaVersion' <> '1.0'
+       OR jsonb_typeof(e->'evaluatorVersion') <> 'string'
+       OR length(e->>'evaluatorVersion') = 0
+       OR jsonb_typeof(e->'payload') <> 'object'
+    THEN RETURN false; END IF;
+    payload := e->'payload';
+    CASE e->>'conditionSchemaId'
+      WHEN 'AUTHENTICATED_AUDIENCE' THEN
+        IF payload <> '{"required":true}'::jsonb THEN RETURN false; END IF;
+      WHEN 'TERRITORY_ALLOWLIST' THEN
+        IF NOT (payload ? 'territories')
+           OR (SELECT count(*) FROM jsonb_object_keys(payload)) <> 1
+           OR jsonb_typeof(payload->'territories') <> 'array'
+           OR jsonb_array_length(payload->'territories') = 0
+           OR jsonb_array_length(payload->'territories') <> (
+             SELECT count(DISTINCT item) FROM jsonb_array_elements(payload->'territories') AS x(item))
+           OR EXISTS (SELECT 1 FROM jsonb_array_elements(payload->'territories') AS x(item)
+                      WHERE jsonb_typeof(item) <> 'string' OR length(item #>> '{}') < 2)
+        THEN RETURN false; END IF;
+      WHEN 'PURPOSE_ALLOWLIST' THEN
+        IF NOT (payload ? 'purposes')
+           OR (SELECT count(*) FROM jsonb_object_keys(payload)) <> 1
+           OR jsonb_typeof(payload->'purposes') <> 'array'
+           OR jsonb_array_length(payload->'purposes') = 0
+           OR jsonb_array_length(payload->'purposes') <> (
+             SELECT count(DISTINCT item) FROM jsonb_array_elements(payload->'purposes') AS x(item))
+           OR EXISTS (SELECT 1 FROM jsonb_array_elements(payload->'purposes') AS x(item)
+                      WHERE jsonb_typeof(item) <> 'string'
+                         OR (item #>> '{}') NOT IN (
+                           'PRIVATE_RESEARCH','RESEARCH_COMPILATION','PUBLICATION','PUBLIC_DISPLAY',
+                           'USER_WORKSPACE','MODEL_ASSISTANCE','EXPORT'))
+        THEN RETURN false; END IF;
+      WHEN 'COMMERCIAL_CONTEXT_ALLOWLIST' THEN
+        IF NOT (payload ? 'contexts')
+           OR (SELECT count(*) FROM jsonb_object_keys(payload)) <> 1
+           OR jsonb_typeof(payload->'contexts') <> 'array'
+           OR jsonb_array_length(payload->'contexts') = 0
+           OR jsonb_array_length(payload->'contexts') <> (
+             SELECT count(DISTINCT item) FROM jsonb_array_elements(payload->'contexts') AS x(item))
+           OR EXISTS (SELECT 1 FROM jsonb_array_elements(payload->'contexts') AS x(item)
+                      WHERE jsonb_typeof(item) <> 'string'
+                         OR (item #>> '{}') NOT IN ('NONCOMMERCIAL','COMMERCIAL','MIXED','UNKNOWN'))
+        THEN RETURN false; END IF;
+      WHEN 'PROVIDER_TERMS_VERSION' THEN
+        IF NOT (payload ? 'providerTermsVersion')
+           OR (SELECT count(*) FROM jsonb_object_keys(payload)) <> 1
+           OR jsonb_typeof(payload->'providerTermsVersion') <> 'string'
+           OR length(payload->>'providerTermsVersion') = 0
+        THEN RETURN false; END IF;
+      ELSE RETURN false;
+    END CASE;
+  END LOOP;
+  RETURN true;
+END
+$rights_conditions$;
 
 CREATE OR REPLACE FUNCTION authoring.valid_rights_obligations(value jsonb)
 RETURNS boolean
-LANGUAGE sql
+LANGUAGE plpgsql
 IMMUTABLE
-AS $$
-  SELECT CASE
-    WHEN value IS NULL THEN true
-    WHEN jsonb_typeof(value) <> 'array' THEN false
-    ELSE NOT EXISTS (
-      SELECT 1
-      FROM jsonb_array_elements(value) e
-      WHERE
-        (e->>'type' = 'MAX_EXCERPT' AND (
-          NOT (e ? 'value') OR COALESCE(e->>'unit','') NOT IN ('WORD','UNICODE_CODEPOINT','GRAPHEME_CLUSTER','BYTE','PERCENT_OF_WORK')
-        ))
-        OR
-        (e->>'type' = 'RETENTION_LIMIT' AND (
-          NOT (e ? 'duration') OR e->>'unit' <> 'DAY'
-        ))
-        OR
-        (COALESCE(e->>'type','') NOT IN ('MAX_EXCERPT','RETENTION_LIMIT','ATTRIBUTION'))
-    )
-  END
-$$;
+AS $rights_obligations$
+DECLARE
+  e jsonb;
+BEGIN
+  IF value IS NULL THEN RETURN true; END IF;
+  IF jsonb_typeof(value) <> 'array' THEN RETURN false; END IF;
+  IF jsonb_array_length(value) <> (
+    SELECT count(DISTINCT item) FROM jsonb_array_elements(value) AS x(item)
+  ) THEN RETURN false; END IF;
+  FOR e IN SELECT item FROM jsonb_array_elements(value) AS x(item)
+  LOOP
+    IF jsonb_typeof(e) <> 'object' OR NOT (e ? 'obligationType')
+       OR jsonb_typeof(e->'obligationType') <> 'string' THEN RETURN false; END IF;
+    CASE e->>'obligationType'
+      WHEN 'ATTRIBUTION' THEN
+        IF NOT (e ?& ARRAY['obligationType','value'])
+           OR (SELECT count(*) FROM jsonb_object_keys(e)) <> 2
+           OR jsonb_typeof(e->'value') <> 'string' OR length(e->>'value') = 0
+        THEN RETURN false; END IF;
+      WHEN 'MAX_EXCERPT' THEN
+        IF NOT (e ?& ARRAY['obligationType','value','unit'])
+           OR (SELECT count(*) FROM jsonb_object_keys(e)) <> 3
+           OR jsonb_typeof(e->'value') <> 'number' OR (e->>'value')::numeric <= 0
+           OR jsonb_typeof(e->'unit') <> 'string'
+           OR e->>'unit' NOT IN ('WORD','UNICODE_CODEPOINT','GRAPHEME_CLUSTER','BYTE','PERCENT_OF_WORK')
+        THEN RETURN false; END IF;
+      WHEN 'RETENTION_LIMIT' THEN
+        IF NOT (e ?& ARRAY['obligationType','value','unit'])
+           OR (SELECT count(*) FROM jsonb_object_keys(e)) <> 3
+           OR jsonb_typeof(e->'value') <> 'number' OR (e->>'value')::numeric < 0
+           OR trunc((e->>'value')::numeric) <> (e->>'value')::numeric OR e->>'unit' <> 'DAY'
+        THEN RETURN false; END IF;
+      WHEN 'AUTHENTICATED_ONLY' THEN
+        IF (SELECT count(*) FROM jsonb_object_keys(e)) <> 1 THEN RETURN false; END IF;
+      WHEN 'TERRITORY_LIMIT' THEN
+        IF NOT (e ?& ARRAY['obligationType','value'])
+           OR (SELECT count(*) FROM jsonb_object_keys(e)) <> 2
+           OR jsonb_typeof(e->'value') <> 'array' OR jsonb_array_length(e->'value') = 0
+           OR jsonb_array_length(e->'value') <> (
+             SELECT count(DISTINCT item) FROM jsonb_array_elements(e->'value') AS x(item))
+           OR EXISTS (SELECT 1 FROM jsonb_array_elements(e->'value') AS x(item)
+                      WHERE jsonb_typeof(item) <> 'string' OR length(item #>> '{}') < 2)
+        THEN RETURN false; END IF;
+      WHEN 'TEMPORARY_PROCESSING_ONLY' THEN
+        IF (SELECT count(*) FROM jsonb_object_keys(e)) <> 1 THEN RETURN false; END IF;
+      ELSE RETURN false;
+    END CASE;
+  END LOOP;
+  RETURN true;
+END
+$rights_obligations$;
 
 CREATE TABLE authoring.rights_policies (
   rights_policy_id uuid PRIMARY KEY,
@@ -990,47 +1076,135 @@ $$;
 
 CREATE OR REPLACE FUNCTION serving.valid_rights_conditions(value jsonb)
 RETURNS boolean
-LANGUAGE sql
+LANGUAGE plpgsql
 IMMUTABLE
 AS $rights_conditions$
-  SELECT CASE
-    WHEN value IS NULL THEN true
-    WHEN jsonb_typeof(value) <> 'array' THEN false
-    ELSE NOT EXISTS (
-      SELECT 1 FROM jsonb_array_elements(value) e
-      WHERE e->>'conditionSchemaId' NOT IN (
-        'AUTHENTICATED_AUDIENCE','TERRITORY_ALLOWLIST','PURPOSE_ALLOWLIST',
-        'COMMERCIAL_CONTEXT_ALLOWLIST','PROVIDER_TERMS_VERSION'
-      )
-      OR COALESCE(e->>'conditionSchemaVersion','') = ''
-      OR COALESCE(e->>'evaluatorVersion','') = ''
-      OR jsonb_typeof(e->'payload') IS DISTINCT FROM 'object'
-    )
-  END
+DECLARE
+  e jsonb;
+  payload jsonb;
+BEGIN
+  IF value IS NULL THEN RETURN true; END IF;
+  IF jsonb_typeof(value) <> 'array' THEN RETURN false; END IF;
+  IF jsonb_array_length(value) <> (
+    SELECT count(DISTINCT item) FROM jsonb_array_elements(value) AS x(item)
+  ) THEN RETURN false; END IF;
+  FOR e IN SELECT item FROM jsonb_array_elements(value) AS x(item)
+  LOOP
+    IF jsonb_typeof(e) <> 'object'
+       OR NOT (e ?& ARRAY['conditionSchemaId','conditionSchemaVersion','evaluatorVersion','payload'])
+       OR (SELECT count(*) FROM jsonb_object_keys(e)) <> 4
+       OR jsonb_typeof(e->'conditionSchemaId') <> 'string'
+       OR jsonb_typeof(e->'conditionSchemaVersion') <> 'string'
+       OR e->>'conditionSchemaVersion' <> '1.0'
+       OR jsonb_typeof(e->'evaluatorVersion') <> 'string'
+       OR length(e->>'evaluatorVersion') = 0
+       OR jsonb_typeof(e->'payload') <> 'object'
+    THEN RETURN false; END IF;
+    payload := e->'payload';
+    CASE e->>'conditionSchemaId'
+      WHEN 'AUTHENTICATED_AUDIENCE' THEN
+        IF payload <> '{"required":true}'::jsonb THEN RETURN false; END IF;
+      WHEN 'TERRITORY_ALLOWLIST' THEN
+        IF NOT (payload ? 'territories')
+           OR (SELECT count(*) FROM jsonb_object_keys(payload)) <> 1
+           OR jsonb_typeof(payload->'territories') <> 'array'
+           OR jsonb_array_length(payload->'territories') = 0
+           OR jsonb_array_length(payload->'territories') <> (
+             SELECT count(DISTINCT item) FROM jsonb_array_elements(payload->'territories') AS x(item))
+           OR EXISTS (SELECT 1 FROM jsonb_array_elements(payload->'territories') AS x(item)
+                      WHERE jsonb_typeof(item) <> 'string' OR length(item #>> '{}') < 2)
+        THEN RETURN false; END IF;
+      WHEN 'PURPOSE_ALLOWLIST' THEN
+        IF NOT (payload ? 'purposes')
+           OR (SELECT count(*) FROM jsonb_object_keys(payload)) <> 1
+           OR jsonb_typeof(payload->'purposes') <> 'array'
+           OR jsonb_array_length(payload->'purposes') = 0
+           OR jsonb_array_length(payload->'purposes') <> (
+             SELECT count(DISTINCT item) FROM jsonb_array_elements(payload->'purposes') AS x(item))
+           OR EXISTS (SELECT 1 FROM jsonb_array_elements(payload->'purposes') AS x(item)
+                      WHERE jsonb_typeof(item) <> 'string'
+                         OR (item #>> '{}') NOT IN (
+                           'PRIVATE_RESEARCH','RESEARCH_COMPILATION','PUBLICATION','PUBLIC_DISPLAY',
+                           'USER_WORKSPACE','MODEL_ASSISTANCE','EXPORT'))
+        THEN RETURN false; END IF;
+      WHEN 'COMMERCIAL_CONTEXT_ALLOWLIST' THEN
+        IF NOT (payload ? 'contexts')
+           OR (SELECT count(*) FROM jsonb_object_keys(payload)) <> 1
+           OR jsonb_typeof(payload->'contexts') <> 'array'
+           OR jsonb_array_length(payload->'contexts') = 0
+           OR jsonb_array_length(payload->'contexts') <> (
+             SELECT count(DISTINCT item) FROM jsonb_array_elements(payload->'contexts') AS x(item))
+           OR EXISTS (SELECT 1 FROM jsonb_array_elements(payload->'contexts') AS x(item)
+                      WHERE jsonb_typeof(item) <> 'string'
+                         OR (item #>> '{}') NOT IN ('NONCOMMERCIAL','COMMERCIAL','MIXED','UNKNOWN'))
+        THEN RETURN false; END IF;
+      WHEN 'PROVIDER_TERMS_VERSION' THEN
+        IF NOT (payload ? 'providerTermsVersion')
+           OR (SELECT count(*) FROM jsonb_object_keys(payload)) <> 1
+           OR jsonb_typeof(payload->'providerTermsVersion') <> 'string'
+           OR length(payload->>'providerTermsVersion') = 0
+        THEN RETURN false; END IF;
+      ELSE RETURN false;
+    END CASE;
+  END LOOP;
+  RETURN true;
+END
 $rights_conditions$;
 
 CREATE OR REPLACE FUNCTION serving.valid_rights_obligations(value jsonb)
 RETURNS boolean
-LANGUAGE sql
+LANGUAGE plpgsql
 IMMUTABLE
 AS $rights_obligations$
-  SELECT CASE
-    WHEN value IS NULL THEN true
-    WHEN jsonb_typeof(value) <> 'array' THEN false
-    ELSE NOT EXISTS (
-      SELECT 1 FROM jsonb_array_elements(value) e
-      WHERE
-        (e->>'type' = 'MAX_EXCERPT' AND (
-          NOT (e ? 'value') OR COALESCE(e->>'unit','') NOT IN ('WORD','UNICODE_CODEPOINT','GRAPHEME_CLUSTER','BYTE','PERCENT_OF_WORK')
-        ))
-        OR
-        (e->>'type' = 'RETENTION_LIMIT' AND (
-          NOT (e ? 'duration') OR e->>'unit' <> 'DAY'
-        ))
-        OR
-        (COALESCE(e->>'type','') NOT IN ('MAX_EXCERPT','RETENTION_LIMIT','ATTRIBUTION'))
-    )
-  END
+DECLARE
+  e jsonb;
+BEGIN
+  IF value IS NULL THEN RETURN true; END IF;
+  IF jsonb_typeof(value) <> 'array' THEN RETURN false; END IF;
+  IF jsonb_array_length(value) <> (
+    SELECT count(DISTINCT item) FROM jsonb_array_elements(value) AS x(item)
+  ) THEN RETURN false; END IF;
+  FOR e IN SELECT item FROM jsonb_array_elements(value) AS x(item)
+  LOOP
+    IF jsonb_typeof(e) <> 'object' OR NOT (e ? 'obligationType')
+       OR jsonb_typeof(e->'obligationType') <> 'string' THEN RETURN false; END IF;
+    CASE e->>'obligationType'
+      WHEN 'ATTRIBUTION' THEN
+        IF NOT (e ?& ARRAY['obligationType','value'])
+           OR (SELECT count(*) FROM jsonb_object_keys(e)) <> 2
+           OR jsonb_typeof(e->'value') <> 'string' OR length(e->>'value') = 0
+        THEN RETURN false; END IF;
+      WHEN 'MAX_EXCERPT' THEN
+        IF NOT (e ?& ARRAY['obligationType','value','unit'])
+           OR (SELECT count(*) FROM jsonb_object_keys(e)) <> 3
+           OR jsonb_typeof(e->'value') <> 'number' OR (e->>'value')::numeric <= 0
+           OR jsonb_typeof(e->'unit') <> 'string'
+           OR e->>'unit' NOT IN ('WORD','UNICODE_CODEPOINT','GRAPHEME_CLUSTER','BYTE','PERCENT_OF_WORK')
+        THEN RETURN false; END IF;
+      WHEN 'RETENTION_LIMIT' THEN
+        IF NOT (e ?& ARRAY['obligationType','value','unit'])
+           OR (SELECT count(*) FROM jsonb_object_keys(e)) <> 3
+           OR jsonb_typeof(e->'value') <> 'number' OR (e->>'value')::numeric < 0
+           OR trunc((e->>'value')::numeric) <> (e->>'value')::numeric OR e->>'unit' <> 'DAY'
+        THEN RETURN false; END IF;
+      WHEN 'AUTHENTICATED_ONLY' THEN
+        IF (SELECT count(*) FROM jsonb_object_keys(e)) <> 1 THEN RETURN false; END IF;
+      WHEN 'TERRITORY_LIMIT' THEN
+        IF NOT (e ?& ARRAY['obligationType','value'])
+           OR (SELECT count(*) FROM jsonb_object_keys(e)) <> 2
+           OR jsonb_typeof(e->'value') <> 'array' OR jsonb_array_length(e->'value') = 0
+           OR jsonb_array_length(e->'value') <> (
+             SELECT count(DISTINCT item) FROM jsonb_array_elements(e->'value') AS x(item))
+           OR EXISTS (SELECT 1 FROM jsonb_array_elements(e->'value') AS x(item)
+                      WHERE jsonb_typeof(item) <> 'string' OR length(item #>> '{}') < 2)
+        THEN RETURN false; END IF;
+      WHEN 'TEMPORARY_PROCESSING_ONLY' THEN
+        IF (SELECT count(*) FROM jsonb_object_keys(e)) <> 1 THEN RETURN false; END IF;
+      ELSE RETURN false;
+    END CASE;
+  END LOOP;
+  RETURN true;
+END
 $rights_obligations$;
 
 CREATE OR REPLACE FUNCTION serving.valid_citation_locator(value jsonb)
@@ -1131,6 +1305,39 @@ CREATE TABLE serving.reference_spans (
   CHECK (start_sequence <= end_sequence)
 );
 
+CREATE TABLE serving.reference_systems (
+  reference_system_id uuid PRIMARY KEY,
+  code text NOT NULL UNIQUE,
+  name text NOT NULL
+);
+
+CREATE TABLE serving.reference_labels (
+  corpus_release_id uuid NOT NULL REFERENCES serving.research_objects(research_object_id),
+  reference_label_id uuid NOT NULL,
+  reference_system_id uuid NOT NULL REFERENCES serving.reference_systems(reference_system_id),
+  reference_span_id uuid NOT NULL REFERENCES serving.reference_spans(reference_span_id),
+  book_code text NOT NULL,
+  label text NOT NULL,
+  chapter_number integer,
+  verse_label text,
+  reference_sort_key bigint NOT NULL,
+  PRIMARY KEY (corpus_release_id, reference_label_id),
+  UNIQUE (corpus_release_id, reference_system_id, label),
+  UNIQUE (corpus_release_id, reference_system_id, reference_sort_key)
+);
+
+CREATE TABLE serving.corpus_text_segments (
+  corpus_release_id uuid NOT NULL REFERENCES serving.research_objects(research_object_id),
+  text_segment_id uuid NOT NULL,
+  reference_span_id uuid NOT NULL REFERENCES serving.reference_spans(reference_span_id),
+  segment_order integer NOT NULL,
+  surface_original text NOT NULL,
+  segment_kind text NOT NULL,
+  content_hash text,
+  PRIMARY KEY (corpus_release_id, text_segment_id),
+  UNIQUE (corpus_release_id, segment_order)
+);
+
 CREATE TABLE serving.corpus_nodes (
   corpus_release_id uuid NOT NULL REFERENCES serving.research_objects(research_object_id),
   analysis_node_id uuid NOT NULL,
@@ -1138,6 +1345,19 @@ CREATE TABLE serving.corpus_nodes (
   node_type text NOT NULL,
   reference_span_id uuid NOT NULL REFERENCES serving.reference_spans(reference_span_id),
   PRIMARY KEY (corpus_release_id, analysis_node_id)
+);
+
+CREATE TABLE serving.corpus_node_segments (
+  corpus_release_id uuid NOT NULL,
+  analysis_node_id uuid NOT NULL,
+  text_segment_id uuid NOT NULL,
+  member_order integer NOT NULL CHECK (member_order >= 0),
+  membership_role text NOT NULL,
+  PRIMARY KEY (corpus_release_id, analysis_node_id, text_segment_id, membership_role),
+  FOREIGN KEY (corpus_release_id, analysis_node_id)
+    REFERENCES serving.corpus_nodes(corpus_release_id, analysis_node_id) ON DELETE CASCADE,
+  FOREIGN KEY (corpus_release_id, text_segment_id)
+    REFERENCES serving.corpus_text_segments(corpus_release_id, text_segment_id) ON DELETE CASCADE
 );
 
 CREATE TABLE serving.corpus_node_features (
@@ -1192,30 +1412,64 @@ CREATE INDEX serving_corpus_mappings_source_idx
 CREATE INDEX serving_semantic_members_lookup_idx
   ON serving.semantic_set_members(semantic_set_version_id, member_key);
 
+CREATE OR REPLACE FUNCTION serving.uuid_array_is_unique(value uuid[])
+RETURNS boolean
+LANGUAGE sql
+IMMUTABLE
+AS $uuid_array_is_unique$
+  SELECT value IS NOT NULL
+     AND cardinality(value) = (
+       SELECT count(DISTINCT item)
+       FROM unnest(value) AS x(item)
+     )
+$uuid_array_is_unique$;
+
 CREATE TABLE serving.rights_decision_snapshots (
   rights_decision_snapshot_id uuid PRIMARY KEY,
-  subject_type text NOT NULL,
+  subject_type text NOT NULL CHECK (subject_type IN (
+    'SOURCE_ASSET','WORK','EDITION','TEXTUAL_WORK','TEXTUAL_EDITION',
+    'DIGITAL_EXPRESSION','PROVIDER_DISTRIBUTION','CORPUS_RELEASE',
+    'ANNOTATION_LAYER','RESEARCH_OBJECT'
+  )),
   subject_identifier uuid NOT NULL,
-  operation text NOT NULL,
-  purpose_scope text NOT NULL,
-  audience_scope text NOT NULL,
-  commercial_context text NOT NULL,
+  operation text NOT NULL CHECK (operation IN (
+    'STORE_ORIGINAL','EXTRACT_TEXT','STORE_EXTRACTED_TEXT','EMBED','MODEL_CONTEXT',
+    'CACHE','DISPLAY_FULLTEXT','DISPLAY_EXCERPT','QUOTE','EXPORT','REDISTRIBUTE','COMMERCIAL_USE'
+  )),
+  purpose_scope text NOT NULL CHECK (purpose_scope IN (
+    'PRIVATE_RESEARCH','RESEARCH_COMPILATION','PUBLICATION','PUBLIC_DISPLAY',
+    'USER_WORKSPACE','MODEL_ASSISTANCE','EXPORT'
+  )),
+  audience_scope text NOT NULL CHECK (audience_scope IN (
+    'INTERNAL_SERVICE','PRIVATE_RESEARCHER','AUTHENTICATED_USER','PUBLIC'
+  )),
+  commercial_context text NOT NULL CHECK (commercial_context IN (
+    'NONCOMMERCIAL','COMMERCIAL','MIXED','UNKNOWN'
+  )),
   applicable_rule_ids uuid[] NOT NULL DEFAULT '{}',
   winning_rule_ids uuid[] NOT NULL DEFAULT '{}',
   decision text NOT NULL CHECK (decision IN ('ALLOW','DENY','CONDITIONAL')),
   decision_basis text NOT NULL CHECK (decision_basis IN ('RULE','DEFAULT_DENY','UNKNOWN_RESTRICTIVE')),
   conditions_json jsonb,
   obligations_json jsonb NOT NULL DEFAULT '[]'::jsonb,
-  resolver_version text NOT NULL,
+  resolver_version text NOT NULL CHECK (length(resolver_version) > 0),
   evaluated_at timestamptz NOT NULL,
-  decision_hash text NOT NULL,
+  decision_hash text NOT NULL CHECK (decision_hash ~ '^[0-9A-Fa-f]{64}$'),
+  CHECK (serving.uuid_array_is_unique(applicable_rule_ids)),
+  CHECK (serving.uuid_array_is_unique(winning_rule_ids)),
   CHECK (winning_rule_ids <@ applicable_rule_ids),
   CHECK (serving.valid_rights_conditions(conditions_json)),
   CHECK (serving.valid_rights_obligations(obligations_json)),
   CHECK (
     (decision_basis = 'RULE' AND cardinality(winning_rule_ids) > 0)
     OR
-    (decision_basis IN ('DEFAULT_DENY','UNKNOWN_RESTRICTIVE') AND decision = 'DENY' AND cardinality(winning_rule_ids) = 0)
+    (
+      decision_basis IN ('DEFAULT_DENY','UNKNOWN_RESTRICTIVE')
+      AND decision = 'DENY'
+      AND cardinality(winning_rule_ids) = 0
+      AND COALESCE(jsonb_array_length(conditions_json),0) = 0
+      AND COALESCE(jsonb_array_length(obligations_json),0) = 0
+    )
   ),
   CHECK (
     decision <> 'CONDITIONAL'
@@ -1606,6 +1860,27 @@ BEGIN
     RAISE EXCEPTION 'release has no components';
   END IF;
 
+  IF EXISTS (
+    SELECT 1
+    FROM serving.research_release_components c
+    WHERE c.research_release_id = p_release_id
+      AND c.component_kind = 'CORPUS'
+      AND NOT EXISTS (
+        SELECT 1
+        FROM serving.rights_decision_snapshots rds
+        WHERE rds.subject_type = 'CORPUS_RELEASE'
+          AND rds.subject_identifier = c.component_research_object_id
+          AND rds.operation = 'DISPLAY_FULLTEXT'
+          AND rds.purpose_scope = 'PUBLIC_DISPLAY'
+          AND rds.audience_scope = 'PUBLIC'
+          AND rds.commercial_context IN ('MIXED','COMMERCIAL')
+          AND rds.decision IN ('ALLOW','CONDITIONAL')
+          AND rds.decision_basis = 'RULE'
+      )
+  ) THEN
+    RAISE EXCEPTION 'corpus component lacks a public DISPLAY_FULLTEXT rights decision';
+  END IF;
+
   SELECT release_channel_id INTO channel_id
   FROM serving.release_channels
   WHERE channel_key = p_channel_key;
@@ -1650,6 +1925,177 @@ SELECT c.channel_key, p.research_release_id, r.release_label, r.published_at
 FROM serving.release_channels c
 JOIN serving.release_channel_pointers p USING (release_channel_id)
 JOIN serving.research_releases r USING (research_release_id);
+
+CREATE OR REPLACE FUNCTION serving.read_passage_core(
+  p_release_id uuid,
+  p_reference_system_code text,
+  p_reference_label text
+)
+RETURNS jsonb
+LANGUAGE sql
+STABLE
+SECURITY INVOKER
+AS $passage_core$
+  WITH pinned_corpus AS (
+    SELECT component_research_object_id AS corpus_release_id
+    FROM serving.research_release_components
+    WHERE research_release_id = p_release_id
+      AND component_kind = 'CORPUS'
+      AND serving.release_is_published(p_release_id)
+    ORDER BY component_order
+    LIMIT 1
+  ),
+  resolved AS (
+    SELECT
+      rl.corpus_release_id,
+      rl.reference_label_id,
+      rl.reference_system_id,
+      rsys.code AS reference_system_code,
+      rl.reference_span_id,
+      rl.book_code,
+      rl.chapter_number,
+      rl.label,
+      rl.reference_sort_key
+    FROM pinned_corpus pc
+    JOIN serving.reference_labels rl ON rl.corpus_release_id = pc.corpus_release_id
+    JOIN serving.reference_systems rsys ON rsys.reference_system_id = rl.reference_system_id
+    WHERE rsys.code = p_reference_system_code
+      AND rl.label = p_reference_label
+  ),
+  token_features AS (
+    SELECT
+      n.corpus_release_id,
+      n.analysis_node_id,
+      ns.text_segment_id,
+      ts.segment_order,
+      ts.surface_original,
+      COALESCE(jsonb_object_agg(f.feature_key, f.feature_value)
+        FILTER (WHERE f.feature_key IS NOT NULL), '{}'::jsonb) AS features
+    FROM resolved r
+    JOIN serving.corpus_nodes n
+      ON n.corpus_release_id = r.corpus_release_id
+     AND n.reference_span_id = r.reference_span_id
+     AND n.node_type = 'WORD'
+    JOIN serving.corpus_node_segments ns
+      ON ns.corpus_release_id = n.corpus_release_id
+     AND ns.analysis_node_id = n.analysis_node_id
+    JOIN serving.corpus_text_segments ts
+      ON ts.corpus_release_id = ns.corpus_release_id
+     AND ts.text_segment_id = ns.text_segment_id
+    LEFT JOIN serving.corpus_node_features f
+      ON f.corpus_release_id = n.corpus_release_id
+     AND f.analysis_node_id = n.analysis_node_id
+    GROUP BY n.corpus_release_id,n.analysis_node_id,ns.text_segment_id,ts.segment_order,ts.surface_original
+  )
+  SELECT jsonb_build_object(
+    'dataSource', 'SERVING',
+    'researchReleaseId', p_release_id::text,
+    'referenceSpanId', r.reference_span_id::text,
+    'resolvedReference', jsonb_build_object(
+      'referenceSystemId', r.reference_system_id::text,
+      'referenceSystemCode', r.reference_system_code,
+      'referenceLabel', r.label
+    ),
+    'textReconstructionStatus', 'OSHB_WORD_TOKENS_ONLY',
+    'hebrewText', COALESCE((
+      SELECT string_agg(tf.surface_original, ' ' ORDER BY tf.segment_order)
+      FROM token_features tf
+    ), ''),
+    'tokens', COALESCE((
+      SELECT jsonb_agg(
+        jsonb_build_object(
+          'analysisNodeId', tf.analysis_node_id::text,
+          'textSegmentId', tf.text_segment_id::text,
+          'surface', tf.surface_original,
+          'lemmaRaw', tf.features->>'LEMMA_RAW',
+          'morphRaw', tf.features->>'MORPH_RAW'
+        )
+        ORDER BY tf.segment_order
+      )
+      FROM token_features tf
+    ), '[]'::jsonb),
+    'navigation', jsonb_build_object(
+      'currentBookCode', r.book_code,
+      'currentChapter', r.chapter_number,
+      'previousReference', (
+        SELECT p.label
+        FROM serving.reference_labels p
+        WHERE p.corpus_release_id = r.corpus_release_id
+          AND p.reference_system_id = r.reference_system_id
+          AND p.reference_sort_key < r.reference_sort_key
+        ORDER BY p.reference_sort_key DESC
+        LIMIT 1
+      ),
+      'nextReference', (
+        SELECT n.label
+        FROM serving.reference_labels n
+        WHERE n.corpus_release_id = r.corpus_release_id
+          AND n.reference_system_id = r.reference_system_id
+          AND n.reference_sort_key > r.reference_sort_key
+        ORDER BY n.reference_sort_key
+        LIMIT 1
+      ),
+      'books', COALESCE((
+        SELECT jsonb_agg(
+          jsonb_build_object(
+            'bookCode', b.book_code,
+            'firstReference', b.first_reference
+          )
+          ORDER BY b.first_sort
+        )
+        FROM (
+          SELECT
+            x.book_code,
+            min(x.reference_sort_key) AS first_sort,
+            (array_agg(x.label ORDER BY x.reference_sort_key))[1] AS first_reference
+          FROM serving.reference_labels x
+          WHERE x.corpus_release_id = r.corpus_release_id
+            AND x.reference_system_id = r.reference_system_id
+          GROUP BY x.book_code
+        ) b
+      ), '[]'::jsonb),
+      'chapters', COALESCE((
+        SELECT jsonb_agg(
+          jsonb_build_object(
+            'chapterNumber', c.chapter_number,
+            'firstReference', c.first_reference
+          )
+          ORDER BY c.chapter_number
+        )
+        FROM (
+          SELECT
+            x.chapter_number,
+            (array_agg(x.label ORDER BY x.reference_sort_key))[1] AS first_reference
+          FROM serving.reference_labels x
+          WHERE x.corpus_release_id = r.corpus_release_id
+            AND x.reference_system_id = r.reference_system_id
+            AND x.book_code = r.book_code
+            AND x.chapter_number IS NOT NULL
+          GROUP BY x.chapter_number
+        ) c
+      ), '[]'::jsonb),
+      'passages', COALESCE((
+        SELECT jsonb_agg(
+          jsonb_build_object(
+            'referenceLabel', p.label,
+            'verseLabel', p.verse_label
+          )
+          ORDER BY p.reference_sort_key
+        )
+        FROM serving.reference_labels p
+        WHERE p.corpus_release_id = r.corpus_release_id
+          AND p.reference_system_id = r.reference_system_id
+          AND p.book_code = r.book_code
+          AND p.chapter_number = r.chapter_number
+      ), '[]'::jsonb)
+    ),
+    'attribution', 'Open Scriptures Hebrew Bible / Westminster Leningrad Codex; source and morphology attribution required.'
+  )
+  FROM resolved r
+$passage_core$;
+
+REVOKE ALL ON FUNCTION serving.read_passage_core(uuid,text,text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION serving.read_passage_core(uuid,text,text) TO anon, authenticated;
 
 CREATE OR REPLACE FUNCTION serving.spike_corpus_query(
   p_release_id uuid,
@@ -1828,7 +2274,11 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON workspace.user_translation_drafts TO aut
 
 ALTER TABLE serving.research_objects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE serving.reference_spans ENABLE ROW LEVEL SECURITY;
+ALTER TABLE serving.reference_systems ENABLE ROW LEVEL SECURITY;
+ALTER TABLE serving.reference_labels ENABLE ROW LEVEL SECURITY;
+ALTER TABLE serving.corpus_text_segments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE serving.corpus_nodes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE serving.corpus_node_segments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE serving.corpus_node_features ENABLE ROW LEVEL SECURITY;
 ALTER TABLE serving.corpus_edges ENABLE ROW LEVEL SECURITY;
 ALTER TABLE serving.corpus_node_mappings ENABLE ROW LEVEL SECURITY;
@@ -1846,6 +2296,17 @@ ALTER TABLE serving.published_assertion_evidence ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY public_read_reference_spans ON serving.reference_spans
 FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY public_read_reference_systems ON serving.reference_systems
+FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY public_read_reference_labels ON serving.reference_labels
+FOR SELECT TO anon, authenticated
+USING (serving.component_is_published(corpus_release_id));
+CREATE POLICY public_read_corpus_text_segments ON serving.corpus_text_segments
+FOR SELECT TO anon, authenticated
+USING (serving.component_is_published(corpus_release_id));
+CREATE POLICY public_read_corpus_node_segments ON serving.corpus_node_segments
+FOR SELECT TO anon, authenticated
+USING (serving.component_is_published(corpus_release_id));
 
 -- Release-scoped Serving rows remain physically materialized before publication,
 -- but public roles must not observe them until the release has a committed
@@ -1908,7 +2369,8 @@ USING (
   )
 );
 
-GRANT SELECT ON serving.reference_spans,
+GRANT SELECT ON serving.reference_spans, serving.reference_systems,
+  serving.reference_labels, serving.corpus_text_segments, serving.corpus_node_segments,
   serving.corpus_nodes, serving.corpus_node_features, serving.corpus_edges,
   serving.corpus_node_mappings, serving.semantic_set_members,
   serving.research_releases, serving.research_release_components,

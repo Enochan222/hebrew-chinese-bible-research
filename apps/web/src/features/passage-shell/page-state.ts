@@ -22,14 +22,18 @@ export function toPassagePageFailure(error: unknown): PassagePageFailure {
   if (error instanceof MissingReferenceSystemError) return { code: error.code, title: "Reference system required", message: error.message };
   if (error instanceof InvalidReleaseIdError) return { code: error.code, title: "Invalid release identifier", message: error.message };
   if (error instanceof InvalidModeError) return { code: error.code, title: "Invalid experience mode", message: error.message };
-  if (error instanceof ReferenceNotFoundError) return { code: error.code, title: "Reference not in fixture", message: error.message };
-  if (error instanceof ReleaseNotFoundError) return { code: error.code, title: "Release not in fixture", message: error.message };
+  if (error instanceof ReferenceNotFoundError) return { code: error.code, title: "Reference not found", message: error.message };
+  if (error instanceof ReleaseNotFoundError) return { code: error.code, title: "Release not found", message: error.message };
   if (error instanceof ContractViolationError) {
-    return { code: error.code, title: "Fixture contract violation", message: "Canonical fixture data failed runtime validation and was not rendered." };
+    const detail =
+      process.env.NODE_ENV === "production"
+        ? "Canonical serving data failed runtime validation and was not rendered."
+        : `Canonical serving data failed runtime validation and was not rendered. ${error.message}`;
+    return { code: error.code, title: "Serving contract violation", message: detail };
   }
   return {
     code: "DATA_TEMPORARILY_UNAVAILABLE",
-    title: "Fixture data unavailable",
-    message: "The serving shell could not read the canonical fixture chain.",
+    title: "Serving data unavailable",
+    message: "The passage reader could not read the selected release.",
   };
 }

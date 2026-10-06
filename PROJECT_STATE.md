@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-05.12**
+State Revision: **2026-10-06.7**
 
 ## Mandatory governance rule
 
@@ -322,11 +322,48 @@ WB-1 acceptance is **PASS** for `CORE-FZ-WB-002`. The synchronized implementatio
 ## Current implementation priority
 
 1. Preserve contract/governance consistency, the ChatGPT-only project AI policy and the whole-Bible scope guard.
-2. Complete WB-2: compile the accepted WB-1 whole-corpus Authoring result into rights-safe, release-pinned passage-serving projections without leaking BHSA/bridging-derived data that lacks an ALLOW RightsDecision.
-3. Complete WB-3: replace fixture-only Hebrew passage content with a database-backed whole-Bible reader/navigation and verify `CORE-FZ-WB-001` / `CORE-FZ-WB-003` behavior.
+2. Treat WB-2/WB-3 as accepted whole-Bible base-reader infrastructure and preserve its exact-head regression suite.
+3. Close the separate ResearchRelease lifecycle semantics gap: distinguish "ever published / immutable" from "currently publicly servable" before implementing REVOKED/REACTIVATED behavior; do not overload one predicate for both concerns.
 4. Complete WB-4/WB-5: add selected translation witnesses, alignment/comparison, project/user translation workflow and deterministic whole-corpus analysis.
 5. Only then make Research Pro provider adapters, ResearchModelAdapter and end-to-end literature builds the primary product implementation frontier; academic enrichment may proceed in parallel where it does not block the base path.
 
+## WB-2 / WB-3 implementation state
+
+WB-2/WB-3 is accepted on PR #23 exact head `21a2cedafb394b84d51e244de6ff37bbac4d6a82` for the whole-Bible base-reader gates.
+
+Current branch implementation includes:
+
+- complete canonical `obligationType` rights payload validation across all current v1.1 RightsCondition and obligation variants;
+- a rights-safe OSHB-only Serving projection compiled from the accepted WB-1 Authoring corpus;
+- a release-pinned ResearchRelease and atomic PRODUCTION publication path;
+- Serving ReferenceSystem/label, text-segment, node, feature and membership projections for the complete accepted OSHB corpus;
+- a `serving.read_passage_core` RPC returning real release-pinned Hebrew word tokens, basic OSHB morphology, attribution and data-driven navigation;
+- a real Book / Chapter / Passage selector derived from the Serving ReferenceSystem, plus previous/next traversal, without hard-coded React book arrays;
+- PostgREST Serving adapters behind the existing ReleaseReadPort / PassageReadPort boundary, while fixture adapters remain a regression mode;
+- runtime AJV validation of external Serving passage/release/capability payloads so TypeScript casts cannot bypass canonical machine contracts;
+- conditional PassageCore validation requiring complete Hebrew/tokens/navigation/attribution fields for `dataSource=SERVING`;
+- hostile malformed-Serving-response regression that must fail closed as `CONTRACT_VIOLATION`;
+- explicit non-exposure of BHSA and ETCBC bridging rows in public Serving.
+
+Exact-head machine evidence is complete. WB-2/WB-3 Serving Reader run `37424398827` passed whole-corpus rebuild/parity, rights-safe OSHB publication, anon RLS public passage reads, 39-book navigation, Genesis 50-chapter and 31-passage indexing, Gen.50.26 -> Exod.1.1 cross-book traversal, non-fixture Isa.6.1 retrieval, OSHB-only public Serving and evidence upload. P1 fixture shell validation `37424398799` passed typecheck, lint/boundaries, unit, integration, fixture E2E, Serving visual E2E and production build. WB-1 `37424398811`, Whole-Bible corpus foundation `37424398932`, Database Spike 001 `37424398816`, Contract validation `37424398834` and Project governance `37424398970` all passed on the same head.
+
+`CORE-FZ-WB-001` and `CORE-FZ-WB-003` are now **PASS**.
+
+## Known release-lifecycle semantic gap
+
+This whole-Bible acceptance does **not** claim that the later Product Operations revoke/reactivate lifecycle is complete.
+
+Independent adversarial review found that the current `serving.release_is_published()` predicate means "has ever received a PUBLISHED event" and is used for both public visibility and post-publication immutability. The active architecture separately defines PUBLISHED, SUPERSEDED, REVOKED and REACTIVATED events, but the machine contract does not yet define a total event-ordering rule for equal `effectiveAt` values.
+
+A future lifecycle implementation must not simply redefine `release_is_published()` as "currently visible": doing so would make a REVOKED release mutable again because immutability triggers rely on the same predicate. The next lifecycle work package must separate:
+
+- ever-published / permanently immutable state;
+- currently publicly servable lifecycle state;
+- channel-pointer eligibility;
+- deterministic REVOKED / REACTIVATED ordering and tests.
+
+Until that contract is explicitly closed, revoke/reactivate behavior is not treated as implemented. This gap does not invalidate `CORE-FZ-WB-001` or `CORE-FZ-WB-003`, whose requirements concern whole-Bible coverage/navigation and the release-pinned public reader.
+
 ## Latest push intent
 
-Close WB-1 on machine-auditable whole-corpus evidence and advance the implementation frontier to WB-2. The accepted relational import preserves the complete configured WB-CORPUS-001 provider record set in Authoring, keeps 1,138 unresolved cross-framework references explicit rather than guessed, preserves empty-source BHSA nodes without invented text, keeps every automatic mapping non-canonical, preserves WB-0 stable identities, and writes no real BHSA/bridging corpus rows to Serving. `CORE-FZ-WB-002` is now PASS; `CORE-FZ-WB-001` remains pending end-user navigation verification and `CORE-FZ-WB-003` remains pending rights-safe release-pinned Serving/reader implementation. The closeout head must rerun all required deterministic GitHub Actions before merge.
+Record exact-head acceptance of WB-2/WB-3 after every required whole-Bible, database, contract, governance, web integration, visual E2E and production-build gate passed on `21a2cedafb394b84d51e244de6ff37bbac4d6a82`. Promote only `CORE-FZ-WB-001` and `CORE-FZ-WB-003`, which are directly supported by the evidence. Preserve the independently identified REVOKED/REACTIVATED lifecycle predicate ambiguity as a separate next work package rather than silently inventing event ordering or weakening immutable-release guarantees.

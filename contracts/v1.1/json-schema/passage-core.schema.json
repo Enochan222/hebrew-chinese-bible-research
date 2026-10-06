@@ -46,7 +46,246 @@
           "type": "null"
         }
       ]
+    },
+    "dataSource": {
+      "enum": [
+        "FIXTURE",
+        "SERVING"
+      ]
+    },
+    "hebrewText": {
+      "type": "string"
+    },
+    "tokens": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "analysisNodeId",
+          "textSegmentId",
+          "surface"
+        ],
+        "properties": {
+          "analysisNodeId": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+          },
+          "textSegmentId": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+          },
+          "surface": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lemmaRaw": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "morphRaw": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "navigation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "previousReference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "nextReference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "currentBookCode": {
+          "type": "string",
+          "minLength": 1
+        },
+        "currentChapter": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "books": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "bookCode",
+              "firstReference"
+            ],
+            "properties": {
+              "bookCode": {
+                "type": "string",
+                "minLength": 1
+              },
+              "firstReference": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "chapters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "chapterNumber",
+              "firstReference"
+            ],
+            "properties": {
+              "chapterNumber": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "firstReference": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "passages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "referenceLabel"
+            ],
+            "properties": {
+              "referenceLabel": {
+                "type": "string",
+                "minLength": 1
+              },
+              "verseLabel": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "attribution": {
+      "type": "string",
+      "minLength": 1
+    },
+    "textReconstructionStatus": {
+      "enum": [
+        "OSHB_WORD_TOKENS_ONLY"
+      ]
     }
   },
-  "description": "Core passage envelope. Canonical ReferenceSpan identity is always present. A resolved human label is included when the request used a ReferenceSystem-aware label; direct ReferenceSpan requests need not invent a display system."
+  "description": "Core passage envelope. Canonical ReferenceSpan identity is always present. A resolved human label is included when the request used a ReferenceSystem-aware label. Published Serving responses may add an OSHB word-token sequence, morphology, navigation and attribution. OSHB_WORD_TOKENS_ONLY explicitly means punctuation/orthographic <seg> nodes such as maqqef, paseq and sof pasuq have not been reconstructed into the display string.",
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "dataSource"
+        ],
+        "properties": {
+          "dataSource": {
+            "const": "SERVING"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "resolvedReference",
+          "hebrewText",
+          "tokens",
+          "navigation",
+          "attribution",
+          "textReconstructionStatus"
+        ],
+        "properties": {
+          "resolvedReference": {
+            "type": "object"
+          },
+          "hebrewText": {
+            "type": "string",
+            "minLength": 1
+          },
+          "tokens": {
+            "type": "array",
+            "minItems": 1
+          },
+          "navigation": {
+            "required": [
+              "currentBookCode",
+              "currentChapter",
+              "previousReference",
+              "nextReference",
+              "books",
+              "chapters",
+              "passages"
+            ],
+            "properties": {
+              "currentBookCode": {
+                "type": "string",
+                "minLength": 1
+              },
+              "currentChapter": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "books": {
+                "type": "array",
+                "minItems": 1
+              },
+              "chapters": {
+                "type": "array",
+                "minItems": 1
+              },
+              "passages": {
+                "type": "array",
+                "minItems": 1
+              },
+              "previousReference": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "nextReference": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "type": "object"
+          },
+          "attribution": {
+            "type": "string",
+            "minLength": 1
+          },
+          "textReconstructionStatus": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  ]
 }

@@ -13,6 +13,6 @@ export class FixturePassageReader implements PassageReadPort {
     ) {
       return null;
     }
-    return fixture.passageCore;
+    return { ...fixture.passageCore, dataSource: "FIXTURE" as const };
   }
 }

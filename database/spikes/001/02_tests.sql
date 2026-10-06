@@ -699,4 +699,312 @@ RESET ROLE;
 
 ALTER SCHEMA authoring_offline RENAME TO authoring;
 
+
+-- WB-2/WB-3: publication must fail closed when a CORPUS component lacks public full-text rights.
+DELETE FROM serving.rights_decision_snapshots
+WHERE rights_decision_snapshot_id='45200000-0000-4000-8000-000000000003';
+
+SET ROLE publication_worker;
+DO $wb2_missing_corpus_rights$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    PERFORM publication_control.publish_release_to_channel(
+      'PRODUCTION','47000000-0000-4000-8000-000000000002',NULL,false
+    );
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN
+    RAISE EXCEPTION 'release publication without corpus DISPLAY_FULLTEXT rights must fail';
+  END IF;
+END
+$wb2_missing_corpus_rights$;
+RESET ROLE;
+
+INSERT INTO serving.rights_decision_snapshots(
+  rights_decision_snapshot_id,subject_type,subject_identifier,operation,purpose_scope,audience_scope,
+  commercial_context,applicable_rule_ids,winning_rule_ids,decision,decision_basis,obligations_json,
+  resolver_version,evaluated_at,decision_hash
+) VALUES (
+  '45200000-0000-4000-8000-000000000003','CORPUS_RELEASE','30000000-0000-4000-8000-000000000001',
+  'DISPLAY_FULLTEXT','PUBLIC_DISPLAY','PUBLIC','MIXED',
+  ARRAY['45100000-0000-4000-8000-000000000004'::uuid],
+  ARRAY['45100000-0000-4000-8000-000000000004'::uuid],
+  'CONDITIONAL','RULE',
+  '[{"obligationType":"ATTRIBUTION","value":"Fixture Hebrew attribution"}]'::jsonb,
+  'spike-rights-1',now(),'5656565656565656565656565656565656565656565656565656565656565656'
+);
+
+-- WB-3: public runtime reads the release-pinned Serving projection, not Authoring.
+SET ROLE anon;
+SELECT spike_test.assert_true(
+  serving.read_passage_core(
+    '47000000-0000-4000-8000-000000000001','MT_TEST','1 Sam 16:7'
+  )->>'referenceSpanId' = '13000000-0000-4000-8000-000000000001',
+  'Serving passage RPC must resolve the pinned ReferenceSpan'
+);
+SELECT spike_test.assert_true(
+  serving.read_passage_core(
+    '47000000-0000-4000-8000-000000000001','MT_TEST','1 Sam 16:7'
+  )->>'hebrewText' = 'יראה עינים',
+  'Serving passage RPC must reconstruct Hebrew surface from published text segments'
+);
+SELECT spike_test.assert_true(
+  jsonb_array_length(
+    serving.read_passage_core(
+      '47000000-0000-4000-8000-000000000001','MT_TEST','1 Sam 16:7'
+    )->'tokens'
+  ) = 2,
+  'Serving passage RPC must return published word tokens only'
+);
+RESET ROLE;
+
 DROP SCHEMA spike_test CASCADE;
+
+
+-- WB-2 RED: database rights obligation JSON must use the canonical contract key obligationType.
+DO $wb2_obligation_type_contract$
+DECLARE
+  inserted boolean := false;
+BEGIN
+  BEGIN
+    INSERT INTO serving.rights_decision_snapshots(
+      rights_decision_snapshot_id,subject_type,subject_identifier,operation,purpose_scope,
+      audience_scope,commercial_context,applicable_rule_ids,winning_rule_ids,
+      decision,decision_basis,conditions_json,obligations_json,resolver_version,evaluated_at,decision_hash
+    ) VALUES (
+      '45200000-0000-4000-8000-0000000000a1','CORPUS_RELEASE',
+      '30000000-0000-4000-8000-000000000001','DISPLAY_FULLTEXT','PUBLIC_DISPLAY',
+      'PUBLIC','MIXED',ARRAY['45100000-0000-4000-8000-000000000001'::uuid],
+      ARRAY['45100000-0000-4000-8000-000000000001'::uuid],
+      'CONDITIONAL','RULE',NULL,
+      '[{"obligationType":"ATTRIBUTION","value":"Open Scriptures Hebrew Bible attribution fixture"}]'::jsonb,
+      'wb2-red-contract',now(),'abababababababababababababababababababababababababababababababab'
+    );
+    inserted := true;
+  EXCEPTION WHEN check_violation THEN
+    inserted := false;
+  END;
+  IF NOT inserted THEN
+    RAISE EXCEPTION 'canonical RightsDecisionSnapshot obligationType payload must be accepted by PostgreSQL';
+  END IF;
+  DELETE FROM serving.rights_decision_snapshots
+  WHERE rights_decision_snapshot_id='45200000-0000-4000-8000-0000000000a1';
+END
+$wb2_obligation_type_contract$;
+
+-- WB-2 GREEN: reject the legacy obligation key so SQL and JSON Schema cannot diverge again.
+DO $wb2_reject_legacy_obligation_key$
+DECLARE
+  inserted boolean := false;
+BEGIN
+  BEGIN
+    INSERT INTO serving.rights_decision_snapshots(
+      rights_decision_snapshot_id,subject_type,subject_identifier,operation,purpose_scope,
+      audience_scope,commercial_context,applicable_rule_ids,winning_rule_ids,
+      decision,decision_basis,conditions_json,obligations_json,resolver_version,evaluated_at,decision_hash
+    ) VALUES (
+      '45200000-0000-4000-8000-0000000000a2','CORPUS_RELEASE',
+      '30000000-0000-4000-8000-000000000001','DISPLAY_FULLTEXT','PUBLIC_DISPLAY',
+      'PUBLIC','MIXED',ARRAY['45100000-0000-4000-8000-000000000001'::uuid],
+      ARRAY['45100000-0000-4000-8000-000000000001'::uuid],
+      'CONDITIONAL','RULE',NULL,
+      '[{"type":"ATTRIBUTION","value":"legacy key must fail"}]'::jsonb,
+      'wb2-green-contract',now(),'acacacacacacacacacacacacacacacacacacacacacacacacacacacacacacacac'
+    );
+    inserted := true;
+  EXCEPTION WHEN check_violation THEN
+    inserted := false;
+  END;
+  IF inserted THEN
+    RAISE EXCEPTION 'legacy rights obligation type key must be rejected';
+  END IF;
+END
+$wb2_reject_legacy_obligation_key$;
+
+
+
+-- WB-2 hardening: complete semantic parity with canonical v1.1 rights JSON.
+DO $wb2_rights_contract_parity$
+DECLARE
+  valid_conditions jsonb := '[
+    {"conditionSchemaId":"AUTHENTICATED_AUDIENCE","conditionSchemaVersion":"1.0","evaluatorVersion":"test-1","payload":{"required":true}},
+    {"conditionSchemaId":"TERRITORY_ALLOWLIST","conditionSchemaVersion":"1.0","evaluatorVersion":"test-1","payload":{"territories":["HK","GB"]}},
+    {"conditionSchemaId":"PURPOSE_ALLOWLIST","conditionSchemaVersion":"1.0","evaluatorVersion":"test-1","payload":{"purposes":["PUBLICATION","PUBLIC_DISPLAY"]}},
+    {"conditionSchemaId":"COMMERCIAL_CONTEXT_ALLOWLIST","conditionSchemaVersion":"1.0","evaluatorVersion":"test-1","payload":{"contexts":["COMMERCIAL","MIXED"]}},
+    {"conditionSchemaId":"PROVIDER_TERMS_VERSION","conditionSchemaVersion":"1.0","evaluatorVersion":"test-1","payload":{"providerTermsVersion":"2026-10"}}
+  ]'::jsonb;
+  valid_obligations jsonb := '[
+    {"obligationType":"ATTRIBUTION","value":"Required attribution"},
+    {"obligationType":"MAX_EXCERPT","value":25,"unit":"WORD"},
+    {"obligationType":"RETENTION_LIMIT","value":30,"unit":"DAY"},
+    {"obligationType":"AUTHENTICATED_ONLY"},
+    {"obligationType":"TERRITORY_LIMIT","value":["HK","GB"]},
+    {"obligationType":"TEMPORARY_PROCESSING_ONLY"}
+  ]'::jsonb;
+BEGIN
+  IF NOT authoring.valid_rights_conditions(valid_conditions)
+     OR NOT serving.valid_rights_conditions(valid_conditions) THEN
+    RAISE EXCEPTION 'all canonical RightsCondition variants must validate in both schemas';
+  END IF;
+  IF NOT authoring.valid_rights_obligations(valid_obligations)
+     OR NOT serving.valid_rights_obligations(valid_obligations) THEN
+    RAISE EXCEPTION 'all canonical rights obligation variants must validate in both schemas';
+  END IF;
+  IF authoring.valid_rights_conditions(
+       '[{"conditionSchemaId":"PURPOSE_ALLOWLIST","conditionSchemaVersion":"2.0","evaluatorVersion":"x","payload":{"purposes":["PUBLIC_DISPLAY"]}}]'::jsonb)
+     OR serving.valid_rights_conditions(
+       '[{"conditionSchemaId":"PURPOSE_ALLOWLIST","conditionSchemaVersion":"2.0","evaluatorVersion":"x","payload":{"purposes":["PUBLIC_DISPLAY"]}}]'::jsonb) THEN
+    RAISE EXCEPTION 'non-canonical RightsCondition schema versions must fail closed';
+  END IF;
+  IF authoring.valid_rights_conditions(
+       '[{"conditionSchemaId":"PURPOSE_ALLOWLIST","conditionSchemaVersion":"1.0","evaluatorVersion":"x","payload":{"purposes":["NOT_A_PURPOSE"]}}]'::jsonb)
+     OR serving.valid_rights_conditions(
+       '[{"conditionSchemaId":"PURPOSE_ALLOWLIST","conditionSchemaVersion":"1.0","evaluatorVersion":"x","payload":{"purposes":["NOT_A_PURPOSE"]}}]'::jsonb) THEN
+    RAISE EXCEPTION 'invalid RightsCondition payload enums must fail closed';
+  END IF;
+  IF authoring.valid_rights_obligations(
+       '[{"obligationType":"TERRITORY_LIMIT","value":["HK","HK"]}]'::jsonb)
+     OR serving.valid_rights_obligations(
+       '[{"obligationType":"TERRITORY_LIMIT","value":["HK","HK"]}]'::jsonb) THEN
+    RAISE EXCEPTION 'duplicate TERRITORY_LIMIT members must fail closed';
+  END IF;
+  IF authoring.valid_rights_obligations(
+       '[{"obligationType":"AUTHENTICATED_ONLY","value":"unexpected"}]'::jsonb)
+     OR serving.valid_rights_obligations(
+       '[{"obligationType":"AUTHENTICATED_ONLY","value":"unexpected"}]'::jsonb) THEN
+    RAISE EXCEPTION 'obligation additional properties must fail closed';
+  END IF;
+END
+$wb2_rights_contract_parity$;
+
+
+-- WB-2 hardening: RightsDecisionSnapshot table semantics must match the
+-- canonical v1.1 JSON Schema, not only its nested condition/obligation parsers.
+DO $wb2_snapshot_contract_parity$
+DECLARE
+  failed boolean;
+BEGIN
+  IF NOT serving.uuid_array_is_unique(ARRAY[]::uuid[])
+     OR serving.uuid_array_is_unique(ARRAY[
+       '90000000-0000-4000-8000-000000000001'::uuid,
+       '90000000-0000-4000-8000-000000000001'::uuid
+     ]) THEN
+    RAISE EXCEPTION 'uuid array uniqueness helper does not match JSON Schema uniqueItems';
+  END IF;
+
+  failed := false;
+  BEGIN
+    INSERT INTO serving.rights_decision_snapshots(
+      rights_decision_snapshot_id,subject_type,subject_identifier,operation,
+      purpose_scope,audience_scope,commercial_context,applicable_rule_ids,winning_rule_ids,
+      decision,decision_basis,conditions_json,obligations_json,resolver_version,evaluated_at,decision_hash
+    ) VALUES (
+      '9f000000-0000-4000-8000-000000000001','NOT_A_SUBJECT',
+      '9f000000-0000-4000-8000-000000000101','DISPLAY_FULLTEXT',
+      'PUBLIC_DISPLAY','PUBLIC','COMMERCIAL','{}','{}','DENY','DEFAULT_DENY',
+      NULL,'[]','rights-test-1',now(),repeat('a',64)
+    );
+  EXCEPTION WHEN check_violation THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'invalid subjectType must fail closed'; END IF;
+
+  failed := false;
+  BEGIN
+    INSERT INTO serving.rights_decision_snapshots(
+      rights_decision_snapshot_id,subject_type,subject_identifier,operation,
+      purpose_scope,audience_scope,commercial_context,applicable_rule_ids,winning_rule_ids,
+      decision,decision_basis,conditions_json,obligations_json,resolver_version,evaluated_at,decision_hash
+    ) VALUES (
+      '9f000000-0000-4000-8000-000000000002','CORPUS_RELEASE',
+      '9f000000-0000-4000-8000-000000000102','NOT_AN_OPERATION',
+      'PUBLIC_DISPLAY','PUBLIC','COMMERCIAL','{}','{}','DENY','DEFAULT_DENY',
+      NULL,'[]','rights-test-1',now(),repeat('b',64)
+    );
+  EXCEPTION WHEN check_violation THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'invalid operation must fail closed'; END IF;
+
+  failed := false;
+  BEGIN
+    INSERT INTO serving.rights_decision_snapshots(
+      rights_decision_snapshot_id,subject_type,subject_identifier,operation,
+      purpose_scope,audience_scope,commercial_context,applicable_rule_ids,winning_rule_ids,
+      decision,decision_basis,conditions_json,obligations_json,resolver_version,evaluated_at,decision_hash
+    ) VALUES (
+      '9f000000-0000-4000-8000-000000000003','CORPUS_RELEASE',
+      '9f000000-0000-4000-8000-000000000103','DISPLAY_FULLTEXT',
+      'PUBLIC_DISPLAY','PUBLIC','COMMERCIAL',
+      ARRAY['9f100000-0000-4000-8000-000000000001'::uuid,'9f100000-0000-4000-8000-000000000001'::uuid],
+      '{}','DENY','DEFAULT_DENY',NULL,'[]','rights-test-1',now(),repeat('c',64)
+    );
+  EXCEPTION WHEN check_violation THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'duplicate applicableRuleIds must fail closed'; END IF;
+
+  failed := false;
+  BEGIN
+    INSERT INTO serving.rights_decision_snapshots(
+      rights_decision_snapshot_id,subject_type,subject_identifier,operation,
+      purpose_scope,audience_scope,commercial_context,applicable_rule_ids,winning_rule_ids,
+      decision,decision_basis,conditions_json,obligations_json,resolver_version,evaluated_at,decision_hash
+    ) VALUES (
+      '9f000000-0000-4000-8000-000000000004','CORPUS_RELEASE',
+      '9f000000-0000-4000-8000-000000000104','DISPLAY_FULLTEXT',
+      'PUBLIC_DISPLAY','PUBLIC','COMMERCIAL','{}','{}','DENY','DEFAULT_DENY',
+      NULL,'[{"obligationType":"AUTHENTICATED_ONLY"}]','rights-test-1',now(),repeat('d',64)
+    );
+  EXCEPTION WHEN check_violation THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'DEFAULT_DENY with obligations must fail closed'; END IF;
+
+  failed := false;
+  BEGIN
+    INSERT INTO serving.rights_decision_snapshots(
+      rights_decision_snapshot_id,subject_type,subject_identifier,operation,
+      purpose_scope,audience_scope,commercial_context,applicable_rule_ids,winning_rule_ids,
+      decision,decision_basis,conditions_json,obligations_json,resolver_version,evaluated_at,decision_hash
+    ) VALUES (
+      '9f000000-0000-4000-8000-000000000005','CORPUS_RELEASE',
+      '9f000000-0000-4000-8000-000000000105','DISPLAY_FULLTEXT',
+      'PUBLIC_DISPLAY','PUBLIC','COMMERCIAL','{}','{}','DENY','UNKNOWN_RESTRICTIVE',
+      '[{"conditionSchemaId":"AUTHENTICATED_AUDIENCE","conditionSchemaVersion":"1.0","evaluatorVersion":"x","payload":{"required":true}}]',
+      '[]','rights-test-1',now(),repeat('e',64)
+    );
+  EXCEPTION WHEN check_violation THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'UNKNOWN_RESTRICTIVE with conditions must fail closed'; END IF;
+
+  failed := false;
+  BEGIN
+    INSERT INTO serving.rights_decision_snapshots(
+      rights_decision_snapshot_id,subject_type,subject_identifier,operation,
+      purpose_scope,audience_scope,commercial_context,applicable_rule_ids,winning_rule_ids,
+      decision,decision_basis,conditions_json,obligations_json,resolver_version,evaluated_at,decision_hash
+    ) VALUES (
+      '9f000000-0000-4000-8000-000000000006','CORPUS_RELEASE',
+      '9f000000-0000-4000-8000-000000000106','DISPLAY_FULLTEXT',
+      'PUBLIC_DISPLAY','PUBLIC','COMMERCIAL','{}','{}','DENY','DEFAULT_DENY',
+      NULL,'[]','',now(),repeat('f',64)
+    );
+  EXCEPTION WHEN check_violation THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'empty resolverVersion must fail closed'; END IF;
+
+  failed := false;
+  BEGIN
+    INSERT INTO serving.rights_decision_snapshots(
+      rights_decision_snapshot_id,subject_type,subject_identifier,operation,
+      purpose_scope,audience_scope,commercial_context,applicable_rule_ids,winning_rule_ids,
+      decision,decision_basis,conditions_json,obligations_json,resolver_version,evaluated_at,decision_hash
+    ) VALUES (
+      '9f000000-0000-4000-8000-000000000007','CORPUS_RELEASE',
+      '9f000000-0000-4000-8000-000000000107','DISPLAY_FULLTEXT',
+      'PUBLIC_DISPLAY','PUBLIC','COMMERCIAL','{}','{}','DENY','DEFAULT_DENY',
+      NULL,'[]','rights-test-1',now(),'not-a-sha256'
+    );
+  EXCEPTION WHEN check_violation THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'invalid decisionHash must fail closed'; END IF;
+END
+$wb2_snapshot_contract_parity$;
