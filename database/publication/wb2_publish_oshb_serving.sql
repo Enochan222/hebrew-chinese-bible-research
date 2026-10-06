@@ -56,7 +56,7 @@ INSERT INTO serving.research_objects(
 )
 SELECT cr.corpus_release_id,'CORPUS_RELEASE',cr.source_checksum,now()
 FROM authoring.corpus_releases cr
-WHERE cr.corpus_release_id = :'oshb_corpus_id'::uuid;
+WHERE cr.corpus_release_id = current_setting('wb2.oshb_corpus_id')::uuid;
 
 -- Project the exact verse spans needed by the OSHB word layer.
 INSERT INTO serving.reference_spans(
@@ -178,7 +178,7 @@ SELECT
 FROM authoring.analysis_node_segments ns
 JOIN authoring.analysis_nodes n USING (analysis_node_id)
 JOIN serving.corpus_text_segments sts
-  ON sts.corpus_release_id = :'oshb_corpus_id'::uuid
+  ON sts.corpus_release_id = current_setting('wb2.oshb_corpus_id')::uuid
  AND sts.text_segment_id = ns.text_segment_id
 WHERE n.annotation_layer_id = :'oshb_layer_id'::uuid;
 
@@ -220,9 +220,9 @@ SELECT
   encode(sha256(convert_to(concat_ws('|',
     :'oshb_corpus_id',
     :'oshb_checksum',
-    (SELECT count(*)::text FROM serving.reference_labels WHERE corpus_release_id=:'oshb_corpus_id'::uuid),
-    (SELECT count(*)::text FROM serving.corpus_nodes WHERE corpus_release_id=:'oshb_corpus_id'::uuid),
-    (SELECT count(*)::text FROM serving.corpus_text_segments WHERE corpus_release_id=:'oshb_corpus_id'::uuid)
+    (SELECT count(*)::text FROM serving.reference_labels WHERE corpus_release_id=current_setting('wb2.oshb_corpus_id')::uuid),
+    (SELECT count(*)::text FROM serving.corpus_nodes WHERE corpus_release_id=current_setting('wb2.oshb_corpus_id')::uuid),
+    (SELECT count(*)::text FROM serving.corpus_text_segments WHERE corpus_release_id=current_setting('wb2.oshb_corpus_id')::uuid)
   ),'UTF8')),'hex'),
   'SHA256','RFC8785_JSON_CANONICALIZATION_SCHEME',:'GIT_SHA','wb2-serving-compiler-1';
 
@@ -241,6 +241,7 @@ SELECT publication_control.publish_release_to_channel(
 );
 
 -- Fail closed on any whole-corpus drift.
+SELECT set_config('wb2.oshb_corpus_id', :'oshb_corpus_id', true);
 DO $wb2_acceptance$
 DECLARE
   ref_count bigint;
@@ -254,23 +255,23 @@ DECLARE
 BEGIN
   SELECT count(*) INTO ref_count
   FROM serving.reference_labels
-  WHERE corpus_release_id=:'oshb_corpus_id'::uuid;
+  WHERE corpus_release_id=current_setting('wb2.oshb_corpus_id')::uuid;
 
   SELECT count(*) INTO node_count
   FROM serving.corpus_nodes
-  WHERE corpus_release_id=:'oshb_corpus_id'::uuid;
+  WHERE corpus_release_id=current_setting('wb2.oshb_corpus_id')::uuid;
 
   SELECT count(*) INTO segment_count
   FROM serving.corpus_text_segments
-  WHERE corpus_release_id=:'oshb_corpus_id'::uuid;
+  WHERE corpus_release_id=current_setting('wb2.oshb_corpus_id')::uuid;
 
   SELECT count(*) INTO membership_count
   FROM serving.corpus_node_segments
-  WHERE corpus_release_id=:'oshb_corpus_id'::uuid;
+  WHERE corpus_release_id=current_setting('wb2.oshb_corpus_id')::uuid;
 
   SELECT count(*) INTO bhsa_rows
   FROM serving.corpus_node_features
-  WHERE corpus_release_id=:'oshb_corpus_id'::uuid
+  WHERE corpus_release_id=current_setting('wb2.oshb_corpus_id')::uuid
     AND feature_key='SOURCE_KEY'
     AND feature_value <> 'OSHB_MORPHHB';
 
@@ -315,7 +316,7 @@ BEGIN
        AND x.reference_system_id=current_label.reference_system_id
        AND x.reference_sort_key > current_label.reference_sort_key
    )
-  WHERE current_label.corpus_release_id=:'oshb_corpus_id'::uuid
+  WHERE current_label.corpus_release_id=current_setting('wb2.oshb_corpus_id')::uuid
     AND current_label.book_code='Gen'
     AND next_label.book_code <> current_label.book_code
   ORDER BY current_label.reference_sort_key DESC
