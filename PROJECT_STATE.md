@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-06.8**
+State Revision: **2026-10-06.9**
 
 ## Mandatory governance rule
 
@@ -367,10 +367,12 @@ Current RL-1 candidate:
 - does not restore a channel pointer automatically on REACTIVATED;
 - keeps rollback as a pointer move only, without appending lifecycle events to either release;
 - updates public Serving RLS and current-release resolution to use current servability while all post-publication mutation guards use permanent ever-published state;
-- adds Database Spike adversarial coverage plus a real whole-Bible WB-2/WB-3 revoke/reactivate regression.
+- adds Database Spike adversarial coverage plus a real whole-Bible WB-2/WB-3 revoke/reactivate regression;
+- the first real whole-Bible lifecycle run correctly hid the revoked release but exposed a pre-existing immutability gap: `serving.corpus_text_segments` could still be updated after publication because WB-2 text/label/membership tables had never received component-lock triggers;
+- the repair closes that whole mutation surface, adding component locks to reference labels, text segments and node/segment memberships, plus append-only update/delete guards for Serving research-object identities, reference spans/systems and RightsDecisionSnapshots; synthetic tests now attack each of those surfaces explicitly.
 
-`CORE-FZ-RELEASE-002` is **PENDING** until the exact PR head passes Contract validation, Database Spike RL-1 tests, WB-2/WB-3 real whole-Bible lifecycle regression and existing governance/regression gates.
+`CORE-FZ-RELEASE-002` is **PENDING** until the repaired exact PR head passes Contract validation, Database Spike RL-1 tests, WB-2/WB-3 real whole-Bible lifecycle regression and existing governance/regression gates.
 
 ## Latest push intent
 
-Implement RL-1 as the governed release-lifecycle closure required after WB-2/WB-3 acceptance. The candidate introduces deterministic event sequencing and an explicit transition machine, separates permanent immutability from current public servability, makes revocation remove channel/public visibility without reopening mutation, requires explicit reactivation before a release can serve again, and preserves rollback as pointer-only. No WB-4/WB-5 translation or Corpus Lab semantics are introduced in this work package. `CORE-FZ-RELEASE-002` remains pending until exact-head machine evidence passes.
+Continue RL-1 after real WB-2/WB-3 evidence exposed an actual post-publication mutation gap rather than weakening the lifecycle test. The repaired candidate now freezes every release-pinned Serving payload surface after first publication and treats core Serving identities/rights snapshots as append-only. Revocation must therefore remove public/channel servability while leaving both old synthetic payloads and the real 306,785-word OSHB projection permanently immutable. `CORE-FZ-RELEASE-002` remains pending until this repaired exact head reruns the complete chain.
