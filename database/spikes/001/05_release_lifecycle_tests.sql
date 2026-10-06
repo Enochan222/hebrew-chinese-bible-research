@@ -175,6 +175,20 @@ SELECT rl1_test.assert_true(
 );
 RESET ROLE;
 
+SET ROLE authenticated;
+SELECT rl1_test.assert_true(
+  (SELECT count(*) FROM serving.research_releases
+   WHERE research_release_id='47000000-0000-4000-8000-000000000002') = 0,
+  'authenticated must not see revoked ResearchRelease'
+);
+SELECT rl1_test.assert_true(
+  serving.read_passage_core(
+    '47000000-0000-4000-8000-000000000002','MT_TEST','1 Sam 16:7'
+  ) IS NULL,
+  'authenticated pinned passage serving must fail closed for revoked release'
+);
+RESET ROLE;
+
 -- Revocation never restores mutability.
 DO $rl1_revoked_immutable$
 DECLARE failed boolean := false;
