@@ -2635,6 +2635,18 @@ Every row must pin:
 
 Serving projections are disposable compiler outputs and may be regenerated from canonical data.
 
+WB-2 makes the first whole-corpus projection concrete with:
+
+- `serving.corpus_text_segments`: rights-approved public text segments for one pinned CorpusRelease;
+- `serving.corpus_node_segments`: release-scoped node/text membership;
+- `serving.passage_reference_index`: Serving-owned ReferenceSystem label -> ReferenceSpan resolution;
+- `serving.corpus_attributions`: obligations that must accompany a published corpus;
+- `serving.corpus_projection_rights`: non-public binding from CorpusRelease + operation to the exact RightsDecisionSnapshot used by the compiler.
+
+A public text segment may be materialized only when both persistent-storage and public-display decisions authorize the operation. A conditional display decision is acceptable only when all machine obligations required for that projection are materialized. Initial WB-2 therefore projects OSHB and fails closed for BHSA/ETCBC bridging until explicit rights review permits those public/commercial operations.
+
+The inactive candidate release is not visible to `anon`/`authenticated`; publication visibility changes only through the existing Serving-database publish transaction and channel pointer.
+
 They must not silently introduce framework-neutral phrase or clause identity.
 
 ---
