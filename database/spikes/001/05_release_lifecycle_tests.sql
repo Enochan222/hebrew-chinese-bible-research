@@ -15,6 +15,9 @@ BEGIN
 END
 $rl1_assert$;
 
+GRANT USAGE ON SCHEMA rl1_test TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION rl1_test.assert_true(boolean,text) TO anon, authenticated;
+
 -- Both controlled releases were first published by the existing spike path.
 SELECT rl1_test.assert_true(
   serving.release_was_published('47000000-0000-4000-8000-000000000001'),
