@@ -292,7 +292,33 @@ Append-only lifecycle history:
 - REVOKED
 - REACTIVATED
 
-Superseding or revoking a release does not mutate its scholarly payload.
+RL-1 separates two different predicates that must never be conflated:
+
+1. **ever published / permanently immutable**: once a ResearchRelease receives its first PUBLISHED event, the release, components and compiled payload/projections remain immutable forever, including while REVOKED;
+2. **currently publicly servable**: public RLS, pinned passage reads and channel eligibility depend on the latest lifecycle event.
+
+Every event carries a positive per-release `event_sequence`. Sequence starts at 1 and is contiguous. `effective_at` is nondecreasing, but equal timestamps are explicitly allowed; `event_sequence`, never UUID ordering, resolves equal-time chronology.
+
+Canonical transition graph:
+
+```text
+(no event) -> PUBLISHED
+PUBLISHED  -> SUPERSEDED | REVOKED
+SUPERSEDED -> REVOKED
+REVOKED    -> REACTIVATED
+REACTIVATED -> SUPERSEDED | REVOKED
+```
+
+Public servability policy:
+
+- PUBLISHED: servable;
+- SUPERSEDED: servable as a citation-stable historical pinned release;
+- REVOKED: not servable;
+- REACTIVATED: servable again.
+
+Superseding, revoking or reactivating a release never mutates its scholarly payload.
+
+Machine authority: `contracts/v1.1/release-lifecycle-policy.json`.
 
 ### 5.5 Release channels
 
@@ -304,7 +330,9 @@ Canonical channels:
 - STAGING
 - PRODUCTION
 
-Rollback updates a channel pointer to an earlier valid ResearchRelease.
+A channel pointer may target only a currently publicly servable ResearchRelease. REVOKED atomically removes any pointer to that release. REACTIVATED restores servability but never restores a channel pointer automatically.
+
+Rollback updates a channel pointer to an earlier currently servable ResearchRelease. It does not append lifecycle events or mutate either release.
 
 ## 6. Manifest integrity
 
