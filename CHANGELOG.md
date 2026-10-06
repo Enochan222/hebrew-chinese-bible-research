@@ -5,6 +5,28 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
 
+## 2026-10-06 — Remove non-canonical Serving capability keys
+
+### Push intent
+
+Fix the remaining P1 integration failure after runtime capability validation was enabled.
+
+### Why
+
+The Serving capability adapter emitted PASSAGE_RESEARCH, HEBREW_TEXT and TRANSLATION_WITNESSES, but none of those names exists in the canonical ExperienceCapabilities v1.1 feature vocabulary. The passage API did not read capabilities, so it passed; full page rendering did and correctly failed closed with CONTRACT_VIOLATION.
+
+### What changed
+
+- remove the three ad hoc feature-decision keys from ServingCapabilityReader;
+- keep PASSAGE_STUDY as the canonical base-reader capability;
+- keep STUDY and RESEARCH experience modes in experienceModesAllowed;
+- leave translation and Research Pro capability expansion to an explicit future contract revision rather than silently widening the schema.
+
+### Validation
+
+P1 integration, Serving E2E/visual capture and production build must rerun on the new exact head. Previously green database, corpus, rights and contract gates must remain green.
+
+
 ## 2026-10-06 — Enforce full RightsDecisionSnapshot table parity
 
 ### Push intent

@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-06.4**
+State Revision: **2026-10-06.5**
 
 ## Mandatory governance rule
 
@@ -351,4 +351,4 @@ The synchronized exact head must prove 39-book navigation index coverage, Genesi
 
 ## Latest push intent
 
-Complete the WB-2 rights-contract parity audit at the persisted RightsDecisionSnapshot boundary. Nested condition/obligation validators now match the canonical v1.1 language, but the snapshot table itself still lacked canonical enum checks, JSON-Schema-style uniqueness for rule-ID arrays, resolver/hash format constraints, and the requirement that DEFAULT_DENY / UNKNOWN_RESTRICTIVE carry no conditions or obligations. This revision adds those table-level constraints and adversarial insert tests. Exact-head CI must rerun before acceptance.
+Repair the remaining P1 integration regression after unit, database, corpus, contract and WB-2/WB-3 gates turned green. Runtime AJV validation exposed that ServingCapabilityReader emitted three feature keys outside the canonical ExperienceCapabilities vocabulary: PASSAGE_RESEARCH, HEBREW_TEXT and TRANSLATION_WITNESSES. This revision removes that schema drift instead of weakening the contract. Research mode remains represented by experienceModesAllowed, while Hebrew passage availability is represented by PassageCore. Later translation and Research Pro capabilities require an explicit versioned contract change. Exact-head web integration/E2E/build validation must rerun.

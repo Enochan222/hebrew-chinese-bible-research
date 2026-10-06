@@ -12,13 +12,8 @@ export class ServingCapabilityReader implements ExperienceCapabilityPort {
       experienceModesAllowed: ["STUDY", "RESEARCH"],
       featureDecisions: {
         PASSAGE_STUDY: "ALLOW",
-        PASSAGE_RESEARCH: "ALLOW",
-        HEBREW_TEXT: "ALLOW",
-        TRANSLATION_WITNESSES: "DENY",
       },
-      reasonCodes: {
-        TRANSLATION_WITNESSES: "NOT_IN_RESEARCH_RELEASE",
-      },
+      reasonCodes: {},
       validUntil: null,
     };
     assertContract<ExperienceCapabilitiesV1>("experienceCapabilities", capabilities);
