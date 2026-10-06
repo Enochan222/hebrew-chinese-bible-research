@@ -33,7 +33,7 @@ WB-2 should prove that whole-Bible OSHB text can cross the publication firewall 
 
 ### Validation
 
-Pending exact-head CI. Acceptance requires: migration success; accepted WB-1 parity; 39 configured books and 23,213 selected references in the Serving passage index; 306,785 rights-approved OSHB nodes/text segments and node-segment memberships; zero BHSA nodes, bridging features or non-OSHB text segments in Serving; invisibility before publication; atomic PRODUCTION publication; representative Genesis, 1 Samuel and 2 Chronicles reads; Authoring isolation; and post-publication projection immutability.
+Pending exact-head CI. Acceptance requires: migration success; accepted WB-1 parity; deterministic Authoring/Serving projection-hash equality with the ResearchRelease CORPUS and ANNOTATION_LAYER components sealed by those hashes; 39 configured books and 23,213 selected references in the Serving passage index; 306,785 rights-approved OSHB nodes/text segments and node-segment memberships; zero BHSA nodes, bridging features or non-OSHB text segments in Serving; invisibility before publication; atomic PRODUCTION publication; representative Genesis, 1 Samuel and 2 Chronicles reads; Authoring isolation; forced RLS on new Serving projection tables; and post-publication projection immutability.
 
 
 ## 2026-10-05 — Implement WB-1 relational whole-corpus candidate
