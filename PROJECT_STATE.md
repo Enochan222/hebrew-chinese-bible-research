@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-06.7**
+State Revision: **2026-10-06.8**
 
 ## Mandatory governance rule
 
@@ -323,9 +323,27 @@ WB-1 acceptance is **PASS** for `CORE-FZ-WB-002`. The synchronized implementatio
 
 1. Preserve contract/governance consistency, the ChatGPT-only project AI policy and the whole-Bible scope guard.
 2. Treat WB-2/WB-3 as accepted whole-Bible base-reader infrastructure and preserve its exact-head regression suite.
-3. Close the separate ResearchRelease lifecycle semantics gap: distinguish "ever published / immutable" from "currently publicly servable" before implementing REVOKED/REACTIVATED behavior; do not overload one predicate for both concerns.
+3. Validate and accept RL-1: the implementation candidate now separates "ever published / immutable" from "currently publicly servable", adds deterministic per-release event sequencing, enforces lifecycle transitions and prevents revoked releases from remaining channel-selected. Do not begin WB-4 publication work until this candidate passes exact-head database/contract/governance regressions.
 4. Complete WB-4/WB-5: add selected translation witnesses, alignment/comparison, project/user translation workflow and deterministic whole-corpus analysis.
 5. Only then make Research Pro provider adapters, ResearchModelAdapter and end-to-end literature builds the primary product implementation frontier; academic enrichment may proceed in parallel where it does not block the base path.
+
+## RL-1 release lifecycle implementation candidate
+
+Issue #25 identified that the accepted WB-2/WB-3 database used one `release_is_published()` predicate for two incompatible concerns: permanent post-publication immutability and current public visibility. The RL-1 candidate removes that overload.
+
+Candidate semantics:
+
+- `eventSequence` is the authoritative per-release lifecycle order; it is gapless from 1 and resolves equal `effectiveAt` timestamps without UUID ordering;
+- the first event is PUBLISHED, and transition validity is enforced in PostgreSQL;
+- ever-published releases and their compiled projections remain permanently immutable even after REVOKED;
+- current public servability is lifecycle-aware: PUBLISHED, SUPERSEDED and REACTIVATED are pinned-readable, while REVOKED and never-published releases are not;
+- SUPERSEDED remains public for citation-stable historical URLs and rollback eligibility;
+- REVOKED atomically detaches channel pointers, and REACTIVATED never silently restores a pointer;
+- channel assignment rejects non-servable releases;
+- public RLS, current-release resolution and release-pinned passage reads use servability rather than historical publication;
+- lifecycle transitions are restricted to the publication worker and covered by adversarial Database Spike tests.
+
+`CORE-FZ-RELEASE-002` now names this lifecycle requirement explicitly. It is not accepted merely because the code exists: exact-head Contract validation, Project governance, Database Spike and affected whole-Bible regressions must pass before RL-1 is closed.
 
 ## WB-2 / WB-3 implementation state
 

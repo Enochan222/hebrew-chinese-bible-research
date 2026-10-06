@@ -759,6 +759,283 @@ SELECT spike_test.assert_true(
 );
 RESET ROLE;
 
+-- RL-1: release lifecycle separates permanent immutability from current public servability.
+-- Release 2 is already ever-published by the publication atomicity tests above.
+SET ROLE publication_worker;
+SELECT publication_control.publish_release_to_channel(
+  'PRODUCTION','47000000-0000-4000-8000-000000000002',NULL,false
+);
+SELECT publication_control.transition_release_lifecycle(
+  '47000000-0000-4000-8000-000000000002','REVOKED',
+  '2099-01-01T00:00:00Z','RL-1 revoke acceptance',NULL
+);
+RESET ROLE;
+
+SELECT spike_test.assert_true(
+  serving.release_ever_published('47000000-0000-4000-8000-000000000002'),
+  'revoked release must remain ever-published for permanent immutability'
+);
+SELECT spike_test.assert_true(
+  NOT serving.release_is_publicly_servable('47000000-0000-4000-8000-000000000002'),
+  'REVOKED release must not be publicly servable'
+);
+SELECT spike_test.assert_true(
+  (SELECT count(*) FROM serving.release_channel_pointers
+   WHERE research_release_id='47000000-0000-4000-8000-000000000002') = 0,
+  'REVOKED must atomically detach every channel pointer from the release'
+);
+
+DO $rl1_revoked_immutable$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    INSERT INTO serving.research_release_components(
+      research_release_id,component_kind,component_research_object_id,
+      component_version,content_hash,component_order
+    ) VALUES (
+      '47000000-0000-4000-8000-000000000002','PUBLISHED_ANALYSIS',
+      '52000000-0000-4000-8000-000000000001','1',
+      repeat('1',64),99
+    );
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN
+    RAISE EXCEPTION 'revocation must never make an ever-published release mutable';
+  END IF;
+END
+$rl1_revoked_immutable$;
+
+DO $rl1_revoked_evidence_immutable$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    UPDATE serving.published_evidence_packets
+    SET packet_type='MUTATED_AFTER_REVOKE'
+    WHERE published_evidence_packet_id='50100000-0000-4000-8000-000000000002';
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN
+    RAISE EXCEPTION 'revocation must never make published evidence mutable';
+  END IF;
+END
+$rl1_revoked_evidence_immutable$;
+
+DO $rl1_revoked_projection_immutable$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    INSERT INTO serving.corpus_node_features(
+      corpus_release_id,analysis_node_id,feature_key,feature_value
+    ) VALUES (
+      '30000000-0000-4000-8000-000000000001',
+      '33000000-0000-4000-8000-000000000001',
+      'POST_REVOKE_MUTATION','must-fail'
+    );
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN
+    RAISE EXCEPTION 'revocation must never make an ever-published corpus projection mutable';
+  END IF;
+END
+$rl1_revoked_projection_immutable$;
+
+DO $rl1_revoked_direct_pointer$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    INSERT INTO serving.release_channel_pointers(
+      release_channel_id,research_release_id,updated_at,updated_by,row_version
+    ) VALUES (
+      '47200000-0000-4000-8000-000000000001',
+      '47000000-0000-4000-8000-000000000002',
+      now(),NULL,1
+    );
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN
+    RAISE EXCEPTION 'direct channel pointer assignment to a revoked release must fail';
+  END IF;
+END
+$rl1_revoked_direct_pointer$;
+
+SET ROLE anon;
+SELECT spike_test.assert_true(
+  (SELECT count(*) FROM serving.research_releases
+   WHERE research_release_id='47000000-0000-4000-8000-000000000002') = 0,
+  'anon must not read a revoked ResearchRelease'
+);
+SELECT spike_test.assert_true(
+  (SELECT count(*) FROM serving.current_release WHERE channel_key='PRODUCTION') = 0,
+  'current release resolution must not expose a revoked release'
+);
+SELECT spike_test.assert_true(
+  serving.read_passage_core(
+    '47000000-0000-4000-8000-000000000002','MT_TEST','1 Sam 16:7'
+  ) IS NULL,
+  'pinned passage read must fail closed while its release is revoked'
+);
+RESET ROLE;
+
+SET ROLE authenticated;
+SELECT spike_test.assert_true(
+  (SELECT count(*) FROM serving.research_releases
+   WHERE research_release_id='47000000-0000-4000-8000-000000000002') = 0,
+  'authenticated role must not read a revoked ResearchRelease'
+);
+SELECT spike_test.assert_true(
+  serving.read_passage_core(
+    '47000000-0000-4000-8000-000000000002','MT_TEST','1 Sam 16:7'
+  ) IS NULL,
+  'authenticated pinned passage read must fail closed while its release is revoked'
+);
+RESET ROLE;
+
+SET ROLE publication_worker;
+DO $rl1_revoked_channel_reject$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    PERFORM publication_control.publish_release_to_channel(
+      'PRODUCTION','47000000-0000-4000-8000-000000000002',NULL,false
+    );
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN
+    RAISE EXCEPTION 'channel assignment to a revoked release must fail';
+  END IF;
+END
+$rl1_revoked_channel_reject$;
+
+-- Equal effective timestamps are deterministic because event_sequence is authoritative.
+SELECT publication_control.transition_release_lifecycle(
+  '47000000-0000-4000-8000-000000000002','REACTIVATED',
+  '2099-01-01T00:00:00Z','RL-1 equal-time reactivation',NULL
+);
+RESET ROLE;
+
+SELECT spike_test.assert_true(
+  serving.release_lifecycle_state('47000000-0000-4000-8000-000000000002') = 'REACTIVATED',
+  'REACTIVATED must become the current lifecycle state'
+);
+SELECT spike_test.assert_true(
+  (SELECT array_agg(event_sequence ORDER BY event_sequence)
+   FROM serving.research_release_events
+   WHERE research_release_id='47000000-0000-4000-8000-000000000002')
+   = ARRAY[1,2,3],
+  'release lifecycle must have one gapless authoritative event sequence'
+);
+SELECT spike_test.assert_true(
+  (SELECT effective_at FROM serving.research_release_events
+   WHERE research_release_id='47000000-0000-4000-8000-000000000002'
+     AND event_sequence=2)
+  =
+  (SELECT effective_at FROM serving.research_release_events
+   WHERE research_release_id='47000000-0000-4000-8000-000000000002'
+     AND event_sequence=3),
+  'equal lifecycle timestamps must be permitted and ordered by event_sequence'
+);
+
+SET ROLE anon;
+SELECT spike_test.assert_true(
+  (SELECT count(*) FROM serving.research_releases
+   WHERE research_release_id='47000000-0000-4000-8000-000000000002') = 1,
+  'reactivated release must become publicly readable again'
+);
+SELECT spike_test.assert_true(
+  (SELECT count(*) FROM serving.current_release WHERE channel_key='PRODUCTION') = 0,
+  'reactivation must not silently restore a channel pointer'
+);
+RESET ROLE;
+
+SET ROLE publication_worker;
+SELECT publication_control.publish_release_to_channel(
+  'PRODUCTION','47000000-0000-4000-8000-000000000002',NULL,false
+);
+SELECT publication_control.transition_release_lifecycle(
+  '47000000-0000-4000-8000-000000000002','SUPERSEDED',
+  '2099-01-01T00:00:00Z','RL-1 historical supersession',NULL
+);
+RESET ROLE;
+
+SET ROLE anon;
+SELECT spike_test.assert_true(
+  serving.read_passage_core(
+    '47000000-0000-4000-8000-000000000002','MT_TEST','1 Sam 16:7'
+  )->>'referenceSpanId' = '13000000-0000-4000-8000-000000000001',
+  'SUPERSEDED historical release must remain citation-stable and pinned-readable'
+);
+RESET ROLE;
+
+SET ROLE publication_worker;
+DO $rl1_invalid_reactivation$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    PERFORM publication_control.transition_release_lifecycle(
+      '47000000-0000-4000-8000-000000000002','REACTIVATED',
+      '2099-01-01T00:00:00Z','invalid transition',NULL
+    );
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN
+    RAISE EXCEPTION 'REACTIVATED without prior REVOKED must fail closed';
+  END IF;
+END
+$rl1_invalid_reactivation$;
+RESET ROLE;
+
+DO $rl1_sequence_gap$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    INSERT INTO serving.research_release_events(
+      research_release_event_id,research_release_id,event_sequence,event_type,effective_at,reason
+    ) VALUES (
+      '47f00000-0000-4000-8000-000000000099',
+      '47000000-0000-4000-8000-000000000002',99,'REVOKED',
+      '2099-01-01T00:00:00Z','invalid sequence gap'
+    );
+  EXCEPTION WHEN raise_exception OR unique_violation THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'lifecycle sequence gaps must fail closed'; END IF;
+END
+$rl1_sequence_gap$;
+
+DO $rl1_time_reversal$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    INSERT INTO serving.research_release_events(
+      research_release_event_id,research_release_id,event_sequence,event_type,effective_at,reason
+    ) VALUES (
+      '47f00000-0000-4000-8000-000000000098',
+      '47000000-0000-4000-8000-000000000002',5,'REVOKED',
+      '2098-12-31T23:59:59Z','invalid effective time reversal'
+    );
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'lifecycle effective_at reversal must fail closed'; END IF;
+END
+$rl1_time_reversal$;
+
+SET ROLE authenticated;
+DO $rl1_unauthorized_transition$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    PERFORM publication_control.transition_release_lifecycle(
+      '47000000-0000-4000-8000-000000000002','REVOKED',
+      '2100-01-01T00:00:00Z','must not execute',NULL
+    );
+  EXCEPTION WHEN insufficient_privilege THEN failed := true;
+  END;
+  IF NOT failed THEN
+    RAISE EXCEPTION 'authenticated role must not execute release lifecycle transitions';
+  END IF;
+END
+$rl1_unauthorized_transition$;
+RESET ROLE;
+
 DROP SCHEMA spike_test CASCADE;
 
 

@@ -292,7 +292,23 @@ Append-only lifecycle history:
 - REVOKED
 - REACTIVATED
 
-Superseding or revoking a release does not mutate its scholarly payload.
+Lifecycle order is explicit, not inferred. Every event has a positive per-release `event_sequence`; the first event is `PUBLISHED` with sequence 1 and every later event increments by exactly one. `effective_at` is non-decreasing metadata, but it is not a tie-breaker. Two events may have the same `effective_at`; `event_sequence` remains the sole authoritative order. UUID order must never be used as chronology.
+
+Valid transitions are:
+
+- no event -> PUBLISHED;
+- PUBLISHED or REACTIVATED -> SUPERSEDED;
+- PUBLISHED, SUPERSEDED or REACTIVATED -> REVOKED;
+- REVOKED -> REACTIVATED.
+
+The lifecycle has two deliberately separate predicates:
+
+- **ever published / permanently immutable**: once a PUBLISHED event exists, the release payload, manifest, evidence and compiled component projections remain immutable forever, including while REVOKED;
+- **currently publicly servable**: PUBLISHED, SUPERSEDED and REACTIVATED releases may be read through pinned public APIs; REVOKED and never-published releases may not.
+
+SUPERSEDED therefore preserves citation-stable historical pinned reads. REVOKED is the explicit public-withdrawal state. REACTIVATED restores public servability but does not itself restore deployment selection.
+
+Superseding, revoking or reactivating a release never mutates its scholarly payload.
 
 ### 5.5 Release channels
 
@@ -304,7 +320,9 @@ Canonical channels:
 - STAGING
 - PRODUCTION
 
-Rollback updates a channel pointer to an earlier valid ResearchRelease.
+A channel pointer may target only a currently publicly servable ResearchRelease. Appending REVOKED atomically removes channel pointers targeting that release so current-release resolution cannot expose it. REACTIVATED does not recreate those pointers; an explicit governed pointer move is required.
+
+Rollback updates a channel pointer to an earlier publicly servable ResearchRelease. It never mutates either release.
 
 ## 6. Manifest integrity
 
