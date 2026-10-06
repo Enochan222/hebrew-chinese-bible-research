@@ -135,6 +135,31 @@ The relational gate requires all source word records to remain represented as pr
 
 Automatic `ANNOTATION_ONLY_TARGET_NODE` classification is intentionally narrow: it currently recognizes only the evidenced unbridged Biblical Hebrew article-node shape with lexeme, article POS/PDP and phrase/clause context. Other empty target nodes remain unresolved until their source semantics are reviewed.
 
+## WB-2 rights-safe Serving compilation
+
+WB-2 starts from a clean database containing the accepted WB-1 relational corpus and applies `database/migrations/002_wb2_serving_projection.sql`.
+
+The first WB-2 compiler deliberately publishes only OSHB/WLC-derived text and OSHB provider-scoped morphology because the pinned source registry currently permits that public/commercial use subject to attribution. BHSA 2021 and ETCBC bridging remain Authoring-only pending explicit rights review.
+
+```bash
+python scripts/corpora/publish_wb2_serving.py \
+  --source-foundation-manifest .local/whole-bible-corpus/coverage-manifest.json \
+  --wb1-report .local/wb2/wb1/reports/wb1-relational-coverage.json \
+  --git-commit-sha "$GITHUB_SHA" \
+  --report .local/wb2/reports/wb2-serving.json
+```
+
+The compiler:
+
+- creates operation-specific storage/display RightsDecisionSnapshots;
+- materializes the required OSHB attribution;
+- copies only rights-approved OSHB text/nodes/features into Serving;
+- builds Serving-owned OSHB_OSIS passage resolution;
+- creates an immutable candidate ResearchRelease with CORPUS + ANNOTATION_LAYER components;
+- leaves that candidate inactive until the publication worker moves the release-channel pointer.
+
+`verify_wb2_report.py` has separate `materialized` and `published` phases. Before publication it proves public roles cannot observe the candidate. After publication it proves whole-corpus public counts, representative Genesis / Samuel / Chronicles reads, Authoring isolation, zero BHSA/bridging leakage and projection immutability.
+
 ## Updating upstream data
 
 ```bash
