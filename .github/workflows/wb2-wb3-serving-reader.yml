@@ -11,6 +11,8 @@ on:
       - 'contracts/v1.1/corpus-source-registry.json'
       - 'contracts/v1.1/hebrew-bible-canon-system.json'
       - 'contracts/v1.1/json-schema/**'
+      - 'contracts/v1.1/release-lifecycle-policy.json'
+      - 'contracts/v1.1/fixtures/release-event-published.json'
       - '.github/workflows/wb2-wb3-serving-reader.yml'
       - 'PROJECT_STATE.md'
       - 'CHANGELOG.md'
@@ -25,6 +27,8 @@ on:
       - 'contracts/v1.1/corpus-source-registry.json'
       - 'contracts/v1.1/hebrew-bible-canon-system.json'
       - 'contracts/v1.1/json-schema/**'
+      - 'contracts/v1.1/release-lifecycle-policy.json'
+      - 'contracts/v1.1/fixtures/release-event-published.json'
       - '.github/workflows/wb2-wb3-serving-reader.yml'
 
 permissions:
