@@ -5,6 +5,35 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
 
+## 2026-10-06 — Accept WB-2/WB-3 whole-Bible reader gates
+
+### Push intent
+
+Synchronize repository authority with the exact-head evidence after the complete WB-2/WB-3 candidate passed.
+
+### What changed
+
+- promote `CORE-FZ-WB-001` from PENDING to PASS;
+- promote `CORE-FZ-WB-003` from PENDING to PASS;
+- record the exact commit and GitHub Actions runs supporting the two gates;
+- move the implementation frontier from WB-2/WB-3 to WB-4/WB-5 while preserving the accepted reader regression suite;
+- document the separate release-lifecycle semantic gap discovered during adversarial review without conflating it with whole-Bible acceptance.
+
+### Validation
+
+Exact head `21a2cedafb394b84d51e244de6ff37bbac4d6a82` passed:
+
+- WB-2 WB-3 Serving Reader `37424398827`;
+- WB-1 Relational Whole Corpus `37424398811`;
+- Whole-Bible corpus foundation `37424398932`;
+- Database Spike 001 `37424398816`;
+- Contract validation `37424398834`;
+- Project governance `37424398970`;
+- P1 fixture shell validation `37424398799`, including unit/integration tests, fixture and Serving visual E2E, and production build.
+
+The WB-2/WB-3 run proved rights-safe OSHB-only publication, anon RLS reads, 39-book data-driven navigation, Genesis chapter/passage indexes, Gen.50.26 -> Exod.1.1 traversal and arbitrary non-fixture passage retrieval. No Research Pro/BYOK dependency is required for the base reader.
+
+
 ## 2026-10-06 — Remove non-canonical Serving capability keys
 
 ### Push intent

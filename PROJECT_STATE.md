@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-06.5**
+State Revision: **2026-10-06.7**
 
 ## Mandatory governance rule
 
@@ -322,14 +322,14 @@ WB-1 acceptance is **PASS** for `CORE-FZ-WB-002`. The synchronized implementatio
 ## Current implementation priority
 
 1. Preserve contract/governance consistency, the ChatGPT-only project AI policy and the whole-Bible scope guard.
-2. Complete WB-2: compile the accepted WB-1 whole-corpus Authoring result into rights-safe, release-pinned passage-serving projections without leaking BHSA/bridging-derived data that lacks an ALLOW RightsDecision.
-3. Complete WB-3: replace fixture-only Hebrew passage content with a database-backed whole-Bible reader/navigation and verify `CORE-FZ-WB-001` / `CORE-FZ-WB-003` behavior.
+2. Treat WB-2/WB-3 as accepted whole-Bible base-reader infrastructure and preserve its exact-head regression suite.
+3. Close the separate ResearchRelease lifecycle semantics gap: distinguish "ever published / immutable" from "currently publicly servable" before implementing REVOKED/REACTIVATED behavior; do not overload one predicate for both concerns.
 4. Complete WB-4/WB-5: add selected translation witnesses, alignment/comparison, project/user translation workflow and deterministic whole-corpus analysis.
 5. Only then make Research Pro provider adapters, ResearchModelAdapter and end-to-end literature builds the primary product implementation frontier; academic enrichment may proceed in parallel where it does not block the base path.
 
 ## WB-2 / WB-3 implementation state
 
-WB-2/WB-3 is now an active implementation candidate on PR #23 rather than only the original RED rights regression.
+WB-2/WB-3 is accepted on PR #23 exact head `21a2cedafb394b84d51e244de6ff37bbac4d6a82` for the whole-Bible base-reader gates.
 
 Current branch implementation includes:
 
@@ -345,10 +345,25 @@ Current branch implementation includes:
 - hostile malformed-Serving-response regression that must fail closed as `CONTRACT_VIOLATION`;
 - explicit non-exposure of BHSA and ETCBC bridging rows in public Serving.
 
-The synchronized exact head must prove 39-book navigation index coverage, Genesis chapter/passage indexing, Gen.50.26 -> Exod.1.1 cross-book traversal, an arbitrary non-fixture passage such as Isa.6.1, OSHB-only public Serving, and all earlier whole-corpus/database/web regressions.
+Exact-head machine evidence is complete. WB-2/WB-3 Serving Reader run `37424398827` passed whole-corpus rebuild/parity, rights-safe OSHB publication, anon RLS public passage reads, 39-book navigation, Genesis 50-chapter and 31-passage indexing, Gen.50.26 -> Exod.1.1 cross-book traversal, non-fixture Isa.6.1 retrieval, OSHB-only public Serving and evidence upload. P1 fixture shell validation `37424398799` passed typecheck, lint/boundaries, unit, integration, fixture E2E, Serving visual E2E and production build. WB-1 `37424398811`, Whole-Bible corpus foundation `37424398932`, Database Spike 001 `37424398816`, Contract validation `37424398834` and Project governance `37424398970` all passed on the same head.
 
-`CORE-FZ-WB-001` and `CORE-FZ-WB-003` remain PENDING until that exact-head evidence passes. Their implementation prerequisites are now present; no PASS is claimed merely from code existence.
+`CORE-FZ-WB-001` and `CORE-FZ-WB-003` are now **PASS**.
+
+## Known release-lifecycle semantic gap
+
+This whole-Bible acceptance does **not** claim that the later Product Operations revoke/reactivate lifecycle is complete.
+
+Independent adversarial review found that the current `serving.release_is_published()` predicate means "has ever received a PUBLISHED event" and is used for both public visibility and post-publication immutability. The active architecture separately defines PUBLISHED, SUPERSEDED, REVOKED and REACTIVATED events, but the machine contract does not yet define a total event-ordering rule for equal `effectiveAt` values.
+
+A future lifecycle implementation must not simply redefine `release_is_published()` as "currently visible": doing so would make a REVOKED release mutable again because immutability triggers rely on the same predicate. The next lifecycle work package must separate:
+
+- ever-published / permanently immutable state;
+- currently publicly servable lifecycle state;
+- channel-pointer eligibility;
+- deterministic REVOKED / REACTIVATED ordering and tests.
+
+Until that contract is explicitly closed, revoke/reactivate behavior is not treated as implemented. This gap does not invalidate `CORE-FZ-WB-001` or `CORE-FZ-WB-003`, whose requirements concern whole-Bible coverage/navigation and the release-pinned public reader.
 
 ## Latest push intent
 
-Repair the remaining P1 integration regression after unit, database, corpus, contract and WB-2/WB-3 gates turned green. Runtime AJV validation exposed that ServingCapabilityReader emitted three feature keys outside the canonical ExperienceCapabilities vocabulary: PASSAGE_RESEARCH, HEBREW_TEXT and TRANSLATION_WITNESSES. This revision removes that schema drift instead of weakening the contract. Research mode remains represented by experienceModesAllowed, while Hebrew passage availability is represented by PassageCore. Later translation and Research Pro capabilities require an explicit versioned contract change. Exact-head web integration/E2E/build validation must rerun.
+Record exact-head acceptance of WB-2/WB-3 after every required whole-Bible, database, contract, governance, web integration, visual E2E and production-build gate passed on `21a2cedafb394b84d51e244de6ff37bbac4d6a82`. Promote only `CORE-FZ-WB-001` and `CORE-FZ-WB-003`, which are directly supported by the evidence. Preserve the independently identified REVOKED/REACTIVATED lifecycle predicate ambiguity as a separate next work package rather than silently inventing event ordering or weakening immutable-release guarantees.
