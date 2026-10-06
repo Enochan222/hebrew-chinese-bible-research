@@ -25,7 +25,11 @@ export function toPassagePageFailure(error: unknown): PassagePageFailure {
   if (error instanceof ReferenceNotFoundError) return { code: error.code, title: "Reference not found", message: error.message };
   if (error instanceof ReleaseNotFoundError) return { code: error.code, title: "Release not found", message: error.message };
   if (error instanceof ContractViolationError) {
-    return { code: error.code, title: "Serving contract violation", message: "Canonical serving data failed runtime validation and was not rendered." };
+    const detail =
+      process.env.NODE_ENV === "production"
+        ? "Canonical serving data failed runtime validation and was not rendered."
+        : `Canonical serving data failed runtime validation and was not rendered. ${error.message}`;
+    return { code: error.code, title: "Serving contract violation", message: detail };
   }
   return {
     code: "DATA_TEMPORARILY_UNAVAILABLE",
