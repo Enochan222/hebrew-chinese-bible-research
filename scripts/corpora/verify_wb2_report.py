@@ -96,6 +96,21 @@ def main() -> int:
     if report.get("wb1AggregatePartitionHash") != wb1.get("aggregatePartitionHash"):
         errors.append("WB-2 is not pinned to the accepted WB-1 aggregate partition hash")
 
+    projection_hashes = report.get("projectionHashes", {})
+    if projection_hashes.get("authoringCorpus") != projection_hashes.get("servingCorpus"):
+        errors.append("Serving corpus projection hash differs from accepted Authoring projection")
+    if projection_hashes.get("authoringAnnotationLayer") != projection_hashes.get("servingAnnotationLayer"):
+        errors.append("Serving annotation projection hash differs from accepted Authoring projection")
+
+    manifest_components = {
+        component.get("componentKind"): component.get("contentHash")
+        for component in report.get("manifest", {}).get("components", [])
+    }
+    if manifest_components.get("CORPUS") != projection_hashes.get("authoringCorpus"):
+        errors.append("ResearchRelease CORPUS component is not sealed by the Authoring corpus projection hash")
+    if manifest_components.get("ANNOTATION_LAYER") != projection_hashes.get("authoringAnnotationLayer"):
+        errors.append("ResearchRelease ANNOTATION_LAYER component is not sealed by the Authoring annotation projection hash")
+
     if canonical_hash(report.get("manifest", {})) != report.get("manifestHash"):
         errors.append("WB-2 manifestHash does not match canonical manifest content")
     if report.get("manifest", {}).get("gitCommitSha") != report.get("gitCommitSha"):
