@@ -194,3 +194,10 @@ h3 { margin: 0 0 10px; font-size: 1.05rem; }
   color: var(--muted);
   font: 0.82rem/1.55 ui-sans-serif, system-ui, sans-serif;
 }
+
+
+.reconstruction-note {
+  margin: -12px 0 24px;
+  color: var(--muted);
+  font: 0.78rem/1.55 ui-sans-serif, system-ui, sans-serif;
+}
