@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-06.7**
+State Revision: **2026-10-06.8**
 
 ## Mandatory governance rule
 
@@ -349,21 +349,28 @@ Exact-head machine evidence is complete. WB-2/WB-3 Serving Reader run `374243988
 
 `CORE-FZ-WB-001` and `CORE-FZ-WB-003` are now **PASS**.
 
-## Known release-lifecycle semantic gap
+## RL-1 release-lifecycle implementation state
 
-This whole-Bible acceptance does **not** claim that the later Product Operations revoke/reactivate lifecycle is complete.
+The previously recorded revoke/reactivate semantic gap is now under explicit machine implementation rather than being handled by an overloaded publication predicate.
 
-Independent adversarial review found that the current `serving.release_is_published()` predicate means "has ever received a PUBLISHED event" and is used for both public visibility and post-publication immutability. The active architecture separately defines PUBLISHED, SUPERSEDED, REVOKED and REACTIVATED events, but the machine contract does not yet define a total event-ordering rule for equal `effectiveAt` values.
+Current RL-1 candidate:
 
-A future lifecycle implementation must not simply redefine `release_is_published()` as "currently visible": doing so would make a REVOKED release mutable again because immutability triggers rely on the same predicate. The next lifecycle work package must separate:
+- adds per-release positive contiguous `event_sequence` to ResearchReleaseEvent and makes it required in the v1.1 machine contract;
+- permits equal `effective_at` timestamps but orders them only by `event_sequence`; UUID ordering is forbidden;
+- defines the lifecycle state machine in `contracts/v1.1/release-lifecycle-policy.json`;
+- separates `release_was_published()` / `component_was_published()` for permanent immutability from `release_is_publicly_servable()` / `component_is_publicly_servable()` for current RLS/runtime visibility;
+- treats PUBLISHED, SUPERSEDED and REACTIVATED as publicly servable, with SUPERSEDED retained for citation-stable pinned historical reads;
+- treats REVOKED as non-servable while preserving permanent immutability;
+- requires explicit valid transitions: initial PUBLISHED; PUBLISHED -> SUPERSEDED/REVOKED; SUPERSEDED -> REVOKED; REVOKED -> REACTIVATED; REACTIVATED -> SUPERSEDED/REVOKED;
+- prevents backwards effective-time transitions and sequence gaps;
+- removes channel pointers when a release is REVOKED and rejects any pointer assignment to a non-servable release;
+- does not restore a channel pointer automatically on REACTIVATED;
+- keeps rollback as a pointer move only, without appending lifecycle events to either release;
+- updates public Serving RLS and current-release resolution to use current servability while all post-publication mutation guards use permanent ever-published state;
+- adds Database Spike adversarial coverage plus a real whole-Bible WB-2/WB-3 revoke/reactivate regression.
 
-- ever-published / permanently immutable state;
-- currently publicly servable lifecycle state;
-- channel-pointer eligibility;
-- deterministic REVOKED / REACTIVATED ordering and tests.
-
-Until that contract is explicitly closed, revoke/reactivate behavior is not treated as implemented. This gap does not invalidate `CORE-FZ-WB-001` or `CORE-FZ-WB-003`, whose requirements concern whole-Bible coverage/navigation and the release-pinned public reader.
+`CORE-FZ-RELEASE-002` is **PENDING** until the exact PR head passes Contract validation, Database Spike RL-1 tests, WB-2/WB-3 real whole-Bible lifecycle regression and existing governance/regression gates.
 
 ## Latest push intent
 
-Record exact-head acceptance of WB-2/WB-3 after every required whole-Bible, database, contract, governance, web integration, visual E2E and production-build gate passed on `21a2cedafb394b84d51e244de6ff37bbac4d6a82`. Promote only `CORE-FZ-WB-001` and `CORE-FZ-WB-003`, which are directly supported by the evidence. Preserve the independently identified REVOKED/REACTIVATED lifecycle predicate ambiguity as a separate next work package rather than silently inventing event ordering or weakening immutable-release guarantees.
+Implement RL-1 as the governed release-lifecycle closure required after WB-2/WB-3 acceptance. The candidate introduces deterministic event sequencing and an explicit transition machine, separates permanent immutability from current public servability, makes revocation remove channel/public visibility without reopening mutation, requires explicit reactivation before a release can serve again, and preserves rollback as pointer-only. No WB-4/WB-5 translation or Corpus Lab semantics are introduced in this work package. `CORE-FZ-RELEASE-002` remains pending until exact-head machine evidence passes.
