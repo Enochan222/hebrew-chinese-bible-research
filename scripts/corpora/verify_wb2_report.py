@@ -44,8 +44,13 @@ def scalar(sql: str) -> str:
     return lines[-1] if lines else ""
 
 
-def validate_json(schema_path: Path, value: dict) -> list[str]:
+def validate_json(schema_path: Path, value: dict, *, release_schema_path: Path | None = None) -> list[str]:
     schema = load(schema_path)
+    if release_schema_path is not None:
+        # Resolve the one local release-manifest reference explicitly so CI does
+        # not depend on implicit filesystem URI resolution.
+        schema = json.loads(json.dumps(schema))
+        schema["properties"]["manifest"] = load(release_schema_path)
     validator = Draft202012Validator(schema)
     return [error.message for error in validator.iter_errors(value)]
 
@@ -69,8 +74,14 @@ def main() -> int:
     canon = load(args.canon)
     errors: list[str] = []
 
-    errors.extend(f"report schema: {e}" for e in validate_json(args.schema, report))
-    errors.extend(f"release manifest schema: {e}" for e in validate_json(args.release_schema, report.get("manifest", {})))
+    errors.extend(
+        f"report schema: {e}"
+        for e in validate_json(args.schema, report, release_schema_path=args.release_schema)
+    )
+    errors.extend(
+        f"release manifest schema: {e}"
+        for e in validate_json(args.release_schema, report.get("manifest", {}))
+    )
 
     if report.get("sourceFoundationBuildId") != foundation.get("buildId"):
         errors.append("source foundation build identity mismatch")
