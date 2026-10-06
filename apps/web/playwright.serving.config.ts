@@ -6,6 +6,7 @@ export default defineConfig({
   retries: 0,
   workers: 1,
   reporter: [["list"]],
+  outputDir: "test-results/serving-artifacts",
   use: {
     baseURL: "http://127.0.0.1:3126",
     trace: "retain-on-failure",
@@ -25,7 +26,6 @@ export default defineConfig({
       reuseExistingServer: false,
       timeout: 120_000,
       env: {
-        ...process.env,
         HCBIBLE_SERVING_REST_URL: "http://127.0.0.1:4126",
         NEXT_TELEMETRY_DISABLED: "1",
       },
