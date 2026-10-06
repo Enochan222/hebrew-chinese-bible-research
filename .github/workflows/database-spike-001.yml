@@ -77,10 +77,14 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f database/spikes/001/00_bootstrap.sql
       - name: Apply Database Spike 001 migration
         run: psql -v ON_ERROR_STOP=1 -f database/migrations/001_database_spike_001.sql
+      - name: Apply RL-1 release lifecycle migration
+        run: psql -v ON_ERROR_STOP=1 -f database/migrations/002_release_lifecycle_rl1.sql
       - name: Load controlled fixtures
         run: psql -v ON_ERROR_STOP=1 -f database/spikes/001/01_seed.sql
       - name: Run adversarial SQL tests
         run: psql -v ON_ERROR_STOP=1 -f database/spikes/001/02_tests.sql
+      - name: Run RL-1 lifecycle adversarial tests
+        run: psql -v ON_ERROR_STOP=1 -f database/spikes/001/05_release_lifecycle_tests.sql
       - name: Capture representative query plan
         run: psql -v ON_ERROR_STOP=1 -f database/spikes/001/03_query_plan.sql
 
@@ -121,6 +125,7 @@ jobs:
           psql --version
           psql -v ON_ERROR_STOP=1 -f database/spikes/001/00_bootstrap.sql
           psql -v ON_ERROR_STOP=1 -f database/migrations/001_database_spike_001.sql
+          psql -v ON_ERROR_STOP=1 -f database/migrations/002_release_lifecycle_rl1.sql
       - name: Fetch exact pinned real corpus sources
         run: python scripts/corpora/fetch_sources.py
       - name: Export pinned 1 Samuel 16:7 provider records
