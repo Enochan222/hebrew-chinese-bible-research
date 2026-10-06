@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import subprocess
 from pathlib import Path
@@ -17,6 +18,11 @@ DEFAULT_CANON = ROOT / "contracts/v1.1/hebrew-bible-canon-system.json"
 
 def load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def canonical_hash(value: object) -> str:
+    raw = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(raw).hexdigest()
 
 
 def run_sql(sql: str, check: bool = True) -> subprocess.CompletedProcess[str]:
@@ -90,6 +96,27 @@ def main() -> int:
     if report.get("wb1AggregatePartitionHash") != wb1.get("aggregatePartitionHash"):
         errors.append("WB-2 is not pinned to the accepted WB-1 aggregate partition hash")
 
+    if canonical_hash(report.get("manifest", {})) != report.get("manifestHash"):
+        errors.append("WB-2 manifestHash does not match canonical manifest content")
+    if report.get("manifest", {}).get("gitCommitSha") != report.get("gitCommitSha"):
+        errors.append("WB-2 manifest gitCommitSha/report gitCommitSha mismatch")
+    if report.get("manifest", {}).get("researchReleaseId") != report.get("researchReleaseId"):
+        errors.append("WB-2 manifest ResearchRelease identity mismatch")
+
+    projection_hashes = report.get("projectionHashes", {})
+    if projection_hashes.get("authoringCorpus") != projection_hashes.get("servingCorpus"):
+        errors.append("WB-2 corpus projection hash differs between Authoring and Serving")
+    if projection_hashes.get("authoringAnnotationLayer") != projection_hashes.get("servingAnnotationLayer"):
+        errors.append("WB-2 annotation projection hash differs between Authoring and Serving")
+    component_hashes = {
+        component.get("componentKind"): component.get("contentHash")
+        for component in report.get("manifest", {}).get("components", [])
+    }
+    if component_hashes.get("CORPUS") != projection_hashes.get("servingCorpus"):
+        errors.append("ResearchRelease CORPUS component hash does not seal the Serving corpus projection")
+    if component_hashes.get("ANNOTATION_LAYER") != projection_hashes.get("servingAnnotationLayer"):
+        errors.append("ResearchRelease ANNOTATION_LAYER hash does not seal the Serving annotation projection")
+
     expected_books = len([b for b in canon["books"] if b.get("included")])
     expected_words = wb1["totals"]["oshbWordRecords"]
     expected_refs = wb1["totals"]["selectedReferenceAtoms"]
@@ -112,6 +139,27 @@ def main() -> int:
         errors.append("bridging exclusion does not match registry rights state")
 
     release_id = report["researchReleaseId"]
+    if scalar(
+        f"SELECT COALESCE(manifest_hash,'') FROM serving.research_releases "
+        f"WHERE research_release_id='{report['researchReleaseId']}'::uuid;"
+    ) != report.get("manifestHash"):
+        errors.append("database ResearchRelease manifest_hash differs from WB-2 report")
+    db_component_hashes = {
+        kind: content_hash
+        for kind, content_hash in (
+            line.split("\t")
+            for line in run_sql(
+                f"SELECT component_kind,content_hash FROM serving.research_release_components "
+                f"WHERE research_release_id='{report['researchReleaseId']}'::uuid ORDER BY component_order;"
+            ).stdout.splitlines()
+            if line.strip()
+        )
+    }
+    if db_component_hashes.get("CORPUS") != projection_hashes.get("servingCorpus"):
+        errors.append("database CORPUS component hash differs from Serving projection hash")
+    if db_component_hashes.get("ANNOTATION_LAYER") != projection_hashes.get("servingAnnotationLayer"):
+        errors.append("database ANNOTATION_LAYER component hash differs from Serving projection hash")
+
     if args.phase == "materialized":
         if scalar(
             f"SELECT count(*) FROM serving.research_release_events "
