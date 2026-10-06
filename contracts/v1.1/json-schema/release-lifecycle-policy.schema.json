@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/release-lifecycle-policy.schema.json",
+  "title": "ResearchRelease Lifecycle Policy v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "policyKey",
+    "ordering",
+    "immutability",
+    "publicServability",
+    "channelPointer",
+    "transitions"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "policyKey": {
+      "const": "RESEARCH_RELEASE_LIFECYCLE_V1"
+    },
+    "ordering": {
+      "const": {
+        "sequenceField": "eventSequence",
+        "firstSequence": 1,
+        "contiguous": true,
+        "effectiveAtNondecreasing": true,
+        "equalEffectiveAtAllowed": true,
+        "equalEffectiveAtTieBreaker": "eventSequence",
+        "uuidOrderingForbidden": true
+      }
+    },
+    "immutability": {
+      "const": {
+        "permanentlyImmutableAfterFirstEvent": "PUBLISHED",
+        "revocationRestoresMutability": false
+      }
+    },
+    "publicServability": {
+      "const": {
+        "servableStates": [
+          "PUBLISHED",
+          "SUPERSEDED",
+          "REACTIVATED"
+        ],
+        "nonServableStates": [
+          "REVOKED"
+        ],
+        "supersededPinnedReleaseRemainsServable": true
+      }
+    },
+    "channelPointer": {
+      "const": {
+        "requiresPubliclyServableTarget": true,
+        "revokeRemovesPointers": true,
+        "reactivationRestoresPointerAutomatically": false,
+        "rollbackIsPointerMoveOnly": true
+      }
+    },
+    "transitions": {
+      "const": [
+        {
+          "from": null,
+          "to": "PUBLISHED"
+        },
+        {
+          "from": "PUBLISHED",
+          "to": "SUPERSEDED"
+        },
+        {
+          "from": "PUBLISHED",
+          "to": "REVOKED"
+        },
+        {
+          "from": "SUPERSEDED",
+          "to": "REVOKED"
+        },
+        {
+          "from": "REVOKED",
+          "to": "REACTIVATED"
+        },
+        {
+          "from": "REACTIVATED",
+          "to": "SUPERSEDED"
+        },
+        {
+          "from": "REACTIVATED",
+          "to": "REVOKED"
+        }
+      ]
+    }
+  }
+}
