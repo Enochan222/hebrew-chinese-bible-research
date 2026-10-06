@@ -190,9 +190,20 @@ Real BHSA/bridging-derived rows remain Authoring-only in WB-1. Rights-safe Servi
 
 ### WB-2: whole-Bible release-pinned passage serving
 
-Serve the ingested corpus through ReferenceSystem-aware, ResearchRelease-pinned passage APIs.
+Compile the accepted WB-1 Authoring corpus into an inactive, release-scoped Serving package, validate it, and only then publish it through the existing ResearchRelease/channel-pointer boundary.
 
-Prove navigation and reads are not fixture-bound.
+The first WB-2 implementation is deliberately **rights-bounded**:
+
+- OSHB/WLC-derived word text and OSHB morphology may be projected because the pinned registry currently records public/commercial serving as allowed subject to attribution;
+- the public projection must carry the exact RightsDecisionSnapshot identities used for persistent storage and public display;
+- attribution obligations must be materialized with the projected corpus rather than left as prose outside the database;
+- BHSA-derived nodes/features/text and ETCBC bridging-derived features remain excluded from public Serving while their registry state is `CONDITIONAL_RIGHTS_REVIEW` / `DENY_UNTIL_RIGHTS_REVIEW`;
+- absence from Serving is a deliberate rights result, not loss of Authoring data;
+- automatic cross-framework candidates remain Authoring-only and non-canonical.
+
+WB-2 materializes Serving-owned text segments, node/segment membership, passage-reference resolution and release components. The candidate ResearchRelease must be invisible to public roles before publication, become visible atomically through the existing channel-pointer transaction, and become immutable after publication.
+
+WB-2 proves the database/publication substrate for whole-Bible passage serving. It does **not** replace the fixture-backed web reader; wiring the application reader and navigation to these database projections is WB-3.
 
 ### WB-3: whole-Bible reader
 
