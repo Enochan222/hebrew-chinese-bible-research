@@ -57,6 +57,33 @@ def rows(sql: str) -> list[list[str]]:
     return [line.split("\t") for line in psql_query(sql).splitlines() if line]
 
 
+def stream_hash_sections(sections: list[tuple[str, str]]) -> str:
+    """Hash deterministic psql result streams without loading the corpus into memory."""
+    digest = hashlib.sha256()
+    for section_name, sql in sections:
+        digest.update(b"WB2-SECTION\0")
+        digest.update(section_name.encode("utf-8"))
+        digest.update(b"\0")
+        proc = subprocess.Popen(
+            ["psql", "-X", "-v", "ON_ERROR_STOP=1", "-At", "-F", "\t", "-c", sql],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        assert proc.stdout is not None
+        assert proc.stderr is not None
+        for block in iter(lambda: proc.stdout.read(1024 * 1024), b""):
+            digest.update(block)
+        stderr = proc.stderr.read()
+        returncode = proc.wait()
+        if returncode != 0:
+            raise RuntimeError(
+                f"psql projection-hash query failed for {section_name}: "
+                + stderr.decode("utf-8", errors="replace")
+            )
+        digest.update(b"\0WB2-END-SECTION\0")
+    return digest.hexdigest()
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Materialize an inactive rights-safe WB-2 OSHB Serving projection from accepted WB-1 Authoring data."
