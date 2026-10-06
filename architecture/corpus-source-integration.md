@@ -395,6 +395,23 @@ Whole-corpus data also disproves the WB-0-only equality assumption for direct no
 
 Provider-only BHSA reference addresses may be represented relationally with explicit source-coverage metadata; they do not silently expand the selected OSHB_OSIS source inventory.
 
+## 10.2 WB-2 rights-safe Serving compilation
+
+WB-2 consumes the accepted WB-1 relational corpus. It does not re-import or redefine source coverage.
+
+Initial projection policy:
+
+1. materialize OSHB/WLC text, OSHB provider-scoped AnalysisNodes/features and the selected OSHB_OSIS passage index into Serving;
+2. bind persistent storage and public-display operations to explicit RightsDecisionSnapshots for the projected OSHB CorpusRelease;
+3. materialize the required OSHB attribution in Serving and require that obligation before any text segment can be inserted;
+4. keep BHSA 2021 and ETCBC bridging data out of Serving until an explicit operation-specific rights decision authorizes the relevant public/commercial use;
+5. materialize the ResearchRelease while inactive and prove public RLS cannot observe it;
+6. publish by the existing atomic Serving `PUBLISHED` event + channel-pointer transaction;
+7. prove public passage reads span the configured corpus and continue to operate without Authoring privileges;
+8. make the published projection immutable.
+
+The public projection is therefore a rights-safe subset of the richer Authoring corpus. It must never fabricate BHSA/MACULA-equivalent public syntax merely because the base Hebrew text is publishable.
+
 ## 11. What this integration does not decide
 
 This integration does not yet declare:
