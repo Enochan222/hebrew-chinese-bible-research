@@ -540,6 +540,26 @@ END
 $authenticated_lifecycle_transition$;
 RESET ROLE;
 
+SET ROLE publication_worker;
+DO $publication_worker_direct_event_insert$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    INSERT INTO serving.research_release_events(
+      research_release_event_id,research_release_id,event_sequence,event_type,
+      effective_at,reason,changed_by,metadata
+    ) VALUES (
+      '47000000-0000-4000-8000-000000000098',
+      '47000000-0000-4000-8000-000000000001',
+      2,'SUPERSEDED',clock_timestamp(),'must-fail direct event insert',NULL,'{}'::jsonb
+    );
+  EXCEPTION WHEN insufficient_privilege THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'publication_worker must append lifecycle events only through Publication Control'; END IF;
+END
+$publication_worker_direct_event_insert$;
+RESET ROLE;
+
 -- Publication failure before pointer move preserves old production release.
 DO $$
 DECLARE failed boolean := false;
@@ -763,6 +783,46 @@ SELECT spike_test.assert_true(
    = '47000000-0000-4000-8000-000000000002',
   'reactivated release must be eligible for channel selection'
 );
+
+-- A release can be revoked while a stored channel pointer still references it.
+-- Public current-release resolution must fail closed rather than expose stale state.
+SELECT publication_control.transition_release_lifecycle(
+  '47000000-0000-4000-8000-000000000002','REVOKED',
+  'stale channel pointer revocation regression',NULL,'{}'::jsonb
+);
+SELECT spike_test.assert_true(
+  (SELECT event_sequence FROM serving.research_release_events
+   WHERE research_release_id='47000000-0000-4000-8000-000000000002'
+     AND event_type='REVOKED'
+   ORDER BY event_sequence DESC LIMIT 1) = 5,
+  'second REVOKED transition must append sequence 5'
+);
+
+SET ROLE anon;
+SELECT spike_test.assert_true(
+  (SELECT count(*) FROM serving.current_release WHERE channel_key='PRODUCTION') = 0,
+  'current_release must not expose a stale channel pointer to a REVOKED release'
+);
+RESET ROLE;
+
+SELECT publication_control.transition_release_lifecycle(
+  '47000000-0000-4000-8000-000000000002','REACTIVATED',
+  'restore after stale-pointer revocation test',NULL,'{}'::jsonb
+);
+SELECT spike_test.assert_true(
+  (SELECT event_sequence FROM serving.research_release_events
+   WHERE research_release_id='47000000-0000-4000-8000-000000000002'
+     AND event_type='REACTIVATED'
+   ORDER BY event_sequence DESC LIMIT 1) = 6,
+  'second REACTIVATED transition must append sequence 6'
+);
+
+SET ROLE anon;
+SELECT spike_test.assert_true(
+  (SELECT count(*) FROM serving.current_release WHERE channel_key='PRODUCTION') = 1,
+  'current_release must resolve again after explicit REACTIVATED'
+);
+RESET ROLE;
 
 DO $invalid_duplicate_reactivation$
 DECLARE failed boolean := false;

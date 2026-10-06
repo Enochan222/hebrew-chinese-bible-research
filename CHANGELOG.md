@@ -5,6 +5,24 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
 
+## 2026-10-06 — Strengthen RL-1 lifecycle boundary tests
+
+### Push intent
+
+Mechanically verify the two remaining release-lifecycle boundary claims after the core state machine passed Database Spike.
+
+### What changed
+
+- prove `publication_worker` cannot directly INSERT `research_release_events` and must use the Publication Control boundary;
+- revoke a release while the stored PRODUCTION pointer still references it and prove public `serving.current_release` returns no row;
+- explicitly reactivate the same immutable release and prove public current-release resolution returns;
+- extend deterministic event-sequence assertions through the second revoke/reactivate cycle.
+
+### Validation
+
+Exact-head Database Spike must pass the strengthened adversarial tests. Whole-Bible reader, P1 web, contract and governance regressions must remain green before the lifecycle freeze gate is promoted.
+
+
 ## 2026-10-06 — Repair lifecycle-aware reference-label RLS
 
 ### Push intent

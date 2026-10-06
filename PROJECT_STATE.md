@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-06.10**
+State Revision: **2026-10-06.11**
 
 ## Mandatory governance rule
 
@@ -367,4 +367,4 @@ The contract is locked before implementation:
 
 ## Latest push intent
 
-Repair the first exact-head RL-1 Database Spike regression without changing lifecycle semantics. The new public servability model was correct, but `serving.reference_labels` retained the old ever-published RLS predicate while anon/authenticated no longer execute that immutability helper directly; PassageCore therefore failed on reference-label policy evaluation after revocation. Move that final public label policy to `component_is_publicly_servable` and enforce that lifecycle metadata is a JSON object at the SQL boundary. Rerun the full exact-head lifecycle and whole-Bible regressions.
+Strengthen RL-1 acceptance after the core lifecycle Database Spike passed. Add a negative privilege test proving publication_worker cannot insert lifecycle rows directly, and a stale-channel-pointer regression proving public `current_release` returns no revoked release even when the stored pointer still references it; explicit REACTIVATED restores resolution. Rerun the exact-head Database Spike and all dependent whole-Bible/web regressions before promoting `CORE-FZ-RELEASE-002`.
