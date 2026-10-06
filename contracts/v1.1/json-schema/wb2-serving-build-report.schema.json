@@ -1,0 +1,236 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/wb2-serving-build-report.schema.json",
+  "title": "WB-2 Rights-Safe Serving Build Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "milestone",
+    "compilerVersion",
+    "gitCommitSha",
+    "sourceFoundationBuildId",
+    "researchBuildId",
+    "researchReleaseId",
+    "releaseLabel",
+    "manifest",
+    "manifestHash",
+    "projectedSources",
+    "excludedSources",
+    "rights",
+    "counts",
+    "checks",
+    "pass"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "milestone": {
+      "const": "WB-2"
+    },
+    "compilerVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "gitCommitSha": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{40}$"
+    },
+    "sourceFoundationBuildId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "wb1AggregatePartitionHash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-fA-F]{64}$"
+    },
+    "researchBuildId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "researchReleaseId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "releaseLabel": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest": {
+      "$ref": "./release-manifest.schema.json"
+    },
+    "manifestHash": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{64}$"
+    },
+    "projectedSources": {
+      "type": "array",
+      "const": [
+        "OSHB_MORPHHB"
+      ]
+    },
+    "excludedSources": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sourceKey",
+          "reason",
+          "publicServingDefault"
+        ],
+        "properties": {
+          "sourceKey": {
+            "enum": [
+              "BHSA_2021",
+              "ETCBC_BRIDGING_2021"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "publicServingDefault": {
+            "enum": [
+              "CONDITIONAL_RIGHTS_REVIEW",
+              "DENY_UNTIL_RIGHTS_REVIEW"
+            ]
+          }
+        }
+      }
+    },
+    "rights": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policyId",
+        "storageSnapshotId",
+        "displaySnapshotId",
+        "storageDecision",
+        "displayDecision",
+        "displayObligation"
+      ],
+      "properties": {
+        "policyId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "storageSnapshotId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "displaySnapshotId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "storageDecision": {
+          "const": "ALLOW"
+        },
+        "displayDecision": {
+          "const": "CONDITIONAL"
+        },
+        "displayObligation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "obligationType",
+            "value"
+          ],
+          "properties": {
+            "obligationType": {
+              "const": "ATTRIBUTION"
+            },
+            "value": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "configuredBooks",
+        "authoringOshbNodes",
+        "authoringOshbSegments",
+        "servingCorpusNodes",
+        "servingTextSegments",
+        "servingNodeSegmentMemberships",
+        "passageReferenceIndexRows",
+        "passageReferenceIndexBooks",
+        "bhsaNodeLeaks",
+        "bridgingFeatureLeaks",
+        "nonOshbServingSegments",
+        "releaseComponents",
+        "publishedEventsBeforeActivation"
+      ],
+      "properties": {
+        "configuredBooks": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "authoringOshbNodes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "authoringOshbSegments": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "servingCorpusNodes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "servingTextSegments": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "servingNodeSegmentMemberships": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "passageReferenceIndexRows": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "passageReferenceIndexBooks": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "bhsaNodeLeaks": {
+          "const": 0
+        },
+        "bridgingFeatureLeaks": {
+          "const": 0
+        },
+        "nonOshbServingSegments": {
+          "const": 0
+        },
+        "releaseComponents": {
+          "const": 2
+        },
+        "publishedEventsBeforeActivation": {
+          "const": 0
+        }
+      }
+    },
+    "checks": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "const": true
+      }
+    },
+    "pass": {
+      "const": true
+    }
+  }
+}
