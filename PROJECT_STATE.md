@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-08.1**
+State Revision: **2026-10-08.2**
 
 ## Mandatory governance rule
 
@@ -323,31 +323,33 @@ WB-1 acceptance is **PASS** for `CORE-FZ-WB-002`. The synchronized implementatio
 
 1. Preserve contract/governance consistency, the ChatGPT-only project AI policy and the whole-Bible scope guard.
 2. Treat WB-2/WB-3 as accepted whole-Bible base-reader infrastructure and preserve its exact-head regression suite.
-3. Re-close RL-1 Issue #25 before WB-4 publication work. PR #28 merged the lifecycle split, but follow-up adversarial review found three release-keyed Serving projection tables without the permanent component immutability guard: `reference_labels`, `corpus_text_segments` and `corpus_node_segments`. The issue is reopened until Database Spike and the real whole-Bible Serving workflow prove those surfaces remain immutable through REVOKED/REACTIVATED.
-4. Complete WB-4/WB-5 only after RL-1 is re-accepted: selected translation witnesses, alignment/comparison, project/user translation workflow and deterministic whole-corpus analysis.
+3. Complete RL-1 closeout through PR #30. The hardening implementation head has passed every required lifecycle, whole-Bible, database, contract, governance and web regression, and `CORE-FZ-RELEASE-002` is accepted as PASS. Keep Issue #25 open until the synchronized acceptance head is merged and verified on `main`.
+4. After RL-1 merge verification, begin WB-4/WB-5: selected translation witnesses, alignment/comparison, project/user translation workflow and deterministic whole-corpus analysis.
 5. Only then make Research Pro provider adapters, ResearchModelAdapter and end-to-end literature builds the primary product implementation frontier; academic enrichment may proceed in parallel where it does not block the base path.
 
-## RL-1 release lifecycle hardening
+## RL-1 release lifecycle acceptance
 
-PR #28 merged the core lifecycle split on exact head `d2d8d71c9d3ee7a2eeb126991816dc6daed7ab89`. Its exact-head Contract validation, Project governance, Database Spike, WB-1, WB-2/WB-3, whole-Bible corpus and P1 workflows all passed. That evidence proves the event-sequence/state-machine/RLS/channel semantics implemented by PR #28, but a later mutation-surface audit found the acceptance suite was incomplete.
+PR #28 merged the core lifecycle split, but later adversarial review found three release-keyed CORPUS Serving projections without the permanent component immutability guard: `reference_labels`, `corpus_text_segments` and `corpus_node_segments`. Issue #25 was reopened and PR #30 hardened that boundary rather than allowing WB-4 publication work to build on an incomplete immutability guarantee.
 
-The defect is specific and load-bearing: `serving.guard_component_projection()` was attached to corpus nodes/features/edges/mappings but not to three other release-keyed CORPUS projections that are part of the same published payload:
+PR #30 implementation head `cedeaa20baa90284fa9f063ef3f1ced943ca7061` now provides machine evidence for the complete current `corpus_release_id` projection surface:
 
-- `serving.reference_labels`;
-- `serving.corpus_text_segments`;
-- `serving.corpus_node_segments`.
+- `guard_component_projection('corpus_release_id')` protects reference labels, corpus text segments, node/segment memberships, nodes, features, edges and mappings after first publication;
+- Database Spike includes a catalog-level invariant that fails if any current or future Serving table carrying `corpus_release_id` lacks that permanent component guard;
+- explicit post-REVOKED mutation attacks against reference labels, Hebrew text segments and node/segment memberships fail;
+- the real whole-Bible OSHB release is exercised through PUBLISHED -> REVOKED -> REACTIVATED: revocation removes current/pinned public serving, all three real projection mutation attacks fail, explicit reactivation plus channel reassignment restores Gen.1.1, and event order remains deterministic;
+- the active database/API contract now matches the canonical `eventSequence` contract and explicitly defines the immutable CORPUS projection boundary.
 
-Because those tables remained mutable after first publication, a REVOKED historical release could have its label/text/membership payload rewritten even though the release itself remained ever-published. That contradicts the active publication model and `CORE-FZ-RELEASE-002`.
+Exact implementation-head evidence:
 
-Current hardening candidate:
+- Database Spike 001 `37669525047`: PASS;
+- WB-2 WB-3 Serving Reader `37669525095`: PASS, including the real whole-Bible revoke/reactivate regression;
+- WB-1 Relational Whole Corpus `37669524878`: PASS;
+- Whole-Bible corpus foundation `37669524970`: PASS;
+- P1 fixture shell validation `37669524947`: PASS;
+- Contract validation `37669525237`: PASS;
+- Project governance `37669524996`: PASS.
 
-- attach the permanent component-projection guard to every current Serving table keyed by `corpus_release_id`;
-- add a catalog-level regression that fails whenever a future `corpus_release_id` Serving table lacks the guard;
-- add explicit post-REVOKED mutation attacks against reference labels, text segments and node/segment memberships;
-- run the same revoke -> hidden -> immutable -> reactivate -> serving-restored sequence against the real whole-Bible OSHB Serving projection;
-- align the active database/API contract with the already-canonical `eventSequence` lifecycle ordering and make complete release-keyed projection immutability explicit.
-
-Issue #25 has been reopened. `CORE-FZ-RELEASE-002` remains **PENDING re-acceptance** until the exact hardening head passes Database Spike 001, WB-2/WB-3 real whole-Bible lifecycle regression, Contract validation, Project governance and every other triggered regression.
+`CORE-FZ-RELEASE-002` is therefore **PASS**. Issue #25 remains open only for PR #30 merge/main verification. The synchronized acceptance head created by this state/freeze/changelog update must itself pass the triggered exact-head checks before merge.
 
 ## WB-2 / WB-3 implementation state
 
@@ -373,4 +375,4 @@ Exact-head machine evidence is complete. WB-2/WB-3 Serving Reader run `374243988
 
 ## Latest push intent
 
-Reopen and harden RL-1 after discovering that PR #28's lifecycle acceptance did not cover every release-keyed CORPUS Serving projection. Keep WB-4/WB-5 blocked, add the missing permanent immutability guards and future-proof catalog assertion, and require a real whole-Bible revoke/reactivate regression before re-closing Issue #25 or promoting `CORE-FZ-RELEASE-002`.
+Synchronize repository authority with PR #30 implementation-head evidence and accept `CORE-FZ-RELEASE-002`. Preserve Issue #25 as open until the synchronized acceptance head passes exact-head CI, PR #30 is squash-merged, and `main` is verified. After that closeout, WB-4/WB-5 becomes the next base-product frontier.
