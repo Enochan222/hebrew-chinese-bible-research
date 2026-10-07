@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/translation-witness.schema.json",
+  "title": "Translation Witness v1.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "digitalExpressionId",
+    "displayName",
+    "languageTag",
+    "coverageStatus",
+    "binding"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.1"
+    },
+    "digitalExpressionId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "displayName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "languageTag": {
+      "type": "string",
+      "minLength": 2
+    },
+    "coverageStatus": {
+      "enum": [
+        "AVAILABLE",
+        "NOT_AVAILABLE"
+      ]
+    },
+    "binding": {
+      "$ref": "./provider-witness-binding.schema.json"
+    }
+  }
+}
