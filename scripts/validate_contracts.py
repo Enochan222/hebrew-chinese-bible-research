@@ -50,6 +50,7 @@ POSITIVE = [
  ("contracts/v1.1/json-schema/annotation-layer.schema.json","contracts/v1.1/fixtures/annotation-layer-clause.json"),
  ("contracts/v1.1/json-schema/provider-witness-binding.schema.json","contracts/v1.1/fixtures/provider-witness-snapshot.json"),
  ("contracts/v1.1/json-schema/provider-witness-binding.schema.json","contracts/v1.1/fixtures/provider-witness-live.json"),
+ ("contracts/v1.1/json-schema/translation-witness-list.schema.json","contracts/v1.1/fixtures/translation-witness-list.json"),
  ("contracts/v1.1/json-schema/release-event.schema.json","contracts/v1.1/fixtures/release-event-published.json"),
  ("contracts/v1.1/json-schema/release-channel-pointer.schema.json","contracts/v1.1/fixtures/release-channel-production.json"),
  ("contracts/v1.1/json-schema/semantic-set-version.schema.json","contracts/v1.1/fixtures/semantic-set-body-part.json"),
@@ -89,6 +90,7 @@ NEG_SCHEMA = [
  ("contracts/v1.1/json-schema/published-evidence-item.schema.json","contracts/v1.1/negative-fixtures/published-evidence-immutable-without-hash.json"),
  ("contracts/v1.1/json-schema/discovery-record.schema.json","contracts/v1.1/negative-fixtures/discovery-persisted-without-rights.json"),
  ("contracts/v1.1/json-schema/translation-source-basis.schema.json","contracts/v1.1/negative-fixtures/translation-source-basis-emendation-without-reading.json"),
+ ("contracts/v1.1/json-schema/translation-witness-list.schema.json","contracts/v1.1/negative-fixtures/translation-witness-list-extra-field.json"),
  ("contracts/v1.1/json-schema/citation-locator.schema.json","contracts/v1.1/negative-fixtures/citation-locator-source-span-missing-id.json"),
  ("contracts/v1.1/json-schema/rights-decision-snapshot.schema.json","contracts/v1.1/negative-fixtures/rights-snapshot-unknown-final-decision.json"),
  ("contracts/v1.1/json-schema/corpus-query-result.schema.json","contracts/v1.1/negative-fixtures/corpus-query-result-nonexact-with-total.json"),
@@ -411,6 +413,13 @@ def governance():
             actual_codes=response_error_codes(route,status)
             if actual_codes!=expected_codes:
                 fail(f"Core OpenAPI error-code drift for {route} {status}: {sorted(actual_codes)} != {sorted(expected_codes)}")
+    translation_schema_ref=core_api["components"]["schemas"]["TranslationWitnessList"].get("$ref")
+    if translation_schema_ref != "./json-schema/translation-witness-list.schema.json":
+        fail(f"Core OpenAPI TranslationWitnessList must use canonical schema, got {translation_schema_ref!r}")
+    for route in ("/api/v1/passages/{reference}/translations", "/api/v1/releases/{releaseId}/passages/{reference}/translations"):
+        response_schema=core_api["paths"][route]["get"]["responses"]["200"]["content"]["application/json"]["schema"].get("$ref")
+        if response_schema != "#/components/schemas/TranslationWitnessList":
+            fail(f"translation route schema drift: {route} -> {response_schema!r}")
     generic_not_found=(core_api["components"]["responses"]["NotFound"]["content"]
                        ["application/json"]["schema"]["properties"]["code"].get("const"))
     if generic_not_found != "NOT_FOUND":
