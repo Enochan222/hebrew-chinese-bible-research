@@ -202,7 +202,11 @@ Replace fixture-only passage content with database-backed Hebrew passage renderi
 
 Add selected permitted Chinese/ancient/reference witnesses, many-to-many alignment, comparison and project/user translation workflows.
 
-Coverage is tracked per witness and must not be inferred from provider availability.
+The canonical serving payload is DigitalExpression-specific and uses a strict TranslationWitness contract. Provider delivery mechanics are represented separately by ProviderWitnessBinding.
+
+Coverage is tracked per witness and must not be inferred from provider availability. A provider binding does not prove passage coverage and does not grant storage, publication or public-display permission. Publication remains gated by operation-specific RightsDecisionSnapshot resolution and the ResearchRelease boundary.
+
+Contract fixtures may use synthetic witnesses for validation; they are not evidence that any real translation has been selected or licensed for Serving.
 
 ### WB-5: deterministic analysis base
 
