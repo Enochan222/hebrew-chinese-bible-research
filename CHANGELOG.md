@@ -5,6 +5,28 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
 
+## 2026-10-08 — Fail closed on null snapshot witness hash
+
+### Push intent
+
+Close the last clear ProviderWitnessBinding inconsistency found in adversarial review of PR #29 before accepting the WB-4 contract boundary.
+
+### Why
+
+A `SNAPSHOT_PINNED` witness means provider text has been persisted into a release-bound immutable snapshot. The schema required the `snapshotContentHash` field but still permitted its value to be null, which would make that snapshot unverifiable and contradict the release-pinning model.
+
+### What changed
+
+- require `SNAPSHOT_PINNED.snapshotContentHash` to be a non-null SHA-256 value;
+- add an adversarial null-hash provider-binding fixture;
+- register that fixture as a mandatory schema rejection;
+- leave `LIVE_EXTERNAL` locator/ephemeral semantics unchanged.
+
+### Validation
+
+This changes no real translation data and adds no provider content. Exact-head Contract validation plus the full affected repository regression suite must pass again before PR #29 may merge.
+
+
 ## 2026-10-08 — Close WB-4 segment-level witness contract
 
 ### Push intent
