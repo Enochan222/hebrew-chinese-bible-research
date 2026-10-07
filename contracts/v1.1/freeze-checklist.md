@@ -72,6 +72,7 @@ Database Spike 001 may begin when all CORE-SPIKE gates are PASS. This does not d
 | CORE-FZ-WB-003 | Release-pinned public passage API/reader traverses database-backed whole-corpus content without fixture-specific hard-coding and remains usable with Research Pro/BYOK unavailable |
 | CORE-FZ-CORPUS-001 | OSHB plus structurally different MACULA/BHSA layer coexist without forced phrase/clause identity |
 | CORE-FZ-TRANS-001 | FHL/provider distribution is distinct from work/edition/expression identity |
+| CORE-FZ-TRANS-002 | Public translation-witness projection is ResearchRelease/ReferenceSpan pinned, segment-level, and keeps coverage, provider delivery and display-rights state independent; non-displayable/stale/failed witnesses expose no translation text |
 | CORE-FZ-ALIGN-001 | Hebrew-Chinese many-to-many alignment fixture passes |
 | CORE-FZ-TC-001 | Grouped apparatus reading retains raw apparatus, witness uncertainty, siglum source context, and exact locus |
 | CORE-FZ-RIGHTS-001 | Conflicting rights + default/unknown restrictive deny + typed conditions/obligations fixtures pass |
@@ -83,6 +84,10 @@ Database Spike 001 may begin when all CORE-SPIKE gates are PASS. This does not d
 | CORE-FZ-API-001 | Core OpenAPI validates and generated/client compatibility smoke test passes |
 | CORE-FZ-EVIDENCE-001 | CitationLocator is typed; public excerpts require rights snapshots; immutable evidence requires content hash |
 | CORE-FZ-HASH-001 | Publishable subtype content-hash canonical projections have versioned golden vectors |
+
+### Current translation-witness gate status
+
+- `CORE-FZ-TRANS-002`: **PENDING**. PR #29 defines the machine/OpenAPI contract and adversarial fixtures only. Real PostgreSQL Serving projection, rights-snapshot linkage, RLS/RPC behavior and reader/alignment implementation evidence are still required before this gate can pass.
 
 ### Current whole-Bible gate status
 

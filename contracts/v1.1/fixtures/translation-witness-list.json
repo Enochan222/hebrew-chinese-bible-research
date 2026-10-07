@@ -1,14 +1,23 @@
 {
   "schemaVersion": "1.1",
   "researchReleaseId": "56565656-5656-4565-8565-565656565656",
-  "reference": "1Sam.16.7",
+  "referenceSpanId": "11111111-2222-4333-8444-555555555555",
+  "resolvedReference": {
+    "referenceSystemId": "12121212-1212-4121-8121-121212121212",
+    "referenceSystemCode": "OSHB_OSIS",
+    "referenceLabel": "1Sam.16.7"
+  },
   "witnesses": [
     {
       "schemaVersion": "1.1",
+      "textualWorkId": "20202020-2020-4020-8020-202020202020",
+      "textualEditionId": null,
       "digitalExpressionId": "22000000-0000-4000-8000-000000000002",
-      "displayName": "Chinese Test Witness",
+      "displayName": "Synthetic Chinese Test Witness",
       "languageTag": "zh-Hant",
-      "coverageStatus": "AVAILABLE",
+      "coverageStatus": "COVERED",
+      "deliveryStatus": "READY",
+      "displayStatus": "DISPLAYABLE",
       "binding": {
         "schemaVersion": "1.1",
         "bindingMode": "SNAPSHOT_PINNED",
@@ -20,7 +29,22 @@
         "observedHash": "8888888888888888888888888888888888888888888888888888888888888888",
         "observedAt": "2026-10-03T00:00:00Z",
         "snapshotContentHash": "9999999999999999999999999999999999999999999999999999999999999999"
-      }
+      },
+      "rightsDecisionSnapshotId": "30303030-3030-4030-8030-303030303030",
+      "provenanceId": "40404040-4040-4040-8040-404040404040",
+      "segments": [
+        {
+          "schemaVersion": "1.1",
+          "textSegmentId": "50505050-5050-4050-8050-505050505050",
+          "textStreamId": "60606060-6060-4060-8060-606060606060",
+          "referenceSpanId": "11111111-2222-4333-8444-555555555555",
+          "segmentOrder": 0,
+          "segmentKind": "VERSE",
+          "text": "合成測試譯文",
+          "contentHash": "7777777777777777777777777777777777777777777777777777777777777777"
+        }
+      ],
+      "attribution": "Synthetic fixture only"
     }
   ]
 }

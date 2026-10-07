@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-08.1**
+State Revision: **2026-10-08.2**
 
 ## Mandatory governance rule
 
@@ -348,15 +348,22 @@ Accepted semantics:
 
 ## WB-4 contract-first implementation state
 
-PR #29 starts WB-4 at the machine-contract boundary only.
+PR #29 remains contract-first and contains no real copyrighted translation publication.
 
-- TranslationWitness is strict, DigitalExpression-specific and language-labelled;
-- TranslationWitnessList is release-pinned and reference-scoped;
-- ProviderWitnessBinding remains the delivery/storage binding and does not grant rights;
-- passage coverage is explicit and must not be inferred from provider availability;
-- real translation publication remains operation-specific RightsDecisionSnapshot gated;
-- current fixtures are synthetic contract evidence, not selected/licensed product translations;
-- no real translation text is added to Serving by this frontier.
+The public witness contract is now designed to survive the next database/alignment frontier without changing field meaning:
+
+- TranslationWitnessList pins ResearchRelease, canonical ReferenceSpan and resolved ReferenceSystem identity;
+- each witness identifies TextualWork, optional TextualEdition and exact DigitalExpression rather than treating provider code as translation identity;
+- displayed witness text is an ordered array of content-hashed TextSegments with stable TextStream/TextSegment IDs suitable for later many-to-many alignment;
+- coverageStatus, deliveryStatus and displayStatus are independent;
+- DISPLAYABLE requires covered + delivery-ready + at least one segment;
+- rights-restricted, metadata-only, stale, provider-error, not-retrieved, uncovered and unknown-coverage states expose zero text segments;
+- each witness carries the display RightsDecisionSnapshot ID and provenance ID;
+- ProviderWitnessBinding remains delivery/storage mechanics and now requires observation hash/time plus an explicit providerVersion field, which may be null if the provider supplies none;
+- duplicate DigitalExpression witnesses and non-contiguous segment order are semantic contract failures;
+- all fixtures remain synthetic and do not assert that any real Chinese translation is licensed or selected.
+
+`CORE-FZ-TRANS-002` is **PENDING** until a real PostgreSQL Serving projection, rights/RLS/RPC path and reader/alignment implementation pass exact-head regression evidence.
 
 ## WB-2 / WB-3 implementation state
 
@@ -397,4 +404,4 @@ Until that contract is explicitly closed, revoke/reactivate behavior is not trea
 
 ## Latest push intent
 
-Record exact-head acceptance of WB-2/WB-3 after every required whole-Bible, database, contract, governance, web integration, visual E2E and production-build gate passed on `21a2cedafb394b84d51e244de6ff37bbac4d6a82`. Promote only `CORE-FZ-WB-001` and `CORE-FZ-WB-003`, which are directly supported by the evidence. Preserve the independently identified REVOKED/REACTIVATED lifecycle predicate ambiguity as a separate next work package rather than silently inventing event ordering or weakening immutable-release guarantees.
+Close the WB-4 serving contract before database implementation: canonical passage identity, work/edition/expression identity, segment-level display payload, provenance and rights snapshot identity, independent coverage/provider/display states, and fail-closed text exposure. Keep the frontier synthetic-only; the next PR after contract acceptance will implement the PostgreSQL Serving projection and rights/RLS/RPC path without selecting real copyrighted witnesses.

@@ -91,6 +91,9 @@ NEG_SCHEMA = [
  ("contracts/v1.1/json-schema/discovery-record.schema.json","contracts/v1.1/negative-fixtures/discovery-persisted-without-rights.json"),
  ("contracts/v1.1/json-schema/translation-source-basis.schema.json","contracts/v1.1/negative-fixtures/translation-source-basis-emendation-without-reading.json"),
  ("contracts/v1.1/json-schema/translation-witness-list.schema.json","contracts/v1.1/negative-fixtures/translation-witness-list-extra-field.json"),
+ ("contracts/v1.1/json-schema/translation-witness-list.schema.json","contracts/v1.1/negative-fixtures/translation-witness-displayable-without-segments.json"),
+ ("contracts/v1.1/json-schema/translation-witness-list.schema.json","contracts/v1.1/negative-fixtures/translation-witness-not-covered-with-segments.json"),
+ ("contracts/v1.1/json-schema/translation-witness-list.schema.json","contracts/v1.1/negative-fixtures/translation-witness-rights-restricted-with-segments.json"),
  ("contracts/v1.1/json-schema/citation-locator.schema.json","contracts/v1.1/negative-fixtures/citation-locator-source-span-missing-id.json"),
  ("contracts/v1.1/json-schema/rights-decision-snapshot.schema.json","contracts/v1.1/negative-fixtures/rights-snapshot-unknown-final-decision.json"),
  ("contracts/v1.1/json-schema/corpus-query-result.schema.json","contracts/v1.1/negative-fixtures/corpus-query-result-nonexact-with-total.json"),
@@ -139,6 +142,19 @@ def query_semantic(q: dict) -> list[str]:
         if x.get("operator") in {"EXISTS","NOT_EXISTS","MIN_COUNT","MAX_COUNT","EXACT_COUNT"}:
             if not x.get("bind"): out.append("empty quantifier bind")
             if any(b not in nodes for b in x.get("bind",[])): out.append("unknown quantifier bind")
+    return out
+
+def translation_witness_semantic(d: dict) -> list[str]:
+    out=[]
+    witnesses=d.get("witnesses",[])
+    expression_ids=[w.get("digitalExpressionId") for w in witnesses]
+    if len(expression_ids)!=len(set(expression_ids)): out.append("duplicate DigitalExpression witness")
+    for witness in witnesses:
+        segments=witness.get("segments",[])
+        orders=[segment.get("segmentOrder") for segment in segments]
+        if orders!=list(range(len(segments))): out.append("translation segmentOrder must be contiguous from 0")
+        segment_ids=[segment.get("textSegmentId") for segment in segments]
+        if len(segment_ids)!=len(set(segment_ids)): out.append("duplicate translation TextSegment")
     return out
 
 def hebrew_bible_canon_semantic(d: dict) -> list[str]:
@@ -300,6 +316,7 @@ def validate_fixtures():
         if f.endswith("query-execution-policy.json"): ERRORS.extend(f"{f}: {e}" for e in query_policy_semantic(d))
         if f.endswith("corpus-query-result.json"): ERRORS.extend(f"{f}: {e}" for e in query_result_semantic(d))
         if f.endswith("experience-capabilities.json"): ERRORS.extend(f"{f}: {e}" for e in experience_semantic(d))
+        if f.endswith("translation-witness-list.json"): ERRORS.extend(f"{f}: {e}" for e in translation_witness_semantic(d))
     for s,f in NEG_SCHEMA:
         if not schema_errors(s,f): fail(f"{f}: expected schema rejection")
     semantic_neg=[
@@ -312,6 +329,7 @@ def validate_fixtures():
       ("contracts/v1.1/negative-fixtures/rights-winner-not-applicable.json",rights_semantic),
       ("contracts/v1.1/negative-fixtures/query-execution-policy-invalid-bounds.json",query_policy_semantic),
       ("contracts/v1.1/negative-fixtures/translation-policy-overlapping-rule-membership.json",translation_policy_semantic),
+      ("contracts/v1.1/negative-fixtures/translation-witness-duplicate-expression.json",translation_witness_semantic),
     ]
     for f,fn in semantic_neg:
         if not fn(load(f)): fail(f"{f}: expected semantic rejection")
@@ -416,6 +434,14 @@ def governance():
     translation_schema_ref=core_api["components"]["schemas"]["TranslationWitnessList"].get("$ref")
     if translation_schema_ref != "./json-schema/translation-witness-list.schema.json":
         fail(f"Core OpenAPI TranslationWitnessList must use canonical schema, got {translation_schema_ref!r}")
+    witness_schema=load("contracts/v1.1/json-schema/translation-witness.schema.json")
+    required_witness_fields={"textualWorkId","textualEditionId","digitalExpressionId","coverageStatus","deliveryStatus","displayStatus","binding","rightsDecisionSnapshotId","provenanceId","segments"}
+    if not required_witness_fields.issubset(set(witness_schema.get("required",[]))):
+        fail("TranslationWitness missing load-bearing identity/rights/segment fields")
+    provider_binding=load("contracts/v1.1/json-schema/provider-witness-binding.schema.json")
+    for required_field in ("providerVersion","observedHash","observedAt"):
+        if required_field not in provider_binding.get("required",[]):
+            fail(f"ProviderWitnessBinding must require {required_field}")
     for route in ("/api/v1/passages/{reference}/translations", "/api/v1/releases/{releaseId}/passages/{reference}/translations"):
         response_schema=core_api["paths"][route]["get"]["responses"]["200"]["content"]["application/json"]["schema"].get("$ref")
         if response_schema != "#/components/schemas/TranslationWitnessList":

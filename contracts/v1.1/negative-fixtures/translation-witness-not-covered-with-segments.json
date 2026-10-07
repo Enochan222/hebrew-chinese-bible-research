@@ -15,7 +15,7 @@
       "digitalExpressionId": "22000000-0000-4000-8000-000000000002",
       "displayName": "Synthetic Chinese Test Witness",
       "languageTag": "zh-Hant",
-      "coverageStatus": "COVERED",
+      "coverageStatus": "NOT_COVERED",
       "deliveryStatus": "READY",
       "displayStatus": "DISPLAYABLE",
       "binding": {
@@ -44,8 +44,7 @@
           "contentHash": "7777777777777777777777777777777777777777777777777777777777777777"
         }
       ],
-      "attribution": "Synthetic fixture only",
-      "unexpectedField": "must fail"
+      "attribution": "Synthetic fixture only"
     }
   ]
 }

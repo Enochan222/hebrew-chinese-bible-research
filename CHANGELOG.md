@@ -4,6 +4,30 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+
+## 2026-10-08 — Close WB-4 segment-level witness contract
+
+### Push intent
+
+Make the translation-witness API stable enough for the next PostgreSQL/alignment implementation without publishing any real copyrighted translation.
+
+### What changed
+
+- replace free-form passage echo with ResearchRelease-pinned canonical ReferenceSpan plus resolved ReferenceSystem identity;
+- carry TextualWork, nullable TextualEdition and exact DigitalExpression identity per witness;
+- add ordered content-hashed TranslationWitnessSegment objects with stable TextStream/TextSegment IDs;
+- separate coverage, provider delivery and display-rights state instead of collapsing them into availability;
+- require displayable witnesses to be covered, delivery-ready and segment-bearing;
+- force rights-restricted, metadata-only, stale, provider-error, not-retrieved and uncovered/unknown states to expose zero translation text;
+- require RightsDecisionSnapshot and provenance identity per witness;
+- strengthen ProviderWitnessBinding with required observed hash/time and explicit providerVersion presence;
+- add schema and semantic adversarial fixtures for missing display segments, uncovered/restricted text leakage and duplicate DigitalExpression identity;
+- add `CORE-FZ-TRANS-002` as a PENDING implementation gate.
+
+### Validation
+
+All translation text in fixtures remains synthetic. Contract validation must reject the new adversarial vectors and the full repository regression suite must pass on the exact PR head before merge. Real witness selection, licensing, ingestion and Serving remain outside this contract-only PR.
+
 ## 2026-10-08 — Start WB-4 with a strict translation-witness contract
 
 ### Push intent

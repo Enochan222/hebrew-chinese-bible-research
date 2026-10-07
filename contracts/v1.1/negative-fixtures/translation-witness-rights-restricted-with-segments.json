@@ -17,7 +17,7 @@
       "languageTag": "zh-Hant",
       "coverageStatus": "COVERED",
       "deliveryStatus": "READY",
-      "displayStatus": "DISPLAYABLE",
+      "displayStatus": "RIGHTS_RESTRICTED",
       "binding": {
         "schemaVersion": "1.1",
         "bindingMode": "SNAPSHOT_PINNED",
@@ -44,8 +44,7 @@
           "contentHash": "7777777777777777777777777777777777777777777777777777777777777777"
         }
       ],
-      "attribution": "Synthetic fixture only",
-      "unexpectedField": "must fail"
+      "attribution": "Synthetic fixture only"
     }
   ]
 }
