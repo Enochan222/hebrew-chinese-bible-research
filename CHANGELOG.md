@@ -4,6 +4,41 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+
+## 2026-10-08 — Reopen RL-1 and harden Serving projection immutability
+
+### Push intent
+
+Correct an acceptance defect discovered after PR #28 merged. Keep WB-4 publication blocked until every release-keyed CORPUS Serving projection remains permanently immutable after first publication, including while REVOKED.
+
+### Why
+
+PR #28 correctly separated ever-published immutability from current public servability and passed its exact-head workflows. Follow-up adversarial review found that the permanent component mutation guard covered `corpus_nodes`, features, edges and mappings but omitted three tables that also belong to the published CORPUS payload:
+
+- `serving.reference_labels`;
+- `serving.corpus_text_segments`;
+- `serving.corpus_node_segments`.
+
+That meant a revoked historical release could still have its published reference addressing, Hebrew surface text or node-to-text membership rewritten. The generic Database Spike test attacked only `corpus_node_features`, and the accepted real WB-2/WB-3 workflow did not exercise revoke/reactivate, so both gates missed the defect.
+
+### What changed
+
+- reopen Issue #25 and keep `CORE-FZ-RELEASE-002` pending re-acceptance;
+- attach `guard_component_projection('corpus_release_id')` to every current Serving table keyed by `corpus_release_id`;
+- add a catalog-level regression that fails if any future `corpus_release_id` Serving table lacks that permanent guard;
+- add post-REVOKED mutation attacks for reference labels, corpus text segments and corpus node/segment memberships;
+- extend the real whole-Bible WB-2/WB-3 workflow with revoke -> public-hidden -> immutable-projection -> reactivate -> explicit channel restore -> public-readable assertions;
+- align the active database/API contract with canonical event-sequence ordering and explicitly enumerate immutable CORPUS Serving projection surfaces;
+- synchronize PROJECT_STATE to the reopened RL-1 hardening frontier.
+
+### Intended effect
+
+REVOKED changes availability only. It cannot reopen any part of an ever-published corpus payload for mutation. Future release-keyed corpus tables cannot silently bypass that invariant.
+
+### Validation
+
+Pending exact-head CI. Acceptance requires Database Spike 001, WB-2/WB-3 real whole-Bible Serving Reader, Contract validation, Project governance, P1 fixture shell and every other triggered regression to pass before Issue #25 is closed again.
+
 ## 2026-10-06 — Implement RL-1 release lifecycle split candidate
 
 ### Push intent
