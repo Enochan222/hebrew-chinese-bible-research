@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/translation-witness-list.schema.json",
+  "title": "Translation Witness List v1.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "researchReleaseId",
+    "reference",
+    "witnesses"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.1"
+    },
+    "researchReleaseId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 1
+    },
+    "witnesses": {
+      "type": "array",
+      "items": {
+        "$ref": "./translation-witness.schema.json"
+      }
+    }
+  }
+}
