@@ -4,6 +4,36 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+## 2026-10-08 — Start WB-4 with a strict translation-witness contract
+
+### Push intent
+
+Begin the translation-witness base without prematurely publishing real translation content or allowing provider-specific payloads to define the product contract.
+
+### Why
+
+Core OpenAPI exposed TranslationWitnessList through a permissive inline witness object with additional properties allowed. That left DigitalExpression identity, passage coverage and provider binding underspecified at the API boundary and risked conflating provider availability with publication permission.
+
+### What changed
+
+- add canonical strict TranslationWitness and TranslationWitnessList JSON Schemas;
+- bind every witness to an exact DigitalExpression and language tag;
+- make passage coverage explicit instead of inferring it from provider availability;
+- embed the existing ProviderWitnessBinding as delivery/storage mechanics rather than rights authority;
+- replace the permissive inline OpenAPI witness object with the canonical list schema;
+- add positive and adversarial fixtures and validator checks;
+- document that provider binding, passage coverage and public-display rights are separate facts;
+- record merged PR #28 / closed Issue #25 as the accepted RL-1 lifecycle baseline;
+- keep all real translation text out of this contract-only frontier.
+
+### Intended effect
+
+WB-4 database publication and reader work can now target one machine-readable witness contract while remaining fail-closed on rights. Synthetic fixtures cannot be mistaken for selected or licensed product translations.
+
+### Validation
+
+Contract validation passed on PR #29 head before the governance synchronization commit. Exact-head validation and whole-Bible regressions must pass again before merge.
+
 ## 2026-10-06 — Implement RL-1 release lifecycle split candidate
 
 ### Push intent
