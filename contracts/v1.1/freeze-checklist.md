@@ -84,6 +84,11 @@ Database Spike 001 may begin when all CORE-SPIKE gates are PASS. This does not d
 | CORE-FZ-EVIDENCE-001 | CitationLocator is typed; public excerpts require rights snapshots; immutable evidence requires content hash |
 | CORE-FZ-HASH-001 | Publishable subtype content-hash canonical projections have versioned golden vectors |
 
+### Current release-lifecycle gate status
+
+- `CORE-FZ-RELEASE-001`: **PASS**. Database Spike publication atomicity remains covered: a failure before channel-pointer movement rolls back the candidate PUBLISHED event and leaves the existing production pointer unchanged.
+- `CORE-FZ-RELEASE-002`: **PASS** on PR #30 implementation head `cedeaa20baa90284fa9f063ef3f1ced943ca7061`. Database Spike 001 run `37669525047` passed lifecycle/RLS/channel tests plus a catalog assertion requiring every current/future Serving table keyed by `corpus_release_id` to carry the permanent component-projection guard. WB-2/WB-3 Serving Reader run `37669525095` then exercised the real whole-Bible OSHB release through PUBLISHED -> REVOKED -> REACTIVATED: revocation removed current/pinned public serving, mutation attempts against real reference labels, Hebrew text segments and node/segment memberships were rejected, explicit reactivation plus channel reassignment restored Gen.1.1 serving, and lifecycle event order remained deterministic. The same implementation head passed Contract validation `37669525237`, Project governance `37669524996`, P1 fixture shell `37669524947`, WB-1 Relational Whole Corpus `37669524878`, and Whole-Bible corpus foundation `37669524970`.
+
 ### Current whole-Bible gate status
 
 - `CORE-FZ-WB-001`: **PASS**. PR #23 synchronized implementation head `21a2cedafb394b84d51e244de6ff37bbac4d6a82` passed WB-2/WB-3 Serving Reader run `37424398827`. The real published OSHB Serving projection exposes a data-driven 39-book Book/Chapter/Passage navigation index from the configured ReferenceSystem; Genesis resolves 50 chapters and Genesis 1 resolves 31 passages; Gen.50.26 advances to Exod.1.1 across the book boundary; no React hard-coded book list defines product coverage.
