@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-06.8**
+State Revision: **2026-10-08.1**
 
 ## Mandatory governance rule
 
@@ -323,27 +323,31 @@ WB-1 acceptance is **PASS** for `CORE-FZ-WB-002`. The synchronized implementatio
 
 1. Preserve contract/governance consistency, the ChatGPT-only project AI policy and the whole-Bible scope guard.
 2. Treat WB-2/WB-3 as accepted whole-Bible base-reader infrastructure and preserve its exact-head regression suite.
-3. Validate and accept RL-1: the implementation candidate now separates "ever published / immutable" from "currently publicly servable", adds deterministic per-release event sequencing, enforces lifecycle transitions and prevents revoked releases from remaining channel-selected. Do not begin WB-4 publication work until this candidate passes exact-head database/contract/governance regressions.
-4. Complete WB-4/WB-5: add selected translation witnesses, alignment/comparison, project/user translation workflow and deterministic whole-corpus analysis.
+3. Re-close RL-1 Issue #25 before WB-4 publication work. PR #28 merged the lifecycle split, but follow-up adversarial review found three release-keyed Serving projection tables without the permanent component immutability guard: `reference_labels`, `corpus_text_segments` and `corpus_node_segments`. The issue is reopened until Database Spike and the real whole-Bible Serving workflow prove those surfaces remain immutable through REVOKED/REACTIVATED.
+4. Complete WB-4/WB-5 only after RL-1 is re-accepted: selected translation witnesses, alignment/comparison, project/user translation workflow and deterministic whole-corpus analysis.
 5. Only then make Research Pro provider adapters, ResearchModelAdapter and end-to-end literature builds the primary product implementation frontier; academic enrichment may proceed in parallel where it does not block the base path.
 
-## RL-1 release lifecycle implementation candidate
+## RL-1 release lifecycle hardening
 
-Issue #25 identified that the accepted WB-2/WB-3 database used one `release_is_published()` predicate for two incompatible concerns: permanent post-publication immutability and current public visibility. The RL-1 candidate removes that overload.
+PR #28 merged the core lifecycle split on exact head `d2d8d71c9d3ee7a2eeb126991816dc6daed7ab89`. Its exact-head Contract validation, Project governance, Database Spike, WB-1, WB-2/WB-3, whole-Bible corpus and P1 workflows all passed. That evidence proves the event-sequence/state-machine/RLS/channel semantics implemented by PR #28, but a later mutation-surface audit found the acceptance suite was incomplete.
 
-Candidate semantics:
+The defect is specific and load-bearing: `serving.guard_component_projection()` was attached to corpus nodes/features/edges/mappings but not to three other release-keyed CORPUS projections that are part of the same published payload:
 
-- `eventSequence` is the authoritative per-release lifecycle order; it is gapless from 1 and resolves equal `effectiveAt` timestamps without UUID ordering;
-- the first event is PUBLISHED, and transition validity is enforced in PostgreSQL;
-- ever-published releases and their compiled projections remain permanently immutable even after REVOKED;
-- current public servability is lifecycle-aware: PUBLISHED, SUPERSEDED and REACTIVATED are pinned-readable, while REVOKED and never-published releases are not;
-- SUPERSEDED remains public for citation-stable historical URLs and rollback eligibility;
-- REVOKED atomically detaches channel pointers, and REACTIVATED never silently restores a pointer;
-- channel assignment rejects non-servable releases;
-- public RLS, current-release resolution and release-pinned passage reads use servability rather than historical publication;
-- lifecycle transitions are restricted to the publication worker and covered by adversarial Database Spike tests.
+- `serving.reference_labels`;
+- `serving.corpus_text_segments`;
+- `serving.corpus_node_segments`.
 
-`CORE-FZ-RELEASE-002` now names this lifecycle requirement explicitly. It is not accepted merely because the code exists: exact-head Contract validation, Project governance, Database Spike and affected whole-Bible regressions must pass before RL-1 is closed.
+Because those tables remained mutable after first publication, a REVOKED historical release could have its label/text/membership payload rewritten even though the release itself remained ever-published. That contradicts the active publication model and `CORE-FZ-RELEASE-002`.
+
+Current hardening candidate:
+
+- attach the permanent component-projection guard to every current Serving table keyed by `corpus_release_id`;
+- add a catalog-level regression that fails whenever a future `corpus_release_id` Serving table lacks the guard;
+- add explicit post-REVOKED mutation attacks against reference labels, text segments and node/segment memberships;
+- run the same revoke -> hidden -> immutable -> reactivate -> serving-restored sequence against the real whole-Bible OSHB Serving projection;
+- align the active database/API contract with the already-canonical `eventSequence` lifecycle ordering and make complete release-keyed projection immutability explicit.
+
+Issue #25 has been reopened. `CORE-FZ-RELEASE-002` remains **PENDING re-acceptance** until the exact hardening head passes Database Spike 001, WB-2/WB-3 real whole-Bible lifecycle regression, Contract validation, Project governance and every other triggered regression.
 
 ## WB-2 / WB-3 implementation state
 
@@ -367,21 +371,6 @@ Exact-head machine evidence is complete. WB-2/WB-3 Serving Reader run `374243988
 
 `CORE-FZ-WB-001` and `CORE-FZ-WB-003` are now **PASS**.
 
-## Known release-lifecycle semantic gap
-
-This whole-Bible acceptance does **not** claim that the later Product Operations revoke/reactivate lifecycle is complete.
-
-Independent adversarial review found that the current `serving.release_is_published()` predicate means "has ever received a PUBLISHED event" and is used for both public visibility and post-publication immutability. The active architecture separately defines PUBLISHED, SUPERSEDED, REVOKED and REACTIVATED events, but the machine contract does not yet define a total event-ordering rule for equal `effectiveAt` values.
-
-A future lifecycle implementation must not simply redefine `release_is_published()` as "currently visible": doing so would make a REVOKED release mutable again because immutability triggers rely on the same predicate. The next lifecycle work package must separate:
-
-- ever-published / permanently immutable state;
-- currently publicly servable lifecycle state;
-- channel-pointer eligibility;
-- deterministic REVOKED / REACTIVATED ordering and tests.
-
-Until that contract is explicitly closed, revoke/reactivate behavior is not treated as implemented. This gap does not invalidate `CORE-FZ-WB-001` or `CORE-FZ-WB-003`, whose requirements concern whole-Bible coverage/navigation and the release-pinned public reader.
-
 ## Latest push intent
 
-Record exact-head acceptance of WB-2/WB-3 after every required whole-Bible, database, contract, governance, web integration, visual E2E and production-build gate passed on `21a2cedafb394b84d51e244de6ff37bbac4d6a82`. Promote only `CORE-FZ-WB-001` and `CORE-FZ-WB-003`, which are directly supported by the evidence. Preserve the independently identified REVOKED/REACTIVATED lifecycle predicate ambiguity as a separate next work package rather than silently inventing event ordering or weakening immutable-release guarantees.
+Reopen and harden RL-1 after discovering that PR #28's lifecycle acceptance did not cover every release-keyed CORPUS Serving projection. Keep WB-4/WB-5 blocked, add the missing permanent immutability guards and future-proof catalog assertion, and require a real whole-Bible revoke/reactivate regression before re-closing Issue #25 or promoting `CORE-FZ-RELEASE-002`.
