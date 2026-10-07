@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "1.1",
+  "researchReleaseId": "56565656-5656-4565-8565-565656565656",
+  "reference": "1Sam.16.7",
+  "witnesses": [
+    {
+      "schemaVersion": "1.1",
+      "digitalExpressionId": "22000000-0000-4000-8000-000000000002",
+      "displayName": "Chinese Test Witness",
+      "languageTag": "zh-Hant",
+      "coverageStatus": "AVAILABLE",
+      "binding": {
+        "schemaVersion": "1.1",
+        "bindingMode": "SNAPSHOT_PINNED",
+        "segmentStorageMode": "PERSISTED_CONTENT",
+        "providerDistributionId": "41414141-4141-4414-8414-414141414141",
+        "reference": "1Sam.16.7",
+        "providerSegmentKey": "fixture-segment",
+        "providerVersion": "fixture-v1",
+        "observedHash": "8888888888888888888888888888888888888888888888888888888888888888",
+        "observedAt": "2026-10-03T00:00:00Z",
+        "snapshotContentHash": "9999999999999999999999999999999999999999999999999999999999999999"
+      }
+    }
+  ]
+}
