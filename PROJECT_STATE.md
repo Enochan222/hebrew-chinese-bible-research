@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-08.3**
+State Revision: **2026-10-08.4**
 
 ## Mandatory governance rule
 
@@ -361,6 +361,7 @@ The public witness contract is now designed to survive the next database/alignme
 - each witness carries the display RightsDecisionSnapshot ID and provenance ID;
 - ProviderWitnessBinding remains delivery/storage mechanics and now requires observation hash/time plus an explicit providerVersion field, which may be null if the provider supplies none;
 - `SNAPSHOT_PINNED` additionally requires a non-null SHA-256 `snapshotContentHash`; a null hash is rejected because a persisted release snapshot must remain verifiable.
+- `LIVE_EXTERNAL` may not carry a non-null `snapshotContentHash`; live observations can expose observed hashes but must not masquerade as immutable persisted snapshots.
 - duplicate DigitalExpression witnesses and non-contiguous segment order are semantic contract failures;
 - all fixtures remain synthetic and do not assert that any real Chinese translation is licensed or selected.
 

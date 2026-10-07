@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "1.1",
+  "bindingMode": "LIVE_EXTERNAL",
+  "segmentStorageMode": "PROVIDER_LOCATOR",
+  "providerDistributionId": "13131313-1313-4131-8131-131313131313",
+  "reference": "1Sam.16.7",
+  "providerSegmentKey": "fixture-segment",
+  "providerVersion": "fixture-v1",
+  "observedHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "observedAt": "2026-10-03T00:00:00Z",
+  "snapshotContentHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+}

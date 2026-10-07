@@ -5,6 +5,28 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
 
+## 2026-10-08 — Prevent live witnesses from claiming snapshot identity
+
+### Push intent
+
+Complete the snapshot/live mutual-exclusion rule in ProviderWitnessBinding before accepting PR #29.
+
+### Why
+
+A `LIVE_EXTERNAL` binding may carry an observed hash for the provider response, but it must not carry a non-null `snapshotContentHash`. Doing so would falsely imply that live external text is an immutable persisted release snapshot.
+
+### What changed
+
+- constrain `LIVE_EXTERNAL.snapshotContentHash` to null when the field is present;
+- add an adversarial live-binding fixture that supplies a fake snapshot hash;
+- require contract validation to reject that fixture;
+- keep READY live-provider delivery possible without claiming snapshot immutability.
+
+### Validation
+
+The change is contract-only and synthetic-only. Exact-head validation must pass again before merge.
+
+
 ## 2026-10-08 — Fail closed on null snapshot witness hash
 
 ### Push intent

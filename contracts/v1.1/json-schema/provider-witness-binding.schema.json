@@ -106,6 +106,9 @@
               "PROVIDER_LOCATOR",
               "EPHEMERAL"
             ]
+          },
+          "snapshotContentHash": {
+            "type": "null"
           }
         }
       }

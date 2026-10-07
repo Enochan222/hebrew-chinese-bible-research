@@ -91,6 +91,7 @@ NEG_SCHEMA = [
  ("contracts/v1.1/json-schema/discovery-record.schema.json","contracts/v1.1/negative-fixtures/discovery-persisted-without-rights.json"),
  ("contracts/v1.1/json-schema/translation-source-basis.schema.json","contracts/v1.1/negative-fixtures/translation-source-basis-emendation-without-reading.json"),
  ("contracts/v1.1/json-schema/provider-witness-binding.schema.json","contracts/v1.1/negative-fixtures/provider-witness-snapshot-null-hash.json"),
+ ("contracts/v1.1/json-schema/provider-witness-binding.schema.json","contracts/v1.1/negative-fixtures/provider-witness-live-with-snapshot-hash.json"),
  ("contracts/v1.1/json-schema/translation-witness-list.schema.json","contracts/v1.1/negative-fixtures/translation-witness-list-extra-field.json"),
  ("contracts/v1.1/json-schema/translation-witness-list.schema.json","contracts/v1.1/negative-fixtures/translation-witness-displayable-without-segments.json"),
  ("contracts/v1.1/json-schema/translation-witness-list.schema.json","contracts/v1.1/negative-fixtures/translation-witness-not-covered-with-segments.json"),
