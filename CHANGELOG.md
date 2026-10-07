@@ -37,7 +37,17 @@ REVOKED changes availability only. It cannot reopen any part of an ever-publishe
 
 ### Validation
 
-Pending exact-head CI. Acceptance requires Database Spike 001, WB-2/WB-3 real whole-Bible Serving Reader, Contract validation, Project governance, P1 fixture shell and every other triggered regression to pass before Issue #25 is closed again.
+PR #30 implementation head `cedeaa20baa90284fa9f063ef3f1ced943ca7061` passed every triggered implementation gate:
+
+- Database Spike 001 `37669525047`, including the catalog-level permanent-projection-guard assertion and post-REVOKED mutation attacks;
+- WB-2 WB-3 Serving Reader `37669525095`, including the real whole-Bible OSHB PUBLISHED -> REVOKED -> REACTIVATED lifecycle regression and restored Gen.1.1 serving;
+- WB-1 Relational Whole Corpus `37669524878`;
+- Whole-Bible corpus foundation `37669524970`;
+- P1 fixture shell validation `37669524947`;
+- Contract validation `37669525237`;
+- Project governance `37669524996`.
+
+On that evidence, `CORE-FZ-RELEASE-002` is accepted as PASS. This synchronized acceptance/state commit must still pass its own triggered exact-head checks before PR #30 is merged and Issue #25 is closed.
 
 ## 2026-10-06 — Implement RL-1 release lifecycle split candidate
 
