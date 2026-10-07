@@ -278,21 +278,7 @@ components:
     PassageCore:
       $ref: './json-schema/passage-core.schema.json'
     TranslationWitnessList:
-      type: object
-      additionalProperties: false
-      required: [researchReleaseId, witnesses]
-      properties:
-        researchReleaseId: {type: string, format: uuid}
-        witnesses:
-          type: array
-          items:
-            type: object
-            additionalProperties: true
-            required: [digitalExpressionId, displayName, bindingMode]
-            properties:
-              digitalExpressionId: {type: string, format: uuid}
-              displayName: {type: string}
-              bindingMode: {enum: [SNAPSHOT_PINNED, LIVE_EXTERNAL]}
+      $ref: './json-schema/translation-witness-list.schema.json'
     RuleApplicationList:
       type: object
       additionalProperties: false
