@@ -82,11 +82,11 @@ WHERE text_segment_id IN (
   '24000000-0000-4000-8000-000000000011'
 );
 
-INSERT INTO authoring.providers(provider_id,provider_code,display_name) VALUES
-('41000000-0000-4000-8000-000000000001','SYNTHETIC_FIXTURE_PROVIDER','Synthetic Fixture Provider');
+INSERT INTO authoring.providers(provider_id,provider_key,name,provider_type) VALUES
+('41000000-0000-4000-8000-000000000001','SYNTHETIC_FIXTURE_PROVIDER','Synthetic Fixture Provider','TEST');
 
 INSERT INTO authoring.provider_distributions(
-  provider_distribution_id,provider_id,digital_expression_id,distribution_key,provider_version
+  provider_distribution_id,provider_id,digital_expression_id,provider_version_code,distribution_version
 ) VALUES (
   '41414141-4141-4414-8414-414141414141',
   '41000000-0000-4000-8000-000000000001',
