@@ -62,6 +62,9 @@ Core OpenAPI does not override Research Pro extension endpoints merely because t
 - `json-schema/translation-decision.schema.json`
 - `json-schema/annotation-layer.schema.json`
 - `json-schema/provider-witness-binding.schema.json`
+- `json-schema/translation-witness.schema.json`
+- `json-schema/translation-witness-segment.schema.json`
+- `json-schema/translation-witness-list.schema.json`
 - `json-schema/release-event.schema.json`
 - `json-schema/release-channel-pointer.schema.json`
 - `json-schema/semantic-set-version.schema.json`
@@ -106,6 +109,9 @@ Important invariants:
 - Product MCP is read-only over published data in the initial contract.
 - Release manifest hashing excludes its own hash and uses deterministic component ordering.
 - RightsDecisionSnapshot represents explicit-rule and default-deny outcomes.
+- Translation witness payloads are release-pinned, canonical-ReferenceSpan scoped, DigitalExpression-specific and segment-level; provider delivery, passage coverage, and public-display permission are separate facts.
+- ProviderWitnessBinding records snapshot/live delivery mechanics only. It does not itself grant storage, publication, or display rights.
+- Non-displayable translation witnesses carry no segment text; displayable text is segment-level, content-hashed, rights-snapshot linked and provenance-linked.
 - Published scholarship uses assertion-level public evidence.
 - JSON Schema validation is necessary but not sufficient; deterministic semantic validation is mandatory.
 

@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-06.8**
+State Revision: **2026-10-08.4**
 
 ## Mandatory governance rule
 
@@ -323,15 +323,16 @@ WB-1 acceptance is **PASS** for `CORE-FZ-WB-002`. The synchronized implementatio
 
 1. Preserve contract/governance consistency, the ChatGPT-only project AI policy and the whole-Bible scope guard.
 2. Treat WB-2/WB-3 as accepted whole-Bible base-reader infrastructure and preserve its exact-head regression suite.
-3. Validate and accept RL-1: the implementation candidate now separates "ever published / immutable" from "currently publicly servable", adds deterministic per-release event sequencing, enforces lifecycle transitions and prevents revoked releases from remaining channel-selected. Do not begin WB-4 publication work until this candidate passes exact-head database/contract/governance regressions.
-4. Complete WB-4/WB-5: add selected translation witnesses, alignment/comparison, project/user translation workflow and deterministic whole-corpus analysis.
-5. Only then make Research Pro provider adapters, ResearchModelAdapter and end-to-end literature builds the primary product implementation frontier; academic enrichment may proceed in parallel where it does not block the base path.
+3. Preserve accepted RL-1 lifecycle semantics from merged PR #28: ever-published immutability is separate from current public servability, lifecycle ordering is deterministic, and revoked releases fail closed.
+4. Execute WB-4 contract-first: make TranslationWitness strict and DigitalExpression-specific, keep provider binding, passage coverage and public-display rights as separate facts, then add selected permitted witnesses and alignment/comparison without inventing or copying unapproved translation content.
+5. Complete WB-5 deterministic whole-corpus analysis after the WB-4 serving boundary is proven.
+6. Only then make Research Pro provider adapters, ResearchModelAdapter and end-to-end literature builds the primary product implementation frontier; academic enrichment may proceed in parallel where it does not block the base path.
 
-## RL-1 release lifecycle implementation candidate
+## RL-1 release lifecycle accepted
 
-Issue #25 identified that the accepted WB-2/WB-3 database used one `release_is_published()` predicate for two incompatible concerns: permanent post-publication immutability and current public visibility. The RL-1 candidate removes that overload.
+Issue #25 identified that the accepted WB-2/WB-3 database used one `release_is_published()` predicate for two incompatible concerns: permanent post-publication immutability and current public visibility. Merged PR #28 resolves that overload.
 
-Candidate semantics:
+Accepted semantics:
 
 - `eventSequence` is the authoritative per-release lifecycle order; it is gapless from 1 and resolves equal `effectiveAt` timestamps without UUID ordering;
 - the first event is PUBLISHED, and transition validity is enforced in PostgreSQL;
@@ -343,7 +344,28 @@ Candidate semantics:
 - public RLS, current-release resolution and release-pinned passage reads use servability rather than historical publication;
 - lifecycle transitions are restricted to the publication worker and covered by adversarial Database Spike tests.
 
-`CORE-FZ-RELEASE-002` now names this lifecycle requirement explicitly. It is not accepted merely because the code exists: exact-head Contract validation, Project governance, Database Spike and affected whole-Bible regressions must pass before RL-1 is closed.
+`CORE-FZ-RELEASE-002` names this lifecycle requirement explicitly. PR #28 exact head `d2d8d71c9d3ee7a2eeb126991816dc6daed7ab89` passed all seven affected workflows, including Database Spike 001, WB-1 and WB-2/WB-3 full-corpus publication regressions. PR #28 was squash-merged as `754590531c8cc755df650daac0b225b05c69648a`, and Issue #25 is closed.
+
+## WB-4 contract-first implementation state
+
+PR #29 remains contract-first and contains no real copyrighted translation publication.
+
+The public witness contract is now designed to survive the next database/alignment frontier without changing field meaning:
+
+- TranslationWitnessList pins ResearchRelease, canonical ReferenceSpan and resolved ReferenceSystem identity;
+- each witness identifies TextualWork, optional TextualEdition and exact DigitalExpression rather than treating provider code as translation identity;
+- displayed witness text is an ordered array of content-hashed TextSegments with stable TextStream/TextSegment IDs suitable for later many-to-many alignment;
+- coverageStatus, deliveryStatus and displayStatus are independent;
+- DISPLAYABLE requires covered + delivery-ready + at least one segment;
+- rights-restricted, metadata-only, stale, provider-error, not-retrieved, uncovered and unknown-coverage states expose zero text segments;
+- each witness carries the display RightsDecisionSnapshot ID and provenance ID;
+- ProviderWitnessBinding remains delivery/storage mechanics and now requires observation hash/time plus an explicit providerVersion field, which may be null if the provider supplies none;
+- `SNAPSHOT_PINNED` additionally requires a non-null SHA-256 `snapshotContentHash`; a null hash is rejected because a persisted release snapshot must remain verifiable.
+- `LIVE_EXTERNAL` may not carry a non-null `snapshotContentHash`; live observations can expose observed hashes but must not masquerade as immutable persisted snapshots.
+- duplicate DigitalExpression witnesses and non-contiguous segment order are semantic contract failures;
+- all fixtures remain synthetic and do not assert that any real Chinese translation is licensed or selected.
+
+`CORE-FZ-TRANS-002` is **PENDING** until a real PostgreSQL Serving projection, rights/RLS/RPC path and reader/alignment implementation pass exact-head regression evidence.
 
 ## WB-2 / WB-3 implementation state
 
@@ -384,4 +406,4 @@ Until that contract is explicitly closed, revoke/reactivate behavior is not trea
 
 ## Latest push intent
 
-Record exact-head acceptance of WB-2/WB-3 after every required whole-Bible, database, contract, governance, web integration, visual E2E and production-build gate passed on `21a2cedafb394b84d51e244de6ff37bbac4d6a82`. Promote only `CORE-FZ-WB-001` and `CORE-FZ-WB-003`, which are directly supported by the evidence. Preserve the independently identified REVOKED/REACTIVATED lifecycle predicate ambiguity as a separate next work package rather than silently inventing event ordering or weakening immutable-release guarantees.
+Close the WB-4 serving contract before database implementation: canonical passage identity, work/edition/expression identity, segment-level display payload, provenance and rights snapshot identity, independent coverage/provider/display states, and fail-closed text exposure. Keep the frontier synthetic-only; the next PR after contract acceptance will implement the PostgreSQL Serving projection and rights/RLS/RPC path without selecting real copyrighted witnesses.
