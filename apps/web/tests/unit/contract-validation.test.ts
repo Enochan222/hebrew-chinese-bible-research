@@ -4,6 +4,7 @@ import path from "node:path";
 import test from "node:test";
 import { ContractViolationError } from "../../src/contracts/errors.ts";
 import { assertContract } from "../../src/contracts/validate.server.ts";
+import { readContractJson } from "../../src/contracts/schema-registry.server.ts";
 
 test("canonical passage fixture validates and a corrupted copy fails closed", () => {
   const root = path.resolve(process.cwd(), "../..");
