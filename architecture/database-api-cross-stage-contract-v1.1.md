@@ -1078,6 +1078,28 @@ A provider distribution such as an FHL version code is never by itself sufficien
 
 ---
 
+## 10.3 WB-4 provider identity and release-compiled witness Serving
+
+WB-4 DB-1 closes the provider/publication boundary without selecting or copying any real copyrighted translation.
+
+Authoring adds:
+
+- `providers`: provider organization/service identity;
+- `provider_distributions`: provider-specific distribution identity bound to exactly one `digital_expression_id`;
+- `translation_witness_coverage`: ProviderDistribution + ReferenceSpan coverage fact;
+- `provider_witness_observations`: binding/storage mode, provider reference/version, observed hash/time, optional snapshot hash and delivery status.
+
+Provider identity never substitutes for TextualWork, TextualEdition or DigitalExpression identity.
+
+Serving adds release-compiled:
+
+- `translation_witnesses`;
+- `translation_witness_segments`.
+
+The runtime Serving projection contains no FK/function dependency on Authoring provider/source tables. A DISPLAYABLE persisted snapshot requires COVERED + READY + SNAPSHOT_PINNED + PERSISTED_CONTENT, an exact DigitalExpression public DISPLAY_FULLTEXT RightsDecisionSnapshot, an exact ProviderDistribution storage RightsDecisionSnapshot, and persisted text segments with SHA-256 content hashes. Missing/mismatched identities, wrong operation/audience/scope, unresolved conditional rights, stale/failed delivery or uncovered passages fail closed.
+
+Current and pinned translation RPCs first resolve the ResearchRelease's corpus ReferenceSystem/ReferenceSpan and then read only release-scoped translation rows. REVOKED releases remain non-readable; first-publication immutability remains permanent under RL-1.
+
 # 11. Ancient versions and LXX
 
 LXX is a research domain, not merely a display column.
