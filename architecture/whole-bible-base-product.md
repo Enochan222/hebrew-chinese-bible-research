@@ -202,6 +202,19 @@ Replace fixture-only passage content with database-backed Hebrew passage renderi
 
 Add selected permitted Chinese/ancient/reference witnesses, many-to-many alignment, comparison and project/user translation workflows.
 
+WB-4 DB-1 first proves the publication boundary with **synthetic/right-safe witness data only**:
+
+- provider identity is normalized as Provider -> ProviderDistribution -> exact DigitalExpression, never substituted for TextualWork/TextualEdition/DigitalExpression identity;
+- passage coverage, provider delivery, storage mode and public-display permission remain independent facts;
+- persisted snapshot witnesses require exact DigitalExpression display rights plus exact ProviderDistribution storage rights before any text segment crosses into Serving;
+- Serving stores a release-compiled witness projection with no runtime dependency on Authoring/provider tables;
+- non-displayable, uncovered, stale, failed or rights-restricted witnesses expose zero text segments;
+- current and pinned witness reads are ResearchRelease/ReferenceSpan aware and lifecycle gated;
+- published and revoked historical payloads remain immutable;
+- no real copyrighted translation is introduced by DB-1.
+
+Only after this projection boundary passes may the project add real permitted witnesses, reader comparison surfaces and whole-Bible Hebrew-Chinese many-to-many alignment.
+
 The canonical serving payload is release-pinned, canonical-ReferenceSpan scoped, DigitalExpression-specific and uses a strict TranslationWitness contract. It carries TextualWork identity, nullable TextualEdition identity, DigitalExpression identity, provenance, the display-rights decision snapshot, and ordered TextSegment-level display content when display is permitted. Provider delivery mechanics are represented separately by ProviderWitnessBinding.
 
 Coverage, provider delivery, and display rights are independent state dimensions. A provider binding does not prove passage coverage and does not grant storage, publication or public-display permission. Provider failure or stale live content must fail closed for that witness without failing the entire witness list. A DISPLAYABLE witness must be covered, delivery-ready, and contain content-hashed segments; rights-restricted, metadata-only, stale, failed or uncovered witnesses expose no translation text.
