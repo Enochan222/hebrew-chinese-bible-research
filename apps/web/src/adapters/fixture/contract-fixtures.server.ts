@@ -5,7 +5,6 @@ import { readContractJson } from "@/contracts/schema-registry.server";
 import type { ReleasePointerV1 } from "@/domain/release/port";
 import type { PassageCoreV1, PassageLabelLocator } from "@/domain/passage/port";
 import type { ExperienceCapabilitiesV1 } from "@/domain/experience/port";
-import type { TranslationWitnessListV1 } from "@/domain/translation/port";
 
 const fixturePaths = {
   releaseChannel: "fixtures/release-channel-production.json",
@@ -14,7 +13,6 @@ const fixturePaths = {
   passageRequest: "fixtures/passage-request.json",
   passageLocator: "fixtures/passage-locator-label.json",
   capabilities: "fixtures/experience-capabilities.json",
-  translationWitnessList: "fixtures/translation-witness-list.json",
 } as const;
 
 type ReleaseChannelFixture = {
@@ -38,7 +36,6 @@ export type CanonicalFixtureSet = {
   passageRequest: PassageRequestFixture;
   passageLocator: PassageLabelLocator;
   capabilities: ExperienceCapabilitiesV1;
-  translationWitnessList: TranslationWitnessListV1;
 };
 
 let cached: CanonicalFixtureSet | undefined;
@@ -63,9 +60,6 @@ export function loadCanonicalFixtureSet(): CanonicalFixtureSet {
 
   const capabilities = readContractJson(fixturePaths.capabilities);
   assertContract<ExperienceCapabilitiesV1>("experienceCapabilities", capabilities);
-
-  const translationWitnessList = readContractJson(fixturePaths.translationWitnessList);
-  assertContract<TranslationWitnessListV1>("translationWitnessList", translationWitnessList);
 
   if (
     releaseChannel.researchReleaseId !== releaseManifest.researchReleaseId ||
@@ -92,6 +86,6 @@ export function loadCanonicalFixtureSet(): CanonicalFixtureSet {
   };
   assertContract<ReleasePointerV1>("releasePointer", releasePointer);
 
-  cached = { releasePointer, passageCore, passageRequest, passageLocator, capabilities, translationWitnessList };
+  cached = { releasePointer, passageCore, passageRequest, passageLocator, capabilities };
   return cached;
 }
