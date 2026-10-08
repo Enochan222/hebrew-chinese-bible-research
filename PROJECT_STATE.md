@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-08.4**
+State Revision: **2026-10-08.5**
 
 ## Mandatory governance rule
 
@@ -323,7 +323,7 @@ WB-1 acceptance is **PASS** for `CORE-FZ-WB-002`. The synchronized implementatio
 
 1. Preserve contract/governance consistency, the ChatGPT-only project AI policy and the whole-Bible scope guard.
 2. Treat WB-2/WB-3 as accepted whole-Bible base-reader infrastructure and preserve its exact-head regression suite.
-3. Preserve accepted RL-1 lifecycle semantics from merged PR #28: ever-published immutability is separate from current public servability, lifecycle ordering is deterministic, and revoked releases fail closed.
+3. Close the post-merge RL-1 corpus projection mutation defect before publishing WB-4 witnesses; preserve the accepted lifecycle semantics from merged PR #28: ever-published immutability is separate from current public servability, lifecycle ordering is deterministic, and revoked releases fail closed.
 4. Execute WB-4 contract-first: make TranslationWitness strict and DigitalExpression-specific, keep provider binding, passage coverage and public-display rights as separate facts, then add selected permitted witnesses and alignment/comparison without inventing or copying unapproved translation content.
 5. Complete WB-5 deterministic whole-corpus analysis after the WB-4 serving boundary is proven.
 6. Only then make Research Pro provider adapters, ResearchModelAdapter and end-to-end literature builds the primary product implementation frontier; academic enrichment may proceed in parallel where it does not block the base path.
@@ -345,6 +345,12 @@ Accepted semantics:
 - lifecycle transitions are restricted to the publication worker and covered by adversarial Database Spike tests.
 
 `CORE-FZ-RELEASE-002` names this lifecycle requirement explicitly. PR #28 exact head `d2d8d71c9d3ee7a2eeb126991816dc6daed7ab89` passed all seven affected workflows, including Database Spike 001, WB-1 and WB-2/WB-3 full-corpus publication regressions. PR #28 was squash-merged as `754590531c8cc755df650daac0b225b05c69648a`, and Issue #25 is closed.
+
+## RL-1 post-merge immutability hardening
+
+An adversarial audit following PR #28 discovered that three published CORPUS projections lacked the permanent component mutation guard: `serving.reference_labels`, `serving.corpus_text_segments` and `serving.corpus_node_segments`. This is a release-integrity defect even while a ResearchRelease is REVOKED.
+
+The follow-up PR #30 passed its own seven exact-head workflows but was based on the pre-WB-4 main commit. This new main-based branch ports the verified migration, catalog invariant, post-revocation mutation attacks and real whole-Bible revoke/reactivate regression on top of merged PR #29. This hardening is a prerequisite to WB-4 DB-1. Keep `CORE-FZ-RELEASE-002` conditional until this new head passes exact-head regressions and is merged.
 
 ## WB-4 contract-first implementation state
 
