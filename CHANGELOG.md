@@ -4,6 +4,40 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+
+## 2026-10-08 — Implement WB-4 DB-1 rights-gated translation Serving candidate
+
+### Push intent
+
+Implement Issue #32 as the first PostgreSQL translation-witness publication slice after the strict PR #29 contract, using synthetic/right-safe witness data only.
+
+### Why
+
+The canonical witness API now distinguishes TextualWork/TextualEdition/DigitalExpression identity, provider delivery, passage coverage and display rights, but PostgreSQL had no normalized ProviderDistribution identity and no release-compiled translation witness projection. Implementing the reader directly from provider JSON would collapse those boundaries and could expose text without the exact storage/display rights facts required by the contract.
+
+### What changed
+
+- add Authoring Provider and ProviderDistribution identity, with ProviderDistribution -> exact DigitalExpression FK;
+- add independent coverage and provider-observation/binding tables;
+- enforce snapshot/live storage invariants and provider-observation DigitalExpression compatibility;
+- add release-scoped Serving translation witness metadata and segment projections;
+- add a privileged publication compiler that validates exact display and storage RightsDecisionSnapshots before copying persisted text;
+- require DISPLAYABLE witnesses to be COVERED, READY, SNAPSHOT_PINNED, PERSISTED_CONTENT and segment-bearing;
+- expose release-pinned and current-channel translation witness RPCs that resolve through the release's corpus ReferenceSystem/ReferenceSpan;
+- preserve zero segments for non-displayable states;
+- attach release immutability guards and lifecycle-aware RLS;
+- extend the synthetic Database Spike with wrong-expression/wrong-storage-rights attacks, inactive/public visibility checks, exact text/hash parity, OSHB-only empty-list compatibility, revoke behavior, post-publication immutability and Authoring isolation;
+- keep real copyrighted translations out of the repository and Serving fixture;
+- close overlapping Issue #31 as duplicate of the more complete Issue #32 implementation authority.
+
+### Intended effect
+
+WB-4 gains a real publication boundary without yet selecting a production Chinese translation. Provider availability cannot imply passage coverage, storage permission or public-display permission. A future real witness can only be published by satisfying the same exact identity/right/lifecycle constraints proven with synthetic data.
+
+### Validation
+
+Pending exact-head CI. `CORE-FZ-TRANS-002` remains PENDING until Database Spike 001, WB-1, WB-2/WB-3, whole-Bible source foundation, Contract validation, Project governance and relevant web regressions pass on one synchronized PR head.
+
 ## 2026-10-08 — Reconcile RL-1 hardening with merged WB-4 contract
 
 ### Push intent
