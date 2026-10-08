@@ -228,7 +228,7 @@ DECLARE
   seq integer := 0;
   seg record;
 BEGIN
-  IF serving.release_was_published(p_release_id) THEN
+  IF serving.release_ever_published(p_release_id) THEN
     RAISE EXCEPTION 'translation witness candidate must be materialized before first PUBLISHED';
   END IF;
 
