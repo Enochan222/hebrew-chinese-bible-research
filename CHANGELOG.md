@@ -5,6 +5,25 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
 
+## 2026-10-08 — Port RL-1 permanent projection hardening onto current main
+
+### Push intent
+Complete the published-release immutability boundary before implementing WB-4 database translation witness publication.
+
+### Why
+After merged PR #28, `reference_labels`, `corpus_text_segments` and `corpus_node_segments` still lacked permanent guards and could be rewritten after release publication, including after REVOKED. Draft PR #30 already implemented and verified the fix, but its branch predates merged WB-4 contract PR #29.
+
+### What changed
+- port the PR #30 permanent projection triggers and schema-catalog regression;
+- include post-REVOKED mutation attacks for the three previously unguarded tables;
+- exercise revoke, hidden public reads, immutable whole-corpus projection, explicit reactivation and channel restoration against the real OSHB publication workflow;
+- align the cross-stage architecture with event-sequence ordering and immutable projection scope;
+- preserve all WB-4 strict witness contract changes from current main;
+- reopen `CORE-FZ-RELEASE-002` for re-acceptance on this exact branch head.
+
+### Validation
+Draft PR #30 head `6573807a7cd199847f70ea42d54f584809f84601` passed all seven triggered CI workflows. This new main-based branch must independently pass exact-head regressions before merge; no acceptance is inferred from the earlier head.
+
 ## 2026-10-08 — Prevent live witnesses from claiming snapshot identity
 
 ### Push intent
