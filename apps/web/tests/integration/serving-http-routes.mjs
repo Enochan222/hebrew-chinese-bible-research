@@ -151,6 +151,14 @@ const restServer = http.createServer(async (req, res) => {
     let body = "";
     for await (const chunk of req) body += chunk;
     const parsed = JSON.parse(body);
+    if (parsed.p_reference_label === "Gen.1.99") {
+      res.end(JSON.stringify({
+        ...translationPayload,
+        resolvedReference: { ...translationPayload.resolvedReference, referenceLabel: "Gen.1.99" },
+        witnesses: [{ ...translationPayload.witnesses[0], segments: [] }],
+      }));
+      return;
+    }
     res.end(JSON.stringify({
       ...translationPayload,
       resolvedReference: {
@@ -223,6 +231,26 @@ try {
   assert.deepEqual(passage.navigation.passages.map((item) => item.referenceLabel), ["Gen.1.1", "Gen.1.2"]);
   assert.match(passage.attribution, /Open Scriptures Hebrew Bible/);
 
+  const translations = await json("/api/v1/passages/Gen.1.1/translations?referenceSystemCode=OSHB_OSIS");
+  assert.equal(translations.researchReleaseId, releaseId);
+  assert.equal(translations.referenceSpanId, passage.referenceSpanId);
+  assert.equal(translations.witnesses.length, 1);
+  assert.equal(translations.witnesses[0].displayStatus, "DISPLAYABLE");
+  assert.equal(translations.witnesses[0].digitalExpressionId, "22000000-0000-4000-8000-000000000002");
+  assert.equal(translations.witnesses[0].segments[0].text, "合成測試譯文");
+  assert.equal(translations.witnesses[0].binding.providerDistributionId, "41414141-4141-4414-8414-414141414141");
+
+  const pinnedTranslations = await json(
+    `/api/v1/releases/${releaseId}/passages/Gen.1.1/translations?referenceSystemCode=OSHB_OSIS`,
+  );
+  assert.deepEqual(pinnedTranslations, translations);
+
+  const malformedTranslations = await json(
+    "/api/v1/passages/Gen.1.99/translations?referenceSystemCode=OSHB_OSIS",
+    500,
+  );
+  assert.equal(malformedTranslations.code, "CONTRACT_VIOLATION");
+
   const adjacent = await json("/api/v1/passages/Gen.1.2?referenceSystemCode=OSHB_OSIS");
   assert.equal(adjacent.dataSource, "SERVING");
   assert.equal(adjacent.resolvedReference.referenceLabel, "Gen.1.2");
@@ -252,6 +280,22 @@ try {
   assert.equal(directPassage.status, 200);
   assert.equal((await directPassage.json()).resolvedReference.referenceLabel, "Gen.1.1");
 
+  const directTranslations = await fetch(`${restBase}/rpc/read_translation_witnesses`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept-Profile": "serving",
+      "Content-Profile": "serving",
+    },
+    body: JSON.stringify({
+      p_release_id: releaseId,
+      p_reference_system_code: "OSHB_OSIS",
+      p_reference_label: "Gen.1.1",
+    }),
+  });
+  assert.equal(directTranslations.status, 200);
+  assert.equal((await directTranslations.json()).witnesses[0].segments[0].text, "合成測試譯文");
+
   const page = await fetch(
     `${appBase}/releases/${releaseId}/passages/Gen.1.1?referenceSystemCode=OSHB_OSIS&mode=STUDY`,
   );
@@ -263,6 +307,10 @@ try {
   assert.match(html, /Gen\.1\.2/);
   assert.match(html, /Whole-Bible reference navigation/);
   assert.match(html, /Exod/);
+  assert.match(html, /Release-pinned comparison witnesses/);
+  assert.match(html, /Synthetic Chinese Test Witness/);
+  assert.match(html, /合成測試譯文/);
+  assert.match(html, /1 rights-approved release-pinned witness available above/);
 
   assert.ok(observed.length >= 3);
   for (const request of observed) {
