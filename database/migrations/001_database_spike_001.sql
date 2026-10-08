@@ -1961,6 +1961,21 @@ CREATE TRIGGER assertion_evidence_release_lock
 BEFORE INSERT OR UPDATE OR DELETE ON serving.published_assertion_evidence
 FOR EACH ROW EXECUTE FUNCTION serving.guard_assertion_evidence_payload();
 
+-- Every release-keyed corpus Serving projection is permanently immutable once
+-- its CORPUS component has participated in a PUBLISHED ResearchRelease.
+-- Keep this list in lockstep with all serving tables carrying corpus_release_id.
+CREATE TRIGGER reference_labels_component_lock
+BEFORE INSERT OR UPDATE OR DELETE ON serving.reference_labels
+FOR EACH ROW EXECUTE FUNCTION serving.guard_component_projection('corpus_release_id');
+
+CREATE TRIGGER corpus_text_segments_component_lock
+BEFORE INSERT OR UPDATE OR DELETE ON serving.corpus_text_segments
+FOR EACH ROW EXECUTE FUNCTION serving.guard_component_projection('corpus_release_id');
+
+CREATE TRIGGER corpus_node_segments_component_lock
+BEFORE INSERT OR UPDATE OR DELETE ON serving.corpus_node_segments
+FOR EACH ROW EXECUTE FUNCTION serving.guard_component_projection('corpus_release_id');
+
 CREATE TRIGGER corpus_nodes_component_lock
 BEFORE INSERT OR UPDATE OR DELETE ON serving.corpus_nodes
 FOR EACH ROW EXECUTE FUNCTION serving.guard_component_projection('corpus_release_id');
