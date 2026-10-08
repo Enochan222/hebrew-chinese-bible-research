@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-08.5**
+State Revision: **2026-10-08.6**
 
 ## Mandatory governance rule
 
@@ -322,10 +322,10 @@ WB-1 acceptance is **PASS** for `CORE-FZ-WB-002`. The synchronized implementatio
 ## Current implementation priority
 
 1. Preserve contract/governance consistency, the ChatGPT-only project AI policy and the whole-Bible scope guard.
-2. Treat WB-2/WB-3 as accepted whole-Bible base-reader infrastructure and preserve its exact-head regression suite.
-3. Complete PR #30 merge verification for RL-1 hardening. The functional and synchronized branch heads have passed all affected workflows; Issue #25 remains open until the merge-resolved head is green, PR #30 is merged, and `main` is verified.
-4. Preserve the accepted PR #29 WB-4 contract boundary while RL-1 closes. No real copyrighted translation witness may be published merely because provider delivery is available.
-5. After PR #30 merge verification, implement the WB-4 PostgreSQL Serving projection with synthetic/right-safe witnesses, RightsDecisionSnapshot linkage, RLS/RPC and reader integration; then implement many-to-many Hebrew-Chinese alignment.
+2. Treat WB-2/WB-3 and RL-1 as accepted infrastructure and preserve their exact-head regression suites.
+3. Implement Issue #32 as the single WB-4 DB-1 frontier: normalized provider identity, synthetic/right-safe release-compiled translation witnesses, exact RightsDecisionSnapshot linkage, RLS/RPC and lifecycle immutability.
+4. Keep `CORE-FZ-TRANS-002` PENDING until the database projection and runtime/reader evidence pass; do not publish any real copyrighted translation merely because provider delivery exists.
+5. After WB-4 DB-1, wire the reader comparison surface and then implement many-to-many Hebrew-Chinese alignment.
 6. Complete WB-5 deterministic whole-corpus analysis after the WB-4 serving/alignment boundary is proven.
 7. Only then make Research Pro provider adapters, ResearchModelAdapter and end-to-end literature builds the primary product implementation frontier; academic enrichment may proceed in parallel where it does not block the base path.
 
@@ -348,6 +348,25 @@ PR #30 implementation head `cedeaa20baa90284fa9f063ef3f1ced943ca7061` passed Dat
 The synchronized PR #30 head `6573807a7cd199847f70ea42d54f584809f84601` independently passed Database Spike `37671312879`, WB-2/WB-3 `37671312984`, WB-1 `37671312895`, Whole-Bible corpus foundation `37671312907`, P1 fixture shell `37671312868`, Contract validation `37671312863` and Project governance `37671312967`.
 
 `CORE-FZ-RELEASE-002` is **PASS** on that evidence. PR #30 still requires the merge-resolved head, which also contains merged PR #29 WB-4 contract work, to remain green before merge. Issue #25 remains open until PR #30 is merged and `main` is verified.
+
+## WB-4 DB-1 translation Serving candidate state
+
+Issue #32 is now the single active WB-4 database frontier. Overlapping Issue #31 has been closed as a duplicate so provider identity and translation publication are not developed as parallel truths.
+
+Current candidate implementation:
+
+- adds normalized `authoring.providers` and `authoring.provider_distributions`, with every ProviderDistribution bound to one exact DigitalExpression;
+- records coverage separately from provider observation/delivery;
+- models SNAPSHOT_PINNED versus LIVE_EXTERNAL storage semantics without granting rights from provider availability;
+- adds release-compiled `serving.translation_witnesses` and `serving.translation_witness_segments` with no runtime dependency on Authoring;
+- requires exact DigitalExpression public-display rights and exact ProviderDistribution storage rights before persisted translation text may enter Serving;
+- fails closed on wrong subject, operation, purpose, audience, commercial scope, unresolved conditional rights, missing storage permission or unhashable persisted segments;
+- exposes current and release-pinned translation witness RPCs resolved through the release's corpus ReferenceSystem/ReferenceSpan;
+- keeps non-displayable states segment-empty;
+- preserves RL-1 revocation/public-servability and permanent post-publication immutability;
+- uses only the existing synthetic Chinese spike text for executable acceptance. No real copyrighted translation content is added.
+
+`database/migrations/002_wb4_translation_serving.sql` and `database/spikes/001/06_translation_witness_tests.sql` are the current executable candidate. `CORE-FZ-TRANS-002` remains **PENDING** until exact-head Database Spike, WB-1, WB-2/WB-3, whole-Bible, contract/governance and relevant app regressions pass.
 
 ## WB-4 contract-first implementation state
 
@@ -394,4 +413,4 @@ Exact-head machine evidence is complete. WB-2/WB-3 Serving Reader run `374243988
 
 ## Latest push intent
 
-Merge current `main` into PR #30 without regressing the accepted PR #29 WB-4 contract. Preserve all WB-4 synthetic-only/right-safe contract work while carrying forward the RL-1 permanent Serving-projection guards and real whole-Bible revoke/reactivate regressions. Require the merge-resolved exact head to pass the complete affected workflow set before PR #30 may merge; then verify `main`, close Issue #25, and begin WB-4 PostgreSQL translation Serving implementation.
+Implement Issue #32 as WB-4 DB-1 without introducing any real translation dataset. Prove provider identity separation, synthetic persisted witness compilation, exact display/storage rights binding, release-pinned/current RPC shape, public RLS isolation, OSHB-only release compatibility, REVOKED fail-closed reads and permanent post-publication immutability. Preserve the merged WB-2/WB-3 and RL-1 behavior. `CORE-FZ-TRANS-002` remains pending until exact-head machine evidence passes.
