@@ -85,6 +85,10 @@ Database Spike 001 may begin when all CORE-SPIKE gates are PASS. This does not d
 | CORE-FZ-EVIDENCE-001 | CitationLocator is typed; public excerpts require rights snapshots; immutable evidence requires content hash |
 | CORE-FZ-HASH-001 | Publishable subtype content-hash canonical projections have versioned golden vectors |
 
+### RL-1 post-merge projection immutability gate
+
+- `CORE-FZ-RELEASE-002`: **PENDING RE-ACCEPTANCE** after a post-merge audit found that published `serving.reference_labels`, `serving.corpus_text_segments` and `serving.corpus_node_segments` could be mutated. The current-main hardening branch ports PR #30's seven-workflow-tested guard coverage, catalog invariant, and real OSHB revoke/reactivate regression. Promote the gate only after this branch's exact-head CI passes and the fix lands on `main`.
+
 ### Current translation-witness gate status
 
 - `CORE-FZ-TRANS-002`: **PENDING**. PR #29 defines the machine/OpenAPI contract and adversarial fixtures only. Real PostgreSQL Serving projection, rights-snapshot linkage, RLS/RPC behavior and reader/alignment implementation evidence are still required before this gate can pass.
