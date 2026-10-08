@@ -54,6 +54,57 @@ const passagePayload = {
   attribution: "Open Scriptures Hebrew Bible / Westminster Leningrad Codex; source and morphology attribution required.",
 };
 
+const translationPayload = {
+  schemaVersion: "1.1",
+  researchReleaseId: releaseId,
+  referenceSpanId: "4089aeaa-ddae-5adb-9510-1ca22845c4c2",
+  resolvedReference: {
+    referenceSystemId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    referenceSystemCode: "OSHB_OSIS",
+    referenceLabel: "Gen.1.1",
+  },
+  witnesses: [
+    {
+      schemaVersion: "1.1",
+      textualWorkId: "20202020-2020-4020-8020-202020202020",
+      textualEditionId: null,
+      digitalExpressionId: "22000000-0000-4000-8000-000000000002",
+      displayName: "Synthetic Chinese Test Witness",
+      languageTag: "zh-Hant",
+      coverageStatus: "COVERED",
+      deliveryStatus: "READY",
+      displayStatus: "DISPLAYABLE",
+      binding: {
+        schemaVersion: "1.1",
+        bindingMode: "SNAPSHOT_PINNED",
+        segmentStorageMode: "PERSISTED_CONTENT",
+        providerDistributionId: "41414141-4141-4414-8414-414141414141",
+        reference: "Gen.1.1",
+        providerSegmentKey: "fixture-segment",
+        providerVersion: "fixture-v1",
+        observedHash: "8888888888888888888888888888888888888888888888888888888888888888",
+        observedAt: "2026-10-03T00:00:00Z",
+        snapshotContentHash: "9999999999999999999999999999999999999999999999999999999999999999",
+      },
+      rightsDecisionSnapshotId: "30303030-3030-4030-8030-303030303030",
+      provenanceId: "40404040-4040-4040-8040-404040404040",
+      segments: [
+        {
+          schemaVersion: "1.1",
+          textSegmentId: "50505050-5050-4050-8050-505050505050",
+          textStreamId: "60606060-6060-4060-8060-606060606060",
+          referenceSpanId: "4089aeaa-ddae-5adb-9510-1ca22845c4c2",
+          segmentOrder: 0,
+          segmentKind: "VERSE",
+          text: "合成測試譯文",
+          contentHash: "7777777777777777777777777777777777777777777777777777777777777777",
+        },
+      ],
+      attribution: "Synthetic fixture only",
+    },
+  ],
+};
+
 const restServer = http.createServer(async (req, res) => {
   observed.push({
     method: req.method,
@@ -93,6 +144,23 @@ const restServer = http.createServer(async (req, res) => {
         previousReference: parsed.p_reference_label === "Gen.1.1" ? null : "Gen.1.1",
         nextReference: parsed.p_reference_label === "Gen.1.1" ? "Gen.1.2" : "Gen.1.3",
       },
+    }));
+    return;
+  }
+  if (req.method === "POST" && req.url === "/rpc/read_translation_witnesses") {
+    let body = "";
+    for await (const chunk of req) body += chunk;
+    const parsed = JSON.parse(body);
+    res.end(JSON.stringify({
+      ...translationPayload,
+      resolvedReference: {
+        ...translationPayload.resolvedReference,
+        referenceLabel: parsed.p_reference_label,
+      },
+      witnesses: translationPayload.witnesses.map((witness) => ({
+        ...witness,
+        binding: { ...witness.binding, reference: parsed.p_reference_label },
+      })),
     }));
     return;
   }
