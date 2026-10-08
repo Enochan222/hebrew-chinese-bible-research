@@ -77,10 +77,14 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f database/spikes/001/00_bootstrap.sql
       - name: Apply Database Spike 001 migration
         run: psql -v ON_ERROR_STOP=1 -f database/migrations/001_database_spike_001.sql
+      - name: Apply WB-4 translation Serving migration
+        run: psql -v ON_ERROR_STOP=1 -f database/migrations/002_wb4_translation_serving.sql
       - name: Load controlled fixtures
         run: psql -v ON_ERROR_STOP=1 -f database/spikes/001/01_seed.sql
       - name: Run adversarial SQL tests
         run: psql -v ON_ERROR_STOP=1 -f database/spikes/001/02_tests.sql
+      - name: Run WB-4 translation witness adversarial tests
+        run: psql -v ON_ERROR_STOP=1 -f database/spikes/001/06_translation_witness_tests.sql
       - name: Capture representative query plan
         run: psql -v ON_ERROR_STOP=1 -f database/spikes/001/03_query_plan.sql
 
