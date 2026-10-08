@@ -85,6 +85,11 @@ Database Spike 001 may begin when all CORE-SPIKE gates are PASS. This does not d
 | CORE-FZ-EVIDENCE-001 | CitationLocator is typed; public excerpts require rights snapshots; immutable evidence requires content hash |
 | CORE-FZ-HASH-001 | Publishable subtype content-hash canonical projections have versioned golden vectors |
 
+### Current release-lifecycle gate status
+
+- `CORE-FZ-RELEASE-001`: **PASS**. Database Spike publication atomicity remains covered: failure before channel-pointer movement rolls back the candidate publication and leaves the existing production pointer unchanged.
+- `CORE-FZ-RELEASE-002`: **PASS**. PR #30 implementation head `cedeaa20baa90284fa9f063ef3f1ced943ca7061` passed Database Spike `37669525047` with catalog-level permanent-projection-guard coverage and post-REVOKED mutation attacks, plus WB-2/WB-3 `37669525095` with the real whole-Bible OSHB PUBLISHED -> REVOKED -> REACTIVATED regression. Synchronized head `6573807a7cd199847f70ea42d54f584809f84601` independently passed Database Spike `37671312879`, WB-2/WB-3 `37671312984`, WB-1 `37671312895`, Whole-Bible corpus foundation `37671312907`, P1 `37671312868`, Contract validation `37671312863` and Project governance `37671312967`. The merge-resolved head must remain green before PR #30 is merged.
+
 ### Current translation-witness gate status
 
 - `CORE-FZ-TRANS-002`: **PENDING**. PR #29 defines the machine/OpenAPI contract and adversarial fixtures only. Real PostgreSQL Serving projection, rights-snapshot linkage, RLS/RPC behavior and reader/alignment implementation evidence are still required before this gate can pass.

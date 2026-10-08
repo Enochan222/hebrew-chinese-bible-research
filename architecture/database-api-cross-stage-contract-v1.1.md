@@ -2151,13 +2151,31 @@ Fields:
 
 - `research_release_event_id uuid PK`
 - `research_release_id uuid FK`
+- `event_sequence integer`
 - `event_type text`
 - `effective_at timestamptz`
 - `reason text nullable`
 - `changed_by uuid nullable`
-- `metadata jsonb`
 
 Event type comes from `researchReleaseEventType`.
+
+Lifecycle order is explicit. `event_sequence` is positive, starts at 1 with PUBLISHED, is gapless per ResearchRelease, and is the sole authoritative ordering rule when `effective_at` values are equal. UUID ordering is never chronology. Effective time is non-decreasing.
+
+Valid transitions are:
+
+- no event -> PUBLISHED;
+- PUBLISHED or REACTIVATED -> SUPERSEDED;
+- PUBLISHED, SUPERSEDED or REACTIVATED -> REVOKED;
+- REVOKED -> REACTIVATED.
+
+Two predicates are mandatory and distinct:
+
+- **ever published / permanently immutable**: after the first PUBLISHED event, release payload, evidence and compiled component projections never regain mutability;
+- **currently publicly servable**: latest PUBLISHED, SUPERSEDED or REACTIVATED is public; latest REVOKED is not.
+
+For a CORPUS component, every Serving projection keyed by `corpus_release_id` is part of that immutable compiled payload. This includes `reference_labels`, `corpus_text_segments`, `corpus_node_segments`, `corpus_nodes`, `corpus_node_features`, `corpus_edges` and `corpus_node_mappings`. Adding a new `corpus_release_id` Serving table requires the same permanent component-projection mutation guard and a regression proving it.
+
+SUPERSEDED remains citation-stable for pinned historical reads unless later REVOKED. REVOKED removes public servability and channel selection without altering historical payload. REACTIVATED restores eligibility but never restores a channel pointer automatically.
 
 ## 29.5 `release_channels`
 

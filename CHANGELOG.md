@@ -4,6 +4,69 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+## 2026-10-08 — Reconcile RL-1 hardening with merged WB-4 contract
+
+### Push intent
+
+Resolve PR #30 against current `main` after PR #29 merged, without losing either the WB-4 translation-witness contract or the RL-1 permanent Serving-projection fix.
+
+### What changed
+
+- merge current `main` ancestry into PR #30;
+- preserve all PR #29 segment-level witness, rights/provider-state and synthetic-fixture contract work;
+- carry forward the PR #30 permanent guards for every current `corpus_release_id` Serving projection;
+- preserve the catalog-level future-table guard assertion and real whole-Bible revoke/reactivate workflow;
+- synchronize PROJECT_STATE and freeze evidence so WB-4 remains the next implementation frontier after RL-1 merge verification.
+
+### Validation
+
+PR #30 implementation head `cedeaa20baa90284fa9f063ef3f1ced943ca7061` and synchronized head `6573807a7cd199847f70ea42d54f584809f84601` both passed the full affected workflow set. This merge-resolved head must rerun Contract validation, Project governance, Database Spike, WB-1, WB-2/WB-3, Whole-Bible corpus foundation and P1 before merge.
+
+## 2026-10-08 — Reopen RL-1 and harden Serving projection immutability
+
+### Push intent
+
+Correct an acceptance defect discovered after PR #28 merged. Keep WB-4 publication blocked until every release-keyed CORPUS Serving projection remains permanently immutable after first publication, including while REVOKED.
+
+### Why
+
+PR #28 correctly separated ever-published immutability from current public servability and passed its exact-head workflows. Follow-up adversarial review found that the permanent component mutation guard covered `corpus_nodes`, features, edges and mappings but omitted three tables that also belong to the published CORPUS payload:
+
+- `serving.reference_labels`;
+- `serving.corpus_text_segments`;
+- `serving.corpus_node_segments`.
+
+That meant a revoked historical release could still have its published reference addressing, Hebrew surface text or node-to-text membership rewritten. The generic Database Spike test attacked only `corpus_node_features`, and the accepted real WB-2/WB-3 workflow did not exercise revoke/reactivate, so both gates missed the defect.
+
+### What changed
+
+- reopen Issue #25 and keep `CORE-FZ-RELEASE-002` pending re-acceptance;
+- attach `guard_component_projection('corpus_release_id')` to every current Serving table keyed by `corpus_release_id`;
+- add a catalog-level regression that fails if any future `corpus_release_id` Serving table lacks that permanent guard;
+- add post-REVOKED mutation attacks for reference labels, corpus text segments and corpus node/segment memberships;
+- extend the real whole-Bible WB-2/WB-3 workflow with revoke -> public-hidden -> immutable-projection -> reactivate -> explicit channel restore -> public-readable assertions;
+- align the active database/API contract with canonical event-sequence ordering and explicitly enumerate immutable CORPUS Serving projection surfaces;
+- synchronize PROJECT_STATE to the reopened RL-1 hardening frontier.
+
+### Intended effect
+
+REVOKED changes availability only. It cannot reopen any part of an ever-published corpus payload for mutation. Future release-keyed corpus tables cannot silently bypass that invariant.
+
+### Validation
+
+PR #30 implementation head `cedeaa20baa90284fa9f063ef3f1ced943ca7061` passed every triggered implementation gate:
+
+- Database Spike 001 `37669525047`, including the catalog-level permanent-projection-guard assertion and post-REVOKED mutation attacks;
+- WB-2 WB-3 Serving Reader `37669525095`, including the real whole-Bible OSHB PUBLISHED -> REVOKED -> REACTIVATED lifecycle regression and restored Gen.1.1 serving;
+- WB-1 Relational Whole Corpus `37669524878`;
+- Whole-Bible corpus foundation `37669524970`;
+- P1 fixture shell validation `37669524947`;
+- Contract validation `37669525237`;
+- Project governance `37669524996`.
+
+On that evidence, `CORE-FZ-RELEASE-002` is accepted as PASS. This synchronized acceptance/state commit must still pass its own triggered exact-head checks before PR #30 is merged and Issue #25 is closed.
+
+
 
 ## 2026-10-08 — Prevent live witnesses from claiming snapshot identity
 

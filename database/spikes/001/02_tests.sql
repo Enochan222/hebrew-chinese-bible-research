@@ -839,6 +839,79 @@ BEGIN
 END
 $rl1_revoked_projection_immutable$;
 
+-- RL-1 hardening: every release-keyed corpus Serving projection must use the
+-- same permanent component immutability guard. This catalog-level assertion
+-- fails when a future corpus_release_id table is added without the trigger.
+SELECT spike_test.assert_true(
+  NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns c
+    WHERE c.table_schema='serving'
+      AND c.column_name='corpus_release_id'
+      AND NOT EXISTS (
+        SELECT 1
+        FROM pg_trigger t
+        JOIN pg_class rel ON rel.oid=t.tgrelid
+        JOIN pg_namespace ns ON ns.oid=rel.relnamespace
+        WHERE ns.nspname='serving'
+          AND rel.relname=c.table_name
+          AND NOT t.tgisinternal
+          AND pg_get_triggerdef(t.oid) LIKE '%guard_component_projection%'
+      )
+  ),
+  'every Serving table keyed by corpus_release_id must have the permanent component projection guard'
+);
+
+DO $rl1_revoked_reference_label_immutable$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    UPDATE serving.reference_labels
+    SET label=label
+    WHERE corpus_release_id='30000000-0000-4000-8000-000000000001'
+      AND reference_label_id='14000000-0000-4000-8000-000000000001';
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN
+    RAISE EXCEPTION 'revocation must never make published reference-label projection mutable';
+  END IF;
+END
+$rl1_revoked_reference_label_immutable$;
+
+DO $rl1_revoked_text_segment_immutable$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    UPDATE serving.corpus_text_segments
+    SET surface_original=surface_original
+    WHERE corpus_release_id='30000000-0000-4000-8000-000000000001'
+      AND text_segment_id='24000000-0000-4000-8000-000000000001';
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN
+    RAISE EXCEPTION 'revocation must never make published corpus text segments mutable';
+  END IF;
+END
+$rl1_revoked_text_segment_immutable$;
+
+DO $rl1_revoked_node_segment_immutable$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    UPDATE serving.corpus_node_segments
+    SET member_order=member_order
+    WHERE corpus_release_id='30000000-0000-4000-8000-000000000001'
+      AND analysis_node_id='33000000-0000-4000-8000-000000000001'
+      AND text_segment_id='24000000-0000-4000-8000-000000000001'
+      AND membership_role='ORTHOGRAPHIC_WORD';
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN
+    RAISE EXCEPTION 'revocation must never make published corpus node/segment membership mutable';
+  END IF;
+END
+$rl1_revoked_node_segment_immutable$;
+
 DO $rl1_revoked_direct_pointer$
 DECLARE failed boolean := false;
 BEGIN

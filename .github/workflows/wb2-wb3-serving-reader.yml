@@ -143,6 +143,149 @@ jobs:
           $public_runtime$;
           RESET ROLE;
           SQL
+      - name: Verify RL-1 on the real whole-Bible Serving projection
+        run: |
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          SET ROLE publication_worker;
+          SELECT publication_control.transition_release_lifecycle(
+            '71000000-0000-4000-8000-000000000005',
+            'REVOKED',
+            now(),
+            'RL-1 real whole-Bible revocation regression',
+            NULL
+          );
+          RESET ROLE;
+
+          SET ROLE anon;
+          DO $revoked_public$
+          BEGIN
+            IF EXISTS (
+              SELECT 1
+              FROM serving.current_release
+              WHERE channel_key='PRODUCTION'
+            ) THEN
+              RAISE EXCEPTION 'revoked whole-Bible release remained channel-visible';
+            END IF;
+
+            IF serving.read_passage_core(
+              '71000000-0000-4000-8000-000000000005',
+              'OSHB_OSIS',
+              'Gen.1.1'
+            ) IS NOT NULL THEN
+              RAISE EXCEPTION 'revoked whole-Bible release remained pinned-publicly servable';
+            END IF;
+          END
+          $revoked_public$;
+          RESET ROLE;
+
+          DO $revoked_projection_immutable$
+          DECLARE
+            corpus_id uuid;
+            failed boolean;
+          BEGIN
+            SELECT component_research_object_id
+            INTO corpus_id
+            FROM serving.research_release_components
+            WHERE research_release_id='71000000-0000-4000-8000-000000000005'
+              AND component_kind='CORPUS';
+
+            failed := false;
+            BEGIN
+              UPDATE serving.reference_labels
+              SET label=label
+              WHERE (corpus_release_id,reference_label_id)=(
+                SELECT corpus_release_id,reference_label_id
+                FROM serving.reference_labels
+                WHERE corpus_release_id=corpus_id
+                LIMIT 1
+              );
+            EXCEPTION WHEN raise_exception THEN
+              failed := true;
+            END;
+            IF NOT failed THEN
+              RAISE EXCEPTION 'revoked whole-Bible reference labels became mutable';
+            END IF;
+
+            failed := false;
+            BEGIN
+              UPDATE serving.corpus_text_segments
+              SET surface_original=surface_original
+              WHERE (corpus_release_id,text_segment_id)=(
+                SELECT corpus_release_id,text_segment_id
+                FROM serving.corpus_text_segments
+                WHERE corpus_release_id=corpus_id
+                LIMIT 1
+              );
+            EXCEPTION WHEN raise_exception THEN
+              failed := true;
+            END;
+            IF NOT failed THEN
+              RAISE EXCEPTION 'revoked whole-Bible text segments became mutable';
+            END IF;
+
+            failed := false;
+            BEGIN
+              UPDATE serving.corpus_node_segments
+              SET member_order=member_order
+              WHERE (corpus_release_id,analysis_node_id,text_segment_id,membership_role)=(
+                SELECT corpus_release_id,analysis_node_id,text_segment_id,membership_role
+                FROM serving.corpus_node_segments
+                WHERE corpus_release_id=corpus_id
+                LIMIT 1
+              );
+            EXCEPTION WHEN raise_exception THEN
+              failed := true;
+            END;
+            IF NOT failed THEN
+              RAISE EXCEPTION 'revoked whole-Bible node/segment membership became mutable';
+            END IF;
+          END
+          $revoked_projection_immutable$;
+
+          SET ROLE publication_worker;
+          SELECT publication_control.transition_release_lifecycle(
+            '71000000-0000-4000-8000-000000000005',
+            'REACTIVATED',
+            now(),
+            'RL-1 real whole-Bible reactivation regression',
+            NULL
+          );
+          SELECT publication_control.publish_release_to_channel(
+            'PRODUCTION',
+            '71000000-0000-4000-8000-000000000005',
+            NULL,
+            false
+          );
+          RESET ROLE;
+
+          SET ROLE anon;
+          DO $reactivated_public$
+          DECLARE p jsonb;
+          BEGIN
+            p := serving.read_passage_core(
+              '71000000-0000-4000-8000-000000000005',
+              'OSHB_OSIS',
+              'Gen.1.1'
+            );
+            IF p IS NULL OR jsonb_array_length(p->'tokens') = 0 THEN
+              RAISE EXCEPTION 'reactivated whole-Bible release did not restore pinned passage serving';
+            END IF;
+          END
+          $reactivated_public$;
+          RESET ROLE;
+
+          DO $lifecycle_sequence$
+          BEGIN
+            IF (
+              SELECT array_agg(event_type ORDER BY event_sequence)
+              FROM serving.research_release_events
+              WHERE research_release_id='71000000-0000-4000-8000-000000000005'
+            ) <> ARRAY['PUBLISHED','REVOKED','REACTIVATED']::text[] THEN
+              RAISE EXCEPTION 'real whole-Bible lifecycle sequence drift';
+            END IF;
+          END
+          $lifecycle_sequence$;
+          SQL
       - name: Assert Serving contains OSHB only
         run: |
           test "$(psql -At -c "SELECT count(*) FROM serving.reference_labels WHERE corpus_release_id='$(psql -At -c "SELECT component_research_object_id FROM serving.research_release_components WHERE research_release_id='71000000-0000-4000-8000-000000000005' AND component_kind='CORPUS'")';")" = "23213"
