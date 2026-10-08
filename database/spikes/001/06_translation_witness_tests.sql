@@ -95,6 +95,116 @@ INSERT INTO serving.rights_decision_snapshots(
   'ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd1'
 );
 
+-- Provider availability/storage semantics fail closed independently of rights.
+DO $invalid_live_persisted_binding$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    INSERT INTO authoring.provider_witness_observations(
+      provider_distribution_id,reference_span_id,text_stream_id,binding_mode,segment_storage_mode,
+      provider_reference,provider_segment_key,provider_version,observed_hash,observed_at,
+      snapshot_content_hash,delivery_status
+    ) VALUES (
+      '41414141-4141-4414-8414-414141414141',
+      '13000000-0000-4000-8000-000000000002',
+      '23000000-0000-4000-8000-000000000003',
+      'LIVE_EXTERNAL','PERSISTED_CONTENT',
+      '1Sam.16.8','invalid-live-persisted','fixture-v1',
+      '8989898989898989898989898989898989898989898989898989898989898989',
+      '2026-10-03T00:00:00Z',
+      '9090909090909090909090909090909090909090909090909090909090909090',
+      'READY'
+    );
+  EXCEPTION WHEN check_violation THEN failed := true;
+  END;
+  IF NOT failed THEN
+    RAISE EXCEPTION 'LIVE_EXTERNAL observation masqueraded as persisted snapshot';
+  END IF;
+END
+$invalid_live_persisted_binding$;
+
+-- Missing rights snapshots must fail closed, not degrade to displayable text.
+DO $missing_display_rights$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    PERFORM publication_control.materialize_translation_witness_candidate(
+      '47000000-0000-4000-8000-000000000003',
+      '13000000-0000-4000-8000-000000000001',
+      '41414141-4141-4414-8414-414141414141',
+      '45200000-0000-4000-8000-000000009999',
+      '45200000-0000-4000-8000-000000000011',
+      'Synthetic Chinese Test Witness','zh-Hant','Synthetic fixture only',
+      '40404040-4040-4040-8040-404040404040',0
+    );
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'missing display RightsDecisionSnapshot was accepted'; END IF;
+END
+$missing_display_rights$;
+
+DO $missing_storage_rights$
+DECLARE failed boolean := false;
+BEGIN
+  BEGIN
+    PERFORM publication_control.materialize_translation_witness_candidate(
+      '47000000-0000-4000-8000-000000000003',
+      '13000000-0000-4000-8000-000000000001',
+      '41414141-4141-4414-8414-414141414141',
+      '45200000-0000-4000-8000-000000000010',
+      '45200000-0000-4000-8000-000000009999',
+      'Synthetic Chinese Test Witness','zh-Hant','Synthetic fixture only',
+      '40404040-4040-4040-8040-404040404040',0
+    );
+  EXCEPTION WHEN raise_exception THEN failed := true;
+  END;
+  IF NOT failed THEN RAISE EXCEPTION 'missing storage RightsDecisionSnapshot was accepted'; END IF;
+END
+$missing_storage_rights$;
+
+-- Stale provider delivery remains independent from otherwise-valid rights and
+-- must compile metadata only with zero translation text.
+UPDATE authoring.provider_witness_observations
+SET delivery_status='STALE'
+WHERE provider_distribution_id='41414141-4141-4414-8414-414141414141'
+  AND reference_span_id='13000000-0000-4000-8000-000000000001';
+
+SELECT publication_control.materialize_translation_witness_candidate(
+  '47000000-0000-4000-8000-000000000003',
+  '13000000-0000-4000-8000-000000000001',
+  '41414141-4141-4414-8414-414141414141',
+  '45200000-0000-4000-8000-000000000010',
+  '45200000-0000-4000-8000-000000000011',
+  'Synthetic Chinese Test Witness','zh-Hant','Synthetic fixture only',
+  '40404040-4040-4040-8040-404040404040',0
+);
+
+DO $stale_metadata_only$
+BEGIN
+  IF (SELECT display_status FROM serving.translation_witnesses
+      WHERE research_release_id='47000000-0000-4000-8000-000000000003'
+        AND reference_span_id='13000000-0000-4000-8000-000000000001')
+     <> 'METADATA_ONLY' THEN
+    RAISE EXCEPTION 'STALE delivery did not compile metadata-only';
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM serving.translation_witness_segments
+    WHERE research_release_id='47000000-0000-4000-8000-000000000003'
+  ) THEN
+    RAISE EXCEPTION 'STALE delivery exposed translation text segments';
+  END IF;
+END
+$stale_metadata_only$;
+
+DELETE FROM serving.translation_witnesses
+WHERE research_release_id='47000000-0000-4000-8000-000000000003'
+  AND reference_span_id='13000000-0000-4000-8000-000000000001';
+
+UPDATE authoring.provider_witness_observations
+SET delivery_status='READY'
+WHERE provider_distribution_id='41414141-4141-4414-8414-414141414141'
+  AND reference_span_id='13000000-0000-4000-8000-000000000001';
+
 -- Wrong-expression display snapshot must fail closed.
 DO $wrong_display_subject$
 DECLARE failed boolean := false;
@@ -206,6 +316,12 @@ BEGIN
   ) THEN
     RAISE EXCEPTION 'inactive translation witness leaked through RLS';
   END IF;
+  IF EXISTS (
+    SELECT 1 FROM serving.translation_witness_segments
+    WHERE research_release_id='47000000-0000-4000-8000-000000000003'
+  ) THEN
+    RAISE EXCEPTION 'inactive translation witness segments leaked through RLS';
+  END IF;
   IF serving.read_translation_witnesses(
     '47000000-0000-4000-8000-000000000003','MT_TEST','1 Sam 16:7'
   ) IS NOT NULL THEN
@@ -304,6 +420,15 @@ RESET ROLE;
 SET ROLE anon;
 DO $revoked_hidden$
 BEGIN
+  IF EXISTS (
+    SELECT 1 FROM serving.translation_witnesses
+    WHERE research_release_id='47000000-0000-4000-8000-000000000003'
+  ) OR EXISTS (
+    SELECT 1 FROM serving.translation_witness_segments
+    WHERE research_release_id='47000000-0000-4000-8000-000000000003'
+  ) THEN
+    RAISE EXCEPTION 'revoked translation rows remained visible through public RLS';
+  END IF;
   IF serving.read_translation_witnesses(
     '47000000-0000-4000-8000-000000000003','MT_TEST','1 Sam 16:7'
   ) IS NOT NULL THEN
