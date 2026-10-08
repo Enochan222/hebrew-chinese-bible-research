@@ -5,8 +5,11 @@ BEGIN;
 -- WB-4 DB-1 provider identity remains distinct from textual identity.
 CREATE TABLE authoring.providers (
   provider_id uuid PRIMARY KEY,
-  provider_code text NOT NULL UNIQUE,
-  display_name text NOT NULL,
+  provider_key text NOT NULL UNIQUE,
+  name text NOT NULL,
+  provider_type text NOT NULL,
+  base_url text,
+  active boolean NOT NULL DEFAULT true,
   metadata jsonb NOT NULL DEFAULT '{}'::jsonb
 );
 
@@ -14,10 +17,12 @@ CREATE TABLE authoring.provider_distributions (
   provider_distribution_id uuid PRIMARY KEY,
   provider_id uuid NOT NULL REFERENCES authoring.providers(provider_id),
   digital_expression_id uuid NOT NULL REFERENCES authoring.digital_expressions(digital_expression_id),
-  distribution_key text NOT NULL,
-  provider_version text,
-  metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
-  UNIQUE (provider_id, distribution_key),
+  provider_version_code text NOT NULL,
+  distribution_version text,
+  availability_metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+  rights_policy_id uuid REFERENCES authoring.rights_policies(rights_policy_id),
+  active boolean NOT NULL DEFAULT true,
+  UNIQUE (provider_id, provider_version_code),
   UNIQUE (provider_distribution_id, digital_expression_id)
 );
 
