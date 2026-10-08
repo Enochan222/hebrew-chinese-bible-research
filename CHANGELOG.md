@@ -4,6 +4,23 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+## 2026-10-08 — Reconcile RL-1 hardening with merged WB-4 contract
+
+### Push intent
+
+Resolve PR #30 against current `main` after PR #29 merged, without losing either the WB-4 translation-witness contract or the RL-1 permanent Serving-projection fix.
+
+### What changed
+
+- merge current `main` ancestry into PR #30;
+- preserve all PR #29 segment-level witness, rights/provider-state and synthetic-fixture contract work;
+- carry forward the PR #30 permanent guards for every current `corpus_release_id` Serving projection;
+- preserve the catalog-level future-table guard assertion and real whole-Bible revoke/reactivate workflow;
+- synchronize PROJECT_STATE and freeze evidence so WB-4 remains the next implementation frontier after RL-1 merge verification.
+
+### Validation
+
+PR #30 implementation head `cedeaa20baa90284fa9f063ef3f1ced943ca7061` and synchronized head `6573807a7cd199847f70ea42d54f584809f84601` both passed the full affected workflow set. This merge-resolved head must rerun Contract validation, Project governance, Database Spike, WB-1, WB-2/WB-3, Whole-Bible corpus foundation and P1 before merge.
 
 ## 2026-10-08 — Reopen RL-1 and harden Serving projection immutability
 
@@ -48,6 +65,105 @@ PR #30 implementation head `cedeaa20baa90284fa9f063ef3f1ced943ca7061` passed eve
 - Project governance `37669524996`.
 
 On that evidence, `CORE-FZ-RELEASE-002` is accepted as PASS. This synchronized acceptance/state commit must still pass its own triggered exact-head checks before PR #30 is merged and Issue #25 is closed.
+
+
+
+## 2026-10-08 — Prevent live witnesses from claiming snapshot identity
+
+### Push intent
+
+Complete the snapshot/live mutual-exclusion rule in ProviderWitnessBinding before accepting PR #29.
+
+### Why
+
+A `LIVE_EXTERNAL` binding may carry an observed hash for the provider response, but it must not carry a non-null `snapshotContentHash`. Doing so would falsely imply that live external text is an immutable persisted release snapshot.
+
+### What changed
+
+- constrain `LIVE_EXTERNAL.snapshotContentHash` to null when the field is present;
+- add an adversarial live-binding fixture that supplies a fake snapshot hash;
+- require contract validation to reject that fixture;
+- keep READY live-provider delivery possible without claiming snapshot immutability.
+
+### Validation
+
+The change is contract-only and synthetic-only. Exact-head validation must pass again before merge.
+
+
+## 2026-10-08 — Fail closed on null snapshot witness hash
+
+### Push intent
+
+Close the last clear ProviderWitnessBinding inconsistency found in adversarial review of PR #29 before accepting the WB-4 contract boundary.
+
+### Why
+
+A `SNAPSHOT_PINNED` witness means provider text has been persisted into a release-bound immutable snapshot. The schema required the `snapshotContentHash` field but still permitted its value to be null, which would make that snapshot unverifiable and contradict the release-pinning model.
+
+### What changed
+
+- require `SNAPSHOT_PINNED.snapshotContentHash` to be a non-null SHA-256 value;
+- add an adversarial null-hash provider-binding fixture;
+- register that fixture as a mandatory schema rejection;
+- leave `LIVE_EXTERNAL` locator/ephemeral semantics unchanged.
+
+### Validation
+
+This changes no real translation data and adds no provider content. Exact-head Contract validation plus the full affected repository regression suite must pass again before PR #29 may merge.
+
+
+## 2026-10-08 — Close WB-4 segment-level witness contract
+
+### Push intent
+
+Make the translation-witness API stable enough for the next PostgreSQL/alignment implementation without publishing any real copyrighted translation.
+
+### What changed
+
+- replace free-form passage echo with ResearchRelease-pinned canonical ReferenceSpan plus resolved ReferenceSystem identity;
+- carry TextualWork, nullable TextualEdition and exact DigitalExpression identity per witness;
+- add ordered content-hashed TranslationWitnessSegment objects with stable TextStream/TextSegment IDs;
+- separate coverage, provider delivery and display-rights state instead of collapsing them into availability;
+- require displayable witnesses to be covered, delivery-ready and segment-bearing;
+- force rights-restricted, metadata-only, stale, provider-error, not-retrieved and uncovered/unknown states to expose zero translation text;
+- require RightsDecisionSnapshot and provenance identity per witness;
+- strengthen ProviderWitnessBinding with required observed hash/time and explicit providerVersion presence;
+- add schema and semantic adversarial fixtures for missing display segments, uncovered/restricted text leakage and duplicate DigitalExpression identity;
+- add `CORE-FZ-TRANS-002` as a PENDING implementation gate.
+
+### Validation
+
+All translation text in fixtures remains synthetic. Contract validation must reject the new adversarial vectors and the full repository regression suite must pass on the exact PR head before merge. Real witness selection, licensing, ingestion and Serving remain outside this contract-only PR.
+
+## 2026-10-08 — Start WB-4 with a strict translation-witness contract
+
+### Push intent
+
+Begin the translation-witness base without prematurely publishing real translation content or allowing provider-specific payloads to define the product contract.
+
+### Why
+
+Core OpenAPI exposed TranslationWitnessList through a permissive inline witness object with additional properties allowed. That left DigitalExpression identity, passage coverage and provider binding underspecified at the API boundary and risked conflating provider availability with publication permission.
+
+### What changed
+
+- add canonical strict TranslationWitness and TranslationWitnessList JSON Schemas;
+- bind every witness to an exact DigitalExpression and language tag;
+- make passage coverage explicit instead of inferring it from provider availability;
+- embed the existing ProviderWitnessBinding as delivery/storage mechanics rather than rights authority;
+- replace the permissive inline OpenAPI witness object with the canonical list schema;
+- add positive and adversarial fixtures and validator checks;
+- document that provider binding, passage coverage and public-display rights are separate facts;
+- record merged PR #28 / closed Issue #25 as the accepted RL-1 lifecycle baseline;
+- keep all real translation text out of this contract-only frontier.
+
+### Intended effect
+
+WB-4 database publication and reader work can now target one machine-readable witness contract while remaining fail-closed on rights. Synthetic fixtures cannot be mistaken for selected or licensed product translations.
+
+### Validation
+
+Contract validation passed on PR #29 head before the governance synchronization commit. Exact-head validation and whole-Bible regressions must pass again before merge.
 
 ## 2026-10-06 — Implement RL-1 release lifecycle split candidate
 

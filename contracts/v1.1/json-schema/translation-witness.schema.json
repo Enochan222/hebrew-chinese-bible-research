@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hebrew-chinese-bible-research.local/schemas/v1.1/translation-witness.schema.json",
+  "title": "Translation Witness v1.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "textualWorkId",
+    "textualEditionId",
+    "digitalExpressionId",
+    "displayName",
+    "languageTag",
+    "coverageStatus",
+    "deliveryStatus",
+    "displayStatus",
+    "binding",
+    "rightsDecisionSnapshotId",
+    "provenanceId",
+    "segments",
+    "attribution"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.1"
+    },
+    "textualWorkId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "textualEditionId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "digitalExpressionId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "displayName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "languageTag": {
+      "type": "string",
+      "minLength": 2
+    },
+    "coverageStatus": {
+      "enum": [
+        "COVERED",
+        "NOT_COVERED",
+        "UNKNOWN"
+      ]
+    },
+    "deliveryStatus": {
+      "enum": [
+        "READY",
+        "PROVIDER_ERROR",
+        "STALE",
+        "NOT_RETRIEVED"
+      ]
+    },
+    "displayStatus": {
+      "enum": [
+        "DISPLAYABLE",
+        "RIGHTS_RESTRICTED",
+        "METADATA_ONLY"
+      ]
+    },
+    "binding": {
+      "$ref": "./provider-witness-binding.schema.json"
+    },
+    "rightsDecisionSnapshotId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "provenanceId": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "segments": {
+      "type": "array",
+      "items": {
+        "$ref": "./translation-witness-segment.schema.json"
+      }
+    },
+    "attribution": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "displayStatus": {
+            "const": "DISPLAYABLE"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "coverageStatus": {
+            "const": "COVERED"
+          },
+          "deliveryStatus": {
+            "const": "READY"
+          },
+          "segments": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "displayStatus": {
+            "enum": [
+              "RIGHTS_RESTRICTED",
+              "METADATA_ONLY"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "segments": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "coverageStatus": {
+            "enum": [
+              "NOT_COVERED",
+              "UNKNOWN"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "segments": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "deliveryStatus": {
+            "enum": [
+              "PROVIDER_ERROR",
+              "STALE",
+              "NOT_RETRIEVED"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "segments": {
+            "maxItems": 0
+          }
+        }
+      }
+    }
+  ]
+}

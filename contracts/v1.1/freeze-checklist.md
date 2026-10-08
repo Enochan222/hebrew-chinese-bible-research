@@ -72,6 +72,7 @@ Database Spike 001 may begin when all CORE-SPIKE gates are PASS. This does not d
 | CORE-FZ-WB-003 | Release-pinned public passage API/reader traverses database-backed whole-corpus content without fixture-specific hard-coding and remains usable with Research Pro/BYOK unavailable |
 | CORE-FZ-CORPUS-001 | OSHB plus structurally different MACULA/BHSA layer coexist without forced phrase/clause identity |
 | CORE-FZ-TRANS-001 | FHL/provider distribution is distinct from work/edition/expression identity |
+| CORE-FZ-TRANS-002 | Public translation-witness projection is ResearchRelease/ReferenceSpan pinned, segment-level, and keeps coverage, provider delivery and display-rights state independent; non-displayable/stale/failed witnesses expose no translation text |
 | CORE-FZ-ALIGN-001 | Hebrew-Chinese many-to-many alignment fixture passes |
 | CORE-FZ-TC-001 | Grouped apparatus reading retains raw apparatus, witness uncertainty, siglum source context, and exact locus |
 | CORE-FZ-RIGHTS-001 | Conflicting rights + default/unknown restrictive deny + typed conditions/obligations fixtures pass |
@@ -86,8 +87,12 @@ Database Spike 001 may begin when all CORE-SPIKE gates are PASS. This does not d
 
 ### Current release-lifecycle gate status
 
-- `CORE-FZ-RELEASE-001`: **PASS**. Database Spike publication atomicity remains covered: a failure before channel-pointer movement rolls back the candidate PUBLISHED event and leaves the existing production pointer unchanged.
-- `CORE-FZ-RELEASE-002`: **PASS** on PR #30 implementation head `cedeaa20baa90284fa9f063ef3f1ced943ca7061`. Database Spike 001 run `37669525047` passed lifecycle/RLS/channel tests plus a catalog assertion requiring every current/future Serving table keyed by `corpus_release_id` to carry the permanent component-projection guard. WB-2/WB-3 Serving Reader run `37669525095` then exercised the real whole-Bible OSHB release through PUBLISHED -> REVOKED -> REACTIVATED: revocation removed current/pinned public serving, mutation attempts against real reference labels, Hebrew text segments and node/segment memberships were rejected, explicit reactivation plus channel reassignment restored Gen.1.1 serving, and lifecycle event order remained deterministic. The same implementation head passed Contract validation `37669525237`, Project governance `37669524996`, P1 fixture shell `37669524947`, WB-1 Relational Whole Corpus `37669524878`, and Whole-Bible corpus foundation `37669524970`.
+- `CORE-FZ-RELEASE-001`: **PASS**. Database Spike publication atomicity remains covered: failure before channel-pointer movement rolls back the candidate publication and leaves the existing production pointer unchanged.
+- `CORE-FZ-RELEASE-002`: **PASS**. PR #30 implementation head `cedeaa20baa90284fa9f063ef3f1ced943ca7061` passed Database Spike `37669525047` with catalog-level permanent-projection-guard coverage and post-REVOKED mutation attacks, plus WB-2/WB-3 `37669525095` with the real whole-Bible OSHB PUBLISHED -> REVOKED -> REACTIVATED regression. Synchronized head `6573807a7cd199847f70ea42d54f584809f84601` independently passed Database Spike `37671312879`, WB-2/WB-3 `37671312984`, WB-1 `37671312895`, Whole-Bible corpus foundation `37671312907`, P1 `37671312868`, Contract validation `37671312863` and Project governance `37671312967`. The merge-resolved head must remain green before PR #30 is merged.
+
+### Current translation-witness gate status
+
+- `CORE-FZ-TRANS-002`: **PENDING**. PR #29 defines the machine/OpenAPI contract and adversarial fixtures only. Real PostgreSQL Serving projection, rights-snapshot linkage, RLS/RPC behavior and reader/alignment implementation evidence are still required before this gate can pass.
 
 ### Current whole-Bible gate status
 

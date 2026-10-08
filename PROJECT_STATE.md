@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-08.2**
+State Revision: **2026-10-08.5**
 
 ## Mandatory governance rule
 
@@ -323,33 +323,52 @@ WB-1 acceptance is **PASS** for `CORE-FZ-WB-002`. The synchronized implementatio
 
 1. Preserve contract/governance consistency, the ChatGPT-only project AI policy and the whole-Bible scope guard.
 2. Treat WB-2/WB-3 as accepted whole-Bible base-reader infrastructure and preserve its exact-head regression suite.
-3. Complete RL-1 closeout through PR #30. The hardening implementation head has passed every required lifecycle, whole-Bible, database, contract, governance and web regression, and `CORE-FZ-RELEASE-002` is accepted as PASS. Keep Issue #25 open until the synchronized acceptance head is merged and verified on `main`.
-4. After RL-1 merge verification, begin WB-4/WB-5: selected translation witnesses, alignment/comparison, project/user translation workflow and deterministic whole-corpus analysis.
-5. Only then make Research Pro provider adapters, ResearchModelAdapter and end-to-end literature builds the primary product implementation frontier; academic enrichment may proceed in parallel where it does not block the base path.
+3. Complete PR #30 merge verification for RL-1 hardening. The functional and synchronized branch heads have passed all affected workflows; Issue #25 remains open until the merge-resolved head is green, PR #30 is merged, and `main` is verified.
+4. Preserve the accepted PR #29 WB-4 contract boundary while RL-1 closes. No real copyrighted translation witness may be published merely because provider delivery is available.
+5. After PR #30 merge verification, implement the WB-4 PostgreSQL Serving projection with synthetic/right-safe witnesses, RightsDecisionSnapshot linkage, RLS/RPC and reader integration; then implement many-to-many Hebrew-Chinese alignment.
+6. Complete WB-5 deterministic whole-corpus analysis after the WB-4 serving/alignment boundary is proven.
+7. Only then make Research Pro provider adapters, ResearchModelAdapter and end-to-end literature builds the primary product implementation frontier; academic enrichment may proceed in parallel where it does not block the base path.
 
-## RL-1 release lifecycle acceptance
+## RL-1 release lifecycle hardening acceptance
 
-PR #28 merged the core lifecycle split, but later adversarial review found three release-keyed CORPUS Serving projections without the permanent component immutability guard: `reference_labels`, `corpus_text_segments` and `corpus_node_segments`. Issue #25 was reopened and PR #30 hardened that boundary rather than allowing WB-4 publication work to build on an incomplete immutability guarantee.
+PR #28 established the lifecycle split between permanent ever-published immutability and current public servability. Post-merge adversarial review then found three release-keyed CORPUS Serving projections that were still missing the permanent component mutation guard: `serving.reference_labels`, `serving.corpus_text_segments` and `serving.corpus_node_segments`. Issue #25 was therefore reopened and PR #30 hardens the actual compiled projection boundary before WB-4 publication work expands Serving.
 
-PR #30 implementation head `cedeaa20baa90284fa9f063ef3f1ced943ca7061` now provides machine evidence for the complete current `corpus_release_id` projection surface:
+Accepted PR #30 behavior:
 
-- `guard_component_projection('corpus_release_id')` protects reference labels, corpus text segments, node/segment memberships, nodes, features, edges and mappings after first publication;
-- Database Spike includes a catalog-level invariant that fails if any current or future Serving table carrying `corpus_release_id` lacks that permanent component guard;
-- explicit post-REVOKED mutation attacks against reference labels, Hebrew text segments and node/segment memberships fail;
-- the real whole-Bible OSHB release is exercised through PUBLISHED -> REVOKED -> REACTIVATED: revocation removes current/pinned public serving, all three real projection mutation attacks fail, explicit reactivation plus channel reassignment restores Gen.1.1, and event order remains deterministic;
-- the active database/API contract now matches the canonical `eventSequence` contract and explicitly defines the immutable CORPUS projection boundary.
+- `guard_component_projection('corpus_release_id')` protects every current Serving table carrying `corpus_release_id`, including reference labels, text segments, node/segment memberships, nodes, features, edges and mappings;
+- a catalog-level regression fails when a future `serving` table with `corpus_release_id` lacks the permanent component guard;
+- explicit post-REVOKED mutation attacks against reference labels, Hebrew text segments and node/segment membership fail;
+- the real whole-Bible OSHB Serving release is exercised through PUBLISHED -> REVOKED -> REACTIVATED;
+- REVOKED removes current and pinned public serving without reopening historical payload mutability;
+- explicit REACTIVATED plus channel reassignment restores Gen.1.1 serving;
+- the active database/API contract now uses canonical `eventSequence` ordering and enumerates the immutable CORPUS Serving projection surface.
 
-Exact implementation-head evidence:
+PR #30 implementation head `cedeaa20baa90284fa9f063ef3f1ced943ca7061` passed Database Spike `37669525047`, WB-2/WB-3 `37669525095`, WB-1 `37669524878`, Whole-Bible corpus foundation `37669524970`, P1 fixture shell `37669524947`, Contract validation `37669525237` and Project governance `37669524996`.
 
-- Database Spike 001 `37669525047`: PASS;
-- WB-2 WB-3 Serving Reader `37669525095`: PASS, including the real whole-Bible revoke/reactivate regression;
-- WB-1 Relational Whole Corpus `37669524878`: PASS;
-- Whole-Bible corpus foundation `37669524970`: PASS;
-- P1 fixture shell validation `37669524947`: PASS;
-- Contract validation `37669525237`: PASS;
-- Project governance `37669524996`: PASS.
+The synchronized PR #30 head `6573807a7cd199847f70ea42d54f584809f84601` independently passed Database Spike `37671312879`, WB-2/WB-3 `37671312984`, WB-1 `37671312895`, Whole-Bible corpus foundation `37671312907`, P1 fixture shell `37671312868`, Contract validation `37671312863` and Project governance `37671312967`.
 
-`CORE-FZ-RELEASE-002` is therefore **PASS**. Issue #25 remains open only for PR #30 merge/main verification. The synchronized acceptance head created by this state/freeze/changelog update must itself pass the triggered exact-head checks before merge.
+`CORE-FZ-RELEASE-002` is **PASS** on that evidence. PR #30 still requires the merge-resolved head, which also contains merged PR #29 WB-4 contract work, to remain green before merge. Issue #25 remains open until PR #30 is merged and `main` is verified.
+
+## WB-4 contract-first implementation state
+
+PR #29 remains contract-first and contains no real copyrighted translation publication.
+
+The public witness contract is now designed to survive the next database/alignment frontier without changing field meaning:
+
+- TranslationWitnessList pins ResearchRelease, canonical ReferenceSpan and resolved ReferenceSystem identity;
+- each witness identifies TextualWork, optional TextualEdition and exact DigitalExpression rather than treating provider code as translation identity;
+- displayed witness text is an ordered array of content-hashed TextSegments with stable TextStream/TextSegment IDs suitable for later many-to-many alignment;
+- coverageStatus, deliveryStatus and displayStatus are independent;
+- DISPLAYABLE requires covered + delivery-ready + at least one segment;
+- rights-restricted, metadata-only, stale, provider-error, not-retrieved, uncovered and unknown-coverage states expose zero text segments;
+- each witness carries the display RightsDecisionSnapshot ID and provenance ID;
+- ProviderWitnessBinding remains delivery/storage mechanics and now requires observation hash/time plus an explicit providerVersion field, which may be null if the provider supplies none;
+- `SNAPSHOT_PINNED` additionally requires a non-null SHA-256 `snapshotContentHash`; a null hash is rejected because a persisted release snapshot must remain verifiable.
+- `LIVE_EXTERNAL` may not carry a non-null `snapshotContentHash`; live observations can expose observed hashes but must not masquerade as immutable persisted snapshots.
+- duplicate DigitalExpression witnesses and non-contiguous segment order are semantic contract failures;
+- all fixtures remain synthetic and do not assert that any real Chinese translation is licensed or selected.
+
+`CORE-FZ-TRANS-002` is **PENDING** until a real PostgreSQL Serving projection, rights/RLS/RPC path and reader/alignment implementation pass exact-head regression evidence.
 
 ## WB-2 / WB-3 implementation state
 
@@ -375,4 +394,4 @@ Exact-head machine evidence is complete. WB-2/WB-3 Serving Reader run `374243988
 
 ## Latest push intent
 
-Synchronize repository authority with PR #30 implementation-head evidence and accept `CORE-FZ-RELEASE-002`. Preserve Issue #25 as open until the synchronized acceptance head passes exact-head CI, PR #30 is squash-merged, and `main` is verified. After that closeout, WB-4/WB-5 becomes the next base-product frontier.
+Merge current `main` into PR #30 without regressing the accepted PR #29 WB-4 contract. Preserve all WB-4 synthetic-only/right-safe contract work while carrying forward the RL-1 permanent Serving-projection guards and real whole-Bible revoke/reactivate regressions. Require the merge-resolved exact head to pass the complete affected workflow set before PR #30 may merge; then verify `main`, close Issue #25, and begin WB-4 PostgreSQL translation Serving implementation.

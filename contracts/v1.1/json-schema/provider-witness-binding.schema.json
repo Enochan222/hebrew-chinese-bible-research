@@ -9,7 +9,10 @@
     "bindingMode",
     "segmentStorageMode",
     "providerDistributionId",
-    "reference"
+    "reference",
+    "providerVersion",
+    "observedHash",
+    "observedAt"
   ],
   "properties": {
     "schemaVersion": {
@@ -49,17 +52,11 @@
       ]
     },
     "observedHash": {
-      "type": [
-        "string",
-        "null"
-      ],
+      "type": "string",
       "pattern": "^[0-9a-fA-F]{64}$"
     },
     "observedAt": {
-      "type": [
-        "string",
-        "null"
-      ],
+      "type": "string",
       "format": "date-time"
     },
     "snapshotContentHash": {
@@ -86,6 +83,10 @@
         "properties": {
           "segmentStorageMode": {
             "const": "PERSISTED_CONTENT"
+          },
+          "snapshotContentHash": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{64}$"
           }
         }
       }
@@ -105,6 +106,9 @@
               "PROVIDER_LOCATOR",
               "EPHEMERAL"
             ]
+          },
+          "snapshotContentHash": {
+            "type": "null"
           }
         }
       }
