@@ -5,6 +5,28 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
 
+## 2026-10-10 — Require exact release-component membership for translation Serving
+
+### Push intent
+
+Close a publication identity gap found during independent review of PR #34 despite a green prior exact-head CI suite.
+
+### Why
+
+Exact ProviderDistribution and RightsDecisionSnapshot checks alone do not authorize inserting a translation witness into an unrelated ResearchRelease. Its CORPUS passage must resolve in that release, its TRANSLATION_WITNESS component must pin the exact DigitalExpression, and a DISPLAYABLE persisted witness must use the same snapshot hash as its release component.
+
+### What changed
+
+- fail compiler materialization if the target release does not list the exact translation DigitalExpression as a TRANSLATION_WITNESS component;
+- fail if the requested reference span cannot resolve through the release's pinned CORPUS component;
+- fail DISPLAYABLE materialization when the release translation component content hash differs from the provider observation's pinned snapshot hash;
+- add adversarial candidate releases for each mismatch and assert exact rejection reasons;
+- preserve synthetic-only/right-safe publication, current WB-3 reader and RL-1 immutability boundaries.
+
+### Validation
+
+Pending exact-head validation following this patch. Previous PR #34 head `a216f45fca1c9c11bfaf4f993454260e65a9f631` passed Project governance, Contract validation, Whole-Bible corpus foundation, P1 fixture shell validation, Database Spike, WB-1 and WB-2/WB-3; those runs are not evidence for the new head. `CORE-FZ-TRANS-002` remains PENDING until fresh regression and merge safety checks.
+
 ## 2026-10-08 — Implement WB-4 DB-1 rights-gated translation Serving candidate
 
 ### Push intent
