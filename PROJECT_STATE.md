@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-10.4**
+State Revision: **2026-10-10.1**
 
 ## Mandatory governance rule
 
@@ -410,6 +410,12 @@ Current branch implementation includes:
 Exact-head machine evidence is complete. WB-2/WB-3 Serving Reader run `37424398827` passed whole-corpus rebuild/parity, rights-safe OSHB publication, anon RLS public passage reads, 39-book navigation, Genesis 50-chapter and 31-passage indexing, Gen.50.26 -> Exod.1.1 cross-book traversal, non-fixture Isa.6.1 retrieval, OSHB-only public Serving and evidence upload. P1 fixture shell validation `37424398799` passed typecheck, lint/boundaries, unit, integration, fixture E2E, Serving visual E2E and production build. WB-1 `37424398811`, Whole-Bible corpus foundation `37424398932`, Database Spike 001 `37424398816`, Contract validation `37424398834` and Project governance `37424398970` all passed on the same head.
 
 `CORE-FZ-WB-001` and `CORE-FZ-WB-003` are now **PASS**.
+
+## WB-4 immutability review companion
+
+A separate review-fix branch protects two load-bearing DB-1 guarantees while PR #34 is being updated in parallel. `serving.rights_decision_snapshots` entries referenced by staged translation witnesses cannot be UPDATEd or DELETEd. Translation rows check the original and the destination release on every UPDATE, closing the relocation case in which the generic guard checked only NEW.release_id.
+
+SQL acceptance tests must reject mutation/deletion of compiled display/storage decisions and migration of published witness/segment rows into an unpublished release. This is an implementation candidate, not completed acceptance. No actual copyrighted Chinese translation data is added.
 
 ## Latest push intent
 

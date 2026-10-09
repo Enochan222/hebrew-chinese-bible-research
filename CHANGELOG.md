@@ -4,6 +4,23 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+## 2026-10-10 — Protect compiled translation rights and release ownership
+
+### Scope
+
+Companion hardening for PR #34 and Issue #32. The inherited release guard protected NEW.release_id but did not check OLD.release_id during UPDATE; translation-bound rights snapshots remained mutable after compilation.
+
+### Change
+
+- prevent UPDATE/DELETE of a RightsDecisionSnapshot once referenced by a staged or published translation witness;
+- replace NEW-only translation payload guards with OLD+NEW permanent publication checks;
+- add negative PostgreSQL tests for rights decision mutation/deletion and cross-release row relocation.
+
+### Validation
+
+Pending exact-head Database Spike and affected regression checks. Synthetic witness fixtures only.
+
+
 
 ## 2026-10-10 — Require exact release-component membership for translation Serving
 

@@ -174,13 +174,56 @@ CREATE TRIGGER translation_witness_segment_display_guard
 BEFORE INSERT OR UPDATE ON serving.translation_witness_segments
 FOR EACH ROW EXECUTE FUNCTION serving.validate_translation_witness_segment_insert();
 
+-- A compiled witness must never refer to a rights verdict that can be
+-- silently rewritten. Reject mutations as soon as a witness references it,
+-- not merely after PUBLISHED, so publication cannot race a mutable decision.
+CREATE OR REPLACE FUNCTION serving.guard_bound_translation_rights_snapshot()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $wb4_bound_snapshot_immutable$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM serving.translation_witnesses w
+    WHERE w.display_rights_decision_snapshot_id=OLD.rights_decision_snapshot_id
+       OR w.storage_rights_decision_snapshot_id=OLD.rights_decision_snapshot_id
+  ) THEN
+    RAISE EXCEPTION 'rights snapshot bound to a translation witness is immutable';
+  END IF;
+  RETURN OLD;
+END
+$wb4_bound_snapshot_immutable$;
+
+CREATE TRIGGER bound_translation_rights_snapshot_immutable
+BEFORE UPDATE OR DELETE ON serving.rights_decision_snapshots
+FOR EACH ROW EXECUTE FUNCTION serving.guard_bound_translation_rights_snapshot();
+
+
+-- The generic NEW-only release guard is insufficient for UPDATE:
+-- an already-published row must not migrate into an unpublished release.
+CREATE OR REPLACE FUNCTION serving.guard_translation_release_payload()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $wb4_translation_release_immutable$
+BEGIN
+  IF TG_OP IN ('UPDATE','DELETE')
+     AND serving.release_ever_published(OLD.research_release_id) THEN
+    RAISE EXCEPTION 'ever-published translation projection cannot be relocated';
+  END IF;
+  IF TG_OP IN ('INSERT','UPDATE')
+     AND serving.release_ever_published(NEW.research_release_id) THEN
+    RAISE EXCEPTION 'ever-published translation projection cannot be modified';
+  END IF;
+  RETURN CASE WHEN TG_OP='DELETE' THEN OLD ELSE NEW END;
+END
+$wb4_translation_release_immutable$;
+
 CREATE TRIGGER translation_witness_release_lock
 BEFORE INSERT OR UPDATE OR DELETE ON serving.translation_witnesses
-FOR EACH ROW EXECUTE FUNCTION serving.guard_direct_release_payload();
+FOR EACH ROW EXECUTE FUNCTION serving.guard_translation_release_payload();
 
 CREATE TRIGGER translation_witness_segment_release_lock
 BEFORE INSERT OR UPDATE OR DELETE ON serving.translation_witness_segments
-FOR EACH ROW EXECUTE FUNCTION serving.guard_direct_release_payload();
+FOR EACH ROW EXECUTE FUNCTION serving.guard_translation_release_payload();
 
 ALTER TABLE serving.translation_witnesses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE serving.translation_witness_segments ENABLE ROW LEVEL SECURITY;

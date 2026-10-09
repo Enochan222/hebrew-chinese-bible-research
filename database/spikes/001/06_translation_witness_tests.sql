@@ -416,6 +416,30 @@ BEGIN
 END
 $candidate_shape$;
 
+
+-- Bound rights records must not change their effective verdict while a
+-- candidate witness is staged, even before first publication.
+DO $wb4_compiled_rights_immutability$
+DECLARE update_failed boolean := false;
+DECLARE delete_failed boolean := false;
+BEGIN
+  BEGIN
+    UPDATE serving.rights_decision_snapshots
+    SET decision='DENY'
+    WHERE rights_decision_snapshot_id='45200000-0000-4000-8000-000000000010';
+  EXCEPTION WHEN raise_exception THEN update_failed := true;
+  END;
+  BEGIN
+    DELETE FROM serving.rights_decision_snapshots
+    WHERE rights_decision_snapshot_id='45200000-0000-4000-8000-000000000011';
+  EXCEPTION WHEN raise_exception THEN delete_failed := true;
+  END;
+  IF NOT update_failed OR NOT delete_failed THEN
+    RAISE EXCEPTION 'translation rights verdict mutation was not rejected';
+  END IF;
+END
+$wb4_compiled_rights_immutability$;
+
 -- Existing OSHB-only release remains contract-compatible with zero witnesses.
 SET ROLE anon;
 DO $oshb_only_empty$
@@ -516,6 +540,8 @@ RESET ROLE;
 DO $published_immutable$
 DECLARE failed_witness boolean := false;
 DECLARE failed_segment boolean := false;
+DECLARE moved_witness boolean := false;
+DECLARE moved_segment boolean := false;
 BEGIN
   BEGIN
     UPDATE serving.translation_witnesses
@@ -529,8 +555,20 @@ BEGIN
     WHERE research_release_id='47000000-0000-4000-8000-000000000003';
   EXCEPTION WHEN raise_exception THEN failed_segment := true;
   END;
-  IF NOT failed_witness OR NOT failed_segment THEN
-    RAISE EXCEPTION 'published translation Serving rows remained mutable';
+  BEGIN
+    UPDATE serving.translation_witnesses
+    SET research_release_id='47000000-0000-4000-8000-000000000004'
+    WHERE research_release_id='47000000-0000-4000-8000-000000000003';
+  EXCEPTION WHEN raise_exception THEN moved_witness := true;
+  END;
+  BEGIN
+    UPDATE serving.translation_witness_segments
+    SET research_release_id='47000000-0000-4000-8000-000000000004'
+    WHERE research_release_id='47000000-0000-4000-8000-000000000003';
+  EXCEPTION WHEN raise_exception THEN moved_segment := true;
+  END;
+  IF NOT failed_witness OR NOT failed_segment OR NOT moved_witness OR NOT moved_segment THEN
+    RAISE EXCEPTION 'published translation rows can change or migrate to another release';
   END IF;
 END
 $published_immutable$;
