@@ -385,7 +385,12 @@ BEGIN
     LOOP
       IF seg.surface_original IS NULL
          OR seg.content_hash IS NULL
-         OR seg.content_hash !~ '^[0-9a-fA-F]{64}
+         OR seg.content_hash !~ '^[0-9a-fA-F]{64}$'
+         OR lower(seg.content_hash) <> encode(
+           sha256(convert_to(seg.surface_original, 'UTF8')), 'hex'
+         ) THEN
+        RAISE EXCEPTION 'persisted translation segment text and SHA-256 content hash must agree';
+      END IF;
 
       INSERT INTO serving.translation_witness_segments(
         research_release_id,reference_span_id,digital_expression_id,
