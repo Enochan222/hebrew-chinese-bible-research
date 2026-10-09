@@ -95,6 +95,77 @@ INSERT INTO serving.rights_decision_snapshots(
   'ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd1'
 );
 
+-- A display/storage grant is not sufficient to append a witness to an
+-- unrelated release. All release/component/reference checks are independent.
+INSERT INTO serving.research_releases(
+  research_release_id,release_label,source_build_id,published_at,
+  manifest_schema_version,manifest_hash,manifest_hash_algorithm,
+  manifest_canonical_serialization,git_commit_sha,compiler_version
+)
+SELECT candidates.id::uuid,candidates.label,r.source_build_id,r.published_at,
+       r.manifest_schema_version,r.manifest_hash,r.manifest_hash_algorithm,
+       r.manifest_canonical_serialization,r.git_commit_sha,r.compiler_version
+FROM serving.research_releases r
+CROSS JOIN (VALUES
+  ('47000000-0000-4000-8000-000000000004','wb4-candidate-without-translation-component'),
+  ('47000000-0000-4000-8000-000000000005','wb4-candidate-without-corpus-component'),
+  ('47000000-0000-4000-8000-000000000006','wb4-candidate-with-mismatched-snapshot')
+) AS candidates(id,label)
+WHERE r.research_release_id='47000000-0000-4000-8000-000000000003';
+
+INSERT INTO serving.research_release_components(
+  research_release_id,component_kind,component_research_object_id,
+  component_version,content_hash,component_order
+) VALUES
+('47000000-0000-4000-8000-000000000004','CORPUS',
+ '30000000-0000-4000-8000-000000000001','1','corpus-fixture',0),
+('47000000-0000-4000-8000-000000000005','TRANSLATION_WITNESS',
+ '22000000-0000-4000-8000-000000000002','fixture-v1',
+ '9999999999999999999999999999999999999999999999999999999999999999',0),
+('47000000-0000-4000-8000-000000000006','CORPUS',
+ '30000000-0000-4000-8000-000000000001','1','corpus-fixture',0),
+('47000000-0000-4000-8000-000000000006','TRANSLATION_WITNESS',
+ '22000000-0000-4000-8000-000000000002','fixture-v1',
+ 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',1);
+
+DO $wb4_release_component_attacks$
+DECLARE
+  attacked uuid;
+  expected_message text;
+  rejected boolean;
+BEGIN
+  FOR attacked,expected_message IN
+    SELECT id::uuid,message FROM (VALUES
+      ('47000000-0000-4000-8000-000000000004',
+       'ResearchRelease lacks the exact translation DigitalExpression component'),
+      ('47000000-0000-4000-8000-000000000005',
+       'translation witness reference does not belong to the pinned corpus'),
+      ('47000000-0000-4000-8000-000000000006',
+       'translation snapshot hash is not pinned by the ResearchRelease component')
+    ) AS cases(id,message)
+  LOOP
+    rejected := false;
+    BEGIN
+      PERFORM publication_control.materialize_translation_witness_candidate(
+        attacked,
+        '13000000-0000-4000-8000-000000000001',
+        '41414141-4141-4414-8414-414141414141',
+        '45200000-0000-4000-8000-000000000010',
+        '45200000-0000-4000-8000-000000000011',
+        'Synthetic Chinese Test Witness','zh-Hant','Synthetic fixture only',
+        '40404040-4040-4040-8040-404040404040',0
+      );
+    EXCEPTION WHEN raise_exception THEN
+      IF SQLERRM <> expected_message THEN RAISE; END IF;
+      rejected := true;
+    END;
+    IF NOT rejected THEN
+      RAISE EXCEPTION 'compiler attached a witness to incompatible release %', attacked;
+    END IF;
+  END LOOP;
+END
+$wb4_release_component_attacks$;
+
 -- Provider availability/storage semantics fail closed independently of rights.
 DO $invalid_live_persisted_binding$
 DECLARE failed boolean := false;
