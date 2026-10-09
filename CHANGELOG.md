@@ -17,7 +17,7 @@ Respond to whole-Bible Corpus Lab product review by proving an actual executable
 - Explicitly distinguished lexical proximity, curated semantic-set membership and BHSA clause/dependency relationships; no current-case language model is permitted to decide corpus matches.
 
 ### Validation
-Locally exercised the read-only algorithm on a synthetic OSHB-shaped word stream and nine edge-case tests; GitHub exact-head workflow acceptance remains required. Real pinned whole-Bible search and public Serving integration are not claimed.
+Locally exercised the read-only algorithm on a synthetic OSHB-shaped word stream and ten edge-case tests; GitHub exact-head workflow acceptance remains required. Real pinned whole-Bible search and public Serving integration are not claimed.
 ## 2026-10-08 — Reconcile RL-1 hardening with merged WB-4 contract
 
 ### Push intent
