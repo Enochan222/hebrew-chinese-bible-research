@@ -316,6 +316,60 @@ BEGIN
 END
 $wrong_storage_scope$;
 
+-- A syntactically valid 64-hex hash is not sufficient: recompute SHA-256
+-- from exact persisted UTF-8 translation text before publication.
+INSERT INTO serving.research_releases(
+  research_release_id,release_label,source_build_id,published_at,
+  manifest_schema_version,manifest_hash,manifest_hash_algorithm,
+  manifest_canonical_serialization,git_commit_sha,compiler_version
+)
+SELECT '47000000-0000-4000-8000-000000000007'::uuid,
+       'wb4-candidate-with-tampered-segment-hash',
+       r.source_build_id,r.published_at,r.manifest_schema_version,r.manifest_hash,
+       r.manifest_hash_algorithm,r.manifest_canonical_serialization,
+       r.git_commit_sha,r.compiler_version
+FROM serving.research_releases r
+WHERE r.research_release_id='47000000-0000-4000-8000-000000000003';
+
+INSERT INTO serving.research_release_components(
+  research_release_id,component_kind,component_research_object_id,
+  component_version,content_hash,component_order
+)
+SELECT '47000000-0000-4000-8000-000000000007'::uuid,
+       component_kind,component_research_object_id,
+       component_version,content_hash,component_order
+FROM serving.research_release_components
+WHERE research_release_id='47000000-0000-4000-8000-000000000003';
+
+DO $wb4_tampered_hash_attack$
+DECLARE rejected boolean := false;
+BEGIN
+  BEGIN
+    UPDATE authoring.text_segments
+    SET content_hash=repeat('f',64)
+    WHERE text_segment_id='24000000-0000-4000-8000-000000000010';
+
+    PERFORM publication_control.materialize_translation_witness_candidate(
+      '47000000-0000-4000-8000-000000000007',
+      '13000000-0000-4000-8000-000000000001',
+      '41414141-4141-4414-8414-414141414141',
+      '45200000-0000-4000-8000-000000000010',
+      '45200000-0000-4000-8000-000000000011',
+      'Synthetic Chinese Test Witness','zh-Hant','Synthetic fixture only',
+      '40404040-4040-4040-8040-404040404040',0
+    );
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM <> 'persisted translation segment text and SHA-256 content hash must agree' THEN
+      RAISE;
+    END IF;
+    rejected := true;
+  END;
+  IF NOT rejected THEN
+    RAISE EXCEPTION 'persisted translation text with forged content hash was published';
+  END IF;
+END
+$wb4_tampered_hash_attack$;
+
 SET ROLE publication_worker;
 SELECT publication_control.materialize_translation_witness_candidate(
   '47000000-0000-4000-8000-000000000003',
