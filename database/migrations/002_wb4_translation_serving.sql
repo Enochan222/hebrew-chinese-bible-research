@@ -174,13 +174,215 @@ CREATE TRIGGER translation_witness_segment_display_guard
 BEFORE INSERT OR UPDATE ON serving.translation_witness_segments
 FOR EACH ROW EXECUTE FUNCTION serving.validate_translation_witness_segment_insert();
 
+-- A staged metadata-only/restricted parent may never retain translation text.
+CREATE OR REPLACE FUNCTION serving.guard_translation_witness_downgrade()
+RETURNS trigger LANGUAGE plpgsql
+AS $wb4_downgrade$
+BEGIN
+  IF NEW.display_status <> 'DISPLAYABLE' AND EXISTS (
+    SELECT 1 FROM serving.translation_witness_segments s
+    WHERE s.research_release_id=OLD.research_release_id
+      AND s.reference_span_id=OLD.reference_span_id
+      AND s.digital_expression_id=OLD.digital_expression_id
+  ) THEN
+    RAISE EXCEPTION 'non-DISPLAYABLE translation witness cannot retain text segments';
+  END IF;
+  RETURN NEW;
+END
+$wb4_downgrade$;
+CREATE TRIGGER translation_witness_parent_display_guard
+BEFORE UPDATE ON serving.translation_witnesses
+FOR EACH ROW EXECUTE FUNCTION serving.guard_translation_witness_downgrade();
+
+-- Canonical v1 UTF-8 bundle serialization: "WB4_SEGMENT_BUNDLE_V1" LF
+-- ReferenceSpan UUID LF DigitalExpression UUID LF rows joined by LF.
+-- Each ordered row: zero-based order:TextSegmentUUID:TextStreamUUID:
+-- hex(UTF8(segmentKind)):lower(sha256(text)):hex(UTF8(text)).
+-- UUID, integer and hexadecimal fields cannot contain LF or ':'.
+CREATE OR REPLACE FUNCTION serving.translation_witness_bundle_sha256(
+  p_release_id uuid,p_reference_span_id uuid,p_digital_expression_id uuid
+)
+RETURNS text LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = pg_catalog, serving
+AS $wb4_bundle$
+  SELECT CASE WHEN count(*)=0 THEN NULL ELSE
+    encode(sha256(convert_to(
+      'WB4_SEGMENT_BUNDLE_V1' || E'\n' ||
+      p_reference_span_id::text || E'\n' ||
+      p_digital_expression_id::text || E'\n' ||
+      string_agg(
+        s.segment_order::text || ':' || s.text_segment_id::text || ':' ||
+        s.text_stream_id::text || ':' ||
+        encode(convert_to(s.segment_kind,'UTF8'),'hex') || ':' ||
+        lower(s.content_hash) || ':' ||
+        encode(convert_to(s.text_content,'UTF8'),'hex'),
+        E'\n' ORDER BY s.segment_order
+      ),'UTF8'
+    )),'hex') END
+  FROM serving.translation_witness_segments s
+  WHERE s.research_release_id=p_release_id
+    AND s.reference_span_id=p_reference_span_id
+    AND s.digital_expression_id=p_digital_expression_id
+$wb4_bundle$;
+REVOKE ALL ON FUNCTION serving.translation_witness_bundle_sha256(uuid,uuid,uuid)
+  FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION serving.translation_witness_bundle_sha256(uuid,uuid,uuid)
+  TO publication_worker;
+
+-- Recompute persisted content at the PUBLISHED event boundary as well as
+-- materialization. This prevents candidate edits from changing the sealed bytes.
+CREATE OR REPLACE FUNCTION serving.assert_translation_witness_publication()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = pg_catalog, serving
+AS $wb4_attestation$
+DECLARE w serving.translation_witnesses%ROWTYPE;
+DECLARE n bigint;
+BEGIN
+  IF NEW.event_type <> 'PUBLISHED' THEN RETURN NEW; END IF;
+  FOR w IN SELECT * FROM serving.translation_witnesses
+           WHERE research_release_id=NEW.research_release_id FOR UPDATE
+  LOOP
+    SELECT count(*) INTO n FROM serving.translation_witness_segments s
+    WHERE s.research_release_id=w.research_release_id
+      AND s.reference_span_id=w.reference_span_id
+      AND s.digital_expression_id=w.digital_expression_id;
+    IF w.display_status <> 'DISPLAYABLE' THEN
+      IF n <> 0 THEN
+        RAISE EXCEPTION 'non-DISPLAYABLE witness has text segments at publication';
+      END IF;
+    ELSE
+      -- Re-evaluate rights from the exact snapshots pinned by the staged
+      -- Serving row. Compiler-time checks cannot authorize a later raw edit.
+      IF NOT EXISTS (
+        SELECT 1 FROM serving.rights_decision_snapshots d
+        WHERE d.rights_decision_snapshot_id=w.display_rights_decision_snapshot_id
+          AND d.subject_type='DIGITAL_EXPRESSION'
+          AND d.subject_identifier=w.digital_expression_id
+          AND d.operation='DISPLAY_FULLTEXT'
+          AND d.purpose_scope='PUBLIC_DISPLAY'
+          AND d.audience_scope='PUBLIC'
+          AND d.commercial_context IN ('MIXED','COMMERCIAL')
+          AND d.decision_basis='RULE'
+          AND (
+            d.decision='ALLOW'
+            OR (d.decision='CONDITIONAL'
+              AND COALESCE(jsonb_array_length(d.conditions_json),0)=0
+              AND NOT EXISTS (
+                SELECT 1 FROM jsonb_array_elements(d.obligations_json) o
+                WHERE o->>'obligationType' <> 'ATTRIBUTION'
+                   OR COALESCE(o->>'value','') <> COALESCE(w.attribution,'')
+              )
+            )
+          )
+      ) OR NOT EXISTS (
+        SELECT 1 FROM serving.rights_decision_snapshots st
+        WHERE st.rights_decision_snapshot_id=w.storage_rights_decision_snapshot_id
+          AND st.subject_type='PROVIDER_DISTRIBUTION'
+          AND st.subject_identifier=w.provider_distribution_id
+          AND st.operation='STORE_EXTRACTED_TEXT'
+          AND st.purpose_scope='PUBLICATION'
+          AND st.audience_scope='INTERNAL_SERVICE'
+          AND st.commercial_context IN ('MIXED','COMMERCIAL')
+          AND st.decision='ALLOW'
+          AND st.decision_basis='RULE'
+          AND COALESCE(jsonb_array_length(st.conditions_json),0)=0
+          AND COALESCE(jsonb_array_length(st.obligations_json),0)=0
+      ) THEN
+        RAISE EXCEPTION 'published translation witness rights snapshots failed exact revalidation';
+      END IF;
+      IF n=0 OR EXISTS (
+        SELECT 1 FROM serving.translation_witness_segments s
+        WHERE s.research_release_id=w.research_release_id
+          AND s.reference_span_id=w.reference_span_id
+          AND s.digital_expression_id=w.digital_expression_id
+          AND lower(s.content_hash) <>
+            encode(sha256(convert_to(s.text_content,'UTF8')),'hex')
+      ) OR (
+        SELECT min(s.segment_order) <> 0
+            OR max(s.segment_order) <> count(*)-1
+            OR count(*) <> count(DISTINCT s.segment_order)
+        FROM serving.translation_witness_segments s
+        WHERE s.research_release_id=w.research_release_id
+          AND s.reference_span_id=w.reference_span_id
+          AND s.digital_expression_id=w.digital_expression_id
+      ) THEN
+        RAISE EXCEPTION 'published translation requires contiguous verified TextSegments';
+      END IF;
+      IF lower(w.snapshot_content_hash) IS DISTINCT FROM
+        serving.translation_witness_bundle_sha256(
+          w.research_release_id,w.reference_span_id,w.digital_expression_id
+        )
+        OR NOT EXISTS (
+          SELECT 1 FROM serving.research_release_components c
+          WHERE c.research_release_id=w.research_release_id
+            AND c.component_kind='TRANSLATION'
+            AND c.component_research_object_id=w.digital_expression_id
+            AND lower(c.content_hash)=lower(w.snapshot_content_hash)
+        ) THEN
+        RAISE EXCEPTION 'published translation snapshot digest does not seal ordered Serving bytes';
+      END IF;
+    END IF;
+  END LOOP;
+  RETURN NEW;
+END
+$wb4_attestation$;
+CREATE TRIGGER translation_witness_publish_attestation
+BEFORE INSERT ON serving.research_release_events
+FOR EACH ROW EXECUTE FUNCTION serving.assert_translation_witness_publication();
+
+
+-- A compiled witness must never refer to a rights verdict that can be
+-- silently rewritten. Reject mutations as soon as a witness references it,
+-- not merely after PUBLISHED, so publication cannot race a mutable decision.
+CREATE OR REPLACE FUNCTION serving.guard_bound_translation_rights_snapshot()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, serving
+AS $wb4_bound_snapshot_immutable$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM serving.translation_witnesses w
+    WHERE w.display_rights_decision_snapshot_id=OLD.rights_decision_snapshot_id
+       OR w.storage_rights_decision_snapshot_id=OLD.rights_decision_snapshot_id
+  ) THEN
+    RAISE EXCEPTION 'rights snapshot bound to a translation witness is immutable';
+  END IF;
+  RETURN OLD;
+END
+$wb4_bound_snapshot_immutable$;
+
+CREATE TRIGGER bound_translation_rights_snapshot_immutable
+BEFORE UPDATE OR DELETE ON serving.rights_decision_snapshots
+FOR EACH ROW EXECUTE FUNCTION serving.guard_bound_translation_rights_snapshot();
+
+
+-- The generic NEW-only release guard is insufficient for UPDATE:
+-- an already-published row must not migrate into an unpublished release.
+CREATE OR REPLACE FUNCTION serving.guard_translation_release_payload()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $wb4_translation_release_immutable$
+BEGIN
+  IF TG_OP IN ('UPDATE','DELETE')
+     AND serving.release_ever_published(OLD.research_release_id) THEN
+    RAISE EXCEPTION 'ever-published translation projection cannot be relocated';
+  END IF;
+  IF TG_OP IN ('INSERT','UPDATE')
+     AND serving.release_ever_published(NEW.research_release_id) THEN
+    RAISE EXCEPTION 'ever-published translation projection cannot be modified';
+  END IF;
+  RETURN CASE WHEN TG_OP='DELETE' THEN OLD ELSE NEW END;
+END
+$wb4_translation_release_immutable$;
+
 CREATE TRIGGER translation_witness_release_lock
 BEFORE INSERT OR UPDATE OR DELETE ON serving.translation_witnesses
-FOR EACH ROW EXECUTE FUNCTION serving.guard_direct_release_payload();
+FOR EACH ROW EXECUTE FUNCTION serving.guard_translation_release_payload();
 
 CREATE TRIGGER translation_witness_segment_release_lock
 BEFORE INSERT OR UPDATE OR DELETE ON serving.translation_witness_segments
-FOR EACH ROW EXECUTE FUNCTION serving.guard_direct_release_payload();
+FOR EACH ROW EXECUTE FUNCTION serving.guard_translation_release_payload();
 
 ALTER TABLE serving.translation_witnesses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE serving.translation_witness_segments ENABLE ROW LEVEL SECURITY;
@@ -193,7 +395,16 @@ USING (serving.release_is_publicly_servable(research_release_id));
 
 CREATE POLICY public_read_translation_witness_segments ON serving.translation_witness_segments
 FOR SELECT TO anon, authenticated
-USING (serving.release_is_publicly_servable(research_release_id));
+USING (
+  serving.release_is_publicly_servable(research_release_id)
+  AND EXISTS (
+    SELECT 1 FROM serving.translation_witnesses w
+    WHERE w.research_release_id=translation_witness_segments.research_release_id
+      AND w.reference_span_id=translation_witness_segments.reference_span_id
+      AND w.digital_expression_id=translation_witness_segments.digital_expression_id
+      AND w.display_status='DISPLAYABLE'
+  )
+);
 
 GRANT SELECT ON serving.translation_witnesses, serving.translation_witness_segments
 TO anon, authenticated;
@@ -270,7 +481,7 @@ BEGIN
     SELECT 1
     FROM serving.research_release_components component
     WHERE component.research_release_id=p_release_id
-      AND component.component_kind='TRANSLATION_WITNESS'
+      AND component.component_kind='TRANSLATION'
       AND component.component_research_object_id=expr.digital_expression_id
   ) THEN
     RAISE EXCEPTION 'ResearchRelease lacks the exact translation DigitalExpression component';
@@ -330,7 +541,7 @@ BEGIN
        SELECT 1
        FROM serving.research_release_components component
        WHERE component.research_release_id=p_release_id
-         AND component.component_kind='TRANSLATION_WITNESS'
+         AND component.component_kind='TRANSLATION'
          AND component.component_research_object_id=expr.digital_expression_id
          AND component.content_hash=obs.snapshot_content_hash
      ) THEN
@@ -411,6 +622,12 @@ BEGIN
     IF segment_count=0 THEN
       RAISE EXCEPTION 'DISPLAYABLE translation witness requires at least one persisted segment';
     END IF;
+    IF lower(obs.snapshot_content_hash) IS DISTINCT FROM
+      serving.translation_witness_bundle_sha256(
+        p_release_id,p_reference_span_id,expr.digital_expression_id
+      ) THEN
+      RAISE EXCEPTION 'translation snapshot hash does not match ordered UTF-8 TextSegments';
+    END IF;
   END IF;
 END
 $wb4_materialize_translation_witness$;
@@ -475,7 +692,7 @@ AS $wb4_read_translation_witnesses$
         ),
         'rightsDecisionSnapshotId',w.display_rights_decision_snapshot_id::text,
         'provenanceId',w.provenance_id::text,
-        'segments',COALESCE((
+        'segments',CASE WHEN w.display_status='DISPLAYABLE' THEN COALESCE((
           SELECT jsonb_agg(
             jsonb_build_object(
               'schemaVersion','1.1',
@@ -493,7 +710,7 @@ AS $wb4_read_translation_witnesses$
           WHERE s.research_release_id=w.research_release_id
             AND s.reference_span_id=w.reference_span_id
             AND s.digital_expression_id=w.digital_expression_id
-        ),'[]'::jsonb),
+        ),'[]'::jsonb) ELSE '[]'::jsonb END,
         'attribution',w.attribution
       ) AS payload
     FROM resolved r
