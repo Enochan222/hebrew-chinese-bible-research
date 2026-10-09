@@ -4,21 +4,17 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
-## 2026-10-10 — Protect compiled translation rights and release ownership
+## 2026-10-10 — WB-4 compiled-rights and release-relocation guard
 
-### Scope
+PR #35 fixes two publication integrity vulnerabilities independently of PR #34's concurrent Hebrew/translation span-parity hardening.
 
-Companion hardening for PR #34 and Issue #32. The inherited release guard protected NEW.release_id but did not check OLD.release_id during UPDATE; translation-bound rights snapshots remained mutable after compilation.
+- Prevent UPDATE/DELETE of display/storage RightsDecisionSnapshots bound to a compiled witness.
+- Execute that bound-rights guard as SECURITY DEFINER with an explicit search path, avoiding RLS-dependent false negatives.
+- Check both OLD and NEW release identity on translation row UPDATE to prevent moving historical published rows into unpublished candidates.
+- Add adversarial Database Spike tests for these bypass attempts.
+- Merge the newest PR #34 ancestry without regressing its canonical-span reader checks.
 
-### Change
-
-- prevent UPDATE/DELETE of a RightsDecisionSnapshot once referenced by a staged or published translation witness;
-- replace NEW-only translation payload guards with OLD+NEW permanent publication checks;
-- add negative PostgreSQL tests for rights decision mutation/deletion and cross-release row relocation.
-
-### Validation
-
-Pending exact-head Database Spike and affected regression checks. Synthetic witness fixtures only.
+Validation requires exact-head Database Spike, whole-corpus, reader, contract and governance workflows before merge.
 
 
 
@@ -42,6 +38,7 @@ Exact ProviderDistribution and RightsDecisionSnapshot checks alone do not author
 - add a forgery regression proving mismatched text/hash is rejected and the valid fixture still materializes;
 - repair a generated SQL string-replacement truncation that caused PostgreSQL's unterminated-string failure; add a static pre-migration guard for the complete SHA-256 block;
 - remove a duplicated 6 KB suffix after the first migration COMMIT, found by the next exact-head PostgreSQL run, and extend CI to enforce a single terminal COMMIT;
+- reject any page render where schema-valid Serving translation witnesses resolve to a different canonical ReferenceSpanId than the release-pinned Hebrew passage; add a hostile cross-span integration regression;
 - preserve synthetic-only/right-safe publication, current WB-3 reader and RL-1 immutability boundaries.
 
 ### Validation

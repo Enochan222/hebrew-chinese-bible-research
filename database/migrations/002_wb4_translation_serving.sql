@@ -180,6 +180,8 @@ FOR EACH ROW EXECUTE FUNCTION serving.validate_translation_witness_segment_inser
 CREATE OR REPLACE FUNCTION serving.guard_bound_translation_rights_snapshot()
 RETURNS trigger
 LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, serving
 AS $wb4_bound_snapshot_immutable$
 BEGIN
   IF EXISTS (

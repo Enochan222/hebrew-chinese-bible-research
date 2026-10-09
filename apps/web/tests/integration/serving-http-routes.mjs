@@ -159,6 +159,16 @@ const restServer = http.createServer(async (req, res) => {
       }));
       return;
     }
+    if (parsed.p_reference_label === "Gen.1.2") {
+      // Schema-valid response for the wrong canonical passage: the reader must
+      // reject it rather than displaying a misplaced Chinese translation.
+      res.end(JSON.stringify({
+        ...translationPayload,
+        referenceSpanId: "13000000-0000-4000-8000-000000000002",
+        resolvedReference: { ...translationPayload.resolvedReference, referenceLabel: "Gen.1.2" },
+      }));
+      return;
+    }
     res.end(JSON.stringify({
       ...translationPayload,
       resolvedReference: {
@@ -256,6 +266,14 @@ try {
   assert.equal(adjacent.resolvedReference.referenceLabel, "Gen.1.2");
   assert.equal(adjacent.navigation.previousReference, "Gen.1.1");
   assert.equal(adjacent.navigation.nextReference, "Gen.1.3");
+
+  const mismatchedPassagePage = await fetch(
+    `${appBase}/releases/${releaseId}/passages/Gen.1.2?referenceSystemCode=OSHB_OSIS&mode=STUDY`,
+  );
+  assert.equal(mismatchedPassagePage.status, 200);
+  const mismatchedHtml = await mismatchedPassagePage.text();
+  assert.match(mismatchedHtml, /Serving contract violation/);
+  assert.doesNotMatch(mismatchedHtml, /合成測試譯文/);
 
   const directRelease = await fetch(
     `${restBase}/research_releases?research_release_id=eq.${releaseId}&select=research_release_id&limit=1`,
