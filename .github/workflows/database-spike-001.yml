@@ -77,6 +77,20 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f database/spikes/001/00_bootstrap.sql
       - name: Apply Database Spike 001 migration
         run: psql -v ON_ERROR_STOP=1 -f database/migrations/001_database_spike_001.sql
+      - name: Guard generated WB-4 SQL digest validation block
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          sql = Path("database/migrations/002_wb4_translation_serving.sql").read_text(encoding="utf-8")
+          begin = sql.index("      IF seg.surface_original IS NULL")
+          end = sql.index("      INSERT INTO serving.translation_witness_segments(", begin)
+          body = sql[begin:end]
+          assert "OR lower(seg.content_hash) <> encode(" in body
+          assert "sha256(convert_to(seg.surface_original, 'UTF8'))" in body
+          assert "RAISE EXCEPTION 'persisted translation segment text and SHA-256 content hash must agree';" in body
+          assert "      END IF;" in body
+          assert "^[0-9a-fA-F]{64}$" in body
+          PY
       - name: Apply WB-4 translation Serving migration
         run: psql -v ON_ERROR_STOP=1 -f database/migrations/002_wb4_translation_serving.sql
       - name: Load controlled fixtures
