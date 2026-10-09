@@ -1,3 +1,4 @@
+import { ContractViolationError } from "@/contracts/errors";
 import { parseExperienceMode, readCapabilities } from "@/domain/experience/service";
 import { readPassage } from "@/domain/passage/service";
 import { readTranslationWitnesses } from "@/domain/translation/service";
@@ -38,6 +39,11 @@ export default async function PinnedPassagePage(props: {
           })
         : Promise.resolve(undefined),
     ]);
+    if (translations && translations.referenceSpanId !== passage.referenceSpanId) {
+      throw new ContractViolationError(
+        "Translation witnesses resolve to a different canonical ReferenceSpan than the selected Hebrew passage.",
+      );
+    }
     return <PassageShell passage={passage} capabilities={capabilities} translations={translations} mode={mode} />;
   } catch (error) {
     return <PassageFailureView failure={toPassagePageFailure(error)} />;
