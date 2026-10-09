@@ -21,6 +21,8 @@ Exact ProviderDistribution and RightsDecisionSnapshot checks alone do not author
 - fail if the requested reference span cannot resolve through the release's pinned CORPUS component;
 - fail DISPLAYABLE materialization when the release translation component content hash differs from the provider observation's pinned snapshot hash;
 - add adversarial candidate releases for each mismatch and assert exact rejection reasons;
+- recompute SHA-256 from exact persisted UTF-8 translation surface before projection; a 64-character hex string alone is not acceptable;
+- add a forgery regression proving mismatched text/hash is rejected and the valid fixture still materializes;
 - preserve synthetic-only/right-safe publication, current WB-3 reader and RL-1 immutability boundaries.
 
 ### Validation
