@@ -25,6 +25,7 @@ Exact ProviderDistribution and RightsDecisionSnapshot checks alone do not author
 - add a forgery regression proving mismatched text/hash is rejected and the valid fixture still materializes;
 - repair a generated SQL string-replacement truncation that caused PostgreSQL's unterminated-string failure; add a static pre-migration guard for the complete SHA-256 block;
 - remove a duplicated 6 KB suffix after the first migration COMMIT, found by the next exact-head PostgreSQL run, and extend CI to enforce a single terminal COMMIT;
+- reject any page render where schema-valid Serving translation witnesses resolve to a different canonical ReferenceSpanId than the release-pinned Hebrew passage; add a hostile cross-span integration regression;
 - preserve synthetic-only/right-safe publication, current WB-3 reader and RL-1 immutability boundaries.
 
 ### Validation
