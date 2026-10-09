@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-08.5**
+State Revision: **2026-10-10.1**
 
 ## Mandatory governance rule
 
@@ -318,6 +318,16 @@ Current review-branch implementation:
 - `.github/workflows/wb1-relational-whole-corpus.yml` rebuilds WB-CORPUS-001, imports the relational corpus and uploads the machine-auditable WB-1 report.
 
 WB-1 acceptance is **PASS** for `CORE-FZ-WB-002`. The synchronized implementation head `6ec515067f05a901667e4d1f783329f0ee46a53a` passed the complete pinned-source relational workflow and every independent regression gate. Machine evidence reconciles 39/39 configured books, 23,213 selected/reference atoms, 306,785 OSHB words, 426,590 BHSA words, 253,203 BHSA phrases, 88,131 BHSA clauses, 1,106,383 graph-membership edges, 469,484 bridging feature values, 287,216 grouped candidate mappings, 6,409 reviewed annotation-only BHSA nodes and 79 explicit unclassified empty-source BHSA nodes. It reports zero missing configured books, provider-ID duplicates, importer errors, source/database parity failures, OSHB missing-surface records or real-corpus Serving rows. The 1,138 unresolved cross-framework references exactly match WB-CORPUS-001 and remain explicit research/mapping exceptions rather than silent source-record drops.
+
+## Corpus Lab pattern-search functional gap and bounded feasibility spike
+
+Review of the current main implementation (2026-10-10) confirms CorpusQuery v1.1, QueryExecutionPolicy and SemanticSetVersion schemas, but no general-purpose CorpusQuery runtime executor, natural-language query interpreter or Pattern Builder UI. `database/spikes/001/03_query_plan.sql` is a specialised SQL spike and must not be presented as a general engine.
+
+This branch introduces only a **read-only experimental OSHB morphological word-proximity candidate evaluator**, using pinned export_oshb_words.py NDJSON and explicit source-exact lemma codes, with deterministic gap, direction and prefix matching, SHA-256 provenance, a strictly bounded SAME_VERSE scope and adversarial tests. It is intentionally disconnected from public Serving. Its input coverage remains UNVERIFIED_INPUT_SCOPE.
+
+Product target remains one canonical CorpusQuery v1.1 pipeline: optional AI interpret / Pattern Builder -> disambiguated user-approved plan -> reviewed semantic-set version and framework-scoped layers -> validator/cost policy -> release-pinned deterministic SQL executor -> corpus-wide matched and excluded evidence -> scholarly review/translation analysis. An OSHB word-only proximity candidate cannot assert BHSA same-clause syntax or semantic membership beyond reviewed source-specific lexemes.
+
+Priority after preserving current WB-4 DB-1 and rights-lifecycle acceptance: design and implement one CorpusQuery validator/executor vertical slice (source exact morphology + reviewed semantic set + bounded word proximity) with proper public Serving projections, then framework-scoped clause/dependency support and natural-language interpretation. This experimental JSON must **not** become a competing production DSL.
 
 ## Current implementation priority
 
