@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-08.6**
+State Revision: **2026-10-10.1**
 
 ## Mandatory governance rule
 
@@ -413,4 +413,4 @@ Exact-head machine evidence is complete. WB-2/WB-3 Serving Reader run `374243988
 
 ## Latest push intent
 
-Implement Issue #32 as WB-4 DB-1 without introducing any real translation dataset. Prove provider identity separation, synthetic persisted witness compilation, exact display/storage rights binding, release-pinned/current RPC shape, public RLS isolation, OSHB-only release compatibility, REVOKED fail-closed reads and permanent post-publication immutability. Preserve the merged WB-2/WB-3 and RL-1 behavior. `CORE-FZ-TRANS-002` remains pending until exact-head machine evidence passes.
+Harden WB-4 DB-1 exact-release integrity before merge. Although the previous exact head passed all seven workflows, independent review found that a valid ProviderDistribution and operation-scoped RightsDecisionSnapshot did not prove a translation witness belonged to the chosen ResearchRelease. The compiler now also requires the exact DigitalExpression in that ResearchRelease's TRANSLATION_WITNESS components, the canonical ReferenceSpan in its pinned CORPUS component, and a matching component/snapshot content hash for DISPLAYABLE text. Three adversarial candidates prove rejection of missing translation component, missing pinned corpus, and inconsistent snapshot hash. These invariants do not add any real copyrighted translation data. CORE-FZ-TRANS-002 remains PENDING until the new exact-head CI evidence passes and merge verification closes. 
