@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-10.7**
+State Revision: **2026-10-10.8**
 
 ## Mandatory governance rule
 
@@ -425,6 +425,7 @@ Companion PR #35 now also closes the independent PR #34 review blockers related 
 - a versioned WB4_SEGMENT_BUNDLE_V1 UTF-8 digest seals the exact reference, DigitalExpression, segment/stream identities, ordered segment kinds, per-segment content hashes and text bytes;
 - independent static SHA-256 golden evidence for the synthetic two-segment witness is `7a8ecf1c4d6953e5fcd3ee1924f632c4ec1649bb92fa976fbafc99e72d9336fd`;
 - compiler checks the provider observation's bundle hash, and first PUBLISHED independently checks the actual Serving rows and release component digest;
+- first PUBLISHED also revalidates the exact DigitalExpression public DISPLAY_FULLTEXT and ProviderDistribution storage RightsDecisionSnapshots from the staged row, closing direct prepublication pointer swaps after successful compiler checks;
 - direct SELECT/RPC filters child segments through DISPLAYABLE parent status, with a separate parent UPDATE guard against retaining text after metadata-only/restricted downgrade;
 - negative tests reject a staged parent downgrade, a newly constructed candidate with mutually matching forged hashes, and staged text/content-hash edits before first PUBLISHED;
 - retained PR #35 protections prevent bound rights-snapshot mutation and OLD-to-NEW published translation row relocation.
