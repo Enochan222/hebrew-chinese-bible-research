@@ -90,6 +90,8 @@ jobs:
           assert "RAISE EXCEPTION 'persisted translation segment text and SHA-256 content hash must agree';" in body
           assert "      END IF;" in body
           assert "^[0-9a-fA-F]{64}$" in body
+          assert sql.count("\\nCOMMIT;\\n") == 1, "migration must contain exactly one final COMMIT"
+          assert sql.rstrip().endswith("COMMIT;"), "trailing SQL after migration COMMIT"
           PY
       - name: Apply WB-4 translation Serving migration
         run: psql -v ON_ERROR_STOP=1 -f database/migrations/002_wb4_translation_serving.sql
