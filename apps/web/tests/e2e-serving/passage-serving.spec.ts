@@ -21,6 +21,10 @@ test("published Serving reader renders data-driven navigation and rights disclos
   await expect(page.getByTestId("hebrew-text")).toContainText("בְּרֵאשִׁית");
   await expect(page.getByText("Word-token display only.")).toBeVisible();
   await expect(page.getByTestId("passage-attribution")).toContainText("Open Scriptures Hebrew Bible");
+  await expect(page.getByTestId("translation-witnesses")).toBeVisible();
+  await expect(page.getByText("Synthetic Chinese Test Witness")).toBeVisible();
+  await expect(page.getByTestId("translation-witness-text")).toContainText("合成測試譯文");
+  await expect(page.getByText("1 rights-approved release-pinned witness available above.")).toBeVisible();
   await expect(page.getByText("Published module availability")).toBeVisible();
 
   await page.screenshot({ path: path.join(visualDir, "serving-genesis-1-1.png"), fullPage: true });

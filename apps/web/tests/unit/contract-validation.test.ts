@@ -4,6 +4,7 @@ import path from "node:path";
 import test from "node:test";
 import { ContractViolationError } from "../../src/contracts/errors.ts";
 import { assertContract } from "../../src/contracts/validate.server.ts";
+import { readContractJson } from "../../src/contracts/schema-registry.server.ts";
 
 test("canonical passage fixture validates and a corrupted copy fails closed", () => {
   const root = path.resolve(process.cwd(), "../..");
@@ -27,6 +28,22 @@ test("passage request validation resolves the canonical passage-locator schema",
   assert.doesNotThrow(() => assertContract("passageRequest", fixture));
 });
 
+
+test("canonical translation witness list validates and corrupted displayable witness fails closed", () => {
+  const fixture = readContractJson("fixtures/translation-witness-list.json");
+  assert.doesNotThrow(() => assertContract("translationWitnessList", fixture));
+
+  const corrupted = structuredClone(fixture) as {
+    witnesses?: Array<{ displayStatus?: string; segments?: unknown[] }>;
+  };
+  assert.ok(corrupted.witnesses?.length);
+  corrupted.witnesses![0]!.displayStatus = "DISPLAYABLE";
+  corrupted.witnesses![0]!.segments = [];
+  assert.throws(
+    () => assertContract("translationWitnessList", corrupted),
+    (error: unknown) => error instanceof ContractViolationError,
+  );
+});
 
 test("SERVING passage projections require the complete runtime payload", () => {
   const validServing = {

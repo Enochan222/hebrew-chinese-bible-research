@@ -10,6 +10,10 @@ export const contractPaths = {
   passageRequest: "json-schema/passage-request.schema.json",
   passageLocator: "json-schema/passage-locator.schema.json",
   experienceCapabilities: "json-schema/experience-capabilities.schema.json",
+  providerWitnessBinding: "json-schema/provider-witness-binding.schema.json",
+  translationWitnessSegment: "json-schema/translation-witness-segment.schema.json",
+  translationWitness: "json-schema/translation-witness.schema.json",
+  translationWitnessList: "json-schema/translation-witness-list.schema.json",
 } as const;
 
 export type ContractSchemaKey = keyof typeof contractPaths;

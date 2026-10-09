@@ -2,10 +2,6 @@ const fixtureModules = ["Translations", "Analysis", "Corpus", "Evidence"] as con
 
 const servingModules = [
   {
-    name: "Translations",
-    text: "Not in the current OSHB-only ResearchRelease. Translation witnesses remain provider- and rights-gated.",
-  },
-  {
     name: "Analysis",
     text: "OSHB lemma and morphology are available above. BHSA and bridging remain Authoring-only pending public rights approval.",
   },
@@ -19,7 +15,13 @@ const servingModules = [
   },
 ] as const;
 
-export function AvailabilityPanel({ isServing = false }: { isServing?: boolean }) {
+export function AvailabilityPanel({
+  isServing = false,
+  translationWitnessCount = 0,
+}: {
+  isServing?: boolean;
+  translationWitnessCount?: number;
+}) {
   if (!isServing) {
     return (
       <section className="availability" aria-labelledby="availability-heading">
@@ -40,6 +42,14 @@ export function AvailabilityPanel({ isServing = false }: { isServing?: boolean }
     <section className="availability" aria-labelledby="availability-heading">
       <h2 id="availability-heading">Published module availability</h2>
       <div className="module-grid">
+        <article>
+          <h3>Translations</h3>
+          <p>
+            {translationWitnessCount > 0
+              ? `${translationWitnessCount} rights-approved release-pinned witness${translationWitnessCount === 1 ? "" : "es"} available above.`
+              : "No translation witness is published for this passage in the selected ResearchRelease."}
+          </p>
+        </article>
         {servingModules.map((module) => (
           <article key={module.name}>
             <h3>{module.name}</h3>
