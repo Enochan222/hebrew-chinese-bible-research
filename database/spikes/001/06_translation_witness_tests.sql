@@ -445,12 +445,33 @@ BEGIN
     SET snapshot_content_hash=repeat('f',64)
     WHERE provider_distribution_id='41414141-4141-4414-8414-414141414141'
       AND reference_span_id='13000000-0000-4000-8000-000000000001';
-    UPDATE serving.research_release_components
-    SET content_hash=repeat('f',64)
-    WHERE research_release_id='47000000-0000-4000-8000-000000000007'
-      AND component_kind='TRANSLATION';
+    -- Create a fresh unpublished manifest with a fabricated matching digest.
+    -- Existing release components are intentionally immutable even prepublish.
+    INSERT INTO serving.research_releases(
+      research_release_id,release_label,source_build_id,published_at,
+      manifest_schema_version,manifest_hash,manifest_hash_algorithm,
+      manifest_canonical_serialization,git_commit_sha,compiler_version
+    )
+    SELECT '47000000-0000-4000-8000-000000000008'::uuid,
+      'wb4-forged-pair-candidate',source_build_id,published_at,
+      manifest_schema_version,manifest_hash,manifest_hash_algorithm,
+      manifest_canonical_serialization,git_commit_sha,compiler_version
+    FROM serving.research_releases
+    WHERE research_release_id='47000000-0000-4000-8000-000000000007';
+    INSERT INTO serving.research_release_components(
+      research_release_id,component_kind,component_research_object_id,
+      component_version,content_hash,component_order
+    )
+    SELECT '47000000-0000-4000-8000-000000000008'::uuid,
+      component_kind,component_research_object_id,
+      component_version,
+      CASE WHEN component_kind='TRANSLATION' THEN repeat('f',64)
+           ELSE content_hash END,
+      component_order
+    FROM serving.research_release_components
+    WHERE research_release_id='47000000-0000-4000-8000-000000000007';
     PERFORM publication_control.materialize_translation_witness_candidate(
-      '47000000-0000-4000-8000-000000000007',
+      '47000000-0000-4000-8000-000000000008',
       '13000000-0000-4000-8000-000000000001',
       '41414141-4141-4414-8414-414141414141',
       '45200000-0000-4000-8000-000000000010',
