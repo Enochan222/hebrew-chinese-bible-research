@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-10.6**
+State Revision: **2026-10-10.7**
 
 ## Mandatory governance rule
 
@@ -417,6 +417,20 @@ Companion PR #35 addresses two DB-1 integrity gaps: a staged witness's display/s
 
 The bound-rights guard runs as a SECURITY DEFINER with an explicit search path so future RLS/role restrictions cannot silently hide the witness rows from the mutation guard. Adversarial PostgreSQL regression checks cover the mutation/deletion and cross-release relocation paths. This remains synthetic-only and is not evidence for the broader `CORE-FZ-TRANS-002` publication rights matrix.
 
+## WB-4 DB-1 integrity hardening, exact-head candidate
+
+Companion PR #35 now also closes the independent PR #34 review blockers related to canonical component identity, metadata-only text leakage and false snapshot hashing:
+
+- all WB-4 release components now use the canonical `TRANSLATION` vocabulary rather than the noncanonical `TRANSLATION_WITNESS` label;
+- a versioned WB4_SEGMENT_BUNDLE_V1 UTF-8 digest seals the exact reference, DigitalExpression, segment/stream identities, ordered segment kinds, per-segment content hashes and text bytes;
+- independent static SHA-256 golden evidence for the synthetic two-segment witness is `7a8ecf1c4d6953e5fcd3ee1924f632c4ec1649bb92fa976fbafc99e72d9336fd`;
+- compiler checks the provider observation's bundle hash, and first PUBLISHED independently checks the actual Serving rows and release component digest;
+- direct SELECT/RPC filters child segments through DISPLAYABLE parent status, with a separate parent UPDATE guard against retaining text after metadata-only/restricted downgrade;
+- negative tests reject a staged parent downgrade, a newly constructed candidate with mutually matching forged hashes, and staged text/content-hash edits before first PUBLISHED;
+- retained PR #35 protections prevent bound rights-snapshot mutation and OLD-to-NEW published translation row relocation.
+
+This remains a **synthetic one-passage DB-1** proof. A complete multi-passage translation witness needs an independently designed/tested aggregate release-component digest. Real Chinese translation licence/provider selection and Hebrew-Chinese alignment remain unresolved. `CORE-FZ-TRANS-002` remains **PENDING** until exact-head evidence and merge-resolved main verification.
+
 ## Latest push intent
 
-Harden WB-4 DB-1 exact-release integrity before merge. Although the previous exact head passed all seven workflows, independent review found that a valid ProviderDistribution and operation-scoped RightsDecisionSnapshot did not prove a translation witness belonged to the chosen ResearchRelease. The compiler now also requires the exact DigitalExpression in that ResearchRelease's TRANSLATION_WITNESS components, the canonical ReferenceSpan in its pinned CORPUS component, and a matching component/snapshot content hash for DISPLAYABLE text. Three adversarial candidates prove rejection of missing translation component, missing pinned corpus, and inconsistent snapshot hash. A separate forged-hash regression now requires compiler-time recomputation of SHA-256 from each persisted UTF-8 translation segment; a correctly shaped hash that disagrees with its text fails closed. These invariants do not add any real copyrighted translation data. The first CI run on the digest hardening failed during PostgreSQL migration because a JavaScript string replacement token truncated the SQL regex/function body. The complete function was restored using callback-safe replacement. A second CI run then identified a duplicated SQL suffix after the first COMMIT from the same earlier replacement token; the 6 KB duplicate tail is now removed. Database Spike now statically verifies the full function body, exactly one COMMIT, and no trailing SQL after COMMIT before applying the migration. The WB-4 pinned reader additionally rejects a schema-valid translation payload if its canonical ReferenceSpanId differs from the Hebrew passage's resolved ReferenceSpanId; an integration regression supplies a mismatched but syntactically valid span. CORE-FZ-TRANS-002 remains PENDING until fresh exact-head CI and merge verification complete. 
+Close the remaining WB-4 DB-1 review blockers on PR #35 before merging it into PR #34: canonical `TRANSLATION` release component identity, mandatory SHA-256 identity for actual ordered UTF-8 Serving segments, publication-time attestation, direct-SQL/RPC metadata-only leak prevention, and adversarial regression coverage. Preserve the earlier bound-rights and release-relocation fixes. Do not claim whole-Bible Chinese translation coverage or promote `CORE-FZ-TRANS-002` on synthetic-only evidence. After PR #35 passes, reconcile the newest WB-4 DB-1 base and rerun all exact-head tests before either PR is accepted.
