@@ -528,6 +528,44 @@ BEGIN
 END
 $wb4_staged_mutation$;
 
+-- Direct staged-row rights swaps must be rejected again at first PUBLISHED,
+-- even if the original compiler validation already succeeded.
+DO $wb4_staged_rights_swap$
+DECLARE rejected boolean := false;
+BEGIN
+  BEGIN
+    UPDATE serving.translation_witnesses
+    SET display_rights_decision_snapshot_id='45200000-0000-4000-8000-000000000012'
+    WHERE research_release_id='47000000-0000-4000-8000-000000000003';
+    PERFORM publication_control.publish_release_to_channel(
+      'PRODUCTION','47000000-0000-4000-8000-000000000003',NULL,false
+    );
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM <> 'published translation witness rights snapshots failed exact revalidation' THEN RAISE; END IF;
+    rejected := true;
+  END;
+  IF NOT rejected THEN RAISE EXCEPTION 'wrong-expression staged display rights bypassed publication'; END IF;
+END
+$wb4_staged_rights_swap$;
+
+DO $wb4_staged_storage_swap$
+DECLARE rejected boolean := false;
+BEGIN
+  BEGIN
+    UPDATE serving.translation_witnesses
+    SET storage_rights_decision_snapshot_id='45200000-0000-4000-8000-000000000013'
+    WHERE research_release_id='47000000-0000-4000-8000-000000000003';
+    PERFORM publication_control.publish_release_to_channel(
+      'PRODUCTION','47000000-0000-4000-8000-000000000003',NULL,false
+    );
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM <> 'published translation witness rights snapshots failed exact revalidation' THEN RAISE; END IF;
+    rejected := true;
+  END;
+  IF NOT rejected THEN RAISE EXCEPTION 'wrong-audience staged storage rights bypassed publication'; END IF;
+END
+$wb4_staged_storage_swap$;
+
 -- Bound rights records must not change their effective verdict while a
 -- candidate witness is staged, even before first publication.
 DO $wb4_compiled_rights_immutability$
