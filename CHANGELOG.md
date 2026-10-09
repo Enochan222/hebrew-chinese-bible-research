@@ -4,6 +4,27 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+## 2026-10-10 — Seal WB-4 compiled translation bytes and restrict metadata-only text
+
+### Why
+
+Independent PR #34 review identified noncanonical `TRANSLATION_WITNESS` release component identifiers, identical copied placeholder hashes that did not seal ordered persisted translation bytes, and direct child SELECT/RPC leakage after a staged witness was downgraded to METADATA_ONLY.
+
+### What changed
+
+- use canonical `TRANSLATION` release component kind in compiler/fixture checks;
+- specify and implement WB4_SEGMENT_BUNDLE_V1, a versioned byte serialization and SHA-256 digest including exact Unicode text, ordered TextSegment/TextStream identity, ReferenceSpan and DigitalExpression;
+- replace placeholder fixture observation/component hashes with independently computed `7a8ecf1c4d6953e5fcd3ee1924f632c4ec1649bb92fa976fbafc99e72d9336fd`;
+- validate that digest after compiler materialization and again at the first PUBLISHED event, to detect staged Serving-row tampering;
+- block pre-publication DISPLAYABLE -> METADATA_ONLY downgrade while child text exists;
+- require DISPLAYABLE parent status in child RLS and RPC segment aggregation;
+- add negative tests for matching forged candidate hashes, staged text tampering and parent-status downgrade, alongside the PR #35 rights-snapshot/release-relocation protections;
+- record that this proves one synthetic passage only, not an entire translation edition, real public-display rights or Hebrew-Chinese alignment.
+
+### Validation
+
+Exact-head Database Spike 001 and WB-2/WB-3, WB-1, whole-corpus, P1, Contract validation and governance runs are required after synchronization. First test attempt detected an invalid negative-test UPDATE of already-immutable release-component rows; the attack fixture was corrected to construct a fresh unpublished candidate with a forged digest. `CORE-FZ-TRANS-002` remains PENDING.
+
 ## 2026-10-10 — WB-4 compiled-rights and release-relocation guard
 
 PR #35 fixes two publication integrity vulnerabilities independently of PR #34's concurrent Hebrew/translation span-parity hardening.
