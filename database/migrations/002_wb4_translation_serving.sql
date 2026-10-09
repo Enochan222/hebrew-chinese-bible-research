@@ -251,6 +251,45 @@ BEGIN
         RAISE EXCEPTION 'non-DISPLAYABLE witness has text segments at publication';
       END IF;
     ELSE
+      -- Re-evaluate rights from the exact snapshots pinned by the staged
+      -- Serving row. Compiler-time checks cannot authorize a later raw edit.
+      IF NOT EXISTS (
+        SELECT 1 FROM serving.rights_decision_snapshots d
+        WHERE d.rights_decision_snapshot_id=w.display_rights_decision_snapshot_id
+          AND d.subject_type='DIGITAL_EXPRESSION'
+          AND d.subject_identifier=w.digital_expression_id
+          AND d.operation='DISPLAY_FULLTEXT'
+          AND d.purpose_scope='PUBLIC_DISPLAY'
+          AND d.audience_scope='PUBLIC'
+          AND d.commercial_context IN ('MIXED','COMMERCIAL')
+          AND d.decision_basis='RULE'
+          AND (
+            d.decision='ALLOW'
+            OR (d.decision='CONDITIONAL'
+              AND COALESCE(jsonb_array_length(d.conditions_json),0)=0
+              AND NOT EXISTS (
+                SELECT 1 FROM jsonb_array_elements(d.obligations_json) o
+                WHERE o->>'obligationType' <> 'ATTRIBUTION'
+                   OR COALESCE(o->>'value','') <> COALESCE(w.attribution,'')
+              )
+            )
+          )
+      ) OR NOT EXISTS (
+        SELECT 1 FROM serving.rights_decision_snapshots st
+        WHERE st.rights_decision_snapshot_id=w.storage_rights_decision_snapshot_id
+          AND st.subject_type='PROVIDER_DISTRIBUTION'
+          AND st.subject_identifier=w.provider_distribution_id
+          AND st.operation='STORE_EXTRACTED_TEXT'
+          AND st.purpose_scope='PUBLICATION'
+          AND st.audience_scope='INTERNAL_SERVICE'
+          AND st.commercial_context IN ('MIXED','COMMERCIAL')
+          AND st.decision='ALLOW'
+          AND st.decision_basis='RULE'
+          AND COALESCE(jsonb_array_length(st.conditions_json),0)=0
+          AND COALESCE(jsonb_array_length(st.obligations_json),0)=0
+      ) THEN
+        RAISE EXCEPTION 'published translation witness rights snapshots failed exact revalidation';
+      END IF;
       IF n=0 OR EXISTS (
         SELECT 1 FROM serving.translation_witness_segments s
         WHERE s.research_release_id=w.research_release_id
