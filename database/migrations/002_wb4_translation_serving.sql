@@ -263,6 +263,31 @@ BEGIN
     RAISE EXCEPTION 'provider witness observation is required';
   END IF;
 
+  -- Provider rights do not authorize attaching a translation to an arbitrary
+  -- ResearchRelease. The release manifest must explicitly pin this exact
+  -- DigitalExpression and the passage must resolve in its pinned corpus.
+  IF NOT EXISTS (
+    SELECT 1
+    FROM serving.research_release_components component
+    WHERE component.research_release_id=p_release_id
+      AND component.component_kind='TRANSLATION_WITNESS'
+      AND component.component_research_object_id=expr.digital_expression_id
+  ) THEN
+    RAISE EXCEPTION 'ResearchRelease lacks the exact translation DigitalExpression component';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM serving.research_release_components corpus_component
+    JOIN serving.reference_labels ref
+      ON ref.corpus_release_id=corpus_component.component_research_object_id
+    WHERE corpus_component.research_release_id=p_release_id
+      AND corpus_component.component_kind='CORPUS'
+      AND ref.reference_span_id=p_reference_span_id
+  ) THEN
+    RAISE EXCEPTION 'translation witness reference does not belong to the pinned corpus';
+  END IF;
+
   SELECT * INTO display_snap
   FROM serving.rights_decision_snapshots
   WHERE rights_decision_snapshot_id=p_display_rights_snapshot_id;
@@ -299,6 +324,18 @@ BEGIN
     WHEN obs.binding_mode <> 'SNAPSHOT_PINNED' THEN 'METADATA_ONLY'
     ELSE 'DISPLAYABLE'
   END;
+
+  IF computed_status='DISPLAYABLE'
+     AND NOT EXISTS (
+       SELECT 1
+       FROM serving.research_release_components component
+       WHERE component.research_release_id=p_release_id
+         AND component.component_kind='TRANSLATION_WITNESS'
+         AND component.component_research_object_id=expr.digital_expression_id
+         AND component.content_hash=obs.snapshot_content_hash
+     ) THEN
+    RAISE EXCEPTION 'translation snapshot hash is not pinned by the ResearchRelease component';
+  END IF;
 
   IF computed_status='DISPLAYABLE' THEN
     SELECT * INTO storage_snap
