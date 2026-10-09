@@ -16,6 +16,7 @@ Independent PR #34 review identified noncanonical `TRANSLATION_WITNESS` release 
 - specify and implement WB4_SEGMENT_BUNDLE_V1, a versioned byte serialization and SHA-256 digest including exact Unicode text, ordered TextSegment/TextStream identity, ReferenceSpan and DigitalExpression;
 - replace placeholder fixture observation/component hashes with independently computed `7a8ecf1c4d6953e5fcd3ee1924f632c4ec1649bb92fa976fbafc99e72d9336fd`;
 - validate that digest after compiler materialization and again at the first PUBLISHED event, to detect staged Serving-row tampering;
+- revalidate exact public-display and internal-storage RightsDecisionSnapshots at the PUBLISHED boundary, catching prepublication staged-row swaps with a different expression or storage audience;
 - block pre-publication DISPLAYABLE -> METADATA_ONLY downgrade while child text exists;
 - require DISPLAYABLE parent status in child RLS and RPC segment aggregation;
 - add negative tests for matching forged candidate hashes, staged text tampering and parent-status downgrade, alongside the PR #35 rights-snapshot/release-relocation protections;
