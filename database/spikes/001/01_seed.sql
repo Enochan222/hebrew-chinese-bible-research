@@ -72,6 +72,53 @@ INSERT INTO authoring.text_segments(text_segment_id,text_stream_id,reference_spa
 ('24000000-0000-4000-8000-000000000010','23000000-0000-4000-8000-000000000003','13000000-0000-4000-8000-000000000001',1,'PERSISTED_CONTENT','人看外在可見之物','SEGMENT'),
 ('24000000-0000-4000-8000-000000000011','23000000-0000-4000-8000-000000000003','13000000-0000-4000-8000-000000000001',2,'PERSISTED_CONTENT','而上主察看內心','SEGMENT');
 
+UPDATE authoring.text_segments
+SET content_hash = CASE text_segment_id
+  WHEN '24000000-0000-4000-8000-000000000010'::uuid THEN '150b6da4d67d0791aff377974f480a3fde5ccc496fb719d7b556b589478aab97'
+  WHEN '24000000-0000-4000-8000-000000000011'::uuid THEN '968a97151eceb829f9c9fa124e9f131211ca84d9d56f24be5fafd3129b115907'
+END
+WHERE text_segment_id IN (
+  '24000000-0000-4000-8000-000000000010',
+  '24000000-0000-4000-8000-000000000011'
+);
+
+INSERT INTO authoring.providers(provider_id,provider_key,name,provider_type) VALUES
+('41000000-0000-4000-8000-000000000001','SYNTHETIC_FIXTURE_PROVIDER','Synthetic Fixture Provider','TEST');
+
+INSERT INTO authoring.provider_distributions(
+  provider_distribution_id,provider_id,digital_expression_id,provider_version_code,distribution_version
+) VALUES (
+  '41414141-4141-4414-8414-414141414141',
+  '41000000-0000-4000-8000-000000000001',
+  '22000000-0000-4000-8000-000000000002',
+  'SYNTHETIC_ZH_HANT_FIXTURE',
+  'fixture-v1'
+);
+
+INSERT INTO authoring.translation_witness_coverage(
+  provider_distribution_id,reference_span_id,coverage_status
+) VALUES (
+  '41414141-4141-4414-8414-414141414141',
+  '13000000-0000-4000-8000-000000000001',
+  'COVERED'
+);
+
+INSERT INTO authoring.provider_witness_observations(
+  provider_distribution_id,reference_span_id,text_stream_id,binding_mode,segment_storage_mode,
+  provider_reference,provider_segment_key,provider_version,observed_hash,observed_at,
+  snapshot_content_hash,delivery_status
+) VALUES (
+  '41414141-4141-4414-8414-414141414141',
+  '13000000-0000-4000-8000-000000000001',
+  '23000000-0000-4000-8000-000000000003',
+  'SNAPSHOT_PINNED','PERSISTED_CONTENT',
+  '1Sam.16.7','fixture-segment','fixture-v1',
+  '8888888888888888888888888888888888888888888888888888888888888888',
+  '2026-10-03T00:00:00Z',
+  '7a8ecf1c4d6953e5fcd3ee1924f632c4ec1649bb92fa976fbafc99e72d9336fd',
+  'READY'
+);
+
 INSERT INTO authoring.annotation_frameworks(annotation_framework_id,framework_key,name,ontology_version) VALUES
 ('31000000-0000-4000-8000-000000000001','OSHB_TEST','OSHB-like spike framework','test-1'),
 ('31000000-0000-4000-8000-000000000002','MACULA_TEST','MACULA-like spike framework','test-1');

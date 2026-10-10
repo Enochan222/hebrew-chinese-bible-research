@@ -1,16 +1,19 @@
 import Link from "next/link";
 import type { ExperienceCapabilitiesV1, ExperienceMode } from "@/domain/experience/port";
 import type { PassageCoreV1 } from "@/domain/passage/port";
+import type { TranslationWitnessListV1 } from "@/domain/translation/port";
 import { AvailabilityPanel } from "./AvailabilityPanel";
 import { FixtureBanner } from "./FixtureBanner";
 import { ModeSwitch } from "./ModeSwitch";
 import type { PassagePageFailure } from "./page-state";
 import { ReleaseBadge } from "./ReleaseBadge";
 import { ReferenceNavigator } from "./ReferenceNavigator";
+import { TranslationWitnessPanel } from "./TranslationWitnessPanel";
 
 export function PassageShell(props: {
   passage: PassageCoreV1;
   capabilities: ExperienceCapabilitiesV1;
+  translations?: TranslationWitnessListV1;
   mode: ExperienceMode;
 }) {
   const resolved = props.passage.resolvedReference;
@@ -125,7 +128,11 @@ export function PassageShell(props: {
               {props.passage.attribution}
             </p>
           </section>
-          <AvailabilityPanel isServing />
+          {props.translations ? <TranslationWitnessPanel list={props.translations} /> : null}
+          <AvailabilityPanel
+            isServing
+            translationWitnessCount={props.translations?.witnesses.length ?? 0}
+          />
         </>
       ) : (
         <>

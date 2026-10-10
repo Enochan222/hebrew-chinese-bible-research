@@ -1078,6 +1078,36 @@ A provider distribution such as an FHL version code is never by itself sufficien
 
 ---
 
+## 10.3 WB-4 provider identity and release-compiled witness Serving
+
+WB-4 DB-1 closes the provider/publication boundary without selecting or copying any real copyrighted translation.
+
+Authoring adds:
+
+- `providers`: provider organization/service identity;
+- `provider_distributions`: provider-specific distribution identity bound to exactly one `digital_expression_id`;
+- `translation_witness_coverage`: ProviderDistribution + ReferenceSpan coverage fact;
+- `provider_witness_observations`: binding/storage mode, provider reference/version, observed hash/time, optional snapshot hash and delivery status.
+
+Provider identity never substitutes for TextualWork, TextualEdition or DigitalExpression identity.
+
+Serving adds release-compiled:
+
+- `translation_witnesses`;
+- `translation_witness_segments`.
+
+The runtime Serving projection contains no FK/function dependency on Authoring provider/source tables. A DISPLAYABLE persisted snapshot requires COVERED + READY + SNAPSHOT_PINNED + PERSISTED_CONTENT, an exact DigitalExpression public DISPLAY_FULLTEXT RightsDecisionSnapshot, an exact ProviderDistribution storage RightsDecisionSnapshot, and persisted text segments with SHA-256 content hashes. Missing/mismatched identities, wrong operation/audience/scope, unresolved conditional rights, stale/failed delivery or uncovered passages fail closed.
+
+The WB-4 DB-1 compiler and publication validator MUST use canonical ReleaseManifest component kind `TRANSLATION`, not an ad hoc `TRANSLATION_WITNESS` value. An exact DigitalExpression is required as that component's research-object identity.
+
+The DB-1 `SNAPSHOT_PINNED` content identity uses a versioned, byte-defined **WB4_SEGMENT_BUNDLE_V1** digest. The exact UTF-8 payload is `WB4_SEGMENT_BUNDLE_V1`, LF, lowercase ReferenceSpan UUID, LF, lowercase DigitalExpression UUID, LF, then zero-based contiguous segment rows joined with LF. Each row is `segment_order:lowercase TextSegment UUID:lowercase TextStream UUID:hex(UTF8(segment_kind)):lowercase SHA256(UTF8(text)):hex(UTF8(text))`. PostgreSQL `sha256(UTF8 payload)` yields the lowercase 64-character hex snapshot hash. The compiler recomputes every segment hash from the actual bytes, recomputes the bundle hash and checks it against both ProviderWitnessObservation and the pinned `TRANSLATION` component hash. The PUBLISHED event boundary independently reattests the release-compiled Serving bytes, so staged mutation cannot change the published content without detection. It also independently rechecks the exact bound DigitalExpression public DISPLAY_FULLTEXT and ProviderDistribution STORE_EXTRACTED_TEXT RightsDecisionSnapshots, including subject, operation, purpose/audience, commercial context, verdict/basis and resolved conditions/obligations.
+
+A witness with `display_status` other than `DISPLAYABLE` has **zero publicly readable text segments**, enforced both by parent-transition guards and child RLS/RPC filtering. RightsDecisionSnapshots bound to compiled witnesses and all already published translation payloads remain immutable, including on REVOKED and attempted OLD-to-NEW release relocation.
+
+**Scope limit:** the DB-1 snapshot/component equality binds one passage snapshot per DigitalExpression component. A future multi-passage or whole-translation witness must define and test a release-level aggregate component digest spanning all permitted passage bundles before it may claim entire-book/whole-Bible translation coverage. Neither synthetic fixture materialization nor rights metadata demonstrates licences for real Chinese translations.
+
+Current and pinned translation RPCs first resolve the ResearchRelease's corpus ReferenceSystem/ReferenceSpan and then read only release-scoped translation rows. REVOKED releases remain non-readable; first-publication immutability remains permanent under RL-1.
+
 # 11. Ancient versions and LXX
 
 LXX is a research domain, not merely a display column.

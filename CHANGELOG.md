@@ -18,6 +18,91 @@ Respond to whole-Bible Corpus Lab product review by proving an actual executable
 
 ### Validation
 Locally exercised the read-only algorithm on a synthetic OSHB-shaped word stream and ten edge-case tests; GitHub exact-head workflow acceptance remains required. Real pinned whole-Bible search and public Serving integration are not claimed.
+
+## 2026-10-10 — WB-4 DB-1 post-merge integrity repair
+
+### Push intent
+
+Restore the complete reviewed PR #35 security fixes onto main after PR #34's squash merge (`2f50699ae9b5c9b927c51585af0c1d78ff8905c1`) deleted the former dependency branch and left the original companion PR conflicted. The replacement PR starts from the merged base and changes only the six relevant files.
+
+### What changed and why
+
+- enforce canonical `TRANSLATION` release component kind instead of noncanonical `TRANSLATION_WITNESS`;
+- permanently guard bound display/storage RightsDecisionSnapshots from mutation even before publication;
+- reject OLD-release to NEW-release update relocation of published translation witnesses and segments;
+- prevent metadata-only/restricted parent downgrade while text children survive, independently hide child text via RLS and return empty child arrays via translation RPC;
+- define the versioned `WB4_SEGMENT_BUNDLE_V1` byte serialization and independently computed SHA-256 of the exact ordered UTF-8 text, segment/stream IDs, ReferenceSpan and DigitalExpression;
+- recompute segment and bundle hashes in candidate materialization and again at the first PUBLISHED lifecycle event;
+- independently revalidate the rights snapshots' exact subject, operation, scope, audience, verdict and obligations at PUBLISHED, blocking staged rights-pointer swaps;
+- add targeted adversarial PostgreSQL regressions for forged matching hashes, staged text/content hash tampering, wrong rights snapshots, metadata-only text leakage and published release relocation;
+- preserve real OSHB whole-Bible base reader and exclude any real copyrighted translation dataset.
+
+### Validation and limits
+
+The earlier companion head passed the Database Spike PostgreSQL adversarial path; the replacement branch requires its own exact-head complete suite before protected merge. This proves only the synthetic single-passage DB-1 path, not a multi-passage aggregate component hash, real translation permission or whole-Bible Hebrew-Chinese alignment. `CORE-FZ-TRANS-002` remains PENDING.
+
+
+
+## 2026-10-10 — Require exact release-component membership for translation Serving
+
+### Push intent
+
+Close a publication identity gap found during independent review of PR #34 despite a green prior exact-head CI suite.
+
+### Why
+
+Exact ProviderDistribution and RightsDecisionSnapshot checks alone do not authorize inserting a translation witness into an unrelated ResearchRelease. Its CORPUS passage must resolve in that release, its TRANSLATION_WITNESS component must pin the exact DigitalExpression, and a DISPLAYABLE persisted witness must use the same snapshot hash as its release component.
+
+### What changed
+
+- fail compiler materialization if the target release does not list the exact translation DigitalExpression as a TRANSLATION_WITNESS component;
+- fail if the requested reference span cannot resolve through the release's pinned CORPUS component;
+- fail DISPLAYABLE materialization when the release translation component content hash differs from the provider observation's pinned snapshot hash;
+- add adversarial candidate releases for each mismatch and assert exact rejection reasons;
+- recompute SHA-256 from exact persisted UTF-8 translation surface before projection; a 64-character hex string alone is not acceptable;
+- add a forgery regression proving mismatched text/hash is rejected and the valid fixture still materializes;
+- repair a generated SQL string-replacement truncation that caused PostgreSQL's unterminated-string failure; add a static pre-migration guard for the complete SHA-256 block;
+- remove a duplicated 6 KB suffix after the first migration COMMIT, found by the next exact-head PostgreSQL run, and extend CI to enforce a single terminal COMMIT;
+- reject any page render where schema-valid Serving translation witnesses resolve to a different canonical ReferenceSpanId than the release-pinned Hebrew passage; add a hostile cross-span integration regression;
+- preserve synthetic-only/right-safe publication, current WB-3 reader and RL-1 immutability boundaries.
+
+### Validation
+
+Pending exact-head validation following this patch. Previous PR #34 head `a216f45fca1c9c11bfaf4f993454260e65a9f631` passed Project governance, Contract validation, Whole-Bible corpus foundation, P1 fixture shell validation, Database Spike, WB-1 and WB-2/WB-3; those runs are not evidence for the new head. `CORE-FZ-TRANS-002` remains PENDING until fresh regression and merge safety checks.
+
+## 2026-10-08 — Implement WB-4 DB-1 rights-gated translation Serving candidate
+
+### Push intent
+
+Implement Issue #32 as the first PostgreSQL translation-witness publication slice after the strict PR #29 contract, using synthetic/right-safe witness data only.
+
+### Why
+
+The canonical witness API now distinguishes TextualWork/TextualEdition/DigitalExpression identity, provider delivery, passage coverage and display rights, but PostgreSQL had no normalized ProviderDistribution identity and no release-compiled translation witness projection. Implementing the reader directly from provider JSON would collapse those boundaries and could expose text without the exact storage/display rights facts required by the contract.
+
+### What changed
+
+- add Authoring Provider and ProviderDistribution identity, with ProviderDistribution -> exact DigitalExpression FK;
+- add independent coverage and provider-observation/binding tables;
+- enforce snapshot/live storage invariants and provider-observation DigitalExpression compatibility;
+- add release-scoped Serving translation witness metadata and segment projections;
+- add a privileged publication compiler that validates exact display and storage RightsDecisionSnapshots before copying persisted text;
+- require DISPLAYABLE witnesses to be COVERED, READY, SNAPSHOT_PINNED, PERSISTED_CONTENT and segment-bearing;
+- expose release-pinned and current-channel translation witness RPCs that resolve through the release's corpus ReferenceSystem/ReferenceSpan;
+- preserve zero segments for non-displayable states;
+- attach release immutability guards and lifecycle-aware RLS;
+- extend the synthetic Database Spike with wrong-expression/wrong-storage-rights attacks, inactive/public visibility checks, exact text/hash parity, OSHB-only empty-list compatibility, revoke behavior, post-publication immutability and Authoring isolation;
+- keep real copyrighted translations out of the repository and Serving fixture;
+- close overlapping Issue #31 as duplicate of the more complete Issue #32 implementation authority.
+
+### Intended effect
+
+WB-4 gains a real publication boundary without yet selecting a production Chinese translation. Provider availability cannot imply passage coverage, storage permission or public-display permission. A future real witness can only be published by satisfying the same exact identity/right/lifecycle constraints proven with synthetic data.
+
+### Validation
+
+Pending exact-head CI. `CORE-FZ-TRANS-002` remains PENDING until Database Spike 001, WB-1, WB-2/WB-3, whole-Bible source foundation, Contract validation, Project governance and relevant web regressions pass on one synchronized PR head.
+
 ## 2026-10-08 — Reconcile RL-1 hardening with merged WB-4 contract
 
 ### Push intent

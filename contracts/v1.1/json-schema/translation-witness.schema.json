@@ -112,7 +112,8 @@
             "const": "READY"
           },
           "segments": {
-            "minItems": 1
+            "minItems": 1,
+            "type": "array"
           }
         }
       }
@@ -131,7 +132,8 @@
       "then": {
         "properties": {
           "segments": {
-            "maxItems": 0
+            "maxItems": 0,
+            "type": "array"
           }
         }
       }
@@ -150,7 +152,8 @@
       "then": {
         "properties": {
           "segments": {
-            "maxItems": 0
+            "maxItems": 0,
+            "type": "array"
           }
         }
       }
@@ -170,7 +173,8 @@
       "then": {
         "properties": {
           "segments": {
-            "maxItems": 0
+            "maxItems": 0,
+            "type": "array"
           }
         }
       }
