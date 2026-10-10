@@ -1,7 +1,7 @@
 # Project State
 
 Status: **MANDATORY LIVING REPOSITORY STATE**
-State Revision: **2026-10-11.1**
+State Revision: **2026-10-11.2**
 
 ## Mandatory governance rule
 
@@ -318,6 +318,14 @@ Current review-branch implementation:
 - `.github/workflows/wb1-relational-whole-corpus.yml` rebuilds WB-CORPUS-001, imports the relational corpus and uploads the machine-auditable WB-1 report.
 
 WB-1 acceptance is **PASS** for `CORE-FZ-WB-002`. The synchronized implementation head `6ec515067f05a901667e4d1f783329f0ee46a53a` passed the complete pinned-source relational workflow and every independent regression gate. Machine evidence reconciles 39/39 configured books, 23,213 selected/reference atoms, 306,785 OSHB words, 426,590 BHSA words, 253,203 BHSA phrases, 88,131 BHSA clauses, 1,106,383 graph-membership edges, 469,484 bridging feature values, 287,216 grouped candidate mappings, 6,409 reviewed annotation-only BHSA nodes and 79 explicit unclassified empty-source BHSA nodes. It reports zero missing configured books, provider-ID duplicates, importer errors, source/database parity failures, OSHB missing-surface records or real-corpus Serving rows. The 1,138 unresolved cross-framework references exactly match WB-CORPUS-001 and remain explicit research/mapping exceptions rather than silent source-record drops.
+
+## SEARCH-1 PostgreSQL candidate primitive (implementation candidate, not canonical executor)
+
+This branch creates `publication_control.oshb_word_proximity_candidates`, a private, non-public SQL function against the **currently publicly servable, explicitly release-pinned CORPUS Serving projection**. It joins source-specific OSHB Word nodes and their `LEMMA_RAW`, `MORPH_RAW`, `SOURCE_KEY` evidence to ordered orthographic TextSegments, restricting results to the same reference span and annotation layer. Attached lamed remains a morpheme within one source word; intervening words are ordinal word-token gaps, not morpheme counts.
+
+The primitive validates lemma-code input, direction, distance and result cap, rejects revoked/unpinned releases, returns stable node/segment identities and word positions, and is inaccessible to `anon`/`authenticated`. PostgreSQL adversarial fixture tests and real full-Bible WB-2 publication smoke are the acceptance evidence sought by this branch.
+
+**Do not represent this as SEARCH-1 complete**: it is not yet a full CorpusQuery v1.1 validator/compiler, does not publish reviewed semantic-set members, does not offer public API, NL interpretation, user Pattern Builder, cross-clause dependency, meaningful corpus-wide search counts or Hebrew/Chinese alignment. The local OSHB NDJSON candidate matcher remains a separate feasibility oracle, not a product DSL. Next frontier must map canonical CorpusQuery AST into this controlled source-aware executor without weakening the query-semantics, right-scope or audit constraints.
 
 ## Corpus Lab pattern-search functional gap and bounded feasibility spike
 
