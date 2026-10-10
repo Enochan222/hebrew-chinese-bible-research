@@ -45,10 +45,10 @@ INSERT INTO serving.research_release_components(
 ),
 (
   '47000000-0000-4000-8000-000000000003',
-  'TRANSLATION_WITNESS',
+  'TRANSLATION',
   '22000000-0000-4000-8000-000000000002',
   'fixture-v1',
-  '9999999999999999999999999999999999999999999999999999999999999999',
+  '7a8ecf1c4d6953e5fcd3ee1924f632c4ec1649bb92fa976fbafc99e72d9336fd',
   1
 );
 
@@ -119,12 +119,12 @@ INSERT INTO serving.research_release_components(
 ) VALUES
 ('47000000-0000-4000-8000-000000000004','CORPUS',
  '30000000-0000-4000-8000-000000000001','1','corpus-fixture',0),
-('47000000-0000-4000-8000-000000000005','TRANSLATION_WITNESS',
+('47000000-0000-4000-8000-000000000005','TRANSLATION',
  '22000000-0000-4000-8000-000000000002','fixture-v1',
- '9999999999999999999999999999999999999999999999999999999999999999',0),
+ '7a8ecf1c4d6953e5fcd3ee1924f632c4ec1649bb92fa976fbafc99e72d9336fd',0),
 ('47000000-0000-4000-8000-000000000006','CORPUS',
  '30000000-0000-4000-8000-000000000001','1','corpus-fixture',0),
-('47000000-0000-4000-8000-000000000006','TRANSLATION_WITNESS',
+('47000000-0000-4000-8000-000000000006','TRANSLATION',
  '22000000-0000-4000-8000-000000000002','fixture-v1',
  'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',1);
 
@@ -416,6 +416,179 @@ BEGIN
 END
 $candidate_shape$;
 
+
+-- Independent golden vector computed from exact ordered Unicode bytes, identities
+-- and content hashes. Both provider claim and compiled bytes must match.
+DO $wb4_bundle_golden$
+BEGIN
+  IF (SELECT snapshot_content_hash FROM authoring.provider_witness_observations
+      WHERE provider_distribution_id='41414141-4141-4414-8414-414141414141'
+      AND reference_span_id='13000000-0000-4000-8000-000000000001')
+    <> '7a8ecf1c4d6953e5fcd3ee1924f632c4ec1649bb92fa976fbafc99e72d9336fd'
+    OR serving.translation_witness_bundle_sha256(
+      '47000000-0000-4000-8000-000000000003',
+      '13000000-0000-4000-8000-000000000001',
+      '22000000-0000-4000-8000-000000000002'
+    ) <> '7a8ecf1c4d6953e5fcd3ee1924f632c4ec1649bb92fa976fbafc99e72d9336fd' THEN
+    RAISE EXCEPTION 'WB-4 independent SHA256 ordered segment-bundle golden vector drift';
+  END IF;
+END
+$wb4_bundle_golden$;
+
+-- Matching invented provider and release-component hashes cannot replace the
+-- independently calculated digest of the actual persisted text.
+DO $wb4_forged_pair$
+DECLARE rejected boolean := false;
+BEGIN
+  BEGIN
+    UPDATE authoring.provider_witness_observations
+    SET snapshot_content_hash=repeat('f',64)
+    WHERE provider_distribution_id='41414141-4141-4414-8414-414141414141'
+      AND reference_span_id='13000000-0000-4000-8000-000000000001';
+    -- Create a fresh unpublished manifest with a fabricated matching digest.
+    -- Existing release components are intentionally immutable even prepublish.
+    INSERT INTO serving.research_releases(
+      research_release_id,release_label,source_build_id,published_at,
+      manifest_schema_version,manifest_hash,manifest_hash_algorithm,
+      manifest_canonical_serialization,git_commit_sha,compiler_version
+    )
+    SELECT '47000000-0000-4000-8000-000000000008'::uuid,
+      'wb4-forged-pair-candidate',source_build_id,published_at,
+      manifest_schema_version,manifest_hash,manifest_hash_algorithm,
+      manifest_canonical_serialization,git_commit_sha,compiler_version
+    FROM serving.research_releases
+    WHERE research_release_id='47000000-0000-4000-8000-000000000007';
+    INSERT INTO serving.research_release_components(
+      research_release_id,component_kind,component_research_object_id,
+      component_version,content_hash,component_order
+    )
+    SELECT '47000000-0000-4000-8000-000000000008'::uuid,
+      component_kind,component_research_object_id,
+      component_version,
+      CASE WHEN component_kind='TRANSLATION' THEN repeat('f',64)
+           ELSE content_hash END,
+      component_order
+    FROM serving.research_release_components
+    WHERE research_release_id='47000000-0000-4000-8000-000000000007';
+    PERFORM publication_control.materialize_translation_witness_candidate(
+      '47000000-0000-4000-8000-000000000008',
+      '13000000-0000-4000-8000-000000000001',
+      '41414141-4141-4414-8414-414141414141',
+      '45200000-0000-4000-8000-000000000010',
+      '45200000-0000-4000-8000-000000000011',
+      'Synthetic Chinese Test Witness','zh-Hant','Synthetic fixture only',
+      '40404040-4040-4040-8040-404040404040',0
+    );
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM <> 'translation snapshot hash does not match ordered UTF-8 TextSegments' THEN
+      RAISE;
+    END IF;
+    rejected := true;
+  END;
+  IF NOT rejected THEN RAISE EXCEPTION 'matching forged hashes passed candidate materialization'; END IF;
+END
+$wb4_forged_pair$;
+
+DO $wb4_prepublication_downgrade$
+DECLARE rejected boolean := false;
+BEGIN
+  BEGIN
+    UPDATE serving.translation_witnesses
+    SET display_status='METADATA_ONLY'
+    WHERE research_release_id='47000000-0000-4000-8000-000000000003';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM <> 'non-DISPLAYABLE translation witness cannot retain text segments' THEN
+      RAISE;
+    END IF;
+    rejected := true;
+  END;
+  IF NOT rejected THEN RAISE EXCEPTION 'prepublication metadata-only downgrade leaked text'; END IF;
+END
+$wb4_prepublication_downgrade$;
+
+-- Mutating both text and its matching per-segment hash after staging must
+-- still fail at PUBLISHED because the versioned bundle digest changed.
+DO $wb4_staged_mutation$
+DECLARE rejected boolean := false;
+BEGIN
+  BEGIN
+    UPDATE serving.translation_witness_segments
+    SET text_content='tampered-staged-translation',
+        content_hash=encode(sha256(convert_to('tampered-staged-translation','UTF8')),'hex')
+    WHERE research_release_id='47000000-0000-4000-8000-000000000003'
+      AND segment_order=0;
+    PERFORM publication_control.publish_release_to_channel(
+      'PRODUCTION','47000000-0000-4000-8000-000000000003',NULL,false
+    );
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM <> 'published translation snapshot digest does not seal ordered Serving bytes' THEN RAISE; END IF;
+    rejected := true;
+  END;
+  IF NOT rejected THEN RAISE EXCEPTION 'staged text mutation was published'; END IF;
+END
+$wb4_staged_mutation$;
+
+-- Direct staged-row rights swaps must be rejected again at first PUBLISHED,
+-- even if the original compiler validation already succeeded.
+DO $wb4_staged_rights_swap$
+DECLARE rejected boolean := false;
+BEGIN
+  BEGIN
+    UPDATE serving.translation_witnesses
+    SET display_rights_decision_snapshot_id='45200000-0000-4000-8000-000000000012'
+    WHERE research_release_id='47000000-0000-4000-8000-000000000003';
+    PERFORM publication_control.publish_release_to_channel(
+      'PRODUCTION','47000000-0000-4000-8000-000000000003',NULL,false
+    );
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM <> 'published translation witness rights snapshots failed exact revalidation' THEN RAISE; END IF;
+    rejected := true;
+  END;
+  IF NOT rejected THEN RAISE EXCEPTION 'wrong-expression staged display rights bypassed publication'; END IF;
+END
+$wb4_staged_rights_swap$;
+
+DO $wb4_staged_storage_swap$
+DECLARE rejected boolean := false;
+BEGIN
+  BEGIN
+    UPDATE serving.translation_witnesses
+    SET storage_rights_decision_snapshot_id='45200000-0000-4000-8000-000000000013'
+    WHERE research_release_id='47000000-0000-4000-8000-000000000003';
+    PERFORM publication_control.publish_release_to_channel(
+      'PRODUCTION','47000000-0000-4000-8000-000000000003',NULL,false
+    );
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM <> 'published translation witness rights snapshots failed exact revalidation' THEN RAISE; END IF;
+    rejected := true;
+  END;
+  IF NOT rejected THEN RAISE EXCEPTION 'wrong-audience staged storage rights bypassed publication'; END IF;
+END
+$wb4_staged_storage_swap$;
+
+-- Bound rights records must not change their effective verdict while a
+-- candidate witness is staged, even before first publication.
+DO $wb4_compiled_rights_immutability$
+DECLARE update_failed boolean := false;
+DECLARE delete_failed boolean := false;
+BEGIN
+  BEGIN
+    UPDATE serving.rights_decision_snapshots
+    SET decision='DENY'
+    WHERE rights_decision_snapshot_id='45200000-0000-4000-8000-000000000010';
+  EXCEPTION WHEN raise_exception THEN update_failed := true;
+  END;
+  BEGIN
+    DELETE FROM serving.rights_decision_snapshots
+    WHERE rights_decision_snapshot_id='45200000-0000-4000-8000-000000000011';
+  EXCEPTION WHEN raise_exception THEN delete_failed := true;
+  END;
+  IF NOT update_failed OR NOT delete_failed THEN
+    RAISE EXCEPTION 'translation rights verdict mutation was not rejected';
+  END IF;
+END
+$wb4_compiled_rights_immutability$;
+
 -- Existing OSHB-only release remains contract-compatible with zero witnesses.
 SET ROLE anon;
 DO $oshb_only_empty$
@@ -516,6 +689,8 @@ RESET ROLE;
 DO $published_immutable$
 DECLARE failed_witness boolean := false;
 DECLARE failed_segment boolean := false;
+DECLARE moved_witness boolean := false;
+DECLARE moved_segment boolean := false;
 BEGIN
   BEGIN
     UPDATE serving.translation_witnesses
@@ -529,8 +704,20 @@ BEGIN
     WHERE research_release_id='47000000-0000-4000-8000-000000000003';
   EXCEPTION WHEN raise_exception THEN failed_segment := true;
   END;
-  IF NOT failed_witness OR NOT failed_segment THEN
-    RAISE EXCEPTION 'published translation Serving rows remained mutable';
+  BEGIN
+    UPDATE serving.translation_witnesses
+    SET research_release_id='47000000-0000-4000-8000-000000000004'
+    WHERE research_release_id='47000000-0000-4000-8000-000000000003';
+  EXCEPTION WHEN raise_exception THEN moved_witness := true;
+  END;
+  BEGIN
+    UPDATE serving.translation_witness_segments
+    SET research_release_id='47000000-0000-4000-8000-000000000004'
+    WHERE research_release_id='47000000-0000-4000-8000-000000000003';
+  EXCEPTION WHEN raise_exception THEN moved_segment := true;
+  END;
+  IF NOT failed_witness OR NOT failed_segment OR NOT moved_witness OR NOT moved_segment THEN
+    RAISE EXCEPTION 'published translation rows can change or migrate to another release';
   END IF;
 END
 $published_immutable$;

@@ -4,6 +4,29 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+## 2026-10-10 — WB-4 DB-1 post-merge integrity repair
+
+### Push intent
+
+Restore the complete reviewed PR #35 security fixes onto main after PR #34's squash merge (`2f50699ae9b5c9b927c51585af0c1d78ff8905c1`) deleted the former dependency branch and left the original companion PR conflicted. The replacement PR starts from the merged base and changes only the six relevant files.
+
+### What changed and why
+
+- enforce canonical `TRANSLATION` release component kind instead of noncanonical `TRANSLATION_WITNESS`;
+- permanently guard bound display/storage RightsDecisionSnapshots from mutation even before publication;
+- reject OLD-release to NEW-release update relocation of published translation witnesses and segments;
+- prevent metadata-only/restricted parent downgrade while text children survive, independently hide child text via RLS and return empty child arrays via translation RPC;
+- define the versioned `WB4_SEGMENT_BUNDLE_V1` byte serialization and independently computed SHA-256 of the exact ordered UTF-8 text, segment/stream IDs, ReferenceSpan and DigitalExpression;
+- recompute segment and bundle hashes in candidate materialization and again at the first PUBLISHED lifecycle event;
+- independently revalidate the rights snapshots' exact subject, operation, scope, audience, verdict and obligations at PUBLISHED, blocking staged rights-pointer swaps;
+- add targeted adversarial PostgreSQL regressions for forged matching hashes, staged text/content hash tampering, wrong rights snapshots, metadata-only text leakage and published release relocation;
+- preserve real OSHB whole-Bible base reader and exclude any real copyrighted translation dataset.
+
+### Validation and limits
+
+The earlier companion head passed the Database Spike PostgreSQL adversarial path; the replacement branch requires its own exact-head complete suite before protected merge. This proves only the synthetic single-passage DB-1 path, not a multi-passage aggregate component hash, real translation permission or whole-Bible Hebrew-Chinese alignment. `CORE-FZ-TRANS-002` remains PENDING.
+
+
 
 ## 2026-10-10 — Require exact release-component membership for translation Serving
 
