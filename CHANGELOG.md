@@ -4,6 +4,21 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+## 2026-10-10 — Bound deterministic Hebrew proximity-search feasibility
+
+### Push intent
+Respond to whole-Bible Corpus Lab product review by proving an actual executable lexical/morphological proximity candidate search while preventing an experimental matcher from being advertised as the canonical CorpusQuery engine.
+
+### What changed
+- Added a read-only OSHB NDJSON candidate evaluator for action lemmas, lamed-prefixed target lemmas, word-distance bounds, and word order within the same verse.
+- Preserved source/pattern SHA-256 hashes, raw morphology, exact scoped counts and explicit candidate-only epistemic labels.
+- Added regression tests covering gap boundaries, reverse order, attached prefix, verse boundaries, required verb morphology, duplicate/noncontiguous references, unsupported clauses and invalid distance.
+- Added a dedicated no-AI GitHub Actions validation job and documented how this limited feasibility spike must eventually be replaced by the validated canonical CorpusQuery v1.1 pipeline.
+- Explicitly distinguished lexical proximity, curated semantic-set membership and BHSA clause/dependency relationships; no current-case language model is permitted to decide corpus matches.
+
+### Validation
+Locally exercised the read-only algorithm on a synthetic OSHB-shaped word stream and ten edge-case tests; GitHub exact-head workflow acceptance remains required. Real pinned whole-Bible search and public Serving integration are not claimed.
+
 ## 2026-10-10 — WB-4 DB-1 post-merge integrity repair
 
 ### Push intent
