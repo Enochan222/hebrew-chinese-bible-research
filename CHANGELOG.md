@@ -4,6 +4,26 @@ Every push/PR must update this file together with `PROJECT_STATE.md`.
 
 Entries record **what changed, why, intended effect, and validation**. The Git commit itself supplies the immutable SHA/timestamp linkage.
 
+## 2026-10-11 — Add release-pinned internal OSHB candidate SQL primitive
+
+### Push intent
+Move beyond the source-NDJSON search feasibility spike by testing a minimal deterministic Word proximity matcher against PostgreSQL Serving, without creating another public CorpusQuery DSL.
+
+### Why
+A study-grade Corpus Lab must search rights-safe published OSHB word identities, not only exported local corpus files. The existing canonical CorpusQuery v1.1 contract is not yet executable end-to-end. This change is an internal, deliberately limited building block for that implementation.
+
+### What changed
+- `database/migrations/003_search1_oshb_word_proximity.sql` adds an internal `publication_control.oshb_word_proximity_candidates` SQL primitive restricted to release-pinned, publicly servable CORPUS and source-specific OSHB Word nodes;
+- joins pinned SOURCE_KEY / LEMMA_RAW / MORPH_RAW features with distinct orthographic Word TextSegments; exact terminal lemma codes and attached-lamed markers are source-scoped;
+- bounds direction, positional gap, requested total rows and invalid inputs;
+- revocation fails closed and anon/authenticated roles cannot execute the private primitive;
+- synthetic pre-publication features exercise actual source-specific morphology, and PostgreSQL negative tests cover invalid input, reversed direction, gap edges, unauthorized execution and revoked release;
+- full OSHB Serving build now verifies source Word presence and executes the private function against an actual published ResearchRelease;
+- updates state, while retaining the core rule that future user-facing Pattern Builder and AI proposals must compile into the single canonical CorpusQuery v1.1 AST.
+
+### Validation
+This is an implementation candidate, not a completed CorpusQuery executor or UI. Exact-head Database Spike, WB-2/WB-3 real corpus, contracts and governance must pass before merge. Counts returned by this bounded function are candidate rows only, not exact exhaustive corpus result counts.
+
 ## 2026-10-10 — Bound deterministic Hebrew proximity-search feasibility
 
 ### Push intent
