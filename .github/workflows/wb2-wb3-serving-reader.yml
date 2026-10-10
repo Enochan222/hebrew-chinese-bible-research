@@ -72,6 +72,7 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f database/spikes/001/00_bootstrap.sql
           psql -v ON_ERROR_STOP=1 -f database/migrations/001_database_spike_001.sql
           psql -v ON_ERROR_STOP=1 -f database/migrations/002_wb4_translation_serving.sql
+          psql -v ON_ERROR_STOP=1 -f database/migrations/003_search1_oshb_word_proximity.sql
       - name: Fetch exact pinned sources
         run: python scripts/corpora/fetch_sources.py
       - name: Build WB-CORPUS-001
@@ -105,6 +106,35 @@ jobs:
         run: |
           psql -v ON_ERROR_STOP=1 -v GIT_SHA="$GITHUB_SHA" \
             -f database/publication/wb2_publish_oshb_serving.sql
+      - name: Validate SEARCH-1 primitive against real release-pinned OSHB Serving
+        run: |
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          DO $search1_real_oshb$
+          DECLARE
+            n integer;
+            words_with_source integer;
+          BEGIN
+            SELECT count(*) INTO words_with_source
+            FROM serving.corpus_node_features f
+            JOIN serving.research_release_components c
+              ON c.component_research_object_id=f.corpus_release_id
+             AND c.component_kind='CORPUS'
+             AND c.research_release_id='71000000-0000-4000-8000-000000000005'
+            WHERE f.feature_key='SOURCE_KEY' AND f.feature_value='OSHB_MORPHHB';
+            IF words_with_source < 300000 THEN
+              RAISE EXCEPTION 'SEARCH-1 real Serving source has fewer OSHB word identities than expected';
+            END IF;
+            SELECT count(*) INTO n
+            FROM publication_control.oshb_word_proximity_candidates(
+              '71000000-0000-4000-8000-000000000005',
+              '7200','5869 a',0,3,'EITHER',50
+            );
+            IF n < 0 OR n > 50 THEN
+              RAISE EXCEPTION 'SEARCH-1 candidate count is not bounded';
+            END IF;
+          END
+          $search1_real_oshb$;
+          SQL
       - name: Verify public RLS passage runtime
         run: |
           psql -v ON_ERROR_STOP=1 <<'SQL'
